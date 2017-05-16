@@ -1,0 +1,220 @@
+# 13/05/17
+# Astro 0.0.01
+# TUPLE LITERAL # TODO DOCUMENT 2
+let name = ()
+let john = ("John",) # not the coma for single element tuple literal
+
+# DEFAULT CONSTRUCTOR # TODO DOCUMENT 2
+var book #: Str # Str is a type annotation here 
+fun getBook str
+type Person:
+    var name = Str # Str is a default constructor here
+    var age = Int
+
+# DYNAMIC FUNCTION CALL # TODO DOCUMENT 2
+fun sum a, b:  a + b 
+sum ...list # unless list is statically known, this can lead to runtime error.
+
+# IMPORT # TODO DOCUMENT 2
+import:
+    com.appy.BananaTree(Trunk, grow)
+    com.nypro->AppleTree(Leaf, Apple)->GuavaTree!(grow, Seed)
+
+# EXPORT # TODO DOCUMENT 2
+export: 
+    add$ Int, Int -> Int 
+    sub$ Int, Int -> Int
+
+# GENERATOR RANGE # TODO DOCUMENT 2
+var count = for x = [..27]: yield x
+count.next
+count.send
+count.throw 
+
+# 05/05/17
+# Astro 0.0.01
+# ASSIGNMENT PATTERN MATCHING # TODO DOCUMENT 2
+var [list] = [2..56]
+var (name) = [1, 2, 3]
+var {x, y, z} = Point 4, 5, 6
+let [keys:values] = dict 
+var a, b, c = ..."abc" 
+var a, ...b = list 
+var (i, j, k) = 50 
+var d, e, f = 6, 7
+
+# TYPE ANNOTATION # TODO DOCUMENT 2
+type GameMaker #> task
+fun createJob #> asyn
+fun add a, b: #: Int, Int -> Int #> asyn
+    a + b 
+
+# 30/04/17
+# Astro 0.0.01
+# TYPE ANNOTATION 
+;; Int, Int
+fun add a, b 
+
+type Person name, age ;; Str, Str
+
+fun swap _a, _b: ;;! ref, ref 
+    a, b = b, a
+
+fun swap _a, _b: #! ref, ref 
+    a, b = b, a
+
+# WHILE TRY # TODO DOCUMENT 2
+while try getMood: 
+    print 'Has mood'
+
+while line = try file.readNextLine: 
+    print line, '\n'
+
+# MUTABLE IMPLICIT SUBJECTS # TODO DOCUMENT 2
+for _x = [1..20]: 
+    print x 
+
+while _name = getName: 
+    name += oldName
+    println name 
+
+type Person _name, _age
+
+# 23/04/17
+# Astro 0.0.01
+def add(a, b):
+    return a + b 
+
+fun add a, b: 
+    a + b
+
+# 21/04/17
+# Astro 0.0.01
+# LIST COMPREHENSION TODO DOCUMENT 
+i << i, j = [0..20], [4..3..40], |i and j|.mod 2 == 0
+
+i, j << i = [0..20] << j = [21..40]
+
+# 22/03/17
+# Dexter 0.2.01
+# SWIFT
+enum OptionalValue<Wrapped> {
+    case none
+    case some(Wrapped)
+}
+var possibleInteger: OptionalValue<Int> = .none
+possibleInteger = .some(100)
+# ASTRO
+enum OptionalValue:
+    none, some x #: $T
+var possibleInteger = OptionalValue.none
+possibleInteger = some 100
+
+# IMPROVING GENERICS TODO DOCUMENT
+# SWIFT
+func anyCommonElements<T: Sequence, U: Sequence>(_ lhs: T, _ rhs: U) -> Bool
+    where T.Iterator.Element: Equatable, T.Iterator.Element == U.Iterator.Element {
+        for lhsItem in lhs {
+            for rhsItem in rhs {
+                if lhsItem == rhsItem {
+                    return true
+                }
+            }
+        }
+        return false
+}
+# ASTRO
+#: where T.Iterator.Element<:Equatable, T.Iterator.Element::U.Iterator.Element 
+fun anyCommonElements lhs, rhs: #: $T<:Sequence, $U<:Sequence
+    for lhsItem = lhs, for rhsItem = rhs: 
+        lhsItem == rhsItem ? return true : _
+    false
+
+# 19/03/17
+# Dexter 0.2.01
+# CHAINING IN TERNARY OPERATOR TODO DOCUMENT
+isCurrentlyFront ? Camera.open->(cameraId) : ->(cameraId)
+
+# 08/03/17
+# Dexter 0.2.01
+# RETURN NOTHING TODO DOCUMENT
+fun effect mood: #: Mood ->
+    ~ .isHappy: happySong ->play
+    ~ .isSad: sadSong ->play
+    _
+
+
+# EXHAUSTIVE PATTERN MATCHING TODO DOCUMENT
+bar
+| Node(value) where value != 42: println value
+~ not in [1..45]: println bar
+
+# OPTIONAL ENUM TODO DOCUMENT
+enum FontStyle:
+    bold, italic, underline, strikeThrough
+# ...
+font.+style = FontStyle.|bold & italic & strikethrough|
+# ...
+if font.style == bold: _
+
+# REDO KEYWORD IS BACK TODO DOCUMENT
+loop: print x
+
+redo: print x
+while x < y
+
+# INITIALIZER TYPES STAY TODO DOCUMENT
+- It makes the code clunky especially when adding an initializer train
+type Person name, age
+type Employee {name, age}, job <: Person
+enum Tree:
+    Leaf value #: $T
+    Node l, r #: Tree, Tree
+
+fun Teacher name, age, org, subjects:
+    new {name, age : org}, subjects
+
+# REMOVE USING AND HIDING KEYWORDS TODO DOCUMENT
+var dataTree = Tree
+dataTree = Leaf 25
+fun println tree: #: Tree
+    | Leaf v: println v
+    | Node l, r: println l, println r
+
+
+# FIRST-CLASS FUNCTIONS TODO DOCUMENT
+fun plus = add$ Int, Int
+let join = add$ Int, 0
+
+fun map list, func:
+    for i = list, if func i: yield i
+
+# CONSTRAINTS TODO DOCUMENT
+var a = Int
+var b = 8``16
+var c = ref Str
+
+#: ref Int, ref x``y -> Int
+fun rectArea l, b: return l * b
+
+# EFFECTS SYSTEM PROPOSAL TODO DOCUMENT
+fun show x: #: $T -> | all | readIO
+    echo x
+
+# VARARGS TODO DOCUMENT
+fun foo ...args, x
+fun foo x, ...args
+fun foo x, ...args, y
+
+# LOCKED OPERATORS TODO DOCUMENT
+\ | ` . , ? : ! <- ->
+
+# GLOBALS
+- module subjects and type keep fields can only be private or read-only.
+
+# 03/03/17
+# Dexter 0.2.01
+# 0-BASED INDEXING TODO DOCUMENT
+for i = [0..20]:
+    print i
+

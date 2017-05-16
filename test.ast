@@ -1,0 +1,66 @@
+# 13/05/17
+fun getBook str: 
+    let found, book = searchForBook str 
+    if found: 
+        return book 
+    else: 
+        raise BookNotFounError "Can't find book [str]!"
+
+var string = 'Hello World'
+
+# this is sorted dict 
+var table = sorted_[:]
+
+#= This is a multiline comment
+    #= This is a comment nested inside a comment 
+    #= This is another nested comment =# 
+    =# 
+   End of multiline comment 
+=#
+
+type Car !make, !model 
+
+fun print car: #: Car 
+    print car.make 
+    print car.model
+
+fun add a, b:
+    a + b
+
+type Person:
+    var name
+    var age
+
+fun Person name, age
+
+var john` = Person
+john.name = "John Smith"
+john.age = add 5, 11
+
+fun printDetails` person: #: Person
+    println person->name, ->age
+
+john.printDetails
+
+fun compare a, b:
+    if a == b: 
+        print 'equal'
+    elif a > b: 
+        print 'greater'
+    else: 
+        print 'lesser'
+
+        
+
+fun swap !a, !b: #: ref, ref
+    a, b = b, a;
+
+fun sum first, ...!rest:
+    return first +. rest
+
+let salary = 20_000
+
+# TEST #
+var nu_m54_78 = 7_214.0_45e-10_100
+let nim = 0x56_56.78p-5_6_7_NGN + 0o34528 + 0b1011_0011
+var is_happy = false

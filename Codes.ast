@@ -1,0 +1,102 @@
+# 04/04/17
+# Astro 0.0.01
+fun looper from.start, to.finish, func: 
+    for _ = [start..finish]: func
+
+fun numbers from.start, to.finish:
+    var [list] = [start..finish]
+
+looper from:1, to:10, => print 'hi'
+numbers from:1, to:10
+
+# 03/04/17
+# Astro 0.0.01
+fun postfixNotation expression: 
+    let operators = ['+', '-', '/', '*']
+    var tokens = expression.split /\s*/
+    loop: 
+        var keep ptr = 0
+    tokens[0]
+..
+
+# 30/04/17
+# Astro 0.0.01 # INCPMPLETE 
+var serviceProviders = [] # SP
+var riceSellers = [] # RS
+var satchetWater = [] # SW
+let SP, RS, SW = 'SP', 'RS', 'SW'
+##################
+type Client _id
+# type Agent _id, _clients #: _, [Client]
+# type MFB _agents, _clients #: [Agent], [Client]
+
+fun readFile filename: #: File 
+    try file = open filename, while line = try readNextLine file: 
+        line[0, ..1]
+        | 'SP':
+            let month, salaries, power, taxes, revenue = line.|[1], [2], [3], [4], [5]|
+            let netProfit = revenue - +(power, tax, revenue)
+        | 'RS': 
+            let month, ppb, num, power = line.|[1], [2], [3], [4]|
+            let netProfit = (ppb * num) - power
+        | 'SW':
+            let month, ppb, num, power = line.|[1], [2], [3], [4]|
+            let netProfit = (ppb * num) - power
+..
+
+
+# 28/04/17
+# Astro 0.0.01
+fun doo  a, b: 
+    var c = [Int8]{4, b}[]
+    var d = [Str:Int64]{25, 6}[]
+    var e = {a, 4}[]
+
+fun fib n: 
+    n < 2 ? n : (fib n-1) + fib n-2
+
+fun printRange a, b: 
+    if a <= b:
+        print ', ' 
+        printRange a+1, b 
+    else: println ''
+
+printRange 1, 5
+
+
+# 25/04/17
+# Astro 0.0.01
+# SWIFT
+FIRAuth.auth()?.addAuthStateDidChangeListener({ (auth, user) in
+  if (user) {
+    var email = user.email
+    // ...
+  }
+})
+FIRAuth.auth()?.signInWithEmail(email,
+                                password: password,
+                                completion: { (_, error) in
+  if (error) {
+    // ...
+  }
+})
+
+# JAVA
+FirebaseAuth auth = FirebaseAuth.getInstance();
+auth.signInWithEmailAndPassword(email, password)
+    .addOnCompleteListener(new OnCompleteListener() {
+        @Override
+        public void onComplete(Task task) {
+            if (task.isSuccessful()) {
+                FirebaseUser user = task.getResult().getUser();
+                String email = user.getEmail();
+                // ...
+            }
+        }
+    });
+
+# ASTRO 
+FirAuth.signInWithEmail email, password
+->setOnCompleteListener |job| => 
+    if job.isSuccessful: 
+        var email = job.result.user.email

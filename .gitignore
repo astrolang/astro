@@ -1,0 +1,12 @@
+
+# project files
+.vscode/
+
+# unused sample codes
+something.dex
+test.js
+test.py
+
+# generated javascript files 
+AstroCompile/parser.js
+AstroCompiler/parser.js.map
