@@ -1,4 +1,4 @@
-# 04/04/17
+# 04/05/17
 # Astro 0.0.01
 fun looper from.start, to.finish, func: 
     for _ = [start..finish]: func
@@ -9,7 +9,7 @@ fun numbers from.start, to.finish:
 looper from:1, to:10, => print 'hi'
 numbers from:1, to:10
 
-# 03/04/17
+# 03/05/17
 # Astro 0.0.01
 fun postfixNotation expression: 
     let operators = ['+', '-', '/', '*']

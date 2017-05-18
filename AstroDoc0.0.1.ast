@@ -104,7 +104,7 @@ EXPRESSION-ORIENTED
         p.name = name;
     ..
 
-    let name = setName.('John Smith') # error! setName returns no result.
+    let name = setName('John Smith') # error! setName returns no result.
 
 SPECIFYING TYPES
     var number = 5

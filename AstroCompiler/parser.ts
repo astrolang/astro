@@ -679,6 +679,66 @@ class BinaryAst extends ExprAst{
     }
 }
 
+class ModuleDefAst extends Ast{
+    name:string;
+    body:Array<Ast>;
+    constructor(name:string, body:Array<Ast>){
+        super(); 
+        this.name = name;
+        this.body = body; 
+    }
+}
+
+
+class FunctionDefAst extends Ast{
+    name:NameDefAst;
+    params:Array<SubjectDefAst>;
+    body:Ast; 
+    access:AccessType;
+    constructor(name:NameDefAst, params:Array<SubjectDefAst>, body?:Ast, access?:AccessType){ 
+        super();
+        this.name = name; 
+        this.params = params; 
+        this.body = body;
+        this.access = access;
+    }
+}
+
+class TypeDefAst extends Ast{
+    name:NameDefAst;
+    body:Ast; 
+    access:AccessType;
+    constructor(name:NameDefAst, body?:Ast, access?:AccessType){ 
+        super();
+        this.name = name; 
+        this.body = body;
+        this.access = access;
+    }
+}
+
+class SubjectDefAst extends Ast{
+    name:string;
+    access:AccessType;
+    constructor(name:string, access?:AccessType){
+        super();
+        this.name = name; 
+        this.access = access;
+    }
+}
+
+class VariableDefAst extends SubjectDefAst{
+    constructor(name:string, access?:AccessType, module?:string){
+        super(name, access, module);
+    }
+}
+
+class ConstantDefAst extends SubjectDefAst{
+    constructor(name:string, access?:AccessType, module?:string){
+        super(name, access, module);
+    }
+}
+
+
 class NameAst extends ExprAst{
     name: ExprAst;
     ref: RefType;
@@ -708,51 +768,29 @@ class FunctionCallAst extends ExprAst{
     }
 }
 
-class FunctionDefAst extends Ast{
-    name: NameAst;
-    params: Array<SubjectDefAst>;
-    body: Ast; 
-    access: AccessType;
-    constructor(name: NameAst, params: Array<SubjectDefAst>, body: Ast, access: AccessType){ 
-        super();
-        this.name = name; 
-        this.params = params; 
-        this.body = body;
-        this.access = access;
-    }
-}
-
-class SubjectDefAst extends Ast{
-    name: string;
-    access: AccessType;
-    constructor(name: string, access: AccessType){
-        super();
-        this.name = name; 
-        this.access = access;
-    }
-}
-
-class VariableDefAst extends SubjectDefAst{
-    constructor(name: string, access: AccessType){
-        super(name, access);
-    }
-}
-
-class ConstantDefAst extends SubjectDefAst{
-    constructor(name: string, access: AccessType){
-        super(name, access);
-    }
-}
-
 class StringAst extends ExprAst{
     str: string; 
     ref: RefType;
-    constructor(str: string, ref: RefType){
+    custom: string;
+    constructor(str:string, ref:RefType, custom?:string){
         super(ref);
         this.str = str;
+        this.ref = ref;
+        this.custom = custom;
     }
 }
 
+class NumberAst extends ExprAst{
+    num: string; 
+    ref: RefType;
+    custom: string;
+    constructor(num:string, ref:RefType, custom?:string){
+        super(ref);
+        this.num = num;
+        this.ref = ref;
+        this.custom = custom;
+    }
+}
 
 // ...
 class Utility{
