@@ -1,6 +1,6 @@
 // PARSER.TS
 // 02/05/17
-class Astro{
+class Lexer{
     chars: string[];
     charPointer: number = -1;
     decDigits = "0123456789";
@@ -20,7 +20,6 @@ class Astro{
     ];
 
     public lex(code:string):Array<Token>{
-        console.log("ENTRY\n-----\n");
         if(code == null || code.length < 1){ console.log("Code not present!"); return; }
 
         this.chars = code.split('');
@@ -36,7 +35,6 @@ class Astro{
         while(true){
             // eoi (end of input)
             if(char == null){ 
-                console.log(char + ": {EOI}"); 
                 // save token
                 tokens.push(new Token(null, TokenType.eoi)); 
                 break; 
@@ -60,20 +58,17 @@ class Astro{
                 // check if token is a keyword
                 if(this.keywords.indexOf(str)>-1){ 
                     tokens.push(new Token(str, TokenType.keyword)); 
-                    console.log(str + ": {KEYWORD}"); 
                 }
                 // check if token is a boolean value
                 else if(str == "true" || str == "false"){
                     tokens.push(new Token(str, TokenType.boolean)); 
-                    console.log(str + ": {BOOLEAN}"); 
                 }
                 // if token is none of the above then its probably an identifier
                 else { 
                     tokens.push(new Token(str, TokenType.identifier)); 
-                    console.log(str + ": {IDENTIFIER}");  
                 }
             }
-            // number 
+            // number // TODO: don't add trailing letters to number
             else if(this.decDigits.indexOf(char)>-1){ 
 
                 let numberType: string = "dec";
@@ -208,10 +203,13 @@ class Astro{
                 }
                 // lexing the letters at the end of the number
                 let subLetter = () => { // [a-zA-Z_]+
-                    while(this.characters.indexOf(char)>-1 || char == '_'){
-                        str += char; 
-                        char = this.eatChar();
-                    }  
+                    // while(this.characters.indexOf(char)>-1 || char == '_'){
+                    //     str += char; 
+                    //     char = this.eatChar();
+                    // }  
+                    if(this.prevChar() == "_"){
+                        char = this.vomitChar();
+                    }
                 }
                 // lexing the decimal point
                 let subDecimal = () => { // [.]
@@ -253,28 +251,23 @@ class Astro{
                 }
                 
                 tokens.push(new Token(str, TokenType.number)); 
-                console.log(str + ": {NUMBER}"); 
             }
             // operator // ns
             else if(this.operators.indexOf(char)>-1){ 
                 tokens.push(new Token(char, TokenType.operator)); 
-                console.log(char + ": {OPERATOR}"); 
                 char = this.eatChar();
                 // check for no-space after operator
                 if(char != " " && char !=  "\t"){
                     tokens.push(new Token("", TokenType.ns)); 
-                    console.log("[ns]: {NOSPACE}"); 
                 }
             }
             // punctuator // ns
             else if(this.punctuators.indexOf(char)>-1){ 
                 tokens.push(new Token(char, TokenType.punctuator)); 
-                console.log(char + ": {PUNCTUATOR}");
                 char = this.eatChar();
                 // check for no-space after punctuator
                 if(char != " " && char !=  "\t"){
                     tokens.push(new Token("", TokenType.ns)); 
-                    console.log("[ns]: {NOSPACE}"); 
                 }
             }
             // newline // dedent
@@ -290,14 +283,12 @@ class Astro{
                     if(prevIndentCount >= 1){
                         for(let i = 0; i < indentFactor; i++) {
                             tokens.push(new Token("", TokenType.dedent));
-                            console.log("<< DEDENT **"); 
                         }
                         // now prevIndent has no indent at all
                         prevIndentCount = 0;
                     }
                     else{
                         tokens.push(new Token("", TokenType.newline));
-                        console.log("\"\\n\"" + ": {NEWLINE}");
                     }
                 }
                 // if preceded by spaces or tabs, there is a possible indentation information
@@ -347,7 +338,6 @@ class Astro{
                     else if(char == "\n" || char == "\r"){ continue lexLoop; }
                     // if it's followed by a null, ignore indent
                     else if(char == null){ 
-                        console.log(char + ": {EOI}"); 
                         tokens.push(new Token(null, TokenType.eoi)); 
                         break lexLoop;  
                     }
@@ -359,7 +349,6 @@ class Astro{
                         firstIndentCount = indentSize;
                         prevIndentCount = firstIndentCount;
                         tokens.push(new Token("", TokenType.indent)); 
-                        console.log(">> FIRST INDENT **");
                     }
                     // not the first indent
                     else{ 
@@ -376,7 +365,6 @@ class Astro{
                             // register a newline if there is no indent or dedent
                             if(indentDiff == 0){
                                 tokens.push(new Token("", TokenType.newline)); 
-                                console.log("\"\\n\"" + ": {NEWLINE}");
                                 continue lexLoop;
                             }
                             if(indentDiff > 1){ 
@@ -385,13 +373,11 @@ class Astro{
                             // indent
                             if(indentDiff == 1){
                                 tokens.push(new Token("", TokenType.indent)); 
-                                console.log(">> INDENT **");
                             }
                             // dedent
                             else{
                                 for(let i = 0; i < (0-indentDiff); i++) {
                                     tokens.push(new Token("", TokenType.dedent));
-                                    console.log("<< DEDENT **"); 
                                 }
                             }
                         }
@@ -399,7 +385,6 @@ class Astro{
                             throw new Error("Error 2: Indentation mismatch!")
                         }
                     }
-                    console.log(">> SPACE INDENT COUNT: " + indentSize);
                 }
                 // not an indent, ignore spaces
                 else{ 
@@ -452,7 +437,6 @@ class Astro{
                     else if(char == "\n" || char == "\r"){ continue lexLoop; }
                     // if it's followed by a null, ignore indent
                     else if(char == null){
-                        console.log(char + ": {EOI}"); 
                         tokens.push(new Token(null, TokenType.eoi)); 
                         break lexLoop;  
                     }
@@ -464,7 +448,6 @@ class Astro{
                         firstIndentCount = indentSize;
                         prevIndentCount = firstIndentCount;
                         tokens.push(new Token("", TokenType.indent)); 
-                        console.log(">> FIRST INDENT **");
                     }
                     // not the first indent
                     else{ 
@@ -480,20 +463,17 @@ class Astro{
                             // register a newline if there is no indent or dedent
                             if(indentDiff == 0){
                                 tokens.push(new Token("", TokenType.newline)); 
-                                console.log("\"\\n\"" + ": {NEWLINE}");
                                 continue lexLoop;
                             }
                             if(indentDiff > 1){ throw new Error("Error 3: Indentation mismatch, indentation is too much!") }
                             // indent
                             if(indentDiff == 1){
                                 tokens.push(new Token("", TokenType.indent)); 
-                                console.log(">> INDENT **");
                             }
                             // dedent
                             else{
                                 for(let i = 0; i < (0-indentDiff); i++) {
                                     tokens.push(new Token("", TokenType.dedent));
-                                    console.log("<< DEDENT **"); 
                                 }
                             }
                         }
@@ -501,7 +481,6 @@ class Astro{
                             throw new Error("Error 2: Indentation mismatch!")
                         }
                     }
-                    console.log(">> TAB INDENT COUNT: " + indentSize);
                 }
                 // not an indent, ignore tabs
                 else{     
@@ -529,7 +508,6 @@ class Astro{
                 char = this.eatChar();
 
                 tokens.push(new Token(str, TokenType.string));
-                console.log(str + " : {STRING}"); 
 
             }
             // double-quote string
@@ -551,7 +529,6 @@ class Astro{
                 char = this.eatChar();
                 
                 tokens.push(new Token(str, TokenType.string));
-                console.log(str + " : {STRING}"); 
             }
             // single-line comment 
             else if(char == "#" && this.peekChar() != "="){ 
@@ -566,7 +543,6 @@ class Astro{
                 }
                 
                 tokens.push(new Token(str, TokenType.comment));
-                console.log(str + " : {COMMENT}"); 
             }
             // multi-line nested comment
             else if(char == "#" && this.peekChar() == "="){ 
@@ -585,7 +561,6 @@ class Astro{
                         if(nestCount == 0){
                             // save comment string 
                             tokens.push(new Token(str, TokenType.comment)); 
-                            console.log(str + " : {COMMENT}"); 
                             // discard the '='
                             this.eatChar();
                             // discard the '#'
@@ -605,7 +580,6 @@ class Astro{
                     else if(char == null){
                         // save comment string
                         tokens.push(new Token(str, TokenType.comment)); 
-                        console.log(str + " : {COMMENT}"); 
                         // save EOI token
                         tokens.push(new Token(null, TokenType.eoi)); 
                         break; 
@@ -620,8 +594,6 @@ class Astro{
                 throw new Error("Error 5: character not recognized!");
             }
         }
-        
-        console.log("\n----\nEXIT");
         return tokens;
     }
 
@@ -649,33 +621,39 @@ class Astro{
         return null;
     }
 
-    public parse(tokens: Array<Token>): Ast{
-        return new Ast();
-    }
 }
 
+class Parser{
+    public parse(tokens: Array<Token>): Ast{
+        this.parseTopLevel();
+        return new Ast();
+    }
+
+    parseTopLevel(){
+
+    }
+}
 
 // Asts
 class Ast{}
 
 class ExprAst extends Ast{
-    ref: RefType; // ref, val, iso, acq
-    constructor(ref: RefType){
+    ref:RefType;
+    type:string;
+    constructor(ref:RefType, type:string){
         super();
         this.ref = ref;
+        this.type = type;
     }
 }
-
-class BinaryAst extends ExprAst{
-    op: string;
-    lhs: ExprAst; 
-    rhs: ExprAst;
-    ref: RefType;
-    constructor(lhs: ExprAst, op: string, rhs: ExprAst, ref: RefType){
-        super(ref);
-        this.op = op;
-        this.lhs = lhs; 
-        this.rhs = rhs;
+ // Definition
+class ImportAst extends Ast{
+    moduleName:string;
+    elements:Array<string>; 
+    constructor(moduleName:string, elements:Array<string>){
+        super();
+        this.moduleName = moduleName; 
+        this.elements = elements;
     }
 }
 
@@ -689,13 +667,12 @@ class ModuleDefAst extends Ast{
     }
 }
 
-
 class FunctionDefAst extends Ast{
-    name:NameDefAst;
-    params:Array<SubjectDefAst>;
-    body:Ast; 
+    name:string;
     access:AccessType;
-    constructor(name:NameDefAst, params:Array<SubjectDefAst>, body?:Ast, access?:AccessType){ 
+    params:Array<string>;
+    body:Array<ExprAst>; 
+    constructor(name:string, access:AccessType, params:Array<string>, body:Array<ExprAst>){ 
         super();
         this.name = name; 
         this.params = params; 
@@ -704,90 +681,320 @@ class FunctionDefAst extends Ast{
     }
 }
 
-class TypeDefAst extends Ast{
-    name:NameDefAst;
-    body:Ast; 
-    access:AccessType;
-    constructor(name:NameDefAst, body?:Ast, access?:AccessType){ 
-        super();
+class BlockAst extends ExprAst{
+    name:string;
+    body:Array<ExprAst>; 
+    constructor(name:string, ref:RefType, type:string, body:Array<ExprAst>){ 
+        super(ref, type);
         this.name = name; 
         this.body = body;
+    }
+}
+
+class TypeDefAst extends Ast{
+    name:string;
+    access:AccessType;
+    parents:Array<TypeDefAst>;
+    fields:Array<SubjectDefAst>; 
+    constructor(name:string, access:AccessType, fields:Array<SubjectDefAst>, parents:Array<TypeDefAst>){ 
+        super();
+        this.name = name; 
+        this.fields = fields;
+        this.access = access;
+        this.parents = parents;
+    }
+}
+
+class EnumDefAst extends Ast{
+    name:string;
+    access:AccessType;
+    types:Array<TypeDefAst>; // represented as bits
+    fields:Array<SubjectDefAst>; 
+    constructor(name:string, access:AccessType, types:Array<TypeDefAst>, fields:Array<SubjectDefAst>){ 
+        super();
+        this.name = name; 
+        this.fields = fields;
+        this.types = types;
         this.access = access;
     }
 }
 
-class SubjectDefAst extends Ast{
+// Control // Expressions
+class SubjectDefAst extends ExprAst{
     name:string;
     access:AccessType;
-    constructor(name:string, access?:AccessType){
-        super();
+    constructor(name:string, ref:RefType, type:string, access:AccessType){
+        super(ref, type);
         this.name = name; 
         this.access = access;
     }
 }
 
 class VariableDefAst extends SubjectDefAst{
-    constructor(name:string, access?:AccessType, module?:string){
-        super(name, access, module);
+    constructor(name:string, ref:RefType, type:string, access:AccessType){
+        super(name, ref, type, access);
     }
 }
 
 class ConstantDefAst extends SubjectDefAst{
-    constructor(name:string, access?:AccessType, module?:string){
-        super(name, access, module);
+    constructor(name:string, ref:RefType, type:string, access:AccessType){
+        super(name, ref, type, access);
     }
 }
 
+class PropertyDefAst extends Ast{
+    name:string;
+    access:AccessType;
+    setter:FunctionDefAst;
+    getter:FunctionDefAst;
+    constructor(name:string, access:AccessType, setter:FunctionDefAst, getter:FunctionDefAst){
+        super();
+        this.name = name; 
+        this.access = access;
+        this.setter = setter;
+        this.getter = getter;
+    }
+}
 
+class TryAst extends ExprAst{
+    body:Array<ExprAst>; 
+    catchBlock:CatchAst;
+    ensure:EnsureAst;
+    constructor(body:Array<ExprAst>, catchBlock:CatchAst, ensure:EnsureAst, ref:RefType, type:string){
+        super(ref, type);
+        this.body = body;
+        this.catchBlock = catchBlock;
+        this.ensure = ensure;
+    }
+}
+
+class CatchAst extends ExprAst{ 
+    body:Array<ExprAst>;
+    constructor(body:Array<ExprAst>, ref:RefType, type:string){
+        super(ref, type);
+        this.body = body;
+    }
+}
+
+class EnsureAst extends ExprAst{ 
+    body:Array<ExprAst>;
+    constructor(body:Array<ExprAst>, ref:RefType, type:string){
+        super(ref, type);
+        this.body = body;
+    }
+}
+
+// Control
+class WhileAst extends ExprAst{
+    condition:ExprAst; 
+    body:Array<ExprAst>;
+    constructor(condition:ExprAst, body:Array<ExprAst>, ref:RefType, type:string){
+        super(ref, type);
+        this.condition = condition;
+        this.body = body;
+    }
+}
+
+class LoopAst extends ExprAst{
+    body:Array<ExprAst>;
+    constructor(body:Array<ExprAst>, ref:RefType, type:string){
+        super(ref, type);
+        this.body = body;
+    }
+}
+
+class IfAst extends ExprAst{
+    condition:ExprAst; 
+    body:Array<ExprAst>;
+    elifs:Array<ElifAst>;
+    elseExpr:Array<ExprAst>;
+    constructor(condition:ExprAst, body:Array<ExprAst>, ref:RefType, type:string, elifs:Array<ElifAst>, elseExpr:Array<ExprAst>){
+        super(ref, type);
+        this.condition = condition;
+        this.body = body;
+        this.elifs = elifs;
+        this.elseExpr = elseExpr;
+    }
+}
+
+class ElifAst extends ExprAst{
+    condition:ExprAst; 
+    body:Array<ExprAst>;
+    constructor(condition:ExprAst, body:Array<ExprAst>, ref:RefType, type:string){
+        super(ref, type);
+        this.condition = condition;
+        this.body = body;
+    }
+}
+
+class ForLoopAst extends ExprAst{
+    iteration:ExprAst;
+    body:Array<ExprAst>;
+    constructor(iteration:ExprAst, body:Array<ExprAst>, ref:RefType, type:string){
+        super(ref, type);
+        this.iteration = iteration;
+        this.body = body;
+    }
+}
+
+// Expressions
+// type signature is a string of comma seperated typeNames, 
+// for function calls, the last typeName is the return type.
 class NameAst extends ExprAst{
-    name: ExprAst;
-    ref: RefType;
-    constructor(name: ExprAst, ref: RefType){ 
-        super(ref);
+    name:ExprAst; // can be dotted
+    module:string;
+    constructor(name:ExprAst, ref:RefType, type:string, module?:string){ 
+        super(ref, type);
         this.name = name;
+        this.module = module;
+    }
+}
+
+class NewAst extends ExprAst{
+    initializers:Array<FunctionCallAst>;
+    constructor(initializers:Array<FunctionCallAst>, ref:RefType, type:string){
+        super(ref, type);
+        this.initializers = initializers;
+    }
+}
+
+class NothingAst extends ExprAst{}
+
+class Spill extends NothingAst{}
+
+class Break extends ExprAst{
+    param:ExprAst;
+    constructor(param:ExprAst, ref:RefType, type:string){
+        super(ref, type);
+        this.param = param;
+    }
+}
+
+class Continue extends ExprAst{
+    param:ExprAst;
+    constructor(param:ExprAst, ref:RefType, type:string){
+        super(ref, type);
+        this.param = param;
+    }
+}
+
+class Return extends ExprAst{
+    param:ExprAst;
+    constructor(param:ExprAst, ref:RefType, type:string){
+        super(ref, type);
+        this.param = param;
+    }
+}
+
+class Yield extends ExprAst{
+    param:ExprAst;
+    constructor(param:ExprAst, ref:RefType, type:string){
+        super(ref, type);
+        this.param = param;
     }
 }
 
 class BooleanAst extends ExprAst{
     bool: boolean;
-    ref: RefType;
-    constructor(bool: boolean, ref: RefType){
-        super(ref);
+    constructor(bool:boolean, ref:RefType){
+        super(ref, "Bool");
         this.bool = bool;
     }
 }
 
 class FunctionCallAst extends ExprAst{ 
-    name: string;
-    args: Array<ExprAst>;
-    ref: RefType;
-    constructor(name: string, args: Array<ExprAst>, ref: RefType){
-        super(ref);
+    name:string; // can be dotted
+    module:string;
+    args:Array<ExprAst>;
+    constructor(name:string, args:Array<ExprAst>, ref:RefType, type:string, module:string){
+        super(ref, type);
         this.name = name;
         this.args = args; 
+        this.module = module; 
     }
 }
 
 class StringAst extends ExprAst{
     str: string; 
-    ref: RefType;
     custom: string;
-    constructor(str:string, ref:RefType, custom?:string){
-        super(ref);
+    constructor(str:string, ref:RefType, custom:string){
+        super(ref, "RawStr");
         this.str = str;
-        this.ref = ref;
         this.custom = custom;
     }
 }
 
-class NumberAst extends ExprAst{
-    num: string; 
-    ref: RefType;
-    custom: string;
-    constructor(num:string, ref:RefType, custom?:string){
-        super(ref);
+class IntegerAst extends ExprAst{
+    num:string; 
+    ref:RefType;
+    custom:string;
+    constructor(num:string, ref:RefType, custom:string){
+        super(ref, "RawInt");
         this.num = num;
-        this.ref = ref;
+        this.custom = custom;
+    }
+}
+
+class FloatAst extends ExprAst{
+    num:string;
+    custom:string;
+    constructor(num:string, ref:RefType, custom:string){
+        super(ref, "RawFloat");
+        this.num = num;
+        this.custom = custom;
+    }
+}
+
+class AssignmentAst extends ExprAst{
+    name:string;
+    rhs:ExprAst;
+    constructor(name:string, ref:RefType, type:string, rhs:ExprAst){
+        super(ref, type)
+        this.name = name;
+        this.rhs = rhs;
+    }
+}
+
+class BinaryExprAst extends ExprAst{
+    lhs:ExprAst;
+    op:string;
+    rhs:ExprAst;
+    constructor(lhs:ExprAst, ope:string, rhs:ExprAst, ref:RefType, type:string){
+        super(ref, type)
+        this.lhs = lhs;
+        this.op = op;
+        this.rhs = rhs;
+    }
+}
+
+class ListAst extends ExprAst{
+    elements:Array<ExprAst>; 
+    custom:string;
+    constructor(elements:Array<ExprAst>, ref:RefType, type:string, custom:string){
+        super(ref, type);
+        this.elements = elements;
+        this.custom = custom;
+    }
+}
+
+class TupleAst extends ExprAst{
+    elements:Array<ExprAst>; 
+    custom:string;
+    constructor(elements:Array<ExprAst>, ref:RefType, type:string, custom:string){
+        super(ref, type);
+        this.elements = elements;
+        this.custom = custom;
+    }
+}
+
+class DictAst extends ExprAst{
+    keys:Array<ExprAst>; 
+    values:Array<ExprAst>; 
+    custom:string;
+    constructor(keys:Array<ExprAst>, values:Array<ExprAst>, ref:RefType, type:string, custom?:string){
+        super(ref, type);
+        this.keys = keys;
+        this.values = values;
         this.custom = custom;
     }
 }
@@ -795,7 +1002,11 @@ class NumberAst extends ExprAst{
 // ...
 class Utility{
     public static printTokens(tokens:Array<Token>){
-        for(let token of tokens){ console.log(`${token.str} => ${Utility.printTokenType(token.type)}`); }
+        console.log("ENTRY\n-----\n");
+        for(let token of tokens){ 
+            console.log(`${token.str} => ${Utility.printTokenType(token.type)}`); \
+        }
+        console.log("\n----\nEXIT");
     }
 
     public static printTokenType(tokenType:TokenType):string{
@@ -808,11 +1019,11 @@ class Utility{
             case TokenType.keyword: return 'keyword';
             case TokenType.operator: return 'operator';
             case TokenType.punctuator: return 'punctuator';
-            case TokenType.newline: return 'newline';
-            case TokenType.indent: return 'indent';
-            case TokenType.dedent: return 'dedent';
-            case TokenType.eoi: return 'eoi';
-            case TokenType.ns: return 'ns';
+            case TokenType.newline: return 'NEWLINE';
+            case TokenType.indent: return 'INDENT >>';
+            case TokenType.dedent: return 'DEDENT <<';
+            case TokenType.eoi: return 'EOI';
+            case TokenType.ns: return 'NS';
         }
     }
 }
@@ -825,7 +1036,7 @@ class Token{
 // Enums 
 enum TokenType{ identifier, number, boolean, string, comment, keyword, operator, punctuator, newline, indent, dedent, eoi, ns }
 enum RefType{ ref, val, iso, acq }
-enum AccessType{ public, private }
+enum AccessType{ public, private, readOnly }
 
 import fs = require('fs');
 
@@ -833,9 +1044,7 @@ let fileName1 = './test.ast';
 let fileName2 = './test2.ast';
 
 fs.readFile(fileName1, function (err, data) {
-    if (err) {
-        return console.error(err);
-    }
+    if (err) { return console.error(err); }
     let astro = new Astro();
     let tokens = astro.lex(data.toString()); // lex the file 
     Utility.printTokens(tokens);

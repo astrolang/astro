@@ -1,5 +1,12 @@
 # 04/05/17
 # Astro 0.0.01
+let convergeAdd = |a, b|
+    if a < b:
+        return a + b 
+    return self --a, ++b
+
+# 04/05/17
+# Astro 0.0.01
 fun looper from.start, to.finish, func: 
     for _ = [start..finish]: func
 

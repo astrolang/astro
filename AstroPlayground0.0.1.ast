@@ -1,3 +1,155 @@
+# 21/05/17
+# Astro 0.0.01
+# 
+a == b
+a === b 
+
+# 
+loop: #@ top 
+    while x == 5: 
+        x += 1
+        if x > 1: break at top 
+
+fun add a, b: #@ top
+    fun _:
+        return a + b at top
+
+# 
+var name = 'Dope'
+fun setName object: 
+    var name = "Swag"
+    object.name = name + ext.name
+
+#  
+var func = |a, b| 
+    if a > b: recall --a, b 
+    a + b
+
+# 20/05/17
+# Astro 0.0.01
+# ASTRO QUIRKS
+# parameter annotation 
+type T !param1.`, !param2.`
+# function call vs enclosed argument   
+play(song, artist)
+play (song, artist)
+# list indexing vs list argument 
+list[2]
+list [2]
+
+# BITWISE # TODO DOCUMENT 2
+bitshl, bitshr, bitushr, bitand, bitor, bitxor, bitinv
+
+# INITIALIZER TRAIN # TODO DOCUMENT 2
+type TeachingStudent <: Teacher, Student
+fun Pegasus <name, staffId : studentId> 
+
+# WHILE TRY # TODO DOCUMENT 2
+while try getMood: 
+    print 'Has mood'
+
+while try line = file.readNextLine: 
+    println line
+catch FileNotFounError:
+    println 'File missing!'
+
+# ERROR COALESCING # TODO DOCUMENT 2
+let realName = map['appcypher'] catch KeyError ?? name
+
+# TRY CATCH REDESIGNED # TODO DOCUMENT 2
+try: 
+    process bigData  
+catch err:  
+    println err.msg
+ensure:
+    restore bigData
+
+try process(bigData)
+catch err: #:: DivByZeroError
+    println err.msg
+
+try data = getData: 
+    use data 
+
+ensure: 
+    file.close
+
+# IF AND NIL # TODO DOCUMENT 2
+if data = getData: 
+    println data
+
+# TUPLE LITERAL # TODO DOCUMENT 2
+var (single) = 5
+var empty = ()
+print (name, age) # this is a tuple
+
+# UNION / INTERSECTION TYPES # TODO DOCUMENT 2 # from Swift, TypeScript
+var pegasus #: Bird&Horse
+var identification #: Str|Int
+
+# WHEN # TODO DOCUMENT 2 # from Kotlin
+return when x 
+| 'a': 1
+| 'b': 2
+
+print fruit when fruit
+| 'grape'
+| 'apple'
+
+# NOT IN # TODO DOCUMENT 2  # redesigned based on Kotlin
+if x !in [1..20]: println 'x is lesser than 20'
+
+# PROPERTIES # TODO DOCUMENT 2 # from C#
+var name = get "[firstname] [surname]"
+var age =
+    set( var extra = 5; age += extra )
+    get age -= 5 
+
+# LAMBDA # TODO DOCUMENT 2 # from Scala
+let sum3 = fun _ a, b: 
+    return a + b + c 
+
+fun sum3 = |a, b, c|
+    return a + b + c
+
+var num = [1, 2, 3, 4].fold(0, |a, b| a + b)
+var nums = [1, 2, 3, 4].fold(0, || $1 + $2)
+
+
+# TERNARY OPERATOR # TODO DOCUMENT 2 # from C++
+x > y ~ x : y
+
+# SINGLETON # TODO DOCUMENT 2 # redesigned based on Java and Scala
+var injector = obj !component`
+
+var runnable = obj Runnable
+fun taskFinished runnable: #: runnable
+    println 'Task finished'
+
+fun run runnable: #: runnable
+    doSomething 
+    runnable.onTaskFinised
+
+# COALESCING # TODO DOCUMENT 2
+let name = person.name ?? "John Doe"
+let realName = map['appcypher'] catch KeyError ?? name
+
+
+# 19/05/17
+# Astro 0.0.01
+# ACCESS MODS # TODO DOCUMENT 2
+let job = "Janitor" # public 
+let name` = "Steve" # private
+
+# SINGLETON # TODO DOCUMENT 2
+obj someTask <: Runnable: 
+fun run sometask: #: someTask
+    println 'Task running...'
+    someTask.onTaskFinished
+
+fun onTaskFinished someTask: #: someTask
+    println 'Task finished!'
+
 # 13/05/17
 # Astro 0.0.01
 # TUPLE LITERAL # TODO DOCUMENT 2
@@ -15,21 +167,16 @@ type Person:
 fun sum a, b:  a + b 
 sum ...list # unless list is statically known, this can lead to runtime error.
 
-# IMPORT # TODO DOCUMENT 2
-import:
-    com.appy.BananaTree(Trunk, grow)
-    com.nypro->AppleTree(Leaf, Apple)->GuavaTree!(grow, Seed)
-
 # EXPORT # TODO DOCUMENT 2
 export: 
     add$ Int, Int -> Int 
     sub$ Int, Int -> Int
 
-# GENERATOR RANGE # TODO DOCUMENT 2
-var count = for x = [..27]: yield x
+# GENERATOR # TODO DOCUMENT 2  # from Python
+var count = for x = [..27]: var z = yield x
 count.next
 count.send
-count.throw 
+count.raise 
 
 # 05/05/17
 # Astro 0.0.01
@@ -63,14 +210,14 @@ fun swap _a, _b: ;;! ref, ref
 fun swap _a, _b: #! ref, ref 
     a, b = b, a
 
-# WHILE TRY # TODO DOCUMENT 2
+# WHILE TRY 
 while try getMood: 
     print 'Has mood'
 
 while line = try file.readNextLine: 
     print line, '\n'
 
-# MUTABLE IMPLICIT SUBJECTS # TODO DOCUMENT 2
+# MUTABLE IMPLICIT SUBJECTS
 for _x = [1..20]: 
     print x 
 
