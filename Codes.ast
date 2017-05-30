@@ -1,4 +1,180 @@
-# 04/05/17
+# 30/05/17
+# Astro 0.1.0
+# WHERE USED
+{} - dict, 
+[] - list, range, typevar
+_ - privatemodifier 
+. - dotaccess, vectorization, nonstandardliteral
+~ - match, listcomprehension, ternary ! 
+| - or, match, lambda, labelsignature
+<- - iteration
+-> - arrowaccess, returntypearrow, lambdas
+@ - macrosignature 
+` - transpose, staticlocalsubjects
+as - contravariantconversion, importalias
+
+# PROPERTIES # TODO DOCUMENT 2 # from C#
+var name = get "[firstname] [surname]"
+var age =
+    set(
+        var extra = 5; 
+        age += extra 
+    )
+    get(age -= 5)
+
+# COROUTINES # TODO DOCUMENT 2  # from Python
+var count = for x = [..27]: var z = yield x
+count.next()    
+count.send()
+count.raise()
+
+# ASSIGNMENT PATTERN MATCHING # TODO DOCUMENT 2 # DOC'D
+var [list] = [2..56]
+var (name) = [1, 2, 3]
+var {x, y, z} = Point 4, 5, 6
+let [keys:values] = dict 
+var a, b, c = ..."abc" 
+var a, ...b = list 
+var (i, j, k) = 50 
+var d, e, f = 6, 7
+
+# 29/05/17
+# Astro 0.0.01
+# WHERE USED
+{} - dict, 
+[] - list, range, typevar
+_ - privatemodifier 
+. - dotaccess, vectorization, nonstandardliteral
+~ - match, listcomprehension, ternary ! 
+| - or, match, lambda, labelsignature
+<- - iteration
+-> - arrowaccess, returntypearrow, lambdas
+@ - macrosignature 
+` - transpose, staticlocalsubjects
+as - contravariantconversion, importalias
+
+# OPERATOR OVERLOADING 
+fun in(x, y): #@ infix(5, 20)
+    for a <- y: 
+        a == x ~ return true
+    false 
+
+fun ++(x): #@ postfix(5, 10)
+    var t = val x 
+    x += 1
+    t
+
+# LABELLING  
+fun play music: #> top
+    if music != nil: music.start()
+    |music| ->
+        if music.artist "Bieber": 
+            return music.artist at top
+..
+
+# MATCH STATEMENT 
+game
+| "interesting": #...
+| "boring": #...
+
+
+# 27/05/17
+# Astro 0.0.01
+# A Quine Program
+var x = 'var x = \q\nprint x + x'
+print x + x
+
+
+var x = "I rock"
+print "var x = "
+
+fun factorial n:
+    | 0: 1
+    | _: n * factorial n - 1
+
+*var john = {*
+    *name: "John Bollocks"*
+    *age : 34*
+*}*
+
+- The content in the *{..}* will desugar to a class 
+- and the instance of the class gets assigned to john variable.
+- So the runtime will generate sth like this:
+
+*class Person:*
+    *var name = "John Bollocks"*
+    *var age  = 34*
+
+*var john = Person()*
+
+- Now lets create another object and pass the prototype to 
+- our john object
+
+*var addy = { address: "Lagos, Nigeria." }*
+
+*setPrototypeOf(john, addy)*
+
+*print(john.address) // this prints "Lagos, Nigeria."*
+
+- But how? Our Person class doesnt have an address property. 
+- Well this is what happens. The runtime detects that we just 
+- extended the old class with *setPrototypeOf(john, addy)*, so 
+- it expands the class accordingly, using the properties in addy.
+- At this point the class becomes: 
+
+*class Person:*
+    *var name    = "John Bollocks"*
+    *var age     = 34*
+    *var address = "Lagos, Nigeria."*
+
+
+
+# 26/05/17
+# Astro 0.0.01
+primes = filterPrime [2..]
+  where filterPrime (p:xs) = 
+          p : filterPrime [x | x <- xs, x `mod` p /= 0]
+
+var primes = filterPrime [2..]
+fun filterPrime list:
+    | [p, ...xs]: p ++ filterPrime (x << x = xs, x .mod p != 0)
+
+
+var primes = |[2..]|
+    | [p, ...xs]: p ++ recurse (x << x = xs, x .mod p != 0)
+
+# 25/05/17
+# Astro 0.0.01
+# TYPE ANNOTATION PRPOSAL
+fun add a, b: :: Int, Int -> Int
+    a + b 
+
+:: Person, Str
+fun setName person, name: 
+    person.name name 
+
+var age :: Int 
+
+type Person !name
+fun toStr person: person.name
+
+type Person !name, !age  
+fun toStr person:
+    person->name, ->age
+
+
+
+# 24/05/17
+# Astro 0.0.01
+files.size.times ||
+    totalLines += channel.recieve
+
+files.size.times do
+    totalLines += channel.recieve
+end
+
+
+# __/05/17
 # Astro 0.0.01
 let convergeAdd = |a, b|
     if a < b:

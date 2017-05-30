@@ -1,4 +1,13 @@
 # 13/05/17
+type Person !name, !years.age* 
+
+type Teacher <: Employee, Person:
+    var subjects  
+    var class
+
+type Car
+
+
 fun getBook str: 
     let found, book = searchForBook str 
     if found: 
@@ -11,11 +20,11 @@ var string = 'Hello World'
 # this is sorted dict 
 var table = sorted_[:]
 
+
 #= This is a multiline comment
     #= This is a comment nested inside a comment 
-    #= This is another nested comment =# 
+        #= This is another nested comment  =# 
     =# 
-   End of multiline comment 
 =#
 
 type Car !make, !model 

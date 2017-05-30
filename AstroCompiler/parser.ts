@@ -18,6 +18,9 @@ class Lexer{
         'catch', 'try', 'raise'
         //...
     ];
+    // debug helpers 
+    col: number = 0;
+    line: number = 1;
 
     public lex(code:string):Array<Token>{
         if(code == null || code.length < 1){ console.log("Code not present!"); return; }
@@ -36,12 +39,14 @@ class Lexer{
             // eoi (end of input)
             if(char == null){ 
                 // save token
-                tokens.push(new Token(null, TokenType.eoi)); 
+                tokens.push(new Token(null, TokenType.eoi, null, this.line)); 
                 break; 
             }
             // identifier // keyword // boolean // ns
             else if(this.characters.indexOf(char)>-1){ 
                 let str: string = '';
+                let col = this.col;
+
                 do{
                     str += char;
                     char = this.eatChar();
@@ -57,15 +62,15 @@ class Lexer{
                 // save token
                 // check if token is a keyword
                 if(this.keywords.indexOf(str)>-1){ 
-                    tokens.push(new Token(str, TokenType.keyword)); 
+                    tokens.push(new Token(str, TokenType.keyword, col, this.line)); 
                 }
                 // check if token is a boolean value
                 else if(str == "true" || str == "false"){
-                    tokens.push(new Token(str, TokenType.boolean)); 
+                    tokens.push(new Token(str, TokenType.boolean, col, this.line)); 
                 }
                 // if token is none of the above then its probably an identifier
                 else { 
-                    tokens.push(new Token(str, TokenType.identifier)); 
+                    tokens.push(new Token(str, TokenType.identifier, col, this.line)); 
                 }
             }
             // number // TODO: don't add trailing letters to number
@@ -73,6 +78,8 @@ class Lexer{
 
                 let numberType: string = "dec";
                 let str: string = char;
+                let col = this.col;
+
                 char = this.eatChar();
 
                 // lexing the exponent
@@ -207,6 +214,7 @@ class Lexer{
                     //     str += char; 
                     //     char = this.eatChar();
                     // }  
+                    // if underscore is the last letter of previously lexed number, vomit it back
                     if(this.prevChar() == "_"){
                         char = this.vomitChar();
                     }
@@ -250,24 +258,42 @@ class Lexer{
                     char = this.vomitChar();
                 }
                 
-                tokens.push(new Token(str, TokenType.number)); 
+                tokens.push(new Token(str, TokenType.number, col, this.line)); 
             }
             // operator // ns
             else if(this.operators.indexOf(char)>-1){ 
-                tokens.push(new Token(char, TokenType.operator)); 
-                char = this.eatChar();
+                // check for no-space before punctuator
+                let prevChar = this.prevChar();
+                if( prevChar != " " && prevChar != "\t"){
+                    // check if last registered token is not a no-space to prevent duplicates
+                    if(tokens[tokens.length - 1].type != TokenType.ns, this.col, this.line)
+                    tokens.push(new Token("", TokenType.ns, this.col, this.line)); 
+                }
+
+                tokens.push(new Token(char, TokenType.operator, this.col, this.line)); 
+                char = this.eatChar(); // eat punctuator
+
                 // check for no-space after operator
                 if(char != " " && char !=  "\t"){
-                    tokens.push(new Token("", TokenType.ns)); 
+                    tokens.push(new Token("", TokenType.ns, this.col, this.line)); 
                 }
             }
             // punctuator // ns
             else if(this.punctuators.indexOf(char)>-1){ 
-                tokens.push(new Token(char, TokenType.punctuator)); 
-                char = this.eatChar();
+                // check for no-space before punctuator
+                let prevChar = this.prevChar();
+                if( prevChar != " " && prevChar != "\t"){
+                    // check if last registered token is not a no-space to prevent duplicates
+                    if(tokens[tokens.length - 1].type != TokenType.ns)
+                    tokens.push(new Token("", TokenType.ns, this.col, this.line)); 
+                }
+
+                tokens.push(new Token(char, TokenType.punctuator, this.col, this.line)); 
+                char = this.eatChar(); // eat punctuator
+
                 // check for no-space after punctuator
-                if(char != " " && char !=  "\t"){
-                    tokens.push(new Token("", TokenType.ns)); 
+                if(char != " " && char != "\t"){
+                    tokens.push(new Token("", TokenType.ns, this.col, this.line)); 
                 }
             }
             // newline // dedent
@@ -276,25 +302,26 @@ class Lexer{
                 do{ char = this.eatChar(); }
                 while(char == "\n" || char == "\r");
 
-                // checking for a possible dedent
-                if(char != " " && char != "\t"){
+                // there's a possibililty of dedent as long as newline is not immediately
+                // followed by spaces, tab or a comment
+                if(char != " " && char != "\t" && char != "#"){
                     let indentFactor: number = prevIndentCount / firstIndentCount;
                     // if previous indent has an indentation 
                     if(prevIndentCount >= 1){
                         for(let i = 0; i < indentFactor; i++) {
-                            tokens.push(new Token("", TokenType.dedent));
+                            tokens.push(new Token("", TokenType.dedent, this.col - 1, this.line));
                         }
                         // now prevIndent has no indent at all
                         prevIndentCount = 0;
                     }
                     else{
-                        tokens.push(new Token("", TokenType.newline));
+                        tokens.push(new Token("", TokenType.newline, null, this.line));
                     }
                 }
                 // if preceded by spaces or tabs, there is a possible indentation information
                 // the newline is ignored
             }
-            // space // indent // dedent
+            // space // indent // dedent // newline // eoi
             else if(char == " "){ 
                 // if there is a preceding newline, then this could be an indent
                 if(this.prevChar() == "\n" || this.prevChar() == "\r"){
@@ -318,6 +345,7 @@ class Lexer{
                             char2 = this.peekChar(++offset);
                             // if all the spaces are followed by newline
                             if(char2 == "\n"){
+                                // offset should only be used when there is guarantee newlines won't be skipped
                                 char = this.eatChar(offset);
                                 continue lexLoop;
                             }
@@ -326,11 +354,11 @@ class Lexer{
                             }
                             // if all the spaces are followed by a null
                             else if(char2 == null){
-                                tokens.push(new Token(null, TokenType.eoi)); 
+                                tokens.push(new Token(null, TokenType.eoi, null, this.line)); 
                                 break lexLoop; 
                             }
                             else{
-                                throw new Error("Error 1: Can't mix tabs with spaces for indents!");
+                                throw new Error("Lex Error: Can't mix tabs with spaces for indents!");
                             }
                         }
                     }
@@ -338,21 +366,22 @@ class Lexer{
                     else if(char == "\n" || char == "\r"){ continue lexLoop; }
                     // if it's followed by a null, ignore indent
                     else if(char == null){ 
-                        tokens.push(new Token(null, TokenType.eoi)); 
+                        tokens.push(new Token(null, TokenType.eoi, null, this.line)); 
                         break lexLoop;  
                     }
+                    // if it's followed by a comment character, ignore indent
+                    else if(char == "#"){ continue lexLoop; }
 
-                    // now we know we've got an indentation, let's see if it's the firstIndent, an indent or a dedent
-                    // is the first indent
+                    // now we know we've got an indentation, let's see if it's the firstIndent
                     if(usesSpaceIndent == null) { 
                         usesSpaceIndent = true;
                         firstIndentCount = indentSize;
                         prevIndentCount = firstIndentCount;
-                        tokens.push(new Token("", TokenType.indent)); 
+                        tokens.push(new Token("", TokenType.indent, this.col - 1, this.line)); 
                     }
                     // not the first indent
                     else{ 
-                        if(!usesSpaceIndent){ throw new Error("Error 4: Cannot mix tab and space indentations!"); }
+                        if(!usesSpaceIndent){ throw new Error("Lex Error: Cannot mix tab and space indentations!"); }
                         if(indentSize%firstIndentCount == 0){
 
                             let indentFactor = indentSize/firstIndentCount;
@@ -362,27 +391,27 @@ class Lexer{
                             // remember to set prevIndent to the current indent
                             prevIndentCount = indentSize;
 
-                            // register a newline if there is no indent or dedent
+                            // register a newline if there is no indent or dedent difference
                             if(indentDiff == 0){
-                                tokens.push(new Token("", TokenType.newline)); 
+                                tokens.push(new Token("", TokenType.newline, null, this.line)); 
                                 continue lexLoop;
                             }
                             if(indentDiff > 1){ 
-                                throw new Error("Error 3: Indentation mismatch, indentation is too much!");
+                                throw new Error("Lex Error: Indentation mismatch, indentation is too much!");
                             }
                             // indent
                             if(indentDiff == 1){
-                                tokens.push(new Token("", TokenType.indent)); 
+                                tokens.push(new Token("", TokenType.indent, this.col - 1, this.line)); 
                             }
                             // dedent
                             else{
                                 for(let i = 0; i < (0-indentDiff); i++) {
-                                    tokens.push(new Token("", TokenType.dedent));
+                                    tokens.push(new Token("", TokenType.dedent, this.col - 1, this.line));
                                 }
                             }
                         }
                         else{
-                            throw new Error("Error 2: Indentation mismatch!")
+                            throw new Error("Lex Error: Indentation mismatch!")
                         }
                     }
                 }
@@ -390,10 +419,9 @@ class Lexer{
                 else{ 
                     do { char = this.eatChar(); }
                     while(char == " " || char == "\t");
-                    // console.log("[ ]" + ": {SPACE}"); 
                 }
             }
-            // tab // indent // dedent
+            // tab // indent // dedent // newline // eoi
             else if(char == "\t"){ 
                 // if there is a preceding newline, then this could be an indent
                 if(this.prevChar() == "\n" || this.prevChar() == "\r"){
@@ -417,6 +445,7 @@ class Lexer{
                             char2 = this.peekChar(++offset);
                             // if all the spaces are followed by newline
                             if(char2 == "\n"){
+                                // offset should only be used when there is guarantee newlines won't be skipped
                                 char = this.eatChar(offset);
                                 continue lexLoop;
                             }
@@ -425,11 +454,11 @@ class Lexer{
                             }
                             // if all the spaces are followed by a null
                             else if(char2 == null){
-                                tokens.push(new Token(null, TokenType.eoi)); 
+                                tokens.push(new Token(null, TokenType.eoi, null, this.line)); 
                                 break lexLoop; 
                             }
                             else{
-                                throw new Error("Error 1: Can't mix tabs with spaces for indents!");
+                                throw new Error("Lex Error: Can't mix tabs with spaces for indents!");
                             }
                         }
                     }
@@ -437,21 +466,22 @@ class Lexer{
                     else if(char == "\n" || char == "\r"){ continue lexLoop; }
                     // if it's followed by a null, ignore indent
                     else if(char == null){
-                        tokens.push(new Token(null, TokenType.eoi)); 
+                        tokens.push(new Token(null, TokenType.eoi, null, this.line)); 
                         break lexLoop;  
                     }
+                    // if it's followed by a comment character, ignore indent
+                    else if(char == "#"){ continue lexLoop; }
 
-                    // now we know we've got an indentation, let's see if it's the firstIndent, an indent or a dedent
-                    // is the first indent
+                    // now we know we've got an indentation, let's see if it's the firstIndent
                     if(usesSpaceIndent == null) {
                         usesSpaceIndent = false;
                         firstIndentCount = indentSize;
                         prevIndentCount = firstIndentCount;
-                        tokens.push(new Token("", TokenType.indent)); 
+                        tokens.push(new Token("", TokenType.indent, this.col - 1, this.line)); 
                     }
                     // not the first indent
                     else{ 
-                        if(usesSpaceIndent){ throw new Error("Error 4: Cannot mix tab and space indentations!"); }
+                        if(usesSpaceIndent){ throw new Error("Lex Error: Cannot mix tab and space indentations!"); }
                         if(indentSize%firstIndentCount == 0){
                             let indentFactor = indentSize/firstIndentCount;
                             let prevIndentFactor = prevIndentCount/firstIndentCount;
@@ -462,23 +492,23 @@ class Lexer{
 
                             // register a newline if there is no indent or dedent
                             if(indentDiff == 0){
-                                tokens.push(new Token("", TokenType.newline)); 
+                                tokens.push(new Token("", TokenType.newline, null, this.line)); 
                                 continue lexLoop;
                             }
-                            if(indentDiff > 1){ throw new Error("Error 3: Indentation mismatch, indentation is too much!") }
+                            if(indentDiff > 1){ throw new Error("Lex Error: Indentation mismatch, indentation is too much!") }
                             // indent
                             if(indentDiff == 1){
-                                tokens.push(new Token("", TokenType.indent)); 
+                                tokens.push(new Token("", TokenType.indent, this.col - 1, this.line)); 
                             }
                             // dedent
                             else{
                                 for(let i = 0; i < (0-indentDiff); i++) {
-                                    tokens.push(new Token("", TokenType.dedent));
+                                    tokens.push(new Token("", TokenType.dedent, this.col - 1, this.line));
                                 }
                             }
                         }
                         else{
-                            throw new Error("Error 2: Indentation mismatch!")
+                            throw new Error("Lex Error: Indentation mismatch!")
                         }
                     }
                 }
@@ -492,6 +522,7 @@ class Lexer{
             // single-quote string 
             else if(char == "'"){ 
                 let str: string = "";
+                let col = this.col;
 
                 // discard the opening quote
                 char = this.eatChar();
@@ -507,12 +538,13 @@ class Lexer{
                 // cache the next character
                 char = this.eatChar();
 
-                tokens.push(new Token(str, TokenType.string));
+                tokens.push(new Token(str, TokenType.string, col, this.line));
 
             }
             // double-quote string
             else if(char == "\""){ 
                 let str: string = "";
+                let col = this.col;
 
                 // discard the opening quote
                 char = this.eatChar();
@@ -528,11 +560,12 @@ class Lexer{
                 // cache the next character
                 char = this.eatChar();
                 
-                tokens.push(new Token(str, TokenType.string));
+                tokens.push(new Token(str, TokenType.string, col, this.line));
             }
             // single-line comment 
             else if(char == "#" && this.peekChar() != "="){ 
                 let str: string = "";
+                let col = this.col;
 
                 // discard the "#"
                 char = this.eatChar();
@@ -542,12 +575,13 @@ class Lexer{
                     char = this.eatChar();
                 }
                 
-                tokens.push(new Token(str, TokenType.comment));
+                tokens.push(new Token(str, TokenType.comment, col, this.line));
             }
             // multi-line nested comment
             else if(char == "#" && this.peekChar() == "="){ 
                 let nestCount = 0;
                 let str: string  = "";
+                let col = this.col;
 
                 // discard the '#'
                 this.eatChar();
@@ -560,7 +594,7 @@ class Lexer{
                         // if outside all nesting
                         if(nestCount == 0){
                             // save comment string 
-                            tokens.push(new Token(str, TokenType.comment)); 
+                            tokens.push(new Token(str, TokenType.comment, col, this.line)); 
                             // discard the '='
                             this.eatChar();
                             // discard the '#'
@@ -579,9 +613,9 @@ class Lexer{
                     // check for EOI
                     else if(char == null){
                         // save comment string
-                        tokens.push(new Token(str, TokenType.comment)); 
+                        tokens.push(new Token(str, TokenType.comment, col, this.line)); 
                         // save EOI token
-                        tokens.push(new Token(null, TokenType.eoi)); 
+                        tokens.push(new Token(null, TokenType.eoi, null, this.line)); 
                         break; 
                     }
                     str += char; 
@@ -591,21 +625,41 @@ class Lexer{
             }
             // others. character not recognized
             else { 
-                throw new Error("Error 5: character not recognized!");
+                throw new Error("Lex Error: Character not recognized!");
             }
         }
         return tokens;
     }
 
-    private eatChar(offset: number = 1):string{
+    // offset should only be used when there is guarantee newlines won't be skipped
+    private eatChar(offset = 1): string {
         this.charPointer += offset;
-        if(this.charPointer < this.chars.length) return this.chars[this.charPointer];
+        if(this.charPointer < this.chars.length){
+            let char = this.chars[this.charPointer];
+            // taking note column and line numbers
+            if(char == "\n"){ 
+                this.col = 0;
+                this.line += 1;
+            }
+            else this.col += offset;
+            return char;
+        }
         return null;
     }
 
-    private vomitChar(offset: number = 1):string{
+     // offset should only be used when there is guarantee newlines won't be skipped
+    private vomitChar(offset = 1): string {
         this.charPointer -= offset;
-        if(this.charPointer < this.chars.length) return this.chars[this.charPointer];
+        if(this.charPointer < this.chars.length) {
+            let char = this.chars[this.charPointer];
+            // taking note column and line numbers
+            if(char == "\n"){ 
+                this.col = 0;
+                this.line -= 1;
+            }
+            else this.col -= offset;
+            return char;
+        }
         return null;
     }
 
@@ -624,16 +678,288 @@ class Lexer{
 }
 
 class Parser{
-    public parse(tokens: Array<Token>): Ast{
-        this.parseTopLevel();
-        return new Ast();
+    tokens:Token[];
+    tokenPointer:number = -1;
+    asts:Ast[];
+
+    public parse(tokens: Array<Token>): Ast[]{
+        this.tokens = tokens;
+        return this.parseModule();
     }
 
-    parseTopLevel(){
+    private parseModule(): Ast[]{
+        let token = this.eatToken();
+        let asts: Ast[] = [];
 
+        while(token != null){
+            if(token.str == "type"){
+                let typeAsts = this.parseTypeDef();
+                asts.push(typeAsts.type);
+                asts.push(typeAsts.initializer);
+            }
+            else{
+                token = this.eatToken(); // skip the token
+            }
+        }
+
+        return asts;
     }
+
+    private parseImportDef(){
+    }
+
+    private parseExportDef(){
+    }
+
+    private parseSubjectDef(){
+    }
+
+    private parseParam():SubjectDefAst{
+        let subject: SubjectDefAst = null;
+        return subject;
+    }
+
+    // TODO: INCOMPLETE, initializer train
+    private parseTypeDef(): {type: TypeDefAst; initializer: FunctionDefAst} {
+        let type = new TypeDefAst(null, AccessType.public, null, null); 
+        let initializer = new FunctionDefAst(null, AccessType.public, null, null);
+        let token = this.eatToken(); // eat "type"
+
+        // parses type's body
+        let subBody = () => {
+            let fields: SubjectDefAst[] = [];
+            if(fields != null) (type.fields = fields);
+        }
+
+        
+        let subParents = () => {
+            token = this.eatToken(); // eat "<"
+            token = this.eatToken(); // eat ":"
+
+            let parents: string[] = [];
+
+            do{
+                if(token.type == TokenType.identifier){
+                    parents.push(token.str);
+                    token = this.eatToken(); // eat identifier
+                }
+                else break;
+            }
+            while(token.str == ",");
+
+            if(parents != null) (type.parents = parents);
+        }
+
+        // parses type's parameters
+        let subParams = () => {
+            
+            // parses variable parameters 
+            let subVariableParam = (): {typeVarField: VariableDefAst, initializerVarParam: VariableDefAst} => {
+                let typeVarField = new VariableDefAst(null, null, null, AccessType.public);
+                let initializerVarParam = new VariableDefAst(null, null, null, AccessType.private);
+                token = this.eatToken(); // eat "!"
+
+                if(token.type != TokenType.identifier) // check for identifier
+                throw new Error("Parse Error: Expecting an identifier!");
+
+                if(!this.lastTokenIsNoSpace()) // no space between "!" and parameter name
+                throw new Error("Parse Error: Spaces between \"!\" and parameter name not expected!");
+
+                typeVarField.name = token.str; 
+                initializerVarParam.name = token.str; 
+                token = this.eatToken(); // eat identifier 
+
+                if(token.str == "."){ // check for named parameter sigil "."
+                    if(!this.lastTokenIsNoSpace()) // no space between parameter name and "."
+                    throw new Error("Parse Error: Spaces between parameter name and \".\" not expected!");
+                    
+                    initializerVarParam.name += ".";
+                    token = this.eatToken(); // eat the "." 
+
+                    if(token.type == TokenType.identifier){ // check for optional local name 
+                        if(!this.lastTokenIsNoSpace()) // no space between optional local name and "."
+                        throw new Error("Parse Error: Spaces between \".\" and optional local name not expected!");
+
+                        typeVarField.name = token.str;
+                        initializerVarParam.name += token.str;
+                        token = this.eatToken(); // eat the identifier 
+                    }
+                }
+                return {
+                    typeVarField:typeVarField,
+                    initializerVarParam:initializerVarParam
+                };
+            }
+
+            // parses constant parameters
+            let subConstantParam = (): {typeConstField: ConstantDefAst, initializerConstParam: ConstantDefAst} => {
+                let typeConstField = new VariableDefAst(null, null, null, AccessType.public);
+                let initializerConstParam = new VariableDefAst(null, null, null, AccessType.private);
+                token = this.eatToken(); // eat "!"
+
+                if(token.type != TokenType.identifier) // check for identifier
+                throw new Error("Parse Error: Expecting an identifier!");
+
+                if(!this.lastTokenIsNoSpace()) // no space between "!" and parameter name
+                throw new Error("Parse Error: Spaces between \"!\" and parameter name not expected!");
+
+                typeConstField.name = token.str; 
+                initializerConstParam.name = token.str; 
+                token = this.eatToken(); // eat identifier 
+
+                if(token.str == "."){ // check for named parameter sigil "."
+                    if(!this.lastTokenIsNoSpace()) // no space between parameter name and "."
+                    throw new Error("Parse Error: Spaces between parameter name and \".\" not expected!");
+                    
+                    initializerConstParam.name += ".";
+                    token = this.eatToken(); // eat the "." 
+
+                    if(token.type == TokenType.identifier){ // check for optional local name 
+                        if(!this.lastTokenIsNoSpace()) // no space between optional local name and "."
+                        throw new Error("Parse Error: Spaces between \".\" and optional local name not expected!");
+
+                        typeConstField.name = token.str;
+                        initializerConstParam.name += token.str;
+                        token = this.eatToken(); // eat the identifier 
+                    }
+                }
+                return {
+                    typeConstField:typeConstField,
+                    initializerConstParam:initializerConstParam
+                };
+            }
+            
+            let newExpression = new NewAst(null, [], null, null); // for initializer's body
+
+            if(token.str == "!"){ // variable param
+                let varTuple = subVariableParam();
+                type.fields = [varTuple.typeVarField];
+                initializer.params = [varTuple.initializerVarParam];
+                newExpression.fieldMappings.push(varTuple.typeVarField.name);
+            }
+            else{ // constant param
+                let constTuple = subVariableParam();
+                type.fields = [constTuple.typeVarField];
+                initializer.params = [constTuple.initializerVarParam];
+                newExpression.fieldMappings.push(constTuple.typeVarField.name);
+            }
+
+            while(token.str == ","){ // possibly more parameters
+                token = this.eatToken(); // eat ","
+
+                if(token.str == "!"){ // variable param
+                    let varTuple = subVariableParam();
+                    type.fields.push(varTuple.typeVarField);
+                    initializer.params.push(varTuple.initializerVarParam);
+                    newExpression.fieldMappings.push(varTuple.typeVarField.name);
+                }
+                else{ // constant param
+                    let constTuple = subVariableParam();
+                    type.fields.push(constTuple.typeVarField);
+                    initializer.params.push(constTuple.initializerVarParam);
+                    newExpression.fieldMappings.push(constTuple.typeVarField.name);
+                }
+            }
+
+            // since the type has parameters, add initializer's body here
+            if(newExpression.fieldMappings != null) initializer.body = [newExpression];
+        }
+
+        if(token.type != TokenType.identifier) // check for identifier (type name)
+        throw new Error("Parse Error: Expected a type name!");
+
+        type.name = token.str;
+        initializer.name = token.str;
+        token = this.eatToken(); // eat identifier (type name)
+
+        // check if identifier has a private access sigil "*" after it
+        if(token.str == "*"){
+            if(!this.lastTokenIsNoSpace()) // no space between type name and "*" 
+            throw new Error("Parse Error: Spaces between type name and \"*\" not expected!");
+            type.access = AccessType.private;
+            initializer.access = AccessType.private;
+            token = this.eatToken(); // eat sigil "*"
+        }
+
+        let hasNoParams = true;
+
+        // now to parse the rest of type's syntax
+        if(token.str == "!"){ // could be params
+            subParams();
+
+            if(token.str == "<"){ // could be parent type declaration
+                subParents();
+            }
+
+            hasNoParams = false;
+        }
+        else if(token.type == TokenType.identifier){ // could be params
+            subParams();
+
+            if(token.str == "<"){ // could be parent type declaration
+                subParents();
+            }
+
+            hasNoParams = false;
+        }
+        else if(token.str == "<"){ // could be parent type declaration
+            subParents();
+
+            if(hasNoParams && token.str == ":"){ // could be body definition
+                subBody();
+            }
+
+            if(!hasNoParams)
+            throw new Error("Parse Error: Types with parameters can't have body!");
+        }
+        else if(hasNoParams && token.str == ":"){ // could be body definition
+            subBody();
+        }
+        else if(token.type == TokenType.newline){ // could be end of type definition
+        }
+        else throw new Error("Parse Error: Invalid Syntax!");
+            
+        return {type, initializer};
+    }
+
+    private parseEnumDef(){}
+
+    private parseFunctionDef(){}
+
+    private parseObjDef(){}
+
+    private parseFunctionCall(){}
+
+    private eatToken():Token{
+        this.tokenPointer += 1;
+        if(this.tokens[this.tokenPointer].type == TokenType.ns) { // skip a no-space
+            this.tokenPointer += 1;
+        }
+        if(this.tokenPointer < this.tokens.length) return this.tokens[this.tokenPointer];
+        return null;
+    }
+
+    private prevToken():Token{
+        let peekPointer = this.tokenPointer - 1;
+        if(this.tokens[peekPointer].type == TokenType.ns) { // skip a no-space
+            peekPointer -= 1;
+        }
+        if(this.tokenPointer < this.tokens.length) return this.tokens[peekPointer];
+        return null;
+    }
+
+    private lastTokenIsNoSpace():boolean{
+        let peekPointer = this.tokenPointer - 1;
+        if(this.tokenPointer < this.tokens.length && this.tokens[peekPointer].type == TokenType.ns) 
+            return true;
+        return false;
+    }
+
+
 }
 
+
+// TODO: INCOMPLETE 
 // Asts
 class Ast{}
 
@@ -670,9 +996,9 @@ class ModuleDefAst extends Ast{
 class FunctionDefAst extends Ast{
     name:string;
     access:AccessType;
-    params:Array<string>;
+    params:Array<SubjectDefAst>;
     body:Array<ExprAst>; 
-    constructor(name:string, access:AccessType, params:Array<string>, body:Array<ExprAst>){ 
+    constructor(name:string, access:AccessType, params:Array<SubjectDefAst>, body:Array<ExprAst>){ 
         super();
         this.name = name; 
         this.params = params; 
@@ -694,9 +1020,9 @@ class BlockAst extends ExprAst{
 class TypeDefAst extends Ast{
     name:string;
     access:AccessType;
-    parents:Array<TypeDefAst>;
+    parents:Array<string>;
     fields:Array<SubjectDefAst>; 
-    constructor(name:string, access:AccessType, fields:Array<SubjectDefAst>, parents:Array<TypeDefAst>){ 
+    constructor(name:string, access:AccessType, fields:Array<SubjectDefAst>, parents:Array<string>){ 
         super();
         this.name = name; 
         this.fields = fields;
@@ -851,16 +1177,20 @@ class NameAst extends ExprAst{
 }
 
 class NewAst extends ExprAst{
-    initializers:Array<FunctionCallAst>;
-    constructor(initializers:Array<FunctionCallAst>, ref:RefType, type:string){
+    initializers: Array<FunctionCallAst>;
+    fieldMappings: Array<string>;
+    constructor(initializers: Array<FunctionCallAst>, fieldMappings: Array<string>, ref: RefType, type: string){
         super(ref, type);
         this.initializers = initializers;
+        this.fieldMappings = fieldMappings;
     }
 }
 
-class NothingAst extends ExprAst{}
+class NothingAst extends ExprAst{
+}
 
-class Spill extends NothingAst{}
+class Spill extends NothingAst{
+}
 
 class Break extends ExprAst{
     param:ExprAst;
@@ -959,7 +1289,7 @@ class BinaryExprAst extends ExprAst{
     lhs:ExprAst;
     op:string;
     rhs:ExprAst;
-    constructor(lhs:ExprAst, ope:string, rhs:ExprAst, ref:RefType, type:string){
+    constructor(lhs:ExprAst, op:string, rhs:ExprAst, ref:RefType, type:string){
         super(ref, type)
         this.lhs = lhs;
         this.op = op;
@@ -1002,11 +1332,62 @@ class DictAst extends ExprAst{
 // ...
 class Utility{
     public static printTokens(tokens:Array<Token>){
-        console.log("ENTRY\n-----\n");
+        console.log("ENTRY TOKEN\n------------\n");
         for(let token of tokens){ 
-            console.log(`${token.str} => ${Utility.printTokenType(token.type)}`); \
+            console.log(`${token.str} => type: ${Utility.printTokenType(token.type)}, col: ${token.col}, line: ${token.line}`);
         }
-        console.log("\n----\nEXIT");
+        console.log("\n-----------\nEXIT TOKEN");
+    }
+
+    public static printAsts(asts:Array<Ast>){ // TODO: to be implemented 
+        console.log("ENTRY AST\n---------\n");
+        for(let ast of asts){
+            console.log(Utility.printAst(ast));
+        }
+        console.log("\n--------\nEXIT AST");
+    }
+    
+    // TODO: INCOMPLETE
+    public static printAst(ast:Ast, indent?:number): string { // TODO: to be implemented 
+        let astTreeStr:string = "";
+        let indentStr:string = "\n";
+        if(indent != null){ for(let i = 0; i < indent + 1; i++) indentStr += "    "; }
+        else indent = 0;
+
+        if(ast instanceof TypeDefAst){
+            astTreeStr += indentStr + `Type  ${ast.name}`; // name
+            astTreeStr += indentStr + `* Access: ${this.printAccessType(ast.access)}`; // access 
+            astTreeStr += indentStr + `* Fields: `; // fields
+            if(ast.fields != null) for(let field of ast.fields) { astTreeStr += this.printAst(field, indent); } 
+            else { astTreeStr += `\n    null` }
+            astTreeStr += indentStr + `* Parents: `; // parents
+            if(ast.parents != null) for(let parent of ast.parents) { astTreeStr += `\n    ${parent}` }
+            else { astTreeStr += `\n    null` }
+        }
+        else if(ast instanceof VariableDefAst){
+            astTreeStr += indentStr + `Var ${ast.name}`;
+            astTreeStr += indentStr + `* Ref: ${this.printRefType(ast.ref)}`;
+            astTreeStr += indentStr + `* Type: ${ast.type}`;
+            astTreeStr += indentStr + `* Access: ${ast.access}`;
+        }
+        else if(ast instanceof ConstantDefAst){
+            astTreeStr += indentStr + `Let ${ast.name}`;
+            astTreeStr += indentStr + `* Ref: ${this.printRefType(ast.ref)}`;
+            astTreeStr += indentStr + `* Type: ${ast.type}`;
+            astTreeStr += indentStr + `* Access: ${ast.access}`;
+        }
+        else if(ast instanceof FunctionDefAst){
+            astTreeStr += indentStr + `Fun ${ast.name}`;
+            astTreeStr += indentStr + `* Access: ${ast.access}`;
+            astTreeStr += indentStr + `* Params: `;
+            for(let param of ast.params) { astTreeStr += this.printAst(param, indent); }
+            astTreeStr += indentStr + `* Body: `;
+            for(let bodyElelement of ast.body) { astTreeStr += this.printAst(bodyElelement, indent); }
+        }
+        else{
+            astTreeStr += indentStr + `Other`;
+        }
+        return astTreeStr;
     }
 
     public static printTokenType(tokenType:TokenType):string{
@@ -1024,13 +1405,41 @@ class Utility{
             case TokenType.dedent: return 'DEDENT <<';
             case TokenType.eoi: return 'EOI';
             case TokenType.ns: return 'NS';
+            case null: return 'null';
+        }
+    }
+
+    public static printAccessType(accessType:AccessType):string{
+        switch(accessType){
+            case AccessType.private: return 'private';
+            case AccessType.public: return 'public';
+            case AccessType.readOnly: return 'readOnly';
+            case null: return 'null';
+        }
+    }
+
+    public static printRefType(refType:RefType):string{
+        switch(refType){
+            case RefType.val: return 'val';
+            case RefType.ref: return 'ref';
+            case RefType.iso: return 'iso';
+            case RefType.acq: return 'acq';
+            case null: return 'null';
         }
     }
 }
 
 class Token{
-    type: TokenType; str: string;
-    constructor(str:string, type:TokenType){ this.str = str;  this.type = type; }
+    type: TokenType; 
+    str: string;
+    col: number; 
+    line: number; 
+    constructor(str: string, type: TokenType, col: number, line: number){ 
+        this.str = str;
+        this.type = type;
+        this.col = col;
+        this.line = line;
+    }
 }
 
 // Enums 
@@ -1042,10 +1451,12 @@ import fs = require('fs');
 
 let fileName1 = './test.ast';
 let fileName2 = './test2.ast';
+let fileName3 = './test3.ast';
 
-fs.readFile(fileName1, function (err, data) {
+fs.readFile(fileName3, function (err, data) {
     if (err) { return console.error(err); }
-    let astro = new Astro();
-    let tokens = astro.lex(data.toString()); // lex the file 
+    let tokens = new Lexer().lex(data.toString());
+    // let asts = new Parser().parse(tokens);
     Utility.printTokens(tokens);
+    // Utility.printAsts(asts);
 });

@@ -1,26 +1,136 @@
+# 26/05/17
+# Astro 0.0.01
+# WHITESPACE SIGNIFICANCE # PROPOSAL
+# operator magnetism
+- binary operators are neutral magnetic 
+- prefix unary operators are right magnetic 
+- postfix unary operator are left magnetic 
+# punctuator magnetism
+- depending on the punctuator it may either be left or right magnetic
+- left magnetic punctuators include , 
+- right magnetic punctuators include . -> 
+
+# LISTS # PROPOSAL
+var list #: [Int]
+var list = List 0, repeat:20
+
+# NIL # DOCUMENT 2 # DOC'D
+var x = b! # exceptionable unwrap
+var y = b? # nillable unwrap
+var z = b ?? 5 # nil coalescing 
+
+b? ~ b : 5
+
+if b? == 5
+elif b.nil 
+else 
+
+# 26/05/17
+# Astro 0.0.01
+# OBJECT DESTRUCTURING # DOC'D
+var person = Person "Tade", 56
+| {name, age}: println name, age
+
+
+# POLYMORPHIC RECURSION # ISSUE 
+#: $T
+enum Nested: Epsilon, Merger a, b #: _, Nested{T}
+
+fun length nest:
+    | epsilon : 0
+    | Merger a, b: 1 + length b 
+
+var nest = Merger 5, (Merger [10], (Merger [[6]], (Merger [[[3]]], epsilon)))
+
+let x
+let y = nest 
+for i = [1..3]: 
+    x = y 
+    print x.a  
+    y = x.b
+
+let x 
+let y = Merger 5, nil 
+for i = [1..3]: 
+    x = y?
+    x.b = Merger [3], nil
+    y = x.b
+
+# types are still known cos they are always explicit in values
+
+# 25/05/17
+# Astro 0.0.01
+# IIFES # TODO DOCUMENT 2  # DOC'D
+var primes = |[2..]|
+    | [p, ...xs]: p ++ recurse (x << x = xs, x .mod p != 0)
+# a function must have a recurse to be a valid IIFE and must have a valuable argument
+# stuffs like this won't compile. it's redundant
+var four = |_| 2 + 2
+# do this instead
+var four = 2 + 2
+
+# 25/05/17
+# Astro 0.0.01
+# TYPE ANNOTATION PRPOSAL
+fun add a, b :: Int, Int -> Int
+    a + b 
+
+:: Person, Str
+fun setName person, name: 
+    person.name name 
+
+var age :: Int 
+
+# 24/05/17
+# Astro 0.0.01
+# ASTRO SRUCURED LANGUAGE # TODO DOCUMENT 2 # DOC'D
+dsl src='hello', link='bar.io':
+    (print 'hello') # astro code
+    list: [1, 2, 3] # 
+
+# ACCESS MODS # TODO DOCUMENT 2  # DOC'D
+let job   = "Janitor" # public 
+let name* = "Steve"   # private
+type Data !name*., !typename*. = Person` 
+
+# 23/05/17
+# Astro 0.0.01
+# REFERENCING FUNCTIONS AND TYPES # TODO DOCUMENT 2  # DOC'D
+if x == Int`: print x 
+list.map regex.match` 
+
+# UNICODE # TODO DOCUMENT 2 # DOC'D
+numbers.map |x| x²
+
+if ade.mood != ☺: 
+    ade.mood == ☹
+
+# LIST AND DICT LITERALS  # TODO DOCUMENT 2 # DOC'D
+[Int]{4, 78}[,]
+[Str, Int]{33, 10}[:]
+
 # 21/05/17
 # Astro 0.0.01
-# 
+# IDENTITY VS VALUE COMPARISON # TODO DOCUMENT 2 # DOC'D
 a == b
 a === b 
 
-# 
+# LABELLING BLOCKS, LOOPS AND FUNCTIONS  # TODO DOCUMENT 2 # DOC'D
 loop: #@ top 
-    while x == 5: 
-        x += 1
-        if x > 1: break at top 
+    while x = eatToken: 
+        if x == "\n": break at top 
 
 fun add a, b: #@ top
+    var c = a + b
     fun _:
-        return a + b at top
+        return c at top
 
-# 
+# USING SUBJECTS FROM ENCLOSING SCOPE # TODO DOCUMENT 2 # DOC'D
 var name = 'Dope'
-fun setName object: 
-    var name = "Swag"
+fun setName object, name: 
     object.name = name + ext.name
 
-#  
+# LAMBDAS # TODO DOCUMENT 2 # DOC'D
 var func = |a, b| 
     if a > b: recall --a, b 
     a + b
@@ -37,10 +147,10 @@ play (song, artist)
 list[2]
 list [2]
 
-# BITWISE # TODO DOCUMENT 2
+# BITWISE # TODO DOCUMENT 2 # DOC'D
 bitshl, bitshr, bitushr, bitand, bitor, bitxor, bitinv
 
-# INITIALIZER TRAIN # TODO DOCUMENT 2
+# INITIALIZER TRAIN # TODO DOCUMENT 2 # DOC'D
 type TeachingStudent <: Teacher, Student
 fun Pegasus <name, staffId : studentId> 
 
@@ -53,10 +163,10 @@ while try line = file.readNextLine:
 catch FileNotFounError:
     println 'File missing!'
 
-# ERROR COALESCING # TODO DOCUMENT 2
+# ERROR COALESCING # TODO DOCUMENT 2 # DOC'D
 let realName = map['appcypher'] catch KeyError ?? name
 
-# TRY CATCH REDESIGNED # TODO DOCUMENT 2
+# TRY CATCH REDESIGNED # TODO DOCUMENT 2 # DOC'D
 try: 
     process bigData  
 catch err:  
@@ -74,11 +184,11 @@ try data = getData:
 ensure: 
     file.close
 
-# IF AND NIL # TODO DOCUMENT 2
-if data = getData: 
-    println data
+# IF AND NIL 
+# if data = getData: 
+#     println data
 
-# TUPLE LITERAL # TODO DOCUMENT 2
+# TUPLE LITERAL # TODO DOCUMENT 2 # DOC'D
 var (single) = 5
 var empty = ()
 print (name, age) # this is a tuple
@@ -87,7 +197,7 @@ print (name, age) # this is a tuple
 var pegasus #: Bird&Horse
 var identification #: Str|Int
 
-# WHEN # TODO DOCUMENT 2 # from Kotlin
+# WHEN # TODO DOCUMENT 2 # from Kotlin # DOC'D
 return when x 
 | 'a': 1
 | 'b': 2
@@ -96,16 +206,16 @@ print fruit when fruit
 | 'grape'
 | 'apple'
 
-# NOT IN # TODO DOCUMENT 2  # redesigned based on Kotlin
+# NOT IN # TODO DOCUMENT 2  # redesigned based on Kotlin # DOC'D
 if x !in [1..20]: println 'x is lesser than 20'
 
-# PROPERTIES # TODO DOCUMENT 2 # from C#
+# PROPERTIES # TODO DOCUMENT 2 # from C# # DOC'D
 var name = get "[firstname] [surname]"
 var age =
     set( var extra = 5; age += extra )
     get age -= 5 
 
-# LAMBDA # TODO DOCUMENT 2 # from Scala
+# LAMBDA # TODO DOCUMENT 2 # from Scala # DOC'D
 let sum3 = fun _ a, b: 
     return a + b + c 
 
@@ -116,63 +226,63 @@ var num = [1, 2, 3, 4].fold(0, |a, b| a + b)
 var nums = [1, 2, 3, 4].fold(0, || $1 + $2)
 
 
-# TERNARY OPERATOR # TODO DOCUMENT 2 # from C++
+# TERNARY OPERATOR # TODO DOCUMENT 2 # from C++ # DOC'D
 x > y ~ x : y
 
-# SINGLETON # TODO DOCUMENT 2 # redesigned based on Java and Scala
-var injector = obj !component`
+# SINGLETON 
+# var injector = obj !component`
 
-var runnable = obj Runnable
-fun taskFinished runnable: #: runnable
-    println 'Task finished'
+# var runnable = obj Runnable
+# fun taskFinished runnable: #: runnable
+#     println 'Task finished'
 
-fun run runnable: #: runnable
-    doSomething 
-    runnable.onTaskFinised
+# fun run runnable: #: runnable
+#     doSomething 
+#     runnable.onTaskFinised
 
-# COALESCING # TODO DOCUMENT 2
+# COALESCING # TODO DOCUMENT 2 # DOC'D
 let name = person.name ?? "John Doe"
 let realName = map['appcypher'] catch KeyError ?? name
 
 
 # 19/05/17
 # Astro 0.0.01
-# ACCESS MODS # TODO DOCUMENT 2
-let job = "Janitor" # public 
-let name` = "Steve" # private
+# ACCESS MODS 
+# let job = "Janitor" # public 
+# let name` = "Steve" # private
 
-# SINGLETON # TODO DOCUMENT 2
-obj someTask <: Runnable: 
-fun run sometask: #: someTask
+# SINGLETON # TODO DOCUMENT 2 # redesigned based on Java and Scala # DOC'D
+obj SomeTask <: Runnable: 
+fun run sometask: #: SomeTask
     println 'Task running...'
-    someTask.onTaskFinished
+    SomeTask.onTaskFinished
 
-fun onTaskFinished someTask: #: someTask
+fun onTaskFinished someTask: #: SomeTask
     println 'Task finished!'
 
 # 13/05/17
 # Astro 0.0.01
-# TUPLE LITERAL # TODO DOCUMENT 2
+# TUPLE LITERAL # TODO DOCUMENT 2 # DOC'D
 let name = ()
 let john = ("John",) # not the coma for single element tuple literal
 
-# DEFAULT CONSTRUCTOR # TODO DOCUMENT 2
+# DEFAULT CONSTRUCTOR # TODO DOCUMENT 2 # DOC'D
 var book #: Str # Str is a type annotation here 
 fun getBook str
 type Person:
     var name = Str # Str is a default constructor here
     var age = Int
 
-# DYNAMIC FUNCTION CALL # TODO DOCUMENT 2
+# DYNAMIC FUNCTION CALL # TODO DOCUMENT 2 # DOC'D
 fun sum a, b:  a + b 
 sum ...list # unless list is statically known, this can lead to runtime error.
 
-# EXPORT # TODO DOCUMENT 2
+# EXPORT # TODO DOCUMENT 2 # DOC'D
 export: 
     add$ Int, Int -> Int 
     sub$ Int, Int -> Int
 
-# GENERATOR # TODO DOCUMENT 2  # from Python
+# GENERATOR # TODO DOCUMENT 2  # from Python # DOC'D
 var count = for x = [..27]: var z = yield x
 count.next
 count.send
@@ -180,7 +290,7 @@ count.raise
 
 # 05/05/17
 # Astro 0.0.01
-# ASSIGNMENT PATTERN MATCHING # TODO DOCUMENT 2
+# ASSIGNMENT PATTERN MATCHING # TODO DOCUMENT 2 # DOC'D
 var [list] = [2..56]
 var (name) = [1, 2, 3]
 var {x, y, z} = Point 4, 5, 6
@@ -190,7 +300,7 @@ var a, ...b = list
 var (i, j, k) = 50 
 var d, e, f = 6, 7
 
-# TYPE ANNOTATION # TODO DOCUMENT 2
+# TYPE ANNOTATION # TODO DOCUMENT 2 # DOC'D
 type GameMaker #> task
 fun createJob #> asyn
 fun add a, b: #: Int, Int -> Int #> asyn
@@ -237,7 +347,7 @@ fun add a, b:
 
 # 21/04/17
 # Astro 0.0.01
-# LIST COMPREHENSION TODO DOCUMENT 
+# LIST COMPREHENSION TODO DOCUMENT # DOC'D
 i << i, j = [0..20], [4..3..40], |i and j|.mod 2 == 0
 
 i, j << i = [0..20] << j = [21..40]
@@ -257,7 +367,7 @@ enum OptionalValue:
 var possibleInteger = OptionalValue.none
 possibleInteger = some 100
 
-# IMPROVING GENERICS TODO DOCUMENT
+# IMPROVING GENERICS TODO DOCUMENT # DOC'D
 # SWIFT
 func anyCommonElements<T: Sequence, U: Sequence>(_ lhs: T, _ rhs: U) -> Bool
     where T.Iterator.Element: Equatable, T.Iterator.Element == U.Iterator.Element {
@@ -279,24 +389,24 @@ fun anyCommonElements lhs, rhs: #: $T<:Sequence, $U<:Sequence
 
 # 19/03/17
 # Dexter 0.2.01
-# CHAINING IN TERNARY OPERATOR TODO DOCUMENT
+# CHAINING IN TERNARY OPERATOR TODO DOCUMENT # DOC'D
 isCurrentlyFront ? Camera.open->(cameraId) : ->(cameraId)
 
 # 08/03/17
 # Dexter 0.2.01
-# RETURN NOTHING TODO DOCUMENT
+# RETURN NOTHING TODO DOCUMENT # DOC'D
 fun effect mood: #: Mood ->
     ~ .isHappy: happySong ->play
     ~ .isSad: sadSong ->play
     _
 
 
-# EXHAUSTIVE PATTERN MATCHING TODO DOCUMENT
+# EXHAUSTIVE PATTERN MATCHING TODO DOCUMENT # DOC'D
 bar
 | Node(value) where value != 42: println value
 ~ not in [1..45]: println bar
 
-# OPTIONAL ENUM TODO DOCUMENT
+# OPTIONAL ENUM TODO DOCUMENT # DOC'D
 enum FontStyle:
     bold, italic, underline, strikeThrough
 # ...

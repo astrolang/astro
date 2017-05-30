@@ -1,0 +1,15 @@
+type Teacher <: Employee, Person:
+    var subjects  
+# this is a comment
+    var class
+
+type Person !name.*, !years.age* 
+
+var name = "John Smith"
+var salary = 1_200_999.56_NGN
+let list_set = set_[1, 2, 3]
+
+fun factorial n:
+    | 1: 0
+    | _: 
+        n * factorial n - 1

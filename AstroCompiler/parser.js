@@ -30,6 +30,9 @@ var Lexer = (function () {
             'catch', 'try', 'raise'
             //...
         ];
+        // debug helpers 
+        this.col = 0;
+        this.line = 1;
     }
     Lexer.prototype.lex = function (code) {
         var _this = this;
@@ -48,11 +51,12 @@ var Lexer = (function () {
             // eoi (end of input)
             if (char == null) {
                 // save token
-                tokens.push(new Token(null, TokenType.eoi));
+                tokens.push(new Token(null, TokenType.eoi, null, this_1.line));
                 return "break";
             }
             else if (this_1.characters.indexOf(char) > -1) {
                 var str = '';
+                var col = this_1.col;
                 do {
                     str += char;
                     char = this_1.eatChar();
@@ -66,18 +70,19 @@ var Lexer = (function () {
                 // save token
                 // check if token is a keyword
                 if (this_1.keywords.indexOf(str) > -1) {
-                    tokens.push(new Token(str, TokenType.keyword));
+                    tokens.push(new Token(str, TokenType.keyword, col, this_1.line));
                 }
                 else if (str == "true" || str == "false") {
-                    tokens.push(new Token(str, TokenType.boolean));
+                    tokens.push(new Token(str, TokenType.boolean, col, this_1.line));
                 }
                 else {
-                    tokens.push(new Token(str, TokenType.identifier));
+                    tokens.push(new Token(str, TokenType.identifier, col, this_1.line));
                 }
             }
             else if (this_1.decDigits.indexOf(char) > -1) {
                 var numberType_1 = "dec";
                 var str_1 = char;
+                var col = this_1.col;
                 char = this_1.eatChar();
                 // lexing the exponent
                 var subExponent_1 = function () {
@@ -253,6 +258,7 @@ var Lexer = (function () {
                     //     str += char; 
                     //     char = this.eatChar();
                     // }  
+                    // if underscore is the last letter of previously lexed number, vomit it back
                     if (_this.prevChar() == "_") {
                         char = _this.vomitChar();
                     }
@@ -295,41 +301,56 @@ var Lexer = (function () {
                     str_1 = str_1.slice(0, -1);
                     char = this_1.vomitChar();
                 }
-                tokens.push(new Token(str_1, TokenType.number));
+                tokens.push(new Token(str_1, TokenType.number, col, this_1.line));
             }
             else if (this_1.operators.indexOf(char) > -1) {
-                tokens.push(new Token(char, TokenType.operator));
-                char = this_1.eatChar();
+                // check for no-space before punctuator
+                var prevChar = this_1.prevChar();
+                if (prevChar != " " && prevChar != "\t") {
+                    // check if last registered token is not a no-space to prevent duplicates
+                    if (tokens[tokens.length - 1].type != TokenType.ns, this_1.col, this_1.line)
+                        tokens.push(new Token("", TokenType.ns, this_1.col, this_1.line));
+                }
+                tokens.push(new Token(char, TokenType.operator, this_1.col, this_1.line));
+                char = this_1.eatChar(); // eat punctuator
                 // check for no-space after operator
                 if (char != " " && char != "\t") {
-                    tokens.push(new Token("", TokenType.ns));
+                    tokens.push(new Token("", TokenType.ns, this_1.col, this_1.line));
                 }
             }
             else if (this_1.punctuators.indexOf(char) > -1) {
-                tokens.push(new Token(char, TokenType.punctuator));
-                char = this_1.eatChar();
+                // check for no-space before punctuator
+                var prevChar = this_1.prevChar();
+                if (prevChar != " " && prevChar != "\t") {
+                    // check if last registered token is not a no-space to prevent duplicates
+                    if (tokens[tokens.length - 1].type != TokenType.ns)
+                        tokens.push(new Token("", TokenType.ns, this_1.col, this_1.line));
+                }
+                tokens.push(new Token(char, TokenType.punctuator, this_1.col, this_1.line));
+                char = this_1.eatChar(); // eat punctuator
                 // check for no-space after punctuator
                 if (char != " " && char != "\t") {
-                    tokens.push(new Token("", TokenType.ns));
+                    tokens.push(new Token("", TokenType.ns, this_1.col, this_1.line));
                 }
             }
             else if (char == "\n" || char == "\r") {
                 do {
                     char = this_1.eatChar();
                 } while (char == "\n" || char == "\r");
-                // checking for a possible dedent
-                if (char != " " && char != "\t") {
+                // there's a possibililty of dedent as long as newline is not immediately
+                // followed by spaces, tab or a comment
+                if (char != " " && char != "\t" && char != "#") {
                     var indentFactor = prevIndentCount / firstIndentCount;
                     // if previous indent has an indentation 
                     if (prevIndentCount >= 1) {
                         for (var i = 0; i < indentFactor; i++) {
-                            tokens.push(new Token("", TokenType.dedent));
+                            tokens.push(new Token("", TokenType.dedent, this_1.col - 1, this_1.line));
                         }
                         // now prevIndent has no indent at all
                         prevIndentCount = 0;
                     }
                     else {
-                        tokens.push(new Token("", TokenType.newline));
+                        tokens.push(new Token("", TokenType.newline, null, this_1.line));
                     }
                 }
                 // if preceded by spaces or tabs, there is a possible indentation information
@@ -355,6 +376,7 @@ var Lexer = (function () {
                             char2 = this_1.peekChar(++offset);
                             // if all the spaces are followed by newline
                             if (char2 == "\n") {
+                                // offset should only be used when there is guarantee newlines won't be skipped
                                 char = this_1.eatChar(offset);
                                 return "continue-lexLoop";
                             }
@@ -362,11 +384,11 @@ var Lexer = (function () {
                                 continue;
                             }
                             else if (char2 == null) {
-                                tokens.push(new Token(null, TokenType.eoi));
+                                tokens.push(new Token(null, TokenType.eoi, null, this_1.line));
                                 return "break-lexLoop";
                             }
                             else {
-                                throw new Error("Error 1: Can't mix tabs with spaces for indents!");
+                                throw new Error("Lex Error: Can't mix tabs with spaces for indents!");
                             }
                         }
                     }
@@ -374,20 +396,22 @@ var Lexer = (function () {
                         return "continue-lexLoop";
                     }
                     else if (char == null) {
-                        tokens.push(new Token(null, TokenType.eoi));
+                        tokens.push(new Token(null, TokenType.eoi, null, this_1.line));
                         return "break-lexLoop";
                     }
-                    // now we know we've got an indentation, let's see if it's the firstIndent, an indent or a dedent
-                    // is the first indent
+                    else if (char == "#") {
+                        return "continue-lexLoop";
+                    }
+                    // now we know we've got an indentation, let's see if it's the firstIndent
                     if (usesSpaceIndent == null) {
                         usesSpaceIndent = true;
                         firstIndentCount = indentSize;
                         prevIndentCount = firstIndentCount;
-                        tokens.push(new Token("", TokenType.indent));
+                        tokens.push(new Token("", TokenType.indent, this_1.col - 1, this_1.line));
                     }
                     else {
                         if (!usesSpaceIndent) {
-                            throw new Error("Error 4: Cannot mix tab and space indentations!");
+                            throw new Error("Lex Error: Cannot mix tab and space indentations!");
                         }
                         if (indentSize % firstIndentCount == 0) {
                             var indentFactor = indentSize / firstIndentCount;
@@ -395,26 +419,26 @@ var Lexer = (function () {
                             var indentDiff = indentFactor - prevIndentFactor;
                             // remember to set prevIndent to the current indent
                             prevIndentCount = indentSize;
-                            // register a newline if there is no indent or dedent
+                            // register a newline if there is no indent or dedent difference
                             if (indentDiff == 0) {
-                                tokens.push(new Token("", TokenType.newline));
+                                tokens.push(new Token("", TokenType.newline, null, this_1.line));
                                 return "continue-lexLoop";
                             }
                             if (indentDiff > 1) {
-                                throw new Error("Error 3: Indentation mismatch, indentation is too much!");
+                                throw new Error("Lex Error: Indentation mismatch, indentation is too much!");
                             }
                             // indent
                             if (indentDiff == 1) {
-                                tokens.push(new Token("", TokenType.indent));
+                                tokens.push(new Token("", TokenType.indent, this_1.col - 1, this_1.line));
                             }
                             else {
                                 for (var i = 0; i < (0 - indentDiff); i++) {
-                                    tokens.push(new Token("", TokenType.dedent));
+                                    tokens.push(new Token("", TokenType.dedent, this_1.col - 1, this_1.line));
                                 }
                             }
                         }
                         else {
-                            throw new Error("Error 2: Indentation mismatch!");
+                            throw new Error("Lex Error: Indentation mismatch!");
                         }
                     }
                 }
@@ -422,7 +446,6 @@ var Lexer = (function () {
                     do {
                         char = this_1.eatChar();
                     } while (char == " " || char == "\t");
-                    // console.log("[ ]" + ": {SPACE}"); 
                 }
             }
             else if (char == "\t") {
@@ -445,6 +468,7 @@ var Lexer = (function () {
                             char2 = this_1.peekChar(++offset);
                             // if all the spaces are followed by newline
                             if (char2 == "\n") {
+                                // offset should only be used when there is guarantee newlines won't be skipped
                                 char = this_1.eatChar(offset);
                                 return "continue-lexLoop";
                             }
@@ -452,11 +476,11 @@ var Lexer = (function () {
                                 continue;
                             }
                             else if (char2 == null) {
-                                tokens.push(new Token(null, TokenType.eoi));
+                                tokens.push(new Token(null, TokenType.eoi, null, this_1.line));
                                 return "break-lexLoop";
                             }
                             else {
-                                throw new Error("Error 1: Can't mix tabs with spaces for indents!");
+                                throw new Error("Lex Error: Can't mix tabs with spaces for indents!");
                             }
                         }
                     }
@@ -464,20 +488,22 @@ var Lexer = (function () {
                         return "continue-lexLoop";
                     }
                     else if (char == null) {
-                        tokens.push(new Token(null, TokenType.eoi));
+                        tokens.push(new Token(null, TokenType.eoi, null, this_1.line));
                         return "break-lexLoop";
                     }
-                    // now we know we've got an indentation, let's see if it's the firstIndent, an indent or a dedent
-                    // is the first indent
+                    else if (char == "#") {
+                        return "continue-lexLoop";
+                    }
+                    // now we know we've got an indentation, let's see if it's the firstIndent
                     if (usesSpaceIndent == null) {
                         usesSpaceIndent = false;
                         firstIndentCount = indentSize;
                         prevIndentCount = firstIndentCount;
-                        tokens.push(new Token("", TokenType.indent));
+                        tokens.push(new Token("", TokenType.indent, this_1.col - 1, this_1.line));
                     }
                     else {
                         if (usesSpaceIndent) {
-                            throw new Error("Error 4: Cannot mix tab and space indentations!");
+                            throw new Error("Lex Error: Cannot mix tab and space indentations!");
                         }
                         if (indentSize % firstIndentCount == 0) {
                             var indentFactor = indentSize / firstIndentCount;
@@ -487,24 +513,24 @@ var Lexer = (function () {
                             prevIndentCount = indentSize;
                             // register a newline if there is no indent or dedent
                             if (indentDiff == 0) {
-                                tokens.push(new Token("", TokenType.newline));
+                                tokens.push(new Token("", TokenType.newline, null, this_1.line));
                                 return "continue-lexLoop";
                             }
                             if (indentDiff > 1) {
-                                throw new Error("Error 3: Indentation mismatch, indentation is too much!");
+                                throw new Error("Lex Error: Indentation mismatch, indentation is too much!");
                             }
                             // indent
                             if (indentDiff == 1) {
-                                tokens.push(new Token("", TokenType.indent));
+                                tokens.push(new Token("", TokenType.indent, this_1.col - 1, this_1.line));
                             }
                             else {
                                 for (var i = 0; i < (0 - indentDiff); i++) {
-                                    tokens.push(new Token("", TokenType.dedent));
+                                    tokens.push(new Token("", TokenType.dedent, this_1.col - 1, this_1.line));
                                 }
                             }
                         }
                         else {
-                            throw new Error("Error 2: Indentation mismatch!");
+                            throw new Error("Lex Error: Indentation mismatch!");
                         }
                     }
                 }
@@ -517,6 +543,7 @@ var Lexer = (function () {
             }
             else if (char == "'") {
                 var str = "";
+                var col = this_1.col;
                 // discard the opening quote
                 char = this_1.eatChar();
                 while (char != "'") {
@@ -527,10 +554,11 @@ var Lexer = (function () {
                 this_1.eatChar();
                 // cache the next character
                 char = this_1.eatChar();
-                tokens.push(new Token(str, TokenType.string));
+                tokens.push(new Token(str, TokenType.string, col, this_1.line));
             }
             else if (char == "\"") {
                 var str = "";
+                var col = this_1.col;
                 // discard the opening quote
                 char = this_1.eatChar();
                 while (char != "\"") {
@@ -541,21 +569,23 @@ var Lexer = (function () {
                 this_1.eatChar();
                 // cache the next character
                 char = this_1.eatChar();
-                tokens.push(new Token(str, TokenType.string));
+                tokens.push(new Token(str, TokenType.string, col, this_1.line));
             }
             else if (char == "#" && this_1.peekChar() != "=") {
                 var str = "";
+                var col = this_1.col;
                 // discard the "#"
                 char = this_1.eatChar();
                 while (char != "\n" && char != "\r") {
                     str += char;
                     char = this_1.eatChar();
                 }
-                tokens.push(new Token(str, TokenType.comment));
+                tokens.push(new Token(str, TokenType.comment, col, this_1.line));
             }
             else if (char == "#" && this_1.peekChar() == "=") {
                 var nestCount = 0;
                 var str = "";
+                var col = this_1.col;
                 // discard the '#'
                 this_1.eatChar();
                 // discard the '='
@@ -566,7 +596,7 @@ var Lexer = (function () {
                         // if outside all nesting
                         if (nestCount == 0) {
                             // save comment string 
-                            tokens.push(new Token(str, TokenType.comment));
+                            tokens.push(new Token(str, TokenType.comment, col, this_1.line));
                             // discard the '='
                             this_1.eatChar();
                             // discard the '#'
@@ -582,9 +612,9 @@ var Lexer = (function () {
                     }
                     else if (char == null) {
                         // save comment string
-                        tokens.push(new Token(str, TokenType.comment));
+                        tokens.push(new Token(str, TokenType.comment, col, this_1.line));
                         // save EOI token
-                        tokens.push(new Token(null, TokenType.eoi));
+                        tokens.push(new Token(null, TokenType.eoi, null, this_1.line));
                         break;
                     }
                     str += char;
@@ -592,7 +622,7 @@ var Lexer = (function () {
                 }
             }
             else {
-                throw new Error("Error 5: character not recognized!");
+                throw new Error("Lex Error: Character not recognized!");
             }
         };
         var this_1 = this;
@@ -607,18 +637,38 @@ var Lexer = (function () {
         }
         return tokens;
     };
+    // offset should only be used when there is guarantee newlines won't be skipped
     Lexer.prototype.eatChar = function (offset) {
         if (offset === void 0) { offset = 1; }
         this.charPointer += offset;
-        if (this.charPointer < this.chars.length)
-            return this.chars[this.charPointer];
+        if (this.charPointer < this.chars.length) {
+            var char = this.chars[this.charPointer];
+            // taking note column and line numbers
+            if (char == "\n") {
+                this.col = 0;
+                this.line += 1;
+            }
+            else
+                this.col += offset;
+            return char;
+        }
         return null;
     };
+    // offset should only be used when there is guarantee newlines won't be skipped
     Lexer.prototype.vomitChar = function (offset) {
         if (offset === void 0) { offset = 1; }
         this.charPointer -= offset;
-        if (this.charPointer < this.chars.length)
-            return this.chars[this.charPointer];
+        if (this.charPointer < this.chars.length) {
+            var char = this.chars[this.charPointer];
+            // taking note column and line numbers
+            if (char == "\n") {
+                this.col = 0;
+                this.line -= 1;
+            }
+            else
+                this.col -= offset;
+            return char;
+        }
         return null;
     };
     Lexer.prototype.peekChar = function (offset) {
@@ -638,15 +688,235 @@ var Lexer = (function () {
 }());
 var Parser = (function () {
     function Parser() {
+        this.tokenPointer = -1;
     }
     Parser.prototype.parse = function (tokens) {
-        this.parseTopLevel();
-        return new Ast();
+        this.tokens = tokens;
+        return this.parseModule();
     };
-    Parser.prototype.parseTopLevel = function () {
+    Parser.prototype.parseModule = function () {
+        var token = this.eatToken();
+        var asts = [];
+        while (token != null) {
+            if (token.str == "type") {
+                var typeAsts = this.parseTypeDef();
+                asts.push(typeAsts.type);
+                asts.push(typeAsts.initializer);
+            }
+            else {
+                token = this.eatToken(); // skip the token
+            }
+        }
+        return asts;
+    };
+    Parser.prototype.parseImportDef = function () {
+    };
+    Parser.prototype.parseExportDef = function () {
+    };
+    Parser.prototype.parseSubjectDef = function () {
+    };
+    Parser.prototype.parseParam = function () {
+        var subject = null;
+        return subject;
+    };
+    // TODO: INCOMPLETE, initializer train
+    Parser.prototype.parseTypeDef = function () {
+        var _this = this;
+        var type = new TypeDefAst(null, AccessType.public, null, null);
+        var initializer = new FunctionDefAst(null, AccessType.public, null, null);
+        var token = this.eatToken(); // eat "type"
+        // parses type's body
+        var subBody = function () {
+            var fields = [];
+            if (fields != null)
+                (type.fields = fields);
+        };
+        var subParents = function () {
+            token = _this.eatToken(); // eat "<"
+            token = _this.eatToken(); // eat ":"
+            var parents = [];
+            do {
+                if (token.type == TokenType.identifier) {
+                    parents.push(token.str);
+                    token = _this.eatToken(); // eat identifier
+                }
+                else
+                    break;
+            } while (token.str == ",");
+            if (parents != null)
+                (type.parents = parents);
+        };
+        // parses type's parameters
+        var subParams = function () {
+            // parses variable parameters 
+            var subVariableParam = function () {
+                var typeVarField = new VariableDefAst(null, null, null, AccessType.public);
+                var initializerVarParam = new VariableDefAst(null, null, null, AccessType.private);
+                token = _this.eatToken(); // eat "!"
+                if (token.type != TokenType.identifier)
+                    throw new Error("Parse Error: Expecting an identifier!");
+                if (!_this.lastTokenIsNoSpace())
+                    throw new Error("Parse Error: Spaces between \"!\" and parameter name not expected!");
+                typeVarField.name = token.str;
+                initializerVarParam.name = token.str;
+                token = _this.eatToken(); // eat identifier 
+                if (token.str == ".") {
+                    if (!_this.lastTokenIsNoSpace())
+                        throw new Error("Parse Error: Spaces between parameter name and \".\" not expected!");
+                    initializerVarParam.name += ".";
+                    token = _this.eatToken(); // eat the "." 
+                    if (token.type == TokenType.identifier) {
+                        if (!_this.lastTokenIsNoSpace())
+                            throw new Error("Parse Error: Spaces between \".\" and optional local name not expected!");
+                        typeVarField.name = token.str;
+                        initializerVarParam.name += token.str;
+                        token = _this.eatToken(); // eat the identifier 
+                    }
+                }
+                return {
+                    typeVarField: typeVarField,
+                    initializerVarParam: initializerVarParam
+                };
+            };
+            // parses constant parameters
+            var subConstantParam = function () {
+                var typeConstField = new VariableDefAst(null, null, null, AccessType.public);
+                var initializerConstParam = new VariableDefAst(null, null, null, AccessType.private);
+                token = _this.eatToken(); // eat "!"
+                if (token.type != TokenType.identifier)
+                    throw new Error("Parse Error: Expecting an identifier!");
+                if (!_this.lastTokenIsNoSpace())
+                    throw new Error("Parse Error: Spaces between \"!\" and parameter name not expected!");
+                typeConstField.name = token.str;
+                initializerConstParam.name = token.str;
+                token = _this.eatToken(); // eat identifier 
+                if (token.str == ".") {
+                    if (!_this.lastTokenIsNoSpace())
+                        throw new Error("Parse Error: Spaces between parameter name and \".\" not expected!");
+                    initializerConstParam.name += ".";
+                    token = _this.eatToken(); // eat the "." 
+                    if (token.type == TokenType.identifier) {
+                        if (!_this.lastTokenIsNoSpace())
+                            throw new Error("Parse Error: Spaces between \".\" and optional local name not expected!");
+                        typeConstField.name = token.str;
+                        initializerConstParam.name += token.str;
+                        token = _this.eatToken(); // eat the identifier 
+                    }
+                }
+                return {
+                    typeConstField: typeConstField,
+                    initializerConstParam: initializerConstParam
+                };
+            };
+            var newExpression = new NewAst(null, [], null, null); // for initializer's body
+            if (token.str == "!") {
+                var varTuple = subVariableParam();
+                type.fields = [varTuple.typeVarField];
+                initializer.params = [varTuple.initializerVarParam];
+                newExpression.fieldMappings.push(varTuple.typeVarField.name);
+            }
+            else {
+                var constTuple = subVariableParam();
+                type.fields = [constTuple.typeVarField];
+                initializer.params = [constTuple.initializerVarParam];
+                newExpression.fieldMappings.push(constTuple.typeVarField.name);
+            }
+            while (token.str == ",") {
+                token = _this.eatToken(); // eat ","
+                if (token.str == "!") {
+                    var varTuple = subVariableParam();
+                    type.fields.push(varTuple.typeVarField);
+                    initializer.params.push(varTuple.initializerVarParam);
+                    newExpression.fieldMappings.push(varTuple.typeVarField.name);
+                }
+                else {
+                    var constTuple = subVariableParam();
+                    type.fields.push(constTuple.typeVarField);
+                    initializer.params.push(constTuple.initializerVarParam);
+                    newExpression.fieldMappings.push(constTuple.typeVarField.name);
+                }
+            }
+            // since the type has parameters, add initializer's body here
+            if (newExpression.fieldMappings != null)
+                initializer.body = [newExpression];
+        };
+        if (token.type != TokenType.identifier)
+            throw new Error("Parse Error: Expected a type name!");
+        type.name = token.str;
+        initializer.name = token.str;
+        token = this.eatToken(); // eat identifier (type name)
+        // check if identifier has a private access sigil "*" after it
+        if (token.str == "*") {
+            if (!this.lastTokenIsNoSpace())
+                throw new Error("Parse Error: Spaces between type name and \"*\" not expected!");
+            type.access = AccessType.private;
+            initializer.access = AccessType.private;
+            token = this.eatToken(); // eat sigil "*"
+        }
+        var hasNoParams = true;
+        // now to parse the rest of type's syntax
+        if (token.str == "!") {
+            subParams();
+            if (token.str == "<") {
+                subParents();
+            }
+            hasNoParams = false;
+        }
+        else if (token.type == TokenType.identifier) {
+            subParams();
+            if (token.str == "<") {
+                subParents();
+            }
+            hasNoParams = false;
+        }
+        else if (token.str == "<") {
+            subParents();
+            if (hasNoParams && token.str == ":") {
+                subBody();
+            }
+            if (!hasNoParams)
+                throw new Error("Parse Error: Types with parameters can't have body!");
+        }
+        else if (hasNoParams && token.str == ":") {
+            subBody();
+        }
+        else if (token.type == TokenType.newline) {
+        }
+        else
+            throw new Error("Parse Error: Invalid Syntax!");
+        return { type: type, initializer: initializer };
+    };
+    Parser.prototype.parseEnumDef = function () { };
+    Parser.prototype.parseFunctionDef = function () { };
+    Parser.prototype.parseObjDef = function () { };
+    Parser.prototype.parseFunctionCall = function () { };
+    Parser.prototype.eatToken = function () {
+        this.tokenPointer += 1;
+        if (this.tokens[this.tokenPointer].type == TokenType.ns) {
+            this.tokenPointer += 1;
+        }
+        if (this.tokenPointer < this.tokens.length)
+            return this.tokens[this.tokenPointer];
+        return null;
+    };
+    Parser.prototype.prevToken = function () {
+        var peekPointer = this.tokenPointer - 1;
+        if (this.tokens[peekPointer].type == TokenType.ns) {
+            peekPointer -= 1;
+        }
+        if (this.tokenPointer < this.tokens.length)
+            return this.tokens[peekPointer];
+        return null;
+    };
+    Parser.prototype.lastTokenIsNoSpace = function () {
+        var peekPointer = this.tokenPointer - 1;
+        if (this.tokenPointer < this.tokens.length && this.tokens[peekPointer].type == TokenType.ns)
+            return true;
+        return false;
     };
     return Parser;
 }());
+// TODO: INCOMPLETE 
 // Asts
 var Ast = (function () {
     function Ast() {
@@ -863,9 +1133,10 @@ var NameAst = (function (_super) {
 }(ExprAst));
 var NewAst = (function (_super) {
     __extends(NewAst, _super);
-    function NewAst(initializers, ref, type) {
+    function NewAst(initializers, fieldMappings, ref, type) {
         var _this = _super.call(this, ref, type) || this;
         _this.initializers = initializers;
+        _this.fieldMappings = fieldMappings;
         return _this;
     }
     return NewAst;
@@ -982,7 +1253,7 @@ var AssignmentAst = (function (_super) {
 }(ExprAst));
 var BinaryExprAst = (function (_super) {
     __extends(BinaryExprAst, _super);
-    function BinaryExprAst(lhs, ope, rhs, ref, type) {
+    function BinaryExprAst(lhs, op, rhs, ref, type) {
         var _this = _super.call(this, ref, type) || this;
         _this.lhs = lhs;
         _this.op = op;
@@ -1027,12 +1298,83 @@ var Utility = (function () {
     function Utility() {
     }
     Utility.printTokens = function (tokens) {
-        console.log("ENTRY\n-----\n");
+        console.log("ENTRY TOKEN\n------------\n");
         for (var _i = 0, tokens_1 = tokens; _i < tokens_1.length; _i++) {
             var token = tokens_1[_i];
-            console.log(token.str + " => " + Utility.printTokenType(token.type));
+            console.log(token.str + " => type: " + Utility.printTokenType(token.type) + ", col: " + token.col + ", line: " + token.line);
         }
-        console.log("\n----\nEXIT");
+        console.log("\n-----------\nEXIT TOKEN");
+    };
+    Utility.printAsts = function (asts) {
+        console.log("ENTRY AST\n---------\n");
+        for (var _i = 0, asts_1 = asts; _i < asts_1.length; _i++) {
+            var ast = asts_1[_i];
+            console.log(Utility.printAst(ast));
+        }
+        console.log("\n--------\nEXIT AST");
+    };
+    // TODO: INCOMPLETE
+    Utility.printAst = function (ast, indent) {
+        var astTreeStr = "";
+        var indentStr = "\n";
+        if (indent != null) {
+            for (var i = 0; i < indent + 1; i++)
+                indentStr += "    ";
+        }
+        else
+            indent = 0;
+        if (ast instanceof TypeDefAst) {
+            astTreeStr += indentStr + ("Type  " + ast.name); // name
+            astTreeStr += indentStr + ("* Access: " + this.printAccessType(ast.access)); // access 
+            astTreeStr += indentStr + "* Fields: "; // fields
+            if (ast.fields != null)
+                for (var _i = 0, _a = ast.fields; _i < _a.length; _i++) {
+                    var field = _a[_i];
+                    astTreeStr += this.printAst(field, indent);
+                }
+            else {
+                astTreeStr += "\n    null";
+            }
+            astTreeStr += indentStr + "* Parents: "; // parents
+            if (ast.parents != null)
+                for (var _b = 0, _c = ast.parents; _b < _c.length; _b++) {
+                    var parent_1 = _c[_b];
+                    astTreeStr += "\n    " + parent_1;
+                }
+            else {
+                astTreeStr += "\n    null";
+            }
+        }
+        else if (ast instanceof VariableDefAst) {
+            astTreeStr += indentStr + ("Var " + ast.name);
+            astTreeStr += indentStr + ("* Ref: " + this.printRefType(ast.ref));
+            astTreeStr += indentStr + ("* Type: " + ast.type);
+            astTreeStr += indentStr + ("* Access: " + ast.access);
+        }
+        else if (ast instanceof ConstantDefAst) {
+            astTreeStr += indentStr + ("Let " + ast.name);
+            astTreeStr += indentStr + ("* Ref: " + this.printRefType(ast.ref));
+            astTreeStr += indentStr + ("* Type: " + ast.type);
+            astTreeStr += indentStr + ("* Access: " + ast.access);
+        }
+        else if (ast instanceof FunctionDefAst) {
+            astTreeStr += indentStr + ("Fun " + ast.name);
+            astTreeStr += indentStr + ("* Access: " + ast.access);
+            astTreeStr += indentStr + "* Params: ";
+            for (var _d = 0, _e = ast.params; _d < _e.length; _d++) {
+                var param = _e[_d];
+                astTreeStr += this.printAst(param, indent);
+            }
+            astTreeStr += indentStr + "* Body: ";
+            for (var _f = 0, _g = ast.body; _f < _g.length; _f++) {
+                var bodyElelement = _g[_f];
+                astTreeStr += this.printAst(bodyElelement, indent);
+            }
+        }
+        else {
+            astTreeStr += indentStr + "Other";
+        }
+        return astTreeStr;
     };
     Utility.printTokenType = function (tokenType) {
         switch (tokenType) {
@@ -1049,14 +1391,34 @@ var Utility = (function () {
             case TokenType.dedent: return 'DEDENT <<';
             case TokenType.eoi: return 'EOI';
             case TokenType.ns: return 'NS';
+            case null: return 'null';
+        }
+    };
+    Utility.printAccessType = function (accessType) {
+        switch (accessType) {
+            case AccessType.private: return 'private';
+            case AccessType.public: return 'public';
+            case AccessType.readOnly: return 'readOnly';
+            case null: return 'null';
+        }
+    };
+    Utility.printRefType = function (refType) {
+        switch (refType) {
+            case RefType.val: return 'val';
+            case RefType.ref: return 'ref';
+            case RefType.iso: return 'iso';
+            case RefType.acq: return 'acq';
+            case null: return 'null';
         }
     };
     return Utility;
 }());
 var Token = (function () {
-    function Token(str, type) {
+    function Token(str, type, col, line) {
         this.str = str;
         this.type = type;
+        this.col = col;
+        this.line = line;
     }
     return Token;
 }());
@@ -1093,12 +1455,14 @@ var AccessType;
 var fs = require("fs");
 var fileName1 = './test.ast';
 var fileName2 = './test2.ast';
-fs.readFile(fileName1, function (err, data) {
+var fileName3 = './test3.ast';
+fs.readFile(fileName3, function (err, data) {
     if (err) {
         return console.error(err);
     }
-    var astro = new Astro();
-    var tokens = astro.lex(data.toString()); // lex the file 
+    var tokens = new Lexer().lex(data.toString());
+    // let asts = new Parser().parse(tokens);
     Utility.printTokens(tokens);
+    // Utility.printAsts(asts);
 });
 //# sourceMappingURL=parser.js.map
