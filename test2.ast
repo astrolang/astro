@@ -1,13 +1,13 @@
-fun getBook str: 
+fun getBook(str): 
 	let found, book = searchForBook str 
 	if found: 
 		return book 
 	else: 
 		raise BookNotFounError "Can't find book [str]!"
 
-type Car !make, !model 
+type Car(!make, !model )
 
-fun print car: #: Car 
+fun print(car): #: Car 
 	print car.make 
 	print car.model
 	

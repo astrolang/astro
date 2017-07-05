@@ -1,7 +1,336 @@
+# 01/07/17
+# Astro 0.1.0
+# ASTRO PARSER SUBSET 
+type Token(string, kind, line, col)
+fun 
+
+
+# 29/06/17
+# Astro 0.1.0
+# QUESTION 1:
+def divisible7not5():
+    print(list([i for i in range(2000, 3201) if not i % 7 and i % 5][::-1]))
+
+fun divisible7not5():
+    println([i] << i <- [3201:2000], (i % 7 == 0) & (i % 5 != 0))
+
+# QUESTION 2:
+def factorial_recursive(n):
+    return 1 if n == 0 else n * factorial_recursive(n-1)
+
+fun factorial_recursive(n):
+    1 if n == 0 else n * factorial_recursive(n-1)
+
+def factorial():
+    value = str(factorial_recursive(int(input())))
+    print((int(value), dict({int(i) : value.count(i) for i in value})))
+
+fun factorial():
+    let value = Str factorial_recursive inputInt()
+    println((Int(value), {Int(i) : value.count(i)} << i <- value))
+
+# QUESTION 3:
+def squared_dict(n):
+    print(dict({i : i*i for i in range(1, n+1)}))
+
+fun squared_dict(n):
+    println({i : i*i} << i <- [1:n+1])
+
+
+def is_isogram(word): 
+    if type(word) is not str: 
+        raise TypeError('Argument should be a string')
+    elif word == ' ':
+        return (word, False)
+    elif len(word) == len(set(word)): 
+        return (word, True)
+    else: 
+        return (word, False)
+    
+fun is_isogram(word): #: Str
+    | " " -> (word, false)
+    | .size == size Set(word) -> (word, true)
+    | _   -> (word, false)
+
+
+class ShoppingCart: 
+    def __init__(self):
+        self.total = 0
+        self.items = {}
+
+    def add_item(self, item_name, quantity, price): 
+        self.total += price * quantity
+        self.items[item_name] = quantity
+
+    def remove_item(self, item_name, quantity, price): 
+        if quantity > self.items[item_name]:
+            self.total -= self.items[item_name] * price
+            del self.items[item_name]
+        else: 
+            self.total -= quantity * price
+            self.items[item_name] -= quantity
+    
+    def checkout(self, cash_paid):
+        if self.total <= cash_paid: 
+            return cash_paid - self.total
+        return "Cash paid not enough"
+
+class Shop(ShoppingCart):
+    def __init__(self): 
+        self.quantity = 100
+
+    def remove_item(self):
+        self.quantity -= 1
+
+type ShoppingCart(!totals:0, !items:{:})
+
+fun addItem(cart, itemName, quantity, price): 
+    cart.total += price * quantity
+    cart.items{itemName} = quantity
+
+fun removeItem(cart, itemName, quantity, price): 
+    if quantity > cart.items{itemName}:
+        cart.total -= cart.items{itemName} * price
+        cart.items.remove(itemName)
+    else: 
+        cart.total -= quantity * price
+        cart.items{itemName} -= quantity
+
+fun checkout(cart, cashPaid):
+    if cart.total <= cashPaid: 
+        return cashPaid - cart.total
+    "Cash paid not enough"
+
+type Shop(quantity:100) <: ShoppingCart
+
+fun removeItem(shop):
+    shop.quantity -= 1
+
+def remove_duplicates(string):
+    filtered = "".join(sorted(set(string)))
+    dup_count = len(string) - len(filtered)
+    return filtered, dup_count
+
+fun remove_duplicates(string):
+    let filtered = Str Set(string).sort()
+    let dupCount = |string - filtered|.size
+    filtered, dupCount
+
+def my_sort(integers):
+    odd = sorted(filter(lambda x: x % 2, integers))
+    even = sorted(filter(lambda x: not x % 2, integers))
+    return odd + even 
+
+fun mySort(integers):
+    sort integers.filter.|(-> ($1 % 2 != 0)) ++ (-> ($1 % 2 == 0))|
+
+from functools import reduce
+def power(a, b):
+    if b == 0: return 1 
+    if type(b) is not int: raise TypeError('Argument must be interfer or float')
+    return reduce(lambda x, y: x*y, [a] * b)
+
+fun power(a, b): #: Integer, Integer
+    (a ** b).foldl(*, 1) if b != 0 else 1
+
+def longest(string):
+    tokens = string.split()
+    return max(tokens, key=len)
+
+fun longest(string):
+    string.split().max size
+
+# 25/06/17
+# Astro 0.1.0
+type Student(!id,  !name, !gpa)
+
+fun average(students):
+    students.|{gpa}.sum() / size|
+
+fun countAboveAverage(students):
+    students{gpa}.count->($1 >= average students)
+
+let file     = open('student.txt') 
+let length   = file.size 
+var students = List[Student, length]()
+
+for line <- file:
+    let tokens  = line.split /\s+/
+    students[i] = Student(tokens[0], tokens[1], F64(tokens[2]))
+
+let per = countAboveAverage(students) / F64(length) * 100d;
+println >> average(students) >> students
+
+# 21/06/17
+# Astro 0.1.0
+type Student(!id, !name, !gpa)
+
+fun Str(student): #: Student
+    "[student.id] [student.name] [student.gpa]"
+
+fun average(students):
+    var sum = 0;
+    for student <- students:
+        sum += student.gpa
+    sum / student.size
+
+fun countAboveAverage(students):
+    var n = 0;
+    for student <- students:
+        (n += 1) if student.gpa >= average(students)
+    return n
+
+let file     = open('student.txt') 
+let length   = file.size 
+var students = List[Student, length]()
+
+for line <- file:
+    let tokens  = line.split /\s+/
+    students[i] = Student(tokens[0], tokens[1], F64(tokens[2]))
+
+let per = countAboveAverage(students) / F64(length) * 100d;
+println "Percent above average :: $per%" 
+>> average(students) >> students
+
+
+
+
+# 18/06/17
+# Astro 0.1.0
+fun join(x, xs): #: [$T], T -> [T]
+    xs.append x
+
+fun join(x, xs): #: Str, Char -> Str
+    xs.append x
+
+#: MyList[$T], $U -> T where U::MyList.U
+fun getItem(list, index):
+    list[index]
+    
+Console will be like 
+>> add 
+function [3 overloads]:
+add([$T], T -> [T]) 
+add(Str, Char -> Str) 
+
+
+Seperating types from code really reduces clutter in generic code
+For example, in Java, u'd write ur generics like this: 
+
+public static <T extends Comparable<T>> T maximum(T x, T y, T z) {
+    T max = x;   // assume x is initially the largest
+    if(y.compareTo(max) > 0) {
+        max = y;   // y is the largest so far
+    }
+    if(z.compareTo(max) > 0) {
+        max = z;   // z is the largest now                 
+    }
+    return max;   // returns the largest object   
+}
+
+In Astro, u'd do this instead. 
+#: $T, T, T where T<:Comparable
+fun maximum(x, y, z):
+    var max = x
+    if y.compare max > 0: max = y 
+    if z.compare max > 0: max = z
+    max
+
+# 13/06/17
+# Astro 0.1.0
+fun vowels(word): word.filter(-> $1 in "aeiouAEIOU").size
+fun vowels(word): word.filter(i_/aeiou/).size
+fun vowels(word): word.count(i_/aeiou/)
+
+list.fold(0) |x, y| -> x + y 
+list.fold(0, |x, y| -> x + y)
+list.fold(0, -> $1 + $2)
+
+var castle = |a, b| ->
+    exec(a, b)
+
+var castle = (-> exec())
+
+# 10/06/17
+# Astro 0.1.0
+fun vowels(word) = word.filter(=$1 in "aeiouAEIOU").size
+fun vowels(word) = word.filter(i_/aeiou/).size
+fun vowels(word) = word.count(i_/aeiou/)
+
+list.fold(0) |x, y| = x + y 
+list.fold(0, |x, y| = x + y)
+list.fold(0, =$1 + $2)
+
+var castle = |a, b| =
+    exec(a, b)
+
+var castle = (=exec())
+
+# 31/05/17
+# Astro 0.1.0
+fun palingram(word):  #: Str
+    if word.size() == set(word).size(): "isogram"
+    elif word == word[-1:]: "palindrome"
+    else: "nothing"
+
+# Increment decrement html app
+import html
+
+fun main():
+    var app = {
+        view: view
+        model: model
+        update: update
+    }
+
+enum Msg: inc, dec
+
+let model = 0
+
+fun update(msg, model):
+    | inc,_: model + 1
+    | dec,_: model - 1
+
+fun view(model):
+    div:
+        button(onclick: inc, text: '+')
+        div: text: model
+        button(onclick: dec, text: '-')
+
+# Astro with braces
+import html
+
+fun main() {
+    var app = {
+        view: view
+        model: model
+        update: update
+    }
+}
+
+enum Msg { inc, dec }
+
+let model = 0
+
+fun update(msg, model) {
+    case msg {
+    | inc: model + 1
+    | dec: model - 1
+    }
+}
+
+fun view(model) {
+    div {
+        button(onclick: inc, text: '+')
+        div { text { model } }
+        button(onclick: dec, text: '-')
+    }
+}
+
 # 30/05/17
 # Astro 0.1.0
 # WHERE USED
-{} - dict, 
+{} - record, objectdestructuring
 [] - list, range, typevar
 _ - privatemodifier 
 . - dotaccess, vectorization, nonstandardliteral

@@ -1,0 +1,13 @@
+# 05/07/17 
+type Student(!id, !name, !age)
+
+fun mean(list): 
+    list.|sum() / size|
+
+fun std(list):
+    let squaredDiff = (list - mean(list))²
+    let variance = squaredDiff.mean()
+    √(variance)
+
+let list = [2, 45, 18, 6, 37, 9]
+std(list)

@@ -4,8 +4,10 @@
 
 # unused sample codes
 something.dex
-test.js
-test.py
+Test/
+
+# old files
+Old/
 
 # generated javascript files 
 AstroCompile/parser.js

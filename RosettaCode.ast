@@ -1,0 +1,12 @@
+# 13/06/17
+# Astro 0.1.0
+# 100 DOORS
+-- unoptimized  
+var doors = falses 100
+for a <- [:100]:
+    for b <- [a:a:100]: 
+        doors[b] = !doors[b]
+    println "Door $a is ['open.' if doors[a] else 'closed.']"
+
+-- optimized
+for i <- [:10]: println "Door [i^2] is open."

@@ -1,6 +1,7 @@
-// PARSER.TS
 // 02/05/17
-class Lexer{
+import {Token, TokenType} from "./AstroUtility0.1.0"
+
+export class Lexer{
     chars: string[];
     charPointer: number = -1;
     decDigits = "0123456789";
@@ -8,14 +9,15 @@ class Lexer{
     octDigits = "01234567";
     hexDigits = "0123456789ABCDEF";
     characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    operators = "=+-*\\^&|><!";
-    punctuators = ".,;:()[]{}_`";
+    operators = "=+-/*\\^&|><";
+    punctuators = ".,;:()[]{}_`~!@";
     keywords: string[] = [
-        'var', 'let', 'type', 'fun', 'enum', 'obj',
-        'ref', 'iso', 'val', 'acq', 
-        'if', 'elif', 'else', 'redo', 'while', 'for', 'in', 'block', 'loop',
-        'break', 'spill', 'continue', 'yield', 'return', 
-        'catch', 'try', 'raise'
+        'var', 'let', 'type', 'fun', 'abst', 'obj', 'rxn',
+        'ref', 'iso', 'val', 'acq', 'const', 'new',
+        'import', 'export', 'as', 'src', 'at', 
+        'if', 'elif', 'else', 'redo', 'while', 'for', 'in', 'do', 'loop', 'use',
+        'break', 'spill', 'continue', 'yield', 'delegate', 'return', 'raise', 'pass', 'await',
+        'catch', 'try', 'ensure', 'defer'
         //...
     ];
     // debug helpers 
@@ -70,7 +72,7 @@ class Lexer{
                 }
                 // if token is none of the above then its probably an identifier
                 else { 
-                    tokens.push(new Token(str, TokenType.identifier, col, this.line)); 
+                    tokens.push(new Token(str, TokenType.name, col, this.line)); 
                 }
             }
             // number // TODO: don't add trailing letters to number
@@ -266,7 +268,7 @@ class Lexer{
                 let prevChar = this.prevChar();
                 if( prevChar != " " && prevChar != "\t"){
                     // check if last registered token is not a no-space to prevent duplicates
-                    if(tokens[tokens.length - 1].type != TokenType.ns, this.col, this.line)
+                    if(tokens[tokens.length - 1].type != TokenType.ns)
                     tokens.push(new Token("", TokenType.ns, this.col, this.line)); 
                 }
 
@@ -358,7 +360,7 @@ class Lexer{
                                 break lexLoop; 
                             }
                             else{
-                                throw new Error("Lex Error: Can't mix tabs with spaces for indents!");
+                                throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Can't mix tabs with spaces for indents!`);
                             }
                         }
                     }
@@ -381,7 +383,7 @@ class Lexer{
                     }
                     // not the first indent
                     else{ 
-                        if(!usesSpaceIndent){ throw new Error("Lex Error: Cannot mix tab and space indentations!"); }
+                        if(!usesSpaceIndent){ throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Cannot mix tab and space indentations!`); }
                         if(indentSize%firstIndentCount == 0){
 
                             let indentFactor = indentSize/firstIndentCount;
@@ -397,7 +399,7 @@ class Lexer{
                                 continue lexLoop;
                             }
                             if(indentDiff > 1){ 
-                                throw new Error("Lex Error: Indentation mismatch, indentation is too much!");
+                                throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Indentation mismatch, indentation is too much!`);
                             }
                             // indent
                             if(indentDiff == 1){
@@ -411,7 +413,7 @@ class Lexer{
                             }
                         }
                         else{
-                            throw new Error("Lex Error: Indentation mismatch!")
+                            throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Indentation mismatch!`)
                         }
                     }
                 }
@@ -458,7 +460,7 @@ class Lexer{
                                 break lexLoop; 
                             }
                             else{
-                                throw new Error("Lex Error: Can't mix tabs with spaces for indents!");
+                                throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Can't mix tabs with spaces for indents!`);
                             }
                         }
                     }
@@ -481,7 +483,7 @@ class Lexer{
                     }
                     // not the first indent
                     else{ 
-                        if(usesSpaceIndent){ throw new Error("Lex Error: Cannot mix tab and space indentations!"); }
+                        if(usesSpaceIndent){ throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Cannot mix tab and space indentations!`); }
                         if(indentSize%firstIndentCount == 0){
                             let indentFactor = indentSize/firstIndentCount;
                             let prevIndentFactor = prevIndentCount/firstIndentCount;
@@ -495,7 +497,7 @@ class Lexer{
                                 tokens.push(new Token("", TokenType.newline, null, this.line)); 
                                 continue lexLoop;
                             }
-                            if(indentDiff > 1){ throw new Error("Lex Error: Indentation mismatch, indentation is too much!") }
+                            if(indentDiff > 1){ throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Indentation mismatch, indentation is too much!`) }
                             // indent
                             if(indentDiff == 1){
                                 tokens.push(new Token("", TokenType.indent, this.col - 1, this.line)); 
@@ -508,7 +510,7 @@ class Lexer{
                             }
                         }
                         else{
-                            throw new Error("Lex Error: Indentation mismatch!")
+                            throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Indentation mismatch!`)
                         }
                     }
                 }
@@ -625,13 +627,15 @@ class Lexer{
             }
             // others. character not recognized
             else { 
-                throw new Error("Lex Error: Character not recognized!");
+                throw new Error(`Lex Error:${tokens[tokens.length - 1].line}:${tokens[tokens.length - 1].line}: Character not recognized!`);
             }
         }
         return tokens;
     }
 
-    // offset should only be used when there is guarantee newlines won't be skipped
+    // UTILITIES //
+
+    // DEV NOTE: offset should only be used when there is guarantee newlines won't be skipped
     private eatChar(offset = 1): string {
         this.charPointer += offset;
         if(this.charPointer < this.chars.length){
@@ -647,7 +651,7 @@ class Lexer{
         return null;
     }
 
-     // offset should only be used when there is guarantee newlines won't be skipped
+    // DEV NOTE: offset should only be used when there is guarantee newlines won't be skipped
     private vomitChar(offset = 1): string {
         this.charPointer -= offset;
         if(this.charPointer < this.chars.length) {
@@ -663,12 +667,14 @@ class Lexer{
         return null;
     }
 
+    // peeks at the char in the provided offset
     private peekChar(offset: number = 1):string{
         let peekPointer = this.charPointer + offset;
         if(peekPointer < this.chars.length) return this.chars[peekPointer];
         return null;
     }
 
+    // returns the previous char without decrementing the char pointer
     private prevChar():string{
         let peekPointer = this.charPointer - 1;
         if(peekPointer < this.chars.length) return this.chars[peekPointer];
@@ -677,786 +683,8 @@ class Lexer{
 
 }
 
-class Parser{
-    tokens:Token[];
-    tokenPointer:number = -1;
-    asts:Ast[];
 
-    public parse(tokens: Array<Token>): Ast[]{
-        this.tokens = tokens;
-        return this.parseModule();
-    }
 
-    private parseModule(): Ast[]{
-        let token = this.eatToken();
-        let asts: Ast[] = [];
 
-        while(token != null){
-            if(token.str == "type"){
-                let typeAsts = this.parseTypeDef();
-                asts.push(typeAsts.type);
-                asts.push(typeAsts.initializer);
-            }
-            else{
-                token = this.eatToken(); // skip the token
-            }
-        }
 
-        return asts;
-    }
 
-    private parseImportDef(){
-    }
-
-    private parseExportDef(){
-    }
-
-    private parseSubjectDef(){
-    }
-
-    private parseParam():SubjectDefAst{
-        let subject: SubjectDefAst = null;
-        return subject;
-    }
-
-    // TODO: INCOMPLETE, initializer train
-    private parseTypeDef(): {type: TypeDefAst; initializer: FunctionDefAst} {
-        let type = new TypeDefAst(null, AccessType.public, null, null); 
-        let initializer = new FunctionDefAst(null, AccessType.public, null, null);
-        let token = this.eatToken(); // eat "type"
-
-        // parses type's body
-        let subBody = () => {
-            let fields: SubjectDefAst[] = [];
-            if(fields != null) (type.fields = fields);
-        }
-
-        
-        let subParents = () => {
-            token = this.eatToken(); // eat "<"
-            token = this.eatToken(); // eat ":"
-
-            let parents: string[] = [];
-
-            do{
-                if(token.type == TokenType.identifier){
-                    parents.push(token.str);
-                    token = this.eatToken(); // eat identifier
-                }
-                else break;
-            }
-            while(token.str == ",");
-
-            if(parents != null) (type.parents = parents);
-        }
-
-        // parses type's parameters
-        let subParams = () => {
-            
-            // parses variable parameters 
-            let subVariableParam = (): {typeVarField: VariableDefAst, initializerVarParam: VariableDefAst} => {
-                let typeVarField = new VariableDefAst(null, null, null, AccessType.public);
-                let initializerVarParam = new VariableDefAst(null, null, null, AccessType.private);
-                token = this.eatToken(); // eat "!"
-
-                if(token.type != TokenType.identifier) // check for identifier
-                throw new Error("Parse Error: Expecting an identifier!");
-
-                if(!this.lastTokenIsNoSpace()) // no space between "!" and parameter name
-                throw new Error("Parse Error: Spaces between \"!\" and parameter name not expected!");
-
-                typeVarField.name = token.str; 
-                initializerVarParam.name = token.str; 
-                token = this.eatToken(); // eat identifier 
-
-                if(token.str == "."){ // check for named parameter sigil "."
-                    if(!this.lastTokenIsNoSpace()) // no space between parameter name and "."
-                    throw new Error("Parse Error: Spaces between parameter name and \".\" not expected!");
-                    
-                    initializerVarParam.name += ".";
-                    token = this.eatToken(); // eat the "." 
-
-                    if(token.type == TokenType.identifier){ // check for optional local name 
-                        if(!this.lastTokenIsNoSpace()) // no space between optional local name and "."
-                        throw new Error("Parse Error: Spaces between \".\" and optional local name not expected!");
-
-                        typeVarField.name = token.str;
-                        initializerVarParam.name += token.str;
-                        token = this.eatToken(); // eat the identifier 
-                    }
-                }
-                return {
-                    typeVarField:typeVarField,
-                    initializerVarParam:initializerVarParam
-                };
-            }
-
-            // parses constant parameters
-            let subConstantParam = (): {typeConstField: ConstantDefAst, initializerConstParam: ConstantDefAst} => {
-                let typeConstField = new VariableDefAst(null, null, null, AccessType.public);
-                let initializerConstParam = new VariableDefAst(null, null, null, AccessType.private);
-                token = this.eatToken(); // eat "!"
-
-                if(token.type != TokenType.identifier) // check for identifier
-                throw new Error("Parse Error: Expecting an identifier!");
-
-                if(!this.lastTokenIsNoSpace()) // no space between "!" and parameter name
-                throw new Error("Parse Error: Spaces between \"!\" and parameter name not expected!");
-
-                typeConstField.name = token.str; 
-                initializerConstParam.name = token.str; 
-                token = this.eatToken(); // eat identifier 
-
-                if(token.str == "."){ // check for named parameter sigil "."
-                    if(!this.lastTokenIsNoSpace()) // no space between parameter name and "."
-                    throw new Error("Parse Error: Spaces between parameter name and \".\" not expected!");
-                    
-                    initializerConstParam.name += ".";
-                    token = this.eatToken(); // eat the "." 
-
-                    if(token.type == TokenType.identifier){ // check for optional local name 
-                        if(!this.lastTokenIsNoSpace()) // no space between optional local name and "."
-                        throw new Error("Parse Error: Spaces between \".\" and optional local name not expected!");
-
-                        typeConstField.name = token.str;
-                        initializerConstParam.name += token.str;
-                        token = this.eatToken(); // eat the identifier 
-                    }
-                }
-                return {
-                    typeConstField:typeConstField,
-                    initializerConstParam:initializerConstParam
-                };
-            }
-            
-            let newExpression = new NewAst(null, [], null, null); // for initializer's body
-
-            if(token.str == "!"){ // variable param
-                let varTuple = subVariableParam();
-                type.fields = [varTuple.typeVarField];
-                initializer.params = [varTuple.initializerVarParam];
-                newExpression.fieldMappings.push(varTuple.typeVarField.name);
-            }
-            else{ // constant param
-                let constTuple = subVariableParam();
-                type.fields = [constTuple.typeVarField];
-                initializer.params = [constTuple.initializerVarParam];
-                newExpression.fieldMappings.push(constTuple.typeVarField.name);
-            }
-
-            while(token.str == ","){ // possibly more parameters
-                token = this.eatToken(); // eat ","
-
-                if(token.str == "!"){ // variable param
-                    let varTuple = subVariableParam();
-                    type.fields.push(varTuple.typeVarField);
-                    initializer.params.push(varTuple.initializerVarParam);
-                    newExpression.fieldMappings.push(varTuple.typeVarField.name);
-                }
-                else{ // constant param
-                    let constTuple = subVariableParam();
-                    type.fields.push(constTuple.typeVarField);
-                    initializer.params.push(constTuple.initializerVarParam);
-                    newExpression.fieldMappings.push(constTuple.typeVarField.name);
-                }
-            }
-
-            // since the type has parameters, add initializer's body here
-            if(newExpression.fieldMappings != null) initializer.body = [newExpression];
-        }
-
-        if(token.type != TokenType.identifier) // check for identifier (type name)
-        throw new Error("Parse Error: Expected a type name!");
-
-        type.name = token.str;
-        initializer.name = token.str;
-        token = this.eatToken(); // eat identifier (type name)
-
-        // check if identifier has a private access sigil "*" after it
-        if(token.str == "*"){
-            if(!this.lastTokenIsNoSpace()) // no space between type name and "*" 
-            throw new Error("Parse Error: Spaces between type name and \"*\" not expected!");
-            type.access = AccessType.private;
-            initializer.access = AccessType.private;
-            token = this.eatToken(); // eat sigil "*"
-        }
-
-        let hasNoParams = true;
-
-        // now to parse the rest of type's syntax
-        if(token.str == "!"){ // could be params
-            subParams();
-
-            if(token.str == "<"){ // could be parent type declaration
-                subParents();
-            }
-
-            hasNoParams = false;
-        }
-        else if(token.type == TokenType.identifier){ // could be params
-            subParams();
-
-            if(token.str == "<"){ // could be parent type declaration
-                subParents();
-            }
-
-            hasNoParams = false;
-        }
-        else if(token.str == "<"){ // could be parent type declaration
-            subParents();
-
-            if(hasNoParams && token.str == ":"){ // could be body definition
-                subBody();
-            }
-
-            if(!hasNoParams)
-            throw new Error("Parse Error: Types with parameters can't have body!");
-        }
-        else if(hasNoParams && token.str == ":"){ // could be body definition
-            subBody();
-        }
-        else if(token.type == TokenType.newline){ // could be end of type definition
-        }
-        else throw new Error("Parse Error: Invalid Syntax!");
-            
-        return {type, initializer};
-    }
-
-    private parseEnumDef(){}
-
-    private parseFunctionDef(){}
-
-    private parseObjDef(){}
-
-    private parseFunctionCall(){}
-
-    private eatToken():Token{
-        this.tokenPointer += 1;
-        if(this.tokens[this.tokenPointer].type == TokenType.ns) { // skip a no-space
-            this.tokenPointer += 1;
-        }
-        if(this.tokenPointer < this.tokens.length) return this.tokens[this.tokenPointer];
-        return null;
-    }
-
-    private prevToken():Token{
-        let peekPointer = this.tokenPointer - 1;
-        if(this.tokens[peekPointer].type == TokenType.ns) { // skip a no-space
-            peekPointer -= 1;
-        }
-        if(this.tokenPointer < this.tokens.length) return this.tokens[peekPointer];
-        return null;
-    }
-
-    private lastTokenIsNoSpace():boolean{
-        let peekPointer = this.tokenPointer - 1;
-        if(this.tokenPointer < this.tokens.length && this.tokens[peekPointer].type == TokenType.ns) 
-            return true;
-        return false;
-    }
-
-
-}
-
-
-// TODO: INCOMPLETE 
-// Asts
-class Ast{}
-
-class ExprAst extends Ast{
-    ref:RefType;
-    type:string;
-    constructor(ref:RefType, type:string){
-        super();
-        this.ref = ref;
-        this.type = type;
-    }
-}
- // Definition
-class ImportAst extends Ast{
-    moduleName:string;
-    elements:Array<string>; 
-    constructor(moduleName:string, elements:Array<string>){
-        super();
-        this.moduleName = moduleName; 
-        this.elements = elements;
-    }
-}
-
-class ModuleDefAst extends Ast{
-    name:string;
-    body:Array<Ast>;
-    constructor(name:string, body:Array<Ast>){
-        super(); 
-        this.name = name;
-        this.body = body; 
-    }
-}
-
-class FunctionDefAst extends Ast{
-    name:string;
-    access:AccessType;
-    params:Array<SubjectDefAst>;
-    body:Array<ExprAst>; 
-    constructor(name:string, access:AccessType, params:Array<SubjectDefAst>, body:Array<ExprAst>){ 
-        super();
-        this.name = name; 
-        this.params = params; 
-        this.body = body;
-        this.access = access;
-    }
-}
-
-class BlockAst extends ExprAst{
-    name:string;
-    body:Array<ExprAst>; 
-    constructor(name:string, ref:RefType, type:string, body:Array<ExprAst>){ 
-        super(ref, type);
-        this.name = name; 
-        this.body = body;
-    }
-}
-
-class TypeDefAst extends Ast{
-    name:string;
-    access:AccessType;
-    parents:Array<string>;
-    fields:Array<SubjectDefAst>; 
-    constructor(name:string, access:AccessType, fields:Array<SubjectDefAst>, parents:Array<string>){ 
-        super();
-        this.name = name; 
-        this.fields = fields;
-        this.access = access;
-        this.parents = parents;
-    }
-}
-
-class EnumDefAst extends Ast{
-    name:string;
-    access:AccessType;
-    types:Array<TypeDefAst>; // represented as bits
-    fields:Array<SubjectDefAst>; 
-    constructor(name:string, access:AccessType, types:Array<TypeDefAst>, fields:Array<SubjectDefAst>){ 
-        super();
-        this.name = name; 
-        this.fields = fields;
-        this.types = types;
-        this.access = access;
-    }
-}
-
-// Control // Expressions
-class SubjectDefAst extends ExprAst{
-    name:string;
-    access:AccessType;
-    constructor(name:string, ref:RefType, type:string, access:AccessType){
-        super(ref, type);
-        this.name = name; 
-        this.access = access;
-    }
-}
-
-class VariableDefAst extends SubjectDefAst{
-    constructor(name:string, ref:RefType, type:string, access:AccessType){
-        super(name, ref, type, access);
-    }
-}
-
-class ConstantDefAst extends SubjectDefAst{
-    constructor(name:string, ref:RefType, type:string, access:AccessType){
-        super(name, ref, type, access);
-    }
-}
-
-class PropertyDefAst extends Ast{
-    name:string;
-    access:AccessType;
-    setter:FunctionDefAst;
-    getter:FunctionDefAst;
-    constructor(name:string, access:AccessType, setter:FunctionDefAst, getter:FunctionDefAst){
-        super();
-        this.name = name; 
-        this.access = access;
-        this.setter = setter;
-        this.getter = getter;
-    }
-}
-
-class TryAst extends ExprAst{
-    body:Array<ExprAst>; 
-    catchBlock:CatchAst;
-    ensure:EnsureAst;
-    constructor(body:Array<ExprAst>, catchBlock:CatchAst, ensure:EnsureAst, ref:RefType, type:string){
-        super(ref, type);
-        this.body = body;
-        this.catchBlock = catchBlock;
-        this.ensure = ensure;
-    }
-}
-
-class CatchAst extends ExprAst{ 
-    body:Array<ExprAst>;
-    constructor(body:Array<ExprAst>, ref:RefType, type:string){
-        super(ref, type);
-        this.body = body;
-    }
-}
-
-class EnsureAst extends ExprAst{ 
-    body:Array<ExprAst>;
-    constructor(body:Array<ExprAst>, ref:RefType, type:string){
-        super(ref, type);
-        this.body = body;
-    }
-}
-
-// Control
-class WhileAst extends ExprAst{
-    condition:ExprAst; 
-    body:Array<ExprAst>;
-    constructor(condition:ExprAst, body:Array<ExprAst>, ref:RefType, type:string){
-        super(ref, type);
-        this.condition = condition;
-        this.body = body;
-    }
-}
-
-class LoopAst extends ExprAst{
-    body:Array<ExprAst>;
-    constructor(body:Array<ExprAst>, ref:RefType, type:string){
-        super(ref, type);
-        this.body = body;
-    }
-}
-
-class IfAst extends ExprAst{
-    condition:ExprAst; 
-    body:Array<ExprAst>;
-    elifs:Array<ElifAst>;
-    elseExpr:Array<ExprAst>;
-    constructor(condition:ExprAst, body:Array<ExprAst>, ref:RefType, type:string, elifs:Array<ElifAst>, elseExpr:Array<ExprAst>){
-        super(ref, type);
-        this.condition = condition;
-        this.body = body;
-        this.elifs = elifs;
-        this.elseExpr = elseExpr;
-    }
-}
-
-class ElifAst extends ExprAst{
-    condition:ExprAst; 
-    body:Array<ExprAst>;
-    constructor(condition:ExprAst, body:Array<ExprAst>, ref:RefType, type:string){
-        super(ref, type);
-        this.condition = condition;
-        this.body = body;
-    }
-}
-
-class ForLoopAst extends ExprAst{
-    iteration:ExprAst;
-    body:Array<ExprAst>;
-    constructor(iteration:ExprAst, body:Array<ExprAst>, ref:RefType, type:string){
-        super(ref, type);
-        this.iteration = iteration;
-        this.body = body;
-    }
-}
-
-// Expressions
-// type signature is a string of comma seperated typeNames, 
-// for function calls, the last typeName is the return type.
-class NameAst extends ExprAst{
-    name:ExprAst; // can be dotted
-    module:string;
-    constructor(name:ExprAst, ref:RefType, type:string, module?:string){ 
-        super(ref, type);
-        this.name = name;
-        this.module = module;
-    }
-}
-
-class NewAst extends ExprAst{
-    initializers: Array<FunctionCallAst>;
-    fieldMappings: Array<string>;
-    constructor(initializers: Array<FunctionCallAst>, fieldMappings: Array<string>, ref: RefType, type: string){
-        super(ref, type);
-        this.initializers = initializers;
-        this.fieldMappings = fieldMappings;
-    }
-}
-
-class NothingAst extends ExprAst{
-}
-
-class Spill extends NothingAst{
-}
-
-class Break extends ExprAst{
-    param:ExprAst;
-    constructor(param:ExprAst, ref:RefType, type:string){
-        super(ref, type);
-        this.param = param;
-    }
-}
-
-class Continue extends ExprAst{
-    param:ExprAst;
-    constructor(param:ExprAst, ref:RefType, type:string){
-        super(ref, type);
-        this.param = param;
-    }
-}
-
-class Return extends ExprAst{
-    param:ExprAst;
-    constructor(param:ExprAst, ref:RefType, type:string){
-        super(ref, type);
-        this.param = param;
-    }
-}
-
-class Yield extends ExprAst{
-    param:ExprAst;
-    constructor(param:ExprAst, ref:RefType, type:string){
-        super(ref, type);
-        this.param = param;
-    }
-}
-
-class BooleanAst extends ExprAst{
-    bool: boolean;
-    constructor(bool:boolean, ref:RefType){
-        super(ref, "Bool");
-        this.bool = bool;
-    }
-}
-
-class FunctionCallAst extends ExprAst{ 
-    name:string; // can be dotted
-    module:string;
-    args:Array<ExprAst>;
-    constructor(name:string, args:Array<ExprAst>, ref:RefType, type:string, module:string){
-        super(ref, type);
-        this.name = name;
-        this.args = args; 
-        this.module = module; 
-    }
-}
-
-class StringAst extends ExprAst{
-    str: string; 
-    custom: string;
-    constructor(str:string, ref:RefType, custom:string){
-        super(ref, "RawStr");
-        this.str = str;
-        this.custom = custom;
-    }
-}
-
-class IntegerAst extends ExprAst{
-    num:string; 
-    ref:RefType;
-    custom:string;
-    constructor(num:string, ref:RefType, custom:string){
-        super(ref, "RawInt");
-        this.num = num;
-        this.custom = custom;
-    }
-}
-
-class FloatAst extends ExprAst{
-    num:string;
-    custom:string;
-    constructor(num:string, ref:RefType, custom:string){
-        super(ref, "RawFloat");
-        this.num = num;
-        this.custom = custom;
-    }
-}
-
-class AssignmentAst extends ExprAst{
-    name:string;
-    rhs:ExprAst;
-    constructor(name:string, ref:RefType, type:string, rhs:ExprAst){
-        super(ref, type)
-        this.name = name;
-        this.rhs = rhs;
-    }
-}
-
-class BinaryExprAst extends ExprAst{
-    lhs:ExprAst;
-    op:string;
-    rhs:ExprAst;
-    constructor(lhs:ExprAst, op:string, rhs:ExprAst, ref:RefType, type:string){
-        super(ref, type)
-        this.lhs = lhs;
-        this.op = op;
-        this.rhs = rhs;
-    }
-}
-
-class ListAst extends ExprAst{
-    elements:Array<ExprAst>; 
-    custom:string;
-    constructor(elements:Array<ExprAst>, ref:RefType, type:string, custom:string){
-        super(ref, type);
-        this.elements = elements;
-        this.custom = custom;
-    }
-}
-
-class TupleAst extends ExprAst{
-    elements:Array<ExprAst>; 
-    custom:string;
-    constructor(elements:Array<ExprAst>, ref:RefType, type:string, custom:string){
-        super(ref, type);
-        this.elements = elements;
-        this.custom = custom;
-    }
-}
-
-class DictAst extends ExprAst{
-    keys:Array<ExprAst>; 
-    values:Array<ExprAst>; 
-    custom:string;
-    constructor(keys:Array<ExprAst>, values:Array<ExprAst>, ref:RefType, type:string, custom?:string){
-        super(ref, type);
-        this.keys = keys;
-        this.values = values;
-        this.custom = custom;
-    }
-}
-
-// ...
-class Utility{
-    public static printTokens(tokens:Array<Token>){
-        console.log("ENTRY TOKEN\n------------\n");
-        for(let token of tokens){ 
-            console.log(`${token.str} => type: ${Utility.printTokenType(token.type)}, col: ${token.col}, line: ${token.line}`);
-        }
-        console.log("\n-----------\nEXIT TOKEN");
-    }
-
-    public static printAsts(asts:Array<Ast>){ // TODO: to be implemented 
-        console.log("ENTRY AST\n---------\n");
-        for(let ast of asts){
-            console.log(Utility.printAst(ast));
-        }
-        console.log("\n--------\nEXIT AST");
-    }
-    
-    // TODO: INCOMPLETE
-    public static printAst(ast:Ast, indent?:number): string { // TODO: to be implemented 
-        let astTreeStr:string = "";
-        let indentStr:string = "\n";
-        if(indent != null){ for(let i = 0; i < indent + 1; i++) indentStr += "    "; }
-        else indent = 0;
-
-        if(ast instanceof TypeDefAst){
-            astTreeStr += indentStr + `Type  ${ast.name}`; // name
-            astTreeStr += indentStr + `* Access: ${this.printAccessType(ast.access)}`; // access 
-            astTreeStr += indentStr + `* Fields: `; // fields
-            if(ast.fields != null) for(let field of ast.fields) { astTreeStr += this.printAst(field, indent); } 
-            else { astTreeStr += `\n    null` }
-            astTreeStr += indentStr + `* Parents: `; // parents
-            if(ast.parents != null) for(let parent of ast.parents) { astTreeStr += `\n    ${parent}` }
-            else { astTreeStr += `\n    null` }
-        }
-        else if(ast instanceof VariableDefAst){
-            astTreeStr += indentStr + `Var ${ast.name}`;
-            astTreeStr += indentStr + `* Ref: ${this.printRefType(ast.ref)}`;
-            astTreeStr += indentStr + `* Type: ${ast.type}`;
-            astTreeStr += indentStr + `* Access: ${ast.access}`;
-        }
-        else if(ast instanceof ConstantDefAst){
-            astTreeStr += indentStr + `Let ${ast.name}`;
-            astTreeStr += indentStr + `* Ref: ${this.printRefType(ast.ref)}`;
-            astTreeStr += indentStr + `* Type: ${ast.type}`;
-            astTreeStr += indentStr + `* Access: ${ast.access}`;
-        }
-        else if(ast instanceof FunctionDefAst){
-            astTreeStr += indentStr + `Fun ${ast.name}`;
-            astTreeStr += indentStr + `* Access: ${ast.access}`;
-            astTreeStr += indentStr + `* Params: `;
-            for(let param of ast.params) { astTreeStr += this.printAst(param, indent); }
-            astTreeStr += indentStr + `* Body: `;
-            for(let bodyElelement of ast.body) { astTreeStr += this.printAst(bodyElelement, indent); }
-        }
-        else{
-            astTreeStr += indentStr + `Other`;
-        }
-        return astTreeStr;
-    }
-
-    public static printTokenType(tokenType:TokenType):string{
-        switch(tokenType){
-            case TokenType.identifier: return 'Identifier';
-            case TokenType.number: return 'number';
-            case TokenType.boolean: return 'boolean';
-            case TokenType.string: return 'string';
-            case TokenType.comment: return 'comment';
-            case TokenType.keyword: return 'keyword';
-            case TokenType.operator: return 'operator';
-            case TokenType.punctuator: return 'punctuator';
-            case TokenType.newline: return 'NEWLINE';
-            case TokenType.indent: return 'INDENT >>';
-            case TokenType.dedent: return 'DEDENT <<';
-            case TokenType.eoi: return 'EOI';
-            case TokenType.ns: return 'NS';
-            case null: return 'null';
-        }
-    }
-
-    public static printAccessType(accessType:AccessType):string{
-        switch(accessType){
-            case AccessType.private: return 'private';
-            case AccessType.public: return 'public';
-            case AccessType.readOnly: return 'readOnly';
-            case null: return 'null';
-        }
-    }
-
-    public static printRefType(refType:RefType):string{
-        switch(refType){
-            case RefType.val: return 'val';
-            case RefType.ref: return 'ref';
-            case RefType.iso: return 'iso';
-            case RefType.acq: return 'acq';
-            case null: return 'null';
-        }
-    }
-}
-
-class Token{
-    type: TokenType; 
-    str: string;
-    col: number; 
-    line: number; 
-    constructor(str: string, type: TokenType, col: number, line: number){ 
-        this.str = str;
-        this.type = type;
-        this.col = col;
-        this.line = line;
-    }
-}
-
-// Enums 
-enum TokenType{ identifier, number, boolean, string, comment, keyword, operator, punctuator, newline, indent, dedent, eoi, ns }
-enum RefType{ ref, val, iso, acq }
-enum AccessType{ public, private, readOnly }
-
-import fs = require('fs');
-
-let fileName1 = './test.ast';
-let fileName2 = './test2.ast';
-let fileName3 = './test3.ast';
-
-fs.readFile(fileName3, function (err, data) {
-    if (err) { return console.error(err); }
-    let tokens = new Lexer().lex(data.toString());
-    // let asts = new Parser().parse(tokens);
-    Utility.printTokens(tokens);
-    // Utility.printAsts(asts);
-});
