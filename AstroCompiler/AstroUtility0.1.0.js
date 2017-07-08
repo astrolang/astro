@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // 05/07/17 
 var AstroAST0_1_0_1 = require("./AstroAST0.1.0");
 var Token = (function () {
-    function Token(str, type, col, line) {
+    function Token(str, type, line, col) {
         this.str = str;
         this.type = type;
-        this.col = col;
         this.line = line;
+        this.col = col;
     }
     return Token;
 }());
@@ -16,18 +16,19 @@ exports.Token = Token;
 var TokenType;
 (function (TokenType) {
     TokenType[TokenType["name"] = 0] = "name";
-    TokenType[TokenType["number"] = 1] = "number";
-    TokenType[TokenType["boolean"] = 2] = "boolean";
-    TokenType[TokenType["string"] = 3] = "string";
-    TokenType[TokenType["comment"] = 4] = "comment";
-    TokenType[TokenType["keyword"] = 5] = "keyword";
-    TokenType[TokenType["operator"] = 6] = "operator";
-    TokenType[TokenType["punctuator"] = 7] = "punctuator";
-    TokenType[TokenType["newline"] = 8] = "newline";
-    TokenType[TokenType["indent"] = 9] = "indent";
-    TokenType[TokenType["dedent"] = 10] = "dedent";
-    TokenType[TokenType["eoi"] = 11] = "eoi";
-    TokenType[TokenType["ns"] = 12] = "ns";
+    TokenType[TokenType["float"] = 1] = "float";
+    TokenType[TokenType["integer"] = 2] = "integer";
+    TokenType[TokenType["boolean"] = 3] = "boolean";
+    TokenType[TokenType["string"] = 4] = "string";
+    TokenType[TokenType["comment"] = 5] = "comment";
+    TokenType[TokenType["keyword"] = 6] = "keyword";
+    TokenType[TokenType["operator"] = 7] = "operator";
+    TokenType[TokenType["punctuator"] = 8] = "punctuator";
+    TokenType[TokenType["newline"] = 9] = "newline";
+    TokenType[TokenType["indent"] = 10] = "indent";
+    TokenType[TokenType["dedent"] = 11] = "dedent";
+    TokenType[TokenType["eoi"] = 12] = "eoi";
+    TokenType[TokenType["ns"] = 13] = "ns";
 })(TokenType = exports.TokenType || (exports.TokenType = {}));
 var RefType;
 (function (RefType) {
@@ -50,7 +51,7 @@ var Utility = (function () {
         console.log("ENTRY TOKEN\n------------\n");
         for (var _i = 0, tokens_1 = tokens; _i < tokens_1.length; _i++) {
             var token = tokens_1[_i];
-            console.log(token.str + " => type: " + Utility.printTokenType(token.type) + ", col: " + token.col + ", line: " + token.line);
+            console.log(token.str + " => type: " + Utility.printTokenType(token.type) + ", line: " + token.line + ", col: " + token.col);
         }
         console.log("\n-----------\nEXIT TOKEN");
     };
@@ -128,7 +129,8 @@ var Utility = (function () {
     Utility.printTokenType = function (tokenType) {
         switch (tokenType) {
             case TokenType.name: return 'name';
-            case TokenType.number: return 'number';
+            case TokenType.float: return 'float';
+            case TokenType.integer: return 'integer';
             case TokenType.boolean: return 'boolean';
             case TokenType.string: return 'string';
             case TokenType.comment: return 'comment';

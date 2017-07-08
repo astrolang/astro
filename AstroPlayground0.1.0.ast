@@ -1,6 +1,12 @@
-# 03/07/17
+# 06/07/17
 # Astro 0.1.0
-# IIFE 
+if parseResult = parsePASS(), if parseResult.success: 
+    print "Parser successful  == [parseResult.success]" 
+
+if (parseResult = parsePASS(); =>success): 
+    print "Parser successful == [parseResult.success]" # error, parseResult not accessible
+
+
 # Astro 0.1.0
 # IIFE // DEPRECATED
 var x = (|a, b| -> a + b)(2, 3)

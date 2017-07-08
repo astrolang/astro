@@ -22,5 +22,10 @@ fun factorial(n):
 fun mean(list): 
     list.|sum() / size|
 
+fun std(list): 
+    let squaredDiff = sq(list - mean(list))
+    let variance = squaredDiff.mean()
+    sqrt(variance)
+
 let list = [2, 45, 18, 6, 37, 9]
-mean(list)
+std(list)

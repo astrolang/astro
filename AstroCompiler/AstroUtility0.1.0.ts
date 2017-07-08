@@ -12,18 +12,18 @@ import {
 export class Token{
     type: TokenType; 
     str: string;
-    col: number; 
-    line: number; 
-    constructor(str: string, type: TokenType, col: number, line: number){ 
+    line: number;
+    col: number;  
+    constructor(str: string, type: TokenType, line: number, col: number){ 
         this.str = str;
         this.type = type;
-        this.col = col;
         this.line = line;
+        this.col = col;
     }
 }
 
 // Enums 
-export enum TokenType{ name, number, boolean, string, comment, keyword, operator, punctuator, newline, indent, dedent, eoi, ns }
+export enum TokenType{ name, float, integer, boolean, string, comment, keyword, operator, punctuator, newline, indent, dedent, eoi, ns }
 export enum RefType{ ref, val, iso, acq }
 export enum AccessType{ public, private, readOnly }
 
@@ -32,7 +32,7 @@ export class Utility{
     public static printTokens(tokens:Array<Token>){
         console.log("ENTRY TOKEN\n------------\n");
         for(let token of tokens){ 
-            console.log(`${token.str} => type: ${Utility.printTokenType(token.type)}, col: ${token.col}, line: ${token.line}`);
+            console.log(`${token.str} => type: ${Utility.printTokenType(token.type)}, line: ${token.line}, col: ${token.col}`);
         }
         console.log("\n-----------\nEXIT TOKEN");
     }
@@ -91,7 +91,8 @@ export class Utility{
     public static printTokenType(tokenType:TokenType):string{
         switch(tokenType){
             case TokenType.name: return 'name';
-            case TokenType.number: return 'number';
+            case TokenType.float: return 'float';
+            case TokenType.integer: return 'integer';
             case TokenType.boolean: return 'boolean';
             case TokenType.string: return 'string';
             case TokenType.comment: return 'comment';

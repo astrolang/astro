@@ -7,8 +7,13 @@ module =
 
 
 // DECLARATIONS
-declarations =
+declaration =
     | type | abst | glob_fun | scop_fun | scop_fun 
+    | glob_obj | scop_obj | inln_obj 
+    | glob_subj | scop_subj | glob_lazy_subj | scop_lazy_subj
+
+scop_declaration = 
+    | glob_fun | scop_fun | scop_fun 
     | glob_obj | scop_obj | inln_obj 
     | glob_subj | scop_subj | glob_lazy_subj | scop_lazy_subj
 
@@ -257,7 +262,7 @@ cond_structure =
     | defer
 
 ctrl_primitive =
-    | break | spill | continue | yield | return | raise
+    | break | spill | continue | yield | delegate | await | return | raise
 
 match = 
     | '|' match_pattern '-' NS '>' expr_or_block
@@ -278,10 +283,10 @@ for_head =
     | 'for' for_head_content
 
 for_head_content =
-    | if_assign_pattern '<' NS '-' parens_expr
+    | if_assign_pattern ('<' NS '<') parens_expr
  
 if_head_content = 
-    | (if_assign_pattern '=')? parens_expr
+    | parens_expr
 
 try_head = 
     | 'try' (if_head)?
@@ -407,13 +412,13 @@ while_expr =
 
 // EXPRESSIONS
 expr =
-    | declarations
+    | scop_declaration
     | cond_structure
     | simple_expr (';' simple_expr)*
     | expr ';'
     
 parens_expr = 
-    | '(' declarations ')'
+    | '(' scop_declaration ')'
     | '(' cond_structure ')'
     | '(' simple_expr (';' simple_expr)+ ')'
     | simple_expr
@@ -445,7 +450,8 @@ fix_expr =
     | postfix_expr
 
 infix_expr =
-    | assign_pattern '=' expr_or_block
+    | assign_pattern '=' expr_or_block // unspecialized
+    | if_assign_pattern '<' NL '<' parens_expr // unspecialized
     | parens_expr dot_op? infix_op parens_expr
 
 prefix_expr =
@@ -509,15 +515,13 @@ not =
 get_set =
     | '(' expr ')' '-' NS '>' '(' expr ')'
     
-    
-
 
 
 // LITERALS
 literals =
     | ns_string_literal | STRING
-    | ns_int_literal | INTNUM
-    | ns_float_literal | FLOATNUM
+    | ns_int_literal | INT
+    | ns_float_literal | FLOAT
     | ns_regex_literal | regex_literal
     | ns_list_literal | list_literal 
     | ns_tuple_literal | tuple_literal | open_tuple_literal
@@ -528,9 +532,9 @@ ns_string_literal =
     | name NS '_' NS STRING 
 
 list_literal = 
-    | '[' ']'
-    | '[' parens_expr (',' parens_expr)* ']'
-    | '[' nested_list ']'
+    | ((INT ('x' INT)*)? '[' name ']')? '[' ']'
+    | ((INT ('x' INT)*)? '[' name ']')? '[' parens_expr (',' parens_expr)* ']'
+    | ((INT ('x' INT)*)? '[' name ']')? '[' nested_list ']'
 
 range_literal =
     | '[' parens_expr ':' parens_expr? (':' parens_expr)? ']'
@@ -591,25 +595,24 @@ ns_regex_literal =
     | name NS '_' NS regex_literal
 
 ns_int_literal =
-    | INTNUM NS '_'? name 
+    | INT NS '_'? name 
 
 ns_float_literal =
-    | FLOATNUM NS '_'? name 
-
+    | FLOAT NS '_'? name 
 
 
 
 // OPERATORS
-infix_op =
-    | '+' | '-' | '*' | '/' | '&' | '|' // IRRELEVANT. These will be categorized under names eventually
+infix_op = // IRRELEVANT. These will be categorized under names eventually
+    | '+' | '-' | '*' | '/' | '&' | '|' 
+    | 'in' 
     | ... // REGISTERED NAMES
 
-prefix_op =
-    | '+' | '-' | '*' | '/' | '&' | '|' // IRRELEVANT. These will be categorized under names eventually
+prefix_op = // IRRELEVANT. These will be categorized under names eventually
+    | '+' | '-' | '+' NS '+'
     | ... // REGISTERED NAMES
 
-postfix_op =
-    | '+' | '-' | '*' | '/' | '&' | '|' // IRRELEVANT. These will be categorized under names eventually
+postfix_op = // IRRELEVANT. These will be categorized under names eventually
     | ... // REGISTERED NAMES
 
 dot_op =
@@ -631,12 +634,12 @@ IND =
 
 DED = 
     | DEDENT 
-    | '\\'
-    | EOL 
-    | NL '..' NL
+    | '\\' NS '\\'
+    | EOI
+    // | NL '..' NL
 
 PH = 
-    | PLACEHOLDER
+    | '_'
 
 PASS = 
     | 'pass'
@@ -658,12 +661,10 @@ EOL = |
 
 NS = |
 
-INTNUM = |
+INT = |
 
-FLOATNUM = |
+FLOAT = |
 
-REGEX = |
-
-PLACEHOLDER = |
+STRING = |
 
 POSSIBLEREGEX = |

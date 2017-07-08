@@ -204,43 +204,6 @@ PROPERTIES
     # empty parens means the setter/getter is inaccessible
     var date = (date) -> () 
 
-LISTS
-    var unorderedList = [7, 3, 8, 5, 4, 0, 9, 1, 2, 6]
-
-    var emptyList =  []
-
-    var names #: [Str] # specifying type of list
-    
-    # heterogenous list
-    var stuffs = [200USD, 'Steve', 1f, Car('Eleanor')]
-
-    # Astro uses 0-based indexing, so every list indices start at 1.
-    var disqualified = contestants[1:6]
-
-    var reversed = contestants[-1:] # -1 is the 1st index from behind, i.e. the last index.
-
-    let myGarage = [Car][('Mustang'), ('Eleanor'), ('Bugatti'), ('Lamborghini')]
-
-    let yearSalary = 28[Int][] # you can specify a size for the list.
-
-    yearSalary[1:3] = [2_000, 2_000, 2_500]
-
-    let calendar = 30×20[]
-
-    # list field generator
-    let students = getStudentList()
-    let totalGpas = students.@gpa.sum()
-
-    fun average(students):
-        students.|@gpa.sum() / size|
-
-    # proposed operations with lists.
-    var concatenate = [1, 2] ++ [3] # [1, 2, 3]
-    var multiply = [1, 2] ** 2 # [1, 2, 1, 2]
-    let subtract = [1, 2, 3, 4, 3] -- [4, 3] # [1, 2]
-    let divide = [1, 2, 5, 6, 3, 4] // [5, 6] # [[1, 2], [3, 4]]
-
-
 TUPLES
     # tuple is a datatype whose element types and length are determined statically
     # you can't appended to or removed from tuples
@@ -265,18 +228,56 @@ TUPLES
     # practical example 
     fun check(f, ...args):
         let test = f(...args[:-2]) == args[-1]
-        println 'Test passed' if test else >> 'Test failed'
+        println 'Test passed' if test else ~> 'Test failed'
     
     check(add, 5, 3, 8)
 
-MATRICES
-    # Astro lists can be used as matrices
-    let a = 2×2[F64][
+LISTS
+    var unorderedList = [7, 3, 8, 5, 4, 0, 9, 1, 2, 6]
+
+    var emptyList = []
+
+    var names #: [Str] # specifying type of list
+    
+    # heterogenous list
+    var stuffs = [200USD, 'Steve', 1f, Car('Eleanor')]
+
+    # Astro uses 0-based indexing, so every list indices start at 1.
+    var disqualified = contestants[1:6]
+
+    var reversed = contestants[-1:] # -1 is the 1st index from behind, i.e. the last index.
+
+    let myGarage = [Car][('Mustang'), ('Eleanor'), ('Bugatti'), ('Lamborghini')] # You can specify a type 
+
+    let number = List[Str](31, 12, "")
+
+    # list field generator
+    let students = getStudentList()
+    let totalGpas = students.@gpa.sum()
+
+    fun average(students):
+        students.|@gpa.sum() / size|
+
+    # proposed operations with lists.
+    var concatenate = [1, 2] ++ [3] # [1, 2, 3]
+    var multiply = [1, 2] ** 2 # [1, 2, 1, 2]
+    let subtract = [1, 2, 3, 4, 3] -- [4, 3] # [1, 2]
+    let divide = [1, 2, 5, 6, 3, 4] // [5, 6] # [[1, 2], [3, 4]]
+
+ARRAYS
+    # List type is an alias of Array type but with overriden constructors to allow pre-allocation
+    # Arrays do not pre-allocate and it is adviced to use Array sparinly, with care and only when 
+    # high performance matters
+
+
+    let calendar = 31×12[] # specifying the size of an Array
+
+    let a = 2×2[F64][ 
         [1, 2, 7, 8]
         [3, 4, 5, 6]
     ]
 
-    var matrix = List[Int]([
+    var matrix = Array[Int]([
         [1, 0]
         [0, 1]
     ])
@@ -319,7 +320,7 @@ MATRICES
     # [0 4 2 4]
 
     # non-standard list literal
-    let spMatrix = 2x2 [Int] sp_[]
+    let spMatrix = 2x2[Int] sp_[]
 
 DICTIONARIES
     # dictionaries are basically key-value lists.
@@ -384,20 +385,15 @@ SET
 
     let emptySet = {}
 
-RANGE AND INDEXER
+RANGE
     # range is a type of list and it's end value is non-inclusive
     let range = [0:20] # 0 to 19
-    # indexer is another type of list, with refernce to another list
-    let indexer = list[1:] 
-    # it holds ref to a subset of another list
 
 REST
     var a, ...b = 1, 2, 3, 4
 
     fun sum(a, ...b):
-        a + b.foldl(0, |x, y| -> x + y)
-
-    
+        a + b.foldl(0, |x, y| -> x + y) 
 
 STRINGS
     let language = 'Astro'
@@ -535,14 +531,14 @@ IF EXPRESSION
     if phoneNumber.nil:
         useEmail()
 
-    if stockCode = getStockCode('APPLE'):
+    if stockCode << getStockCode('APPLE'):
         println('APPLE: [stockCode]')
 
     var player = Player() 
-    if $player = getPlayer(name): # reassigning an variable with '$' 
+    if $player << getPlayer(name): # reassigning an variable with '$' 
         println player.fitness
 
-    if copy = getCopy():
+    if copy << getCopy():
         println(copy)
 
     # nested if statements can be written together with their corresponding
@@ -612,7 +608,7 @@ BOOLEAN EXPRESSIONS
 
 
 FOR LOOP
-    for i <- [1:11]:
+    for i << [1:11]:
         println i
 
     let interestingNumbers = {
@@ -622,10 +618,10 @@ FOR LOOP
     }
 
     # pattern matching with for loop
-    for (kind, number) <- interestingNumbers: # parallel pairing through a dictionary.
+    for (kind, number) << interestingNumbers: # parallel pairing through a dictionary.
         println '$kind: $number'
 
-    for name, {kind: number} <- nameList, table:
+    for name, {kind: number} << nameList, table:
         println(name, key, value)
 
     # looping through a number
@@ -634,43 +630,43 @@ FOR LOOP
     for up, down ← [1:21], [21:1]: # parallel pairing through ranges.
         println '$up <=> $down'
 
-    for upper <- [1:21] for lower <- [1:21]: # nested iterations through ranges.
+    for upper <- [1:21] for lower << [1:21]: # nested iterations through ranges.
         println '$upper <=> $lower'
 
-    for i <- [1:21]:
+    for i << [1:21]:
         i += 1 # error! immutable subject.
         j = i
     ..
 
-    for !i <- [1:21]:
+    for !i << [1:21]:
         i += 1
         j = i
     ..
 
     #  the 'end' block which executes when a loop does not break
-    for line <- file:
+    for line << file:
         if line.contains code:
             print "code found!"
             break 
     end:
         print "code not found!"
 
-    file.writeln(el) for el <- array end >> ()
+file.writeln(el) for el << array end ~> ()
          
 
-    for _ <- [1:fifty]:
+    for _ << [1:fifty]:
         println('Hello')
     
-    yield x for x <- stream()
+    yield x for x << stream()
 
 COMPREHENSION
-    var oddList =  yield x for i <- [1:21] if i .mod(2) != 0
+    var oddList =  yield x for i << [1:21] if i .mod(2) != 0
     var oddList = [x] << x <- [1:21], x .mod(2) != 0
     let numberDict = {x : y} << x <- [1:11], y <- [21:1], even(y)
     var numberSet = Set(i) << i <- [:200]
 
 BREAK WITH
-    for name <- register():
+    for name << register():
         if name == 'Tony':
             break name
         ""
@@ -711,10 +707,10 @@ WHILE LOOP & LOOP
         lines = gen.readLine() # evaluated at least once.
     while gen.hasNext()
 
-    while user = genRandomUser():
+    while user << genRandomUser():
         println user.name
 
-    while list.size > 0, for name <- list:
+    while list.size > 0, for name << list:
         print(name, newline)
         list.removeTop()
 
@@ -724,7 +720,7 @@ CONDITION EXPRESSION
 
     var absValue = a if a > 0 else -a
 
-    println 'Test passed' if test else >> 'Test failed'
+    println 'Test passed' if test else ~> 'Test failed'
 
     # a ternary operator statement needs to be encapsulated in brackets
     # where a semicolon is expected
@@ -900,6 +896,7 @@ PATTERN MATCHING
     | (x, y)      -> x + y
     | {a:b}       -> a
     | [a:b]       -> a, b
+    | = getVal()? -> .value
     | [x, ...y]   -> x
     | Point(x, y) -> x * y
     | /[a-z]+/    -> print object
@@ -946,7 +943,7 @@ ASSIGNMENT PATTERN MATCHING
     a, b, c = x, y, z
 
     # pattern matching with iterators
-    for (x, y) <- dictionary: 
+    for (x, y) << dictionary: 
         println "$x - $y"
 
 PATTERN MATCHING OPERATOR  
@@ -957,7 +954,7 @@ PATTERN MATCHING OPERATOR
 
 COROUTINES & GENERATORS
     def count(num):
-        for x <- [:num]: var z = yield x
+        for x << [:num]: var z = yield x
 
     var counter = count(25) # instantiating coroutine
     count.next(25)
@@ -1167,9 +1164,6 @@ TYPE CHECKING
     if myCar :: Car:
         println 'myCar is a Car'
 
-    if myCar == Car:
-        println 'myCar is a Car or its subtype'
-
     if myCar <: Car:
         println 'myCar is a supertype of Car'
 
@@ -1224,7 +1218,7 @@ SUBJECT REPEAT SYNTACTIC SUGARS
 
     # call chain
     var nameList #: [Str]
-    nameList.add 'Badmus' >> 'Travis' >> 'Gabriel'
+    nameList.add 'Badmus' ~> 'Travis' ~> 'Gabriel'
     
     # cascading dot
     a if |a == b|.size else b
@@ -1234,7 +1228,7 @@ SUBJECT REPEAT SYNTACTIC SUGARS
     # NOTE: tupling call chain and tail object chain returns an open tuple
     # however tupling cascading dot returns a closed tuple
     var name, version = haskell =>name, =>version
-    var first, second = getPerson 'Seamus', >> 'Flinn'
+    var first, second = getPerson 'Seamus', ~> 'Flinn'
     println john.|name, address|.toUppercase()
 
 COVARIANCE
@@ -1271,7 +1265,7 @@ TYPE CASTING
 NAME ALIASES
     type Number = Integer|Float|Complex
     fun cheb = chebyshevCoefficient
-    let pi = thisIsAPiConstant
+    let pi = piConstant
 
 FUNCTION & TYPE OBJECTS
     fun foo = bar #: Int -> Int 
@@ -1324,7 +1318,7 @@ GENERICS
 
     # you can specify the order generic parameters
     type MyList: #: ${T, l{}} where l<:Int
-        let list = List[T, l]()
+        let list = List[T](l, 0)
         let size = l
     ..
 
@@ -1374,7 +1368,7 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
     # definite characters
     # these group of characters cannot be overloaded as is, but can be combined
     # to form new identifiers.
-    (special_chars)= :: <: >: >> << . ~ => !
+    (special_chars)= :: <: >: ~> << . ~ => !
 
     # language-level characters
     # this group of characters cannot be overloaded nor can they be combined
@@ -1389,8 +1383,8 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
     # you can call an operator like a function
     println(+(56, 5))
 
-    fun in(x, y): #@ infixl(5)
-        for a <- y: 
+    fun in(x, y): #@ infixl(5, left)
+        for a << y: 
             return true if a == x
         false 
 
@@ -1423,14 +1417,14 @@ TRY, CATCH & ENSURE
     catch err: #: DivByZeroError
         println err.msg
 
-    try data = getData(): 
+    try data << getData(): 
         use data 
 
     # there is also defer block which can be put at the end of 
     # a block for clean up 
     defer: file.close()
 
-    try, while line = file.readNextLine(): 
+    try, while line << file.readNextLine(): 
         println line
     catch err: #: FileNotFounError
         println 'File missing!'
@@ -1467,13 +1461,6 @@ OTHER LITERALS # @INC
     # builtin non-standard literals
     var raw_string = r_"\t represnts a tab character"
 
-BUFFER TYPE
-    # buffer is a base array that types like List, Str, Chars use to build their internal
-    # array structure.
-    let int5 = Buffer[Int](5)
-    # You can resize and also fill a buffer.
-    let buffer = Buffer[Int](10, 10)=>fill(0)
-
 BASIC ARITHMETIC OPERATIONS
     let t = 2 + 2
     let u = 5f * 20d
@@ -1484,12 +1471,12 @@ BASIC ARITHMETIC OPERATIONS
     let z = I8(√25)
 
 INTEGER BITWISE FUNCTIONS
-    var x = 2 band 5 # and
-    var y = 3 bor 6 # or
-    var z = bnot 6  # not
-    var a = bxor 7  # exclusive or
-    var b = a bshl b # bit shift left
-    var c = b bshr a # bit shift right
+    var x = 2 && 5 # and
+    var y = 3 || 6 # or
+    var z = ~~6  # not
+    var a = ^^7  # exclusive or
+    var b = a <<< b # bit shift left
+    var c = b >>> a # bit shift right
 
 UNICODE SUPPORT 
 numbers.map(|x| -> x²)
@@ -1513,17 +1500,14 @@ PREDEFINED TYPE HIERARCHY
             Complex
                 Cmp64, Cmp128
             Bool
-        Array
-            Buffer
-            List
-                AbStr
-                    Str, Chars
-                Range
-                Indexer
+        Sequence
+            Array/List
+            Range
+            Indexer
             Tuple
-                Name Tuple
+            NamedTuple
             Dict
-        Generator
+            Generator
 
 
 Non-MVP
@@ -1592,7 +1576,7 @@ WHAT IF
 - Astro had Braces 
     var sum = 5 + 6
 
-    for i <- stream() if i > 25 {
+    for i << stream() if i > 25 {
         println i
     }
 
