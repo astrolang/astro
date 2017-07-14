@@ -230,7 +230,7 @@ if_assign_pattern =
     | '{' if_name_or_ph '|' if_name_or_ph '}'
     | '{' if_name_or_ph ':' if_name_or_ph '}'
 
-list_comp_yield_pattern =
+list_comp_yield_pattern = // TO BE REMOVED 
     | parens_expr
     | '[' parens_expr ']'
     | '{' parens_expr ':' parens_expr '}'
@@ -248,8 +248,8 @@ lambda =
     | ('|' params '|')? '-' NS '>' expr_or_block
     | '|' assign_pattern (',' assign_pattern)* '|' '-' NS '>' expr_or_block
 
-iife = // DEPRECATED
-    | '|' parens_expr (',' parens_expr)* '|' '-' NS '>' expr_or_block
+iife =
+    | '(' parens_expr (':' assign_pattern)? (',' parens_expr (':' assign_pattern)? )* ')' '-' NS '>' expr_or_block
 
 
 
@@ -274,7 +274,10 @@ list_comp =
     | list_comp_yield_pattern ('<' NS '<' for_head_content (',' if_head_content)*)+
 
 if_head =
-    | 'if' if_head_content 
+    | 'if' if_head_content
+
+if_head_content =
+    | (if_assign_pattern '<' NL '<')? parens_expr
 
 while_head =
     | 'while' if_head_content
@@ -284,9 +287,6 @@ for_head =
 
 for_head_content =
     | if_assign_pattern ('<' NS '<') parens_expr
- 
-if_head_content = 
-    | parens_expr
 
 try_head = 
     | 'try' (if_head)?
@@ -450,8 +450,7 @@ fix_expr =
     | postfix_expr
 
 infix_expr =
-    | assign_pattern '=' expr_or_block // unspecialized
-    | if_assign_pattern '<' NL '<' parens_expr // unspecialized
+    | assign_pattern '=' expr_or_block
     | parens_expr dot_op? infix_op parens_expr
 
 prefix_expr =
@@ -465,7 +464,7 @@ subj_or_fun_call =
     | name | fun_call 
 
 fun_call = 
-    | name fun_arg
+    | name ('[' name (',' name)* ']')? fun_arg // values in generics not supported yet
 
 indexer =
     | name index
@@ -513,7 +512,7 @@ not =
     | '!' '(' expr ')'
 
 get_set =
-    | '(' expr ')' '-' NS '>' '(' expr ')'
+    | '(' expr ')' '>' NS '>' '(' expr ')'
     
 
 
@@ -532,9 +531,9 @@ ns_string_literal =
     | name NS '_' NS STRING 
 
 list_literal = 
-    | ((INT ('x' INT)*)? '[' name ']')? '[' ']'
-    | ((INT ('x' INT)*)? '[' name ']')? '[' parens_expr (',' parens_expr)* ']'
-    | ((INT ('x' INT)*)? '[' name ']')? '[' nested_list ']'
+    | ((INT (('x' | '×') INT)*)? '[' name ']')? '[' ']'
+    | ((INT (('x' | '×') INT)*)? '[' name ']')? '[' parens_expr (',' parens_expr)* ']'
+    | ((INT (('x' | '×') INT)*)? '[' name ']')? '[' nested_list ']'
 
 range_literal =
     | '[' parens_expr ':' parens_expr? (':' parens_expr)? ']'
@@ -579,7 +578,7 @@ dict_key =
 
 dict_literal = 
     | '{' ':' '}'
-    | '{' dict_key ':' parens_expr (',' dict_key ':' parens_expr )* '}'
+    | '{' dict_key ':' parens_expr (',' dict_key ':' parens_expr)* '}'
     | '{' nested_dict '}'
 
 nested_dict = 
@@ -599,7 +598,6 @@ ns_int_literal =
 
 ns_float_literal =
     | FLOAT NS '_'? name 
-
 
 
 // OPERATORS
@@ -659,12 +657,17 @@ DEDENT = |
 
 EOL = |
 
-NS = |
-
 INT = |
 
 FLOAT = |
 
 STRING = |
+
+
+
+
+
+// SPECIAL VALUES 
+NS = |
 
 POSSIBLEREGEX = |

@@ -8,12 +8,12 @@ var Lexer = (function () {
         this.decDigits = "0123456789";
         this.hexDigits = "0123456789ABCDEF";
         this.characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        this.operators = "=+-/*\\^&|><";
+        this.operators = "=+-/*\\^&|><×";
         this.punctuators = ".,;:()[]{}_`~!@";
         this.keywords = [
             'var', 'let', 'type', 'fun', 'abst', 'obj', 'rxn',
             'ref', 'iso', 'val', 'acq', 'const', 'new',
-            'import', 'export', 'as', 'src', 'at',
+            'import', 'export', 'except', 'as', 'src', 'at',
             'if', 'elif', 'else', 'redo', 'while', 'for', 'in', 'do', 'loop', 'use',
             'break', 'spill', 'continue', 'yield', 'delegate', 'return', 'raise', 'pass', 'await',
             'catch', 'try', 'ensure', 'defer'
@@ -374,9 +374,9 @@ var Lexer = (function () {
                 do {
                     char = this_1.eatChar();
                 } while (char === "\n" || char === "\r");
-                // there's a possibililty of dedent as long as newline is not immediately
-                // followed by spaces, tab or a comment
-                if (char !== " " && char !== "\t" && char !== "#") {
+                // DEV NOTE: there's a possibililty of dedent as long as newline is not immediately
+                // followed by a space, a tab, a comment or a dedent punctuator (\\)
+                if (char !== " " && char !== "\t" && char !== "#" && (char !== "\\" && this_1.peekChar() !== "\\")) {
                     var indentFactor = prevIndentCount / firstIndentCount;
                     // if previous indent has an indentation 
                     if (prevIndentCount >= 1) {
@@ -390,7 +390,7 @@ var Lexer = (function () {
                         tokens.push(new AstroUtility0_1_0_1.Token("", AstroUtility0_1_0_1.TokenType.newline, this_1.line, null));
                     }
                 }
-                // if preceded by spaces or tabs, there is a possible indentation information
+                // DEV NOTE: if preceded by spaces or tabs, there is a possible indentation information
                 // the newline is ignored
             }
             else if (char === " ") {
@@ -667,7 +667,7 @@ var Lexer = (function () {
                 }
             }
             else {
-                throw new Error("Lex Error:" + this_1.getErrorToken(tokens).line + ":" + this_1.getErrorToken(tokens).col + ": Character not recognized!");
+                throw new Error("Lex Error:" + this_1.getErrorToken(tokens).line + ":" + this_1.getErrorToken(tokens).col + ": Character \"" + char + "\" not recognized!");
             }
         };
         var this_1 = this;

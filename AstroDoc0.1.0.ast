@@ -16,13 +16,12 @@ MULTILINE COMMENTS
 
 SUBJECT DECLARATION & DEFINITION
     var a # unitialized subject declaration.
-    var b = 25 = 50
-    let c = 8
+    var b = 25
 
     # var is used for subjects whose values can change.
     # let is used for subjects whose values cannot change.
 
-    let b = 5 # covariant subject declaration.
+    let c = 5 # covariant subject declaration.
     let d # uninitialized subject declaration.
 
     var Ω, δ = 5, 6 # multiple subject declaration.
@@ -37,7 +36,7 @@ IDENTIFIERS
 
     # by convention, names use camel case style
     fun createMeme():
-        println(memes[random()])
+        println(memes[rand()])
 
     # by convention, subject and function names start with a lowercase character
     # by convention, type names start with an uppercase character.
@@ -195,14 +194,14 @@ MULTIPLE DECLARATION
 PROPERTIES
     # properties provide getter/setter behavior.
     # first bracket is the setter, and second bracket the getter
-    var age  = (age + 5) -> (age - 5)
+    var age  = (age + 5) ~> (age - 5)
 
     # the last expression in the setter parens becomes the properties value
     # the last expression in the getter parens is the properties returned value
-    var name = (name) -> (name + "Smith")
+    var name = (name) ~> (name + "Smith")
 
     # empty parens means the setter/getter is inaccessible
-    var date = (date) -> () 
+    var date = (date) ~> () 
 
 TUPLES
     # tuple is a datatype whose element types and length are determined statically
@@ -228,7 +227,7 @@ TUPLES
     # practical example 
     fun check(f, ...args):
         let test = f(...args[:-2]) == args[-1]
-        println 'Test passed' if test else ~> 'Test failed'
+        println =>('Test passed') if test else =>('Test failed')
     
     check(add, 5, 3, 8)
 
@@ -586,17 +585,17 @@ NIL
 
 BOOLEAN EXPRESSIONS
     # Astro discourages reptition in conditional expression.
-    x < y & y < z # deprecation warning!
+    x < y and y < z 
     x < y < z
 
-    x == y & y == z # deprecation warning!
-    x and y == z # if both x and y equals z.
+    x == y and y == z 
+    x && y == z # if both x and y equals z.
     x == y == z
 
-    x == y | y < z # deprecation warning!
-    x == y or < z # if x equals y and also greater than z.
+    x == y or y < z 
+    x == y || < z # if x equals y and also greater than z.
 
-    x == y & a == b # no warning
+    x == y and a == b # no warning
 
     # NOT
     # the not operator in Astro is placed adjacent the target boolean
@@ -621,7 +620,7 @@ FOR LOOP
     for (kind, number) << interestingNumbers: # parallel pairing through a dictionary.
         println '$kind: $number'
 
-    for name, {kind: number} << nameList, table:
+    for name, (kind, number) << nameList, table:
         println(name, key, value)
 
     # looping through a number
@@ -651,7 +650,7 @@ FOR LOOP
     end:
         print "code not found!"
 
-file.writeln(el) for el << array end ~> ()
+file.writeln =>(el) for el << array end =>()
          
 
     for _ << [1:fifty]:
@@ -660,10 +659,16 @@ file.writeln(el) for el << array end ~> ()
     yield x for x << stream()
 
 COMPREHENSION
-    var oddList =  yield x for i << [1:21] if i .mod(2) != 0
-    var oddList = [x] << x <- [1:21], x .mod(2) != 0
-    let numberDict = {x : y} << x <- [1:11], y <- [21:1], even(y)
-    var numberSet = Set(i) << i <- [:200]
+    var oddList = yield x for i << [1:21] if i .mod(2) != 0
+    var oddList = List(x << [1:21] if x .mod(2) != 0)
+    let numberDict = Dict((x, y) <- x << [1:11], y << [21:1] if even(y))
+    var numberSet = Set(i << rand(20, [:200]))
+
+    (x, y, z) <- 
+        z << [1:21]
+        y << [1:z+1]
+        x << [1:y+1] 
+        if x² * y² == z²
 
 BREAK WITH
     for name << register():
@@ -720,7 +725,7 @@ CONDITION EXPRESSION
 
     var absValue = a if a > 0 else -a
 
-    println 'Test passed' if test else ~> 'Test failed'
+    println =>('Test passed') if test else =>('Test failed')
 
     # a ternary operator statement needs to be encapsulated in brackets
     # where a semicolon is expected
@@ -730,7 +735,11 @@ FUNCTION DEFINITION (2)
     fun multiply(a, b):
         a * b
 
-    # if a function returns nothing, it's return type may be left empty
+    # if a function returns nothing, it can is annotated Nada 
+    fun print(point): #: -> Nada 
+        print point.|a, b|
+    
+    # or its return type may be left empty
     #: Str
     fun greet(name):
         println "Hello [name]"
@@ -836,11 +845,15 @@ list.map add3
 
 IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
     # The value is passed as parameter to the lambda
-    var primes = |[2:]| ->
-        | [p, ...xs]: p ++ fn(x << x = xs, x .mod p != 0)
+    (2:a, 5:b) -> a + b
 
-    |10| -> 1 if $1 == 0 else fn($1 - 1) 
+    var primes = ([2:]) ->
+        | [p, ...xs]: p ++ fn(i << xs if i .mod p != 0)
 
+    var x = (|a, b| -> a + b)(2, 3) # warning!
+    
+
+    
 CLOSURE
     # a closure is an inner function.
     fun genDbConnector(host., username., password.):
@@ -891,7 +904,7 @@ PATTERN MATCHING
     # match block is like switch-case statement, and it matches against the expression on the previous line.
     object
     | 0           -> 1, spill # a keyword for moving to the next case
-    | 1|23|40|5   -> .name + n
+    | 1||23||40||5   -> .name + n
     | n           -> n * n
     | (x, y)      -> x + y
     | {a:b}       -> a
@@ -922,8 +935,8 @@ PATTERN MATCHING
 
     # you can pattern match with any language construct that has arguments
     while turn in ['y', 'Y', 'n', 'N']:
-        | 'y'|'Y' -> return 1
-        | 'n'|'N' -> return 0
+        | 'y'||'Y' -> return 1
+        | 'n'||'N' -> return 0
         | _       -> print "its an invalid choice"
 
 ASSIGNMENT PATTERN MATCHING
@@ -972,7 +985,7 @@ ACTORS # NEEDS REVIEW!!!
 
     fun Task(name):
         self.name = name
-        self.time = random([1:1_000])
+        self.time = rand([1:1_000])
 
     fun sleep(actor): #: Task
         println "[name] is sleeping for [time]ms"
@@ -1218,7 +1231,7 @@ SUBJECT REPEAT SYNTACTIC SUGARS
 
     # call chain
     var nameList #: [Str]
-    nameList.add 'Badmus' ~> 'Travis' ~> 'Gabriel'
+    nameList.add =>('Badmus') =>('Travis') =>('Gabriel')
     
     # cascading dot
     a if |a == b|.size else b
@@ -1228,7 +1241,7 @@ SUBJECT REPEAT SYNTACTIC SUGARS
     # NOTE: tupling call chain and tail object chain returns an open tuple
     # however tupling cascading dot returns a closed tuple
     var name, version = haskell =>name, =>version
-    var first, second = getPerson 'Seamus', ~> 'Flinn'
+    var first, second = getPerson =>('Seamus'), =>('Flinn')
     println john.|name, address|.toUppercase()
 
 COVARIANCE
@@ -1283,17 +1296,13 @@ FUNCTION & TYPE OBJECTS
     var bin = mix 1
 
 MODULES AND IMPORTS # NEEDS REVIEW!!!
-    import 
-        math.{pi, cos, tan}
-        math.{_} # import all
-        game.{physics, events no lighting} # don't import
-        plant.{Apple as ap, Mango as mg}  # import as
-        src.com.appy.android.{MainActivity} # follow path from src
+    import math # import all
+    import math except [tan, atan] # import all except
+    import math [pi:π, cos, sin:sine] # aliasing
 
 EXPORT  
-    export 
-        add #: Int, Int -> Int
-        Person #: Str, Str, Int -> Person
+    export math except [cos, sin]
+    export this [cos, sin]
 
 GENERICS
     # declaring a generic type T.
@@ -1350,7 +1359,7 @@ TYPE OBJECTS # @INC
     type Name = Str
 
     fun haveSameTypes(x, y):
-        x and y ==  x'
+        x && y == x'
     ..
 
 OPERATOR OVERLOADING # NEEDS REVIEW!!!
@@ -1368,7 +1377,7 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
     # definite characters
     # these group of characters cannot be overloaded as is, but can be combined
     # to form new identifiers.
-    (special_chars)= :: <: >: ~> << . ~ => !
+    (special_chars)= :: <: >: << . ~ => !
 
     # language-level characters
     # this group of characters cannot be overloaded nor can they be combined
@@ -1403,7 +1412,7 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
         return myList.keys{index}
 
 TRY, CATCH & ENSURE
-    if numerator and denominator == 0:
+    if numerator && denominator == 0:
         raise DomainError() # raising an exception.
     
     try: 
@@ -1471,23 +1480,23 @@ BASIC ARITHMETIC OPERATIONS
     let z = I8(√25)
 
 INTEGER BITWISE FUNCTIONS
-    var x = 2 && 5 # and
-    var y = 3 || 6 # or
-    var z = ~~6  # not
-    var a = ^^7  # exclusive or
+    var x = 2 &&& 5 # and
+    var y = 3 ||| 6 # or
+    var z = ~6  # not
+    var a = ^7  # exclusive or
     var b = a <<< b # bit shift left
     var c = b >>> a # bit shift right
 
 UNICODE SUPPORT 
-numbers.map(|x| -> x²)
+numbers.map|x| -> x²
 
 if ade.mood != happy: 
     ade.mood == ☹
 
 PREDEFINED TYPE HIERARCHY
+    Type
     Any
-        Type
-        Func
+        Fun
         Scalar
             Real
                 Integer
@@ -1517,6 +1526,8 @@ Non-MVP
 - Package manager
 - Concurrency - coroutines, async and actors 
 - Exceptions
+- Complete Standard Library
+- Complete Generics 
 
 FEATURE SUMMARY  
 - Near-native speed.
@@ -1612,5 +1623,9 @@ WHAT IF
     dsl(src: 'hello', link: 'bar.io') {
         list { [1, 2, 3] }
     }
+
+INSTANCE TYPES 
+add(3, 4) :: Fun:(Int, Int) -> Int 
+car :: Car:{Str, Str, Int}
 
 # END

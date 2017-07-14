@@ -1,9 +1,67 @@
+# 14/07/17
+# Astro 0.1.0
+# CONDITIONS 
+x == y || z
+x == y or x == z
+
+error  
+| TypeError || DomainError -> log(.issue)
+
+# BITWISE 
+var state = flag1 &&& flag2
+
+# 12/07/17
+# Astro 0.1.0
+# COMPREHENSION NEEDS WORK
+sum( yield rand() < 0.5 for i << [:t] if i % 2 == 0 )
+sum( rand() < 0.5 : i << [:t], i % 2 == 0 )
+
+list(i << [:t])
+dict((a,  b) << table if a == 5)
+list(a * b <- (a, b) << table)
+
+(x, y, z) <- 
+    z << [1:21]
+    y << [1:z+1]
+    x << [1:y+1] 
+    if x² * y² == z²
+
+# INSTANCE TYPES
+add(3, 4) :: Fun:(Int, Int) -> Int 
+car :: Car:{Str, Str, Int}
+
+# IMPORT  
+import math 
+import math except [tan, atan]
+import math [pi:π, cos, sin:sine]
+
+# EXPORT  
+export math except [cos, sin]
+
+# 11/07/17
+# Astro 0.1.0
+# IIFE
+(2:a, 5:b) -> a + b
+
+() ->
+    if toks.parseString("{").success:
+        if toks.|parseString(":") & parseString("}")|.!success:
+            return { success: true, ast: null, lastPointerPos: null, name: null, problem: null }
+        doSome stuffs
+
+# GET//SET  
+var prop = (prop) ~> (prop)
+
+# Returning Nothing 
+fun print(point): #: -> None 
+    print point.|a, b|
+
 # 06/07/17
 # Astro 0.1.0
 if parseResult = parsePASS(), if parseResult.success: 
     print "Parser successful  == [parseResult.success]" 
 
-if (parseResult = parsePASS(); =>success): 
+if (var parseResult = parsePASS(); =>success): 
     print "Parser successful == [parseResult.success]" # error, parseResult not accessible
 
 
