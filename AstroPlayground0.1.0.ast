@@ -1,3 +1,177 @@
+# 18/07/17
+# Astro 0.1.0
+# LIST COMPREHENSION 
+let l = [x * y | x <- [:10], y <- [:x], x % 2 == 0]
+let s = [x <- numStream()]
+
+# IF | FOR | WHILE
+if x <- value?: 
+    print x  
+ 
+for x <- [:20]: 
+    print x  
+
+while x < num: 
+    print x  
+
+# IMPORT | EXPORT  
+import state, tables
+import math [sin, cos]
+export math except [pi]
+
+# MAIN FUNCTION  
+fun main():
+    println "Hello world!"
+
+# INDEXING  
+var x = y[:end] 
+var y = z[end:]
+
+# BITWISE OPERATORS
+var state = flag1 .band flag2
+var state = flag1 .bor flag2
+
+# INSTANCE TYPES
+add(3, 4) :: Fun:(Int, Int) -> Int 
+car :: Car:{Str, Str, Int}
+
+# PROPERTIES
+var age = (age + 1) >> (age - 1)
+
+
+
+
+-----------------------------------------------
+# 18/07/17
+# Astro 0.1.0
+# MAIN FUNCTION  
+fun main():
+    println('hello')
+    scanln('> ')
+    readln(fileObject)
+
+# INDEXING 
+var x = y[:end]
+var x = y[end:]
+
+# LIST COMPREHENSION 
+
+# FOR (DEPRECATING WHILE)
+for x << numStream():
+    print x
+
+foo( x, y = y, x )
+foo( yield x * y for x, y <- [:10], numStream() if x % 2 == 0 )
+
+var x, y = y, x
+
+if x << getNumber():
+    print x
+
+for x, y << numStream(), boolStream(): 
+    print x 
+
+for x != genNum(): 
+
+redo: 
+    print x 
+for x == age
+
+while x << numStream(): # unsupported
+    print x 
+
+# COMPREHENSION NEEDS WORK
+
+<< block_expr
+:  block_expr
+<- block_expr
+-> block_expr
+(  block_expr)
+{  block_expr}
+[  block_expr]
+
+x << [:34]
+x <- (x, y) << ([:34], [1:45]) if x == 25
+
+(x, y, z) <- 
+    z, x, y << 
+        [1:21], [1:z+1], [1:y+1] 
+    if x² * y² == z²
+
+for_expr =
+    | parens_expr for_head if_head? end_expr?
+
+if_expr = 
+    | parens_expr if_head else_expr?  
+
+while_expr = 
+    | parens_expr while_head if_head? end_expr? 
+
+expr = 
+    | block_expr  
+    | parens_expr 
+
+parens_expr =
+    | fix_expr 
+    | list_comp 
+    | atom
+
+atom = 
+    | parens_atom 
+    | ...
+
+parens_atom = 
+    | '(' IND (block_expr ) DED_START_DEFERRABLE ')'
+    | '(' IND (long_expr | atom) DED_START_DEFERRABLE ')' // IGNORE_NL 
+    | '(' (long_expr | atom) ')' // IGNORE_NL
+
+long_expr = 
+    | expr (';' expr)+ 
+
+block_expr = 
+    | block_decl  
+    | block_cond 
+
+fun_call = 
+    | name '(' IND named_arg (',' named_arg)* DED_START_DEFERRABLE ')'  // IGNORE_NL
+    | name '(' named_arg (',' named_arg)* ')' // IGNORE_NL
+    | ...
+
+DED =
+    | DED_START 
+    | DED_INLN 
+
+DED_START = 
+    | DEDENT
+
+DED_INLN = 
+    | '\\' NS  '\\'
+
+
+match = 
+    | 
+
+list_comp = 
+    | (parens_expr '<' NS '-')? for_head_content (CNL? for_head_content)* (CNL? if_head)?
+    | for_head_content (CNL? if_head)?
+
+list_comp_block = 
+    |  
+
+iife = 
+    | 
+
+lambda = 
+    | ('|' params '|')? '-' NS '>' expr_or_block
+    | '|' assign_pattern (',' assign_pattern)* '|' '-' NS '>' expr_or_block
+
+import = 
+    | 'import' ('[' name (':' name)? (',' name (':' name)? )* ']')? ('except' '[' name (',' name )* ']')? 
+
+export = 
+    | 'export' ('[' name (',' name )*']')? ('except' '[' name (',' name )* ']')?
+
+
 # 14/07/17
 # Astro 0.1.0
 # CONDITIONS 

@@ -8,7 +8,8 @@ var fileName1 = './test1.ast';
 var fileName2 = './test2.ast';
 var fileName3 = './test3.ast';
 var fileName4 = './test4.ast';
-fs.readFile(fileName4, function (err, data) {
+var fileNameP = './parser_test1.ast';
+fs.readFile(fileNameP, function (err, data) {
     if (err) {
         return console.error(err);
     }

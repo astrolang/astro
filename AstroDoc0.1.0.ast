@@ -95,7 +95,7 @@ EXPRESSION-ORIENTED
         p.name = name;
     ..
 
-    let name = getName('John Smith') # error! setName returns no result.
+    let name = setName('John Smith') # error! setName returns no result.
 
 
 LAZY ASSIGNMENT
@@ -157,7 +157,7 @@ VALUES & REFERENCES
     fun getAmount():
         return let amount # passed by reference, but it cannot be written to.
 
-    fun swap(a, b): #: ref, ref -> _
+    fun swap(!a, !b): #: ref, ref -> _
         a, b = b, a;
     ..
 
@@ -181,7 +181,7 @@ ACCESS MODIFIERS
 
     type Person`(!name`, !age`)
 
-MULTIPLE DECLARATION
+MULTIPLE DECLARATION # DEPRECATING
     var 
         title  = "The Drunk Chef Visits Chicken Town"
         author = "appcypher"
@@ -194,14 +194,14 @@ MULTIPLE DECLARATION
 PROPERTIES
     # properties provide getter/setter behavior.
     # first bracket is the setter, and second bracket the getter
-    var age  = (age + 5) ~> (age - 5)
+    var age  = (age + 5) >> (age - 5)
 
     # the last expression in the setter parens becomes the properties value
     # the last expression in the getter parens is the properties returned value
-    var name = (name) ~> (name + "Smith")
+    var name = (name) >> (name + "Smith")
 
     # empty parens means the setter/getter is inaccessible
-    var date = (date) ~> () 
+    var date = (date) >> () 
 
 TUPLES
     # tuple is a datatype whose element types and length are determined statically
@@ -226,7 +226,7 @@ TUPLES
 
     # practical example 
     fun check(f, ...args):
-        let test = f(...args[:-2]) == args[-1]
+        let test = f(...args[:end-1]) == args[end]
         println =>('Test passed') if test else =>('Test failed')
     
     check(add, 5, 3, 8)
@@ -244,7 +244,7 @@ LISTS
     # Astro uses 0-based indexing, so every list indices start at 1.
     var disqualified = contestants[1:6]
 
-    var reversed = contestants[-1:] # -1 is the 1st index from behind, i.e. the last index.
+    var reversed = contestants[end:] # end is the lizt length.
 
     let myGarage = [Car][('Mustang'), ('Eleanor'), ('Bugatti'), ('Lamborghini')] # You can specify a type 
 
@@ -530,14 +530,14 @@ IF EXPRESSION
     if phoneNumber.nil:
         useEmail()
 
-    if stockCode << getStockCode('APPLE'):
+    if stockCode <- getStockCode('APPLE'):
         println('APPLE: [stockCode]')
 
     var player = Player() 
-    if $player << getPlayer(name): # reassigning an variable with '$' 
+    if $player <- getPlayer(name): # reassigning an variable with '$' 
         println player.fitness
 
-    if copy << getCopy():
+    if copy <- getCopy():
         println(copy)
 
     # nested if statements can be written together with their corresponding
@@ -607,7 +607,7 @@ BOOLEAN EXPRESSIONS
 
 
 FOR LOOP
-    for i << [1:11]:
+    for i <- [1:11]:
         println i
 
     let interestingNumbers = {
@@ -617,10 +617,10 @@ FOR LOOP
     }
 
     # pattern matching with for loop
-    for (kind, number) << interestingNumbers: # parallel pairing through a dictionary.
+    for (kind, number) <- interestingNumbers: # parallel pairing through a dictionary.
         println '$kind: $number'
 
-    for name, (kind, number) << nameList, table:
+    for name, (kind, number) <- nameList, table:
         println(name, key, value)
 
     # looping through a number
@@ -629,49 +629,49 @@ FOR LOOP
     for up, down ← [1:21], [21:1]: # parallel pairing through ranges.
         println '$up <=> $down'
 
-    for upper <- [1:21] for lower << [1:21]: # nested iterations through ranges.
+    for upper <- [1:21], lower <- [1:21]: # nested iterations through ranges.
         println '$upper <=> $lower'
 
-    for i << [1:21]:
+    for i <- [1:21]:
         i += 1 # error! immutable subject.
         j = i
     ..
 
-    for !i << [1:21]:
+    for !i <- [1:21]:
         i += 1
         j = i
     ..
 
     #  the 'end' block which executes when a loop does not break
-    for line << file:
+    for line <- file:
         if line.contains code:
             print "code found!"
             break 
     end:
         print "code not found!"
 
-file.writeln =>(el) for el << array end =>()
+file.writeln =>(el) for el <- array end =>()
          
 
-    for _ << [1:fifty]:
+    for _ <- [1:fifty]:
         println('Hello')
     
-    yield x for x << stream()
+    yield x for x <- stream()
 
 COMPREHENSION
-    var oddList = yield x for i << [1:21] if i .mod(2) != 0
-    var oddList = List(x << [1:21] if x .mod(2) != 0)
-    let numberDict = Dict((x, y) <- x << [1:11], y << [21:1] if even(y))
-    var numberSet = Set(i << rand(20, [:200]))
+    var oddList = yield x for i <- [1:21] if i .mod(2) != 0
+    var oddList = List([x <- [1:21], x .mod(2) != 0])
+    let numberDict = Dict([(x, y) | x <- [1:11], y <- [21:1], even(y)])
+    var numberSet = Set([i <- rand(20, [:200])])
 
-    (x, y, z) <- 
-        z << [1:21]
-        y << [1:z+1]
-        x << [1:y+1] 
-        if x² * y² == z²
+    [(x, y, z) | 
+        z <- [1:21]
+        y <- [1:z+1]
+        x <- [1:y+1] 
+        x² * y² == z²]
 
 BREAK WITH
-    for name << register():
+    for name <- register():
         if name == 'Tony':
             break name
         ""
@@ -691,7 +691,7 @@ CHAINED CONDITION CONSTRUCTS
         acceptanceList.add person
 
     # there can ohly be two conditional constructs in a chain.
-    for book in library, if book.title.contains('adventure'):
+    for book <- library, if book.title.contains('adventure'):
         personalLibrary.add book
 
 WHILE LOOP & LOOP
@@ -712,10 +712,7 @@ WHILE LOOP & LOOP
         lines = gen.readLine() # evaluated at least once.
     while gen.hasNext()
 
-    while user << genRandomUser():
-        println user.name
-
-    while list.size > 0, for name << list:
+    while list.size > 0, for name <- list:
         print(name, newline)
         list.removeTop()
 
@@ -730,6 +727,11 @@ CONDITION EXPRESSION
     # a ternary operator statement needs to be encapsulated in brackets
     # where a semicolon is expected
     if a == (b if b > c else c): print a
+
+MAIN FUNCTION  
+    # if a module provides a main function, it will become the module's entry point
+    fun main(): 
+        println "Hello World!"
 
 FUNCTION DEFINITION (2)
     fun multiply(a, b):
@@ -848,7 +850,7 @@ IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
     (2:a, 5:b) -> a + b
 
     var primes = ([2:]) ->
-        | [p, ...xs]: p ++ fn(i << xs if i .mod p != 0)
+        | [p, ...xs]: p ++ fn([i <- xs, i .mod p != 0])
 
     var x = (|a, b| -> a + b)(2, 3) # warning!
     
@@ -956,7 +958,7 @@ ASSIGNMENT PATTERN MATCHING
     a, b, c = x, y, z
 
     # pattern matching with iterators
-    for (x, y) << dictionary: 
+    for (x, y) <- dictionary: 
         println "$x - $y"
 
 PATTERN MATCHING OPERATOR  
@@ -967,7 +969,7 @@ PATTERN MATCHING OPERATOR
 
 COROUTINES & GENERATORS
     def count(num):
-        for x << [:num]: var z = yield x
+        for x <- [:num]: var z = yield x
 
     var counter = count(25) # instantiating coroutine
     count.next(25)
@@ -1297,12 +1299,12 @@ FUNCTION & TYPE OBJECTS
 
 MODULES AND IMPORTS # NEEDS REVIEW!!!
     import math # import all
+    import math, dataframes # import all
     import math except [tan, atan] # import all except
     import math [pi:π, cos, sin:sine] # aliasing
 
 EXPORT  
     export math except [cos, sin]
-    export this [cos, sin]
 
 GENERICS
     # declaring a generic type T.
@@ -1393,7 +1395,7 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
     println(+(56, 5))
 
     fun in(x, y): #@ infixl(5, left)
-        for a << y: 
+        for a <- y: 
             return true if a == x
         false 
 
@@ -1426,14 +1428,14 @@ TRY, CATCH & ENSURE
     catch err: #: DivByZeroError
         println err.msg
 
-    try data << getData(): 
+    try data <- getData(): 
         use data 
 
     # there is also defer block which can be put at the end of 
     # a block for clean up 
     defer: file.close()
 
-    try, while line << file.readNextLine(): 
+    try, while line <- file.readNextLine(): 
         println line
     catch err: #: FileNotFounError
         println 'File missing!'
@@ -1476,16 +1478,16 @@ BASIC ARITHMETIC OPERATIONS
     var v = 5 / 2 # this returns an F64 even though the operands are Ints
     var w = 5 // 2 # this returns a clamped Int result of the above
     var x = 6 % 5
-    let y = 5i16 ^ 2_i8
-    let z = I8(√25)
+    let y = 5i16²
+    let z = I8 √25
 
 INTEGER BITWISE FUNCTIONS
-    var x = 2 &&& 5 # and
-    var y = 3 ||| 6 # or
-    var z = ~6  # not
-    var a = ^7  # exclusive or
-    var b = a <<< b # bit shift left
-    var c = b >>> a # bit shift right
+    var x = 2 .band 5 # and
+    var y = 3 .bor 6 # or
+    var z = bnot 6  # not
+    var a = bxor 7  # exclusive or
+    var b = a .shl b # bit shift left
+    var c = b .shr a # bit shift right
 
 UNICODE SUPPORT 
 numbers.map|x| -> x²
@@ -1553,19 +1555,24 @@ WHERE USED
 _ - patternmatching, partialapplication, anonymousname, unknowntypesig, importall, donothing, initialisertrain
 . - dotaccess, vectorization
 ~ - match
-| - or, match, lambda, labelsignature
+| - match, lambda, typeunion, listcomprehension
+& - typeintersection
+|| - chainedor 
+&& - chainedand
 <- - iteration
 -> - returntypearrow, lambdas, match
 => - arrowaccess
 @ - macrosignature 
 ` - staticlocalsubjects
-as - contravariantconversion, importalias
+as - contravariantconversion
 $ - generictypedecl, unnamedargs, outersubjects, stringinterpolation
 .. - blockend, constrainedvalue
 ... - rest, unpack, linecontinuation
-: - blockstart, range
+: - blockstart, range, importalias
 _ (post) - nonstandardliteral
 , NL - list, dict, enums, chainedconditionalconstruct
+<< -
+>> - properties
 
 ASTRO STRUCTURED LANGUAGE PROPOSAL 
 dsl(src: 'hello', link: 'bar.io'):
@@ -1587,7 +1594,7 @@ WHAT IF
 - Astro had Braces 
     var sum = 5 + 6
 
-    for i << stream() if i > 25 {
+    for i <- stream() if i > 25 {
         println i
     }
 

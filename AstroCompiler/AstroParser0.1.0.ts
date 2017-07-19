@@ -37,7 +37,15 @@ export class Parser {
 
         /// TEST ///
         this.parserTest(this.parseNsSetLiteral());
+        this.parserTest(this.parseNL());
+        this.parserTest(this.parseSetLiteral());
+        this.parserTest(this.parseNL());
+        this.parserTest(this.parseDictLiteral());
+        this.parserTest(this.parseNL());
+        this.parserTest(this.parseDictLiteral());
+        this.parserTest(this.parseNL());
         this.parserTest(this.parseNsDictLiteral());
+        this.parserTest(this.parseNL());
         this.parserTest(this.parseNsFloatLiteral());
         this.parserTest(this.parseIND());
         this.parserTest(this.parseNsIntLiteral());
@@ -109,7 +117,7 @@ export class Parser {
 
         // parse and consume →  '{' ':' '}' | '{' parens_expr (',' parens_expr)* '}' | '{' nested_set '}'
         (function() { 
-            if(self.parseString("{").success){ // parse and consume → '{'
+            if(self.parseString("{").success) { // parse and consume → '{'
                 // [1] '{' '}'
                 if(self.parseString("}").success){ // parse and consume → '}'
                     success = true;
@@ -123,27 +131,28 @@ export class Parser {
                     let comma = self.parseString(",");  // parse and consume → ','
                     if(!keyValue.success || !comma.success) break;
                 }
-                if(keyValue.success && self.parseString("}")) // parse and consume → '}'
+                if(keyValue.success && self.parseString("}")){ // parse and consume → '}'
                     success = true;
                     return;  
                 }
 
                 // [3] '{' nested_set '}'
-                const nestedDict = this.parseNestedDict(); // parse and consume → nested_dict
+                const nestedDict = self.parseNestedDict(); // parse and consume → nested_dict
                 if(nestedDict.success && self.parseString("}")){ // parse and consume → '}'
                     success = true;
                     return; 
                 }
+            }
         })();
 
         // if any of the alternatives above parsed successfully
-        if(success) { return { success: true, ast: null, lastPointerPos: null, name: "dict_literal", problem: null }; }
+        if(success) { return { success: true, ast: null, lastPointerPos: null, name: "set_literal", problem: null }; }
 
         // set tokenPointer back to original state before parsing started
         this.tokenPointer = initialPointerPos; 
         return { 
             success: false, ast: null, lastPointerPos: this.tokenPointer, 
-            name: "dict_literal", problem: ""
+            name: "set_literal", problem: ""
         }
     }
 
@@ -210,7 +219,7 @@ export class Parser {
 
         // parse and consume →  '{' ':' '}' | '{' dict_key ':' parens_expr (',' dict_key ':' parens_expr )* '}' | '{' nested_dict '}'
         (function() { 
-            if(self.parseString("{").success){ // parse and consume → '{'
+            if(self.parseString("{").success) { // parse and consume → '{'
                 // [1] '{' ':' '}'
                 if(self.parseString(":").success && self.parseString("}").success){ // parse and consume → ':' '}'
                     success = true;
@@ -224,17 +233,18 @@ export class Parser {
                     let comma = self.parseString(",");  // parse and consume → ','
                     if(!keyValue.success || !comma.success) break;
                 }
-                if(keyValue.success && self.parseString("}")) // parse and consume → '}'
+                if(keyValue.success && self.parseString("}")) { // parse and consume → '}'
                     success = true;
                     return;  
                 }
 
                 // [3] '{' nested_dict '}'
-                const nestedDict = this.parseNestedDict(); // parse and consume → nested_dict
+                const nestedDict = self.parseNestedDict(); // parse and consume → nested_dict
                 if(nestedDict.success && self.parseString("}")){ // parse and consume → '}'
                     success = true;
                     return; 
                 }
+            }
         })();
 
         // if any of the alternatives above parsed successfully

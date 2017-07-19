@@ -722,14 +722,14 @@ export class Lexer{
     }
 
     // peeks at the char in the provided offset
-    private peekChar(offset: number = 1):string{
+    private peekChar(offset: number = 1):string {
         let peekPointer = this.charPointer + offset;
         if(peekPointer < this.chars.length) return this.chars[peekPointer];
         return null;
     }
 
     // returns the previous char without decrementing the char pointer
-    private prevChar():string{
+    private prevChar():string {
         let peekPointer = this.charPointer - 1;
         if(peekPointer < this.chars.length) return this.chars[peekPointer];
         return null;

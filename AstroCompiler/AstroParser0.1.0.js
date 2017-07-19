@@ -24,7 +24,15 @@ var Parser = (function () {
         /* this.parseModule(); */
         /// TEST ///
         this.parserTest(this.parseNsSetLiteral());
+        this.parserTest(this.parseNL());
+        this.parserTest(this.parseSetLiteral());
+        this.parserTest(this.parseNL());
+        this.parserTest(this.parseDictLiteral());
+        this.parserTest(this.parseNL());
+        this.parserTest(this.parseDictLiteral());
+        this.parserTest(this.parseNL());
         this.parserTest(this.parseNsDictLiteral());
+        this.parserTest(this.parseNL());
         this.parserTest(this.parseNsFloatLiteral());
         this.parserTest(this.parseIND());
         this.parserTest(this.parseNsIntLiteral());
@@ -98,26 +106,27 @@ var Parser = (function () {
                     if (!keyValue.success || !comma.success)
                         break;
                 }
-                if (keyValue.success && self.parseString("}"))
+                if (keyValue.success && self.parseString("}")) {
                     success = true;
-                return;
-            }
-            // [3] '{' nested_set '}'
-            var nestedDict = this.parseNestedDict(); // parse and consume → nested_dict
-            if (nestedDict.success && self.parseString("}")) {
-                success = true;
-                return;
+                    return;
+                }
+                // [3] '{' nested_set '}'
+                var nestedDict = self.parseNestedDict(); // parse and consume → nested_dict
+                if (nestedDict.success && self.parseString("}")) {
+                    success = true;
+                    return;
+                }
             }
         })();
         // if any of the alternatives above parsed successfully
         if (success) {
-            return { success: true, ast: null, lastPointerPos: null, name: "dict_literal", problem: null };
+            return { success: true, ast: null, lastPointerPos: null, name: "set_literal", problem: null };
         }
         // set tokenPointer back to original state before parsing started
         this.tokenPointer = initialPointerPos;
         return {
             success: false, ast: null, lastPointerPos: this.tokenPointer,
-            name: "dict_literal", problem: ""
+            name: "set_literal", problem: ""
         };
     };
     Parser.prototype.parseNestedSet = function () {
@@ -189,15 +198,16 @@ var Parser = (function () {
                     if (!keyValue.success || !comma.success)
                         break;
                 }
-                if (keyValue.success && self.parseString("}"))
+                if (keyValue.success && self.parseString("}")) {
                     success = true;
-                return;
-            }
-            // [3] '{' nested_dict '}'
-            var nestedDict = this.parseNestedDict(); // parse and consume → nested_dict
-            if (nestedDict.success && self.parseString("}")) {
-                success = true;
-                return;
+                    return;
+                }
+                // [3] '{' nested_dict '}'
+                var nestedDict = self.parseNestedDict(); // parse and consume → nested_dict
+                if (nestedDict.success && self.parseString("}")) {
+                    success = true;
+                    return;
+                }
             }
         })();
         // if any of the alternatives above parsed successfully
