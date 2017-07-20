@@ -650,8 +650,7 @@ FOR LOOP
     end:
         print "code not found!"
 
-file.writeln =>(el) for el <- array end =>()
-         
+    file.writeln =>(el) for el <- array end =>()
 
     for _ <- [1:fifty]:
         println('Hello')
@@ -660,15 +659,15 @@ file.writeln =>(el) for el <- array end =>()
 
 COMPREHENSION
     var oddList = yield x for i <- [1:21] if i .mod(2) != 0
-    var oddList = List([x <- [1:21], x .mod(2) != 0])
-    let numberDict = Dict([(x, y) | x <- [1:11], y <- [21:1], even(y)])
-    var numberSet = Set([i <- rand(20, [:200])])
+    var listComprehension = [x <- [1:21], x .mod(2) != 0]
+    let dictComprehension = {x : y | x <- [1:11], y <- [21:1], even(y)}
+    var setComprehension = {i <- rand(20, [:200])}
 
-    [(x, y, z) | 
-        z <- [1:21]
-        y <- [1:z+1]
-        x <- [1:y+1] 
-        x² * y² == z²]
+    var pythagorasList = [(x, y, z) | 
+    z <- [1:21]
+    y <- [1:z+1]
+    x <- [1:y+1] 
+    x² * y² == z²]
 
 BREAK WITH
     for name <- register():
@@ -749,9 +748,9 @@ FUNCTION DEFINITION (2)
     # to make sure nothing is returned from a function you can use `;` to terminate an exit expression or `_` as the exit expression.
     fun effect(mood):
         if mood.isHappy:
-            happySong =>play();
+            happySong.play();
         else:
-            sadSong =>play();
+            sadSong.play();
 
     # varargs.
     #: Int -> F64

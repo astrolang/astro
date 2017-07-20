@@ -1,4 +1,11 @@
-# 18/07/17
+# 20/07/17
+# Astro 0.1.0
+# LIST COMPREHENSION
+var l = [x | x <- [:200], even x]
+var s = {x | x <- rand([:20]), even x}
+var d = {x : y | x <- [:50], y <- [:x], even x}
+
+# 19/07/17
 # Astro 0.1.0
 # LIST COMPREHENSION 
 let l = [x * y | x <- [:10], y <- [:x], x % 2 == 0]
