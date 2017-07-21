@@ -658,7 +658,7 @@ FOR LOOP
     yield x for x <- stream()
 
 COMPREHENSION
-    var oddList = yield x for i <- [1:21] if i .mod(2) != 0
+    var listComprehension = List(yield x for i <- [1:21] if i .mod(2) != 0)
     var listComprehension = [x <- [1:21], x .mod(2) != 0]
     let dictComprehension = {x : y | x <- [1:11], y <- [21:1], even(y)}
     var setComprehension = {i <- rand(20, [:200])}
@@ -1629,6 +1629,15 @@ WHAT IF
     dsl(src: 'hello', link: 'bar.io') {
         list { [1, 2, 3] }
     }
+
+BLOCKS  
+    << block_expr
+    :  block_expr
+    <- block_expr
+    -> block_expr
+    (  block_expr)
+    {  block_expr}
+    [  block_expr]
 
 INSTANCE TYPES 
 add(3, 4) :: Fun:(Int, Int) -> Int 

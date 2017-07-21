@@ -10,13 +10,5 @@ Test/
 Old/
 
 # generated javascript files 
-AstroCompile/AstroMain0.1.0.js
-AstroCompile/AstroLexer0.1.0.js
-AstroCompile/AstroParser0.1.0.js
-AstroCompile/AstroUtility0.1.0.js
-AstroCompile/AstroAST0.1.0.js
-AstroCompile/AstroMain0.1.0.js.map
-AstroCompile/AstroLexer0.1.0.js.map
-AstroCompile/AstroParser0.1.0.js.map
-AstroCompile/AstroUtility0.1.0.js.map
-AstroCompile/AstroAST0.1.0.js.map
+AstroCompiler/*.js
+AstroCompiler/*.js.map
