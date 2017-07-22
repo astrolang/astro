@@ -1,7 +1,5 @@
 # 20/07/17
 # Astro 0.1.0
-var v = [x | x <- gen ]
-
 # LIST COMPREHENSION
 var l = [x | x <- [:200], even x]
 var s = {x | x <- rand([:20]), even x}

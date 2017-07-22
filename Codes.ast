@@ -1,11 +1,37 @@
 # 22/07/17
 # Astro 0.1.0
-ns_[]
-if x == 5 and y == 6:
-    print "Hello  World!"
+# QUESTION 1:
+fun camelCase(string):
+    let tokens = string.split("_")
+    tokens[0].join(t.capitalize() | t <- tokens[1:])
+# Test
+println(camelCase('is_prime'))
+println(camelCase('prepare_for_andela_interview'))
 
-play[Int, Int](
-play(
+
+# QUESTION 2: 
+fun alphabetOccur():
+    var concat = ""
+    loop:
+        let i = scanln("> ")
+        break if i.isEmpty()
+        concat += i
+    for c <- sorted(set(concat)) if c.isAlphabet(): 
+        println("[c] [concat.count(c)]")
+# Test 
+alphabetOccur()
+
+
+# QUESTION 3:
+fun hourFormat(string):
+    let tokens = string.split /:|\s+/
+    if tokens[3] == "PM":
+        "[int(tokens[0])] [tokens[1]] [tokens[2]]"
+    else: 
+        "[tokens[0]] [tokens[1]] [tokens[2]]"
+# Test 
+println(hourFormat("5:45:10 AM"))
+println(hourFormat("5:45:10 PM"))
 
 # 29/06/17
 # Astro 0.1.0
