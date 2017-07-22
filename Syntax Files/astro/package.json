@@ -1,0 +1,43 @@
+{
+  "name": "astro",
+  "displayName": "astro",
+  "description": "Language support for Astro in VSCode",
+  "version": "0.0.1",
+  "publisher": "astro-lang",
+  "engines": {
+    "vscode": "^0.10.5"
+  },
+  "activationEvents": [
+    "onLanguage:astro"
+  ],
+  "main": "./out/astroMain",
+  "categories": [
+    "Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "astro",
+        "aliases": [
+          "Astro",
+          "astro"
+        ],
+        "extensions": [
+          ".ast",
+          ".astro",
+          ".dex"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "astro",
+        "scopeName": "source.astro",
+        "path": "./syntaxes/astro.tmLanguage.json"
+      }
+    ]
+  },
+  "author": "",
+  "license": "ISC"
+}

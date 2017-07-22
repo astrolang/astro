@@ -1631,9 +1631,7 @@ WHAT IF
     }
 
 BLOCKS  
-    << block_expr
     :  block_expr
-    <- block_expr
     -> block_expr
     (  block_expr)
     {  block_expr}
