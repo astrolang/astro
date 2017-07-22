@@ -1,5 +1,5 @@
 // 05/07/17
-import {Token, TokenType, RefType, AccessType} from "./AstroUtility0.1.0"
+import {Token, TokenType, RefType, AccessType} from "./AstroUtility"
 import {
     Ast, ExprAst, ImportAst, ModuleDefAst, FunctionDefAst, BlockAst,
     TypeDefAst, EnumDefAst, SubjectDefAst, VariableDefAst, ConstantDefAst, 
@@ -8,7 +8,7 @@ import {
     ContinueAst, ReturnAst, YieldAst, BooleanAst, FunctionCallAst, StringAst, 
     IntegerAst, FloatAst, AssignmentAst, BinaryExprAst, ListAst, TupleAst, 
     DictAst
-} from "./AstroAST0.1.0"
+} from "./AstroAST"
 
 export class Parser {
     tokens:Token[];

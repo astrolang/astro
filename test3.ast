@@ -6,15 +6,8 @@ type Teacher <: Employee, Person:
 # this is a comment
     var class
 
-#= 
-	chfjfjfjfplmkglkhlk
-	#= badood 
-		#=
-		=# bada bada doom!
-	=#
-=#
 
-ns_"literal"
+ns_"literal" 
 ns_'literal $name dndjfjfk hfhfhfjf'
 ns_[this is sparta]
 

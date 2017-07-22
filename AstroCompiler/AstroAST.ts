@@ -1,5 +1,5 @@
 // 05/07/17
-import {RefType, AccessType} from "./AstroUtility0.1.0"
+import {RefType, AccessType} from "./AstroUtility"
 
 // ...
 export class Ast{}

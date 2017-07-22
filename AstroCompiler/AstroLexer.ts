@@ -1,5 +1,5 @@
 // 02/05/17
-import {Token, TokenType} from "./AstroUtility0.1.0"
+import {Token, TokenType} from "./AstroUtility"
 
 export class Lexer{
     chars: string[];

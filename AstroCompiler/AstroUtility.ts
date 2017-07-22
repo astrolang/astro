@@ -7,7 +7,7 @@ import {
     ContinueAst, ReturnAst, YieldAst, BooleanAst, FunctionCallAst, StringAst, 
     IntegerAst, FloatAst, AssignmentAst, BinaryExprAst, ListAst, TupleAst, 
     DictAst
-} from "./AstroAST0.1.0"
+} from "./AstroAST"
 
 export class Token{
     type: TokenType; 
