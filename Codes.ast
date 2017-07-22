@@ -1,9 +1,11 @@
-# 01/07/17
+# 22/07/17
 # Astro 0.1.0
-# ASTRO PARSER SUBSET 
-type Token(string, kind, line, col)
-fun 
+ns_[]
+if x == 5 and y == 6:
+    print "Hello  World!"
 
+play[Int, Int](
+play(
 
 # 29/06/17
 # Astro 0.1.0
