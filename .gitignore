@@ -6,20 +6,12 @@
 something.dex
 Test/
 
-# temporary files
-temp.abnf
-
 # old files
 Old/
 
 # generated javascript files 
-AstroCompiler/AstroAST.js
-AstroCompiler/AstroAST.js.map
-AstroCompiler/AstroLexer.js
-AstroCompiler/AstroLexer.js.map
-AstroCompiler/AstroMain.js
-AstroCompiler/AstroMain.js.map
-AstroCompiler/AstroParser.js
-AstroCompiler/AstroParser.js.map
-AstroCompiler/AstroUtility.js
-AstroCompiler/AstroUtility.js.map
+AstroCompiler/*.js
+AstroCompiler/*.map
+
+# temporary files 
+temporary.abnf
