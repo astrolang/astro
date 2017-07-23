@@ -1,6 +1,8 @@
 # 23/07/17
-# Astro 0.1.0
+# Astro 0.1.01
+# NESTED EXPRESSIONS 
 x if y == x else (y if y == z else z)
+
 # TYPE CONVERSION FUNCTIONS 
 - camelCase names of types are now by convention meant for type conversion operations
 type Int

@@ -661,7 +661,7 @@ COMPREHENSION
     var listComprehension = List(yield x for i <- [1:21] if i .mod(2) != 0)
     var listComprehension = [x <- [1:21], x .mod(2) != 0]
     let dictComprehension = {x : y | x <- [1:11], y <- [21:1], even(y)}
-    var setComprehension = {i <- rand(20, [:200])}
+    var setComprehension  = {i <- rand(0, 200, ->20)}
 
     var pythagorasList = [(x, y, z) | 
     z <- [1:21]
@@ -905,25 +905,28 @@ PATTERN MATCHING
     # match block is like switch-case statement, and it matches against the expression on the previous line.
     object
     | 0           -> 1, spill # a keyword for moving to the next case
-    | 1||23||40||5   -> .name + n
+    | 1||23||40   -> .name + n
     | n           -> n * n
-    | (x, y)      -> x + y
-    | {a:b}       -> a
-    | [a:b]       -> a, b
     | = getVal()? -> .value
-    | [x, ...y]   -> x
+    | [x, ...y]   -> println "list"
     | Point(x, y) -> x * y
-    | /[a-z]+/    -> print object
-    | {name, age} -> name, age
-    | Int         -> 'This is an integer'
+    | /[a-z]+/    -> println "regex"
+    | [x, y, z]   -> println "list"
+    | {x, y, z}   -> println "set"
+    | {x:, y:}    -> println "dict"
+    | (x, y)      -> println "list"
+    | {a:b}       -> println "dict"
+    | [a:b]       -> println "range"
+    | Int         -> println "integer"
     | $outer      -> outer
     | 5 if x == z -> doSth() # exhaustive pattern matching
     | .name == 45 -> 45
     | .> 25       -> 'Greater than 25'
     ~ x > 25      -> x * 2 / 5
     ~ x < 25      -> 'x is lesser than 25'
-    ! .in [1..10] -> 78_324b
+    ! in [1..10]  -> 78_324b
     | _           -> 'default' # otherwise
+    | else        -> 'default' # same as above 
 
     # if-match block
     return "Hello" if x 
@@ -943,22 +946,22 @@ PATTERN MATCHING
 ASSIGNMENT PATTERN MATCHING
     let [name, age, _, ...rest] = list
     let (name, age, _, ...rest) = tuple
-    let {name, age, _, ...rest} = dict
     let {name, age, _, ...rest} = set
+    let {name:, age:, _:, ...rest:} = dict
     let [first|last] = list
     let (first|last) = tuple
     let {first|last} = dict 
     let {first|last} = set 
     let {key:value}  = dict 
-    let {a: {b}, c}  = dict  
-    var [a, [b], c]  = list 
-    var {a, {b}, c}  = set  
-    a, b, c = ..."abc" 
-    a, b, c = x, y, z
+    let a, b, c = ..."abc" 
+    let a, b, c = x, y, z
+    john.|name, age| = (newName, newAge)
+    [john.name, peter.age] = ["Jean", "Pierre"]
+
 
     # pattern matching with iterators
-    for (x, y) <- dictionary: 
-        println "$x - $y"
+    for (x, y) <- dictionary:
+        println "$x : $y"
 
 PATTERN MATCHING OPERATOR  
     let pattern = /\d+/
@@ -977,7 +980,7 @@ COROUTINES & GENERATORS
 
 ASYNC AND AWAIT
     fun showUrlText(url): #@ async
-        print str(html) await fetchUrl url
+        println(str html) await fetch url
     ..
 
 ACTORS # NEEDS REVIEW!!!
@@ -985,8 +988,7 @@ ACTORS # NEEDS REVIEW!!!
         var name, time #: Str, Int
 
     fun Task(name):
-        self.name = name
-        self.time = rand([1:1_000])
+        new(name, rand(1, 1_000))
 
     fun sleep(actor): #: Task
         println "[name] is sleeping for [time]ms"

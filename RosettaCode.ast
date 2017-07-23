@@ -1,4 +1,25 @@
-# created: 23/07/17 (Astro 0.1.0)
+# created: 23/07/17 (Astro 0.1.01)
+# edited:
+# 99 Bottles of Beer
+fun bottles(n): 
+	| 0 -> "No more bottles"
+	| 1 -> "1 bottle"
+	| else -> "$n bottles"
+	
+for n <- [100:1]:
+    println """
+    [bottles(n)] of beer on the wall
+    [bottles(n)] of beer
+    Take one down, pass it around
+    [bottles(n-1)] of beer on the wall
+    """
+
+# created: 23/07/17 (Astro 0.1.01)
+# edited:
+# Averages/Root Mean Square
+fun rootMeanSq(l): sqrt(mean(l²))
+
+# created: 23/07/17 (Astro 0.1.01)
 # edited:
 # Caesar Cipher 
 fun caesar(s, k, decode: false):
@@ -10,19 +31,19 @@ println msg
 let enc = caesar(msg, 11)
 println =>(enc) =>(caesar(enc, 11, decode: true))
 
-# created: 23/07/17 (Astro 0.1.0)
+# created: 23/07/17 (Astro 0.1.01)
 # edited:
 # Averages/Arithmetic Mean
 mean([1,2,3])
 mean([1:10])
 mean([])
 
-# created: 23/07/17 (Astro 0.1.0)
+# created: 23/07/17 (Astro 0.1.01)
 # edited:
 # Hello World/Text 
 println "Hello world!"
 
-# created: 23/07/17 (Astro 0.1.0)
+# created: 23/07/17 (Astro 0.1.01)
 # edited:
 # 15 Puzzle 
 type Puzzle(items: {:}, position: -1)
