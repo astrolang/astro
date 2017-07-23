@@ -1,5 +1,13 @@
 # 22/07/17
 # Astro 0.1.0
+fun clean(input): 
+    | .size() <= 1 -> input
+    | .[0] == .[1] -> clean(.[1:])
+    | _            -> .[0] + clean(.[1:])) 
+
+fun clean(input): 
+    input.foldl('')|a,b| -> a if a == b else a + b 
+
 # QUESTION 1:
 fun camelCase(string):
     let tokens = string.split("_")
@@ -26,7 +34,7 @@ alphabetOccur()
 fun hourFormat(string):
     let tokens = string.split /:|\s+/
     if tokens[3] == "PM":
-        "[int(tokens[0])] [tokens[1]] [tokens[2]]"
+        "[int(tokens[0])]:[tokens[1]] [tokens[2]]"
     else: 
         "[tokens[0]] [tokens[1]] [tokens[2]]"
 # Test 
