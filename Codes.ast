@@ -6,7 +6,7 @@ fun clean(input):
     | _            -> .[0] + clean(.[1:])) 
 
 fun clean(input): 
-    input.foldl('')|a,b| -> a if a == b else a + b 
+    input.foldl('')|a, b| -> a if a == b else a + b 
 
 # QUESTION 1:
 fun camelCase(string):

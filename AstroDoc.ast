@@ -977,7 +977,7 @@ COROUTINES & GENERATORS
 
 ASYNC AND AWAIT
     fun showUrlText(url): #@ async
-        print Str(html) await fetchUrl url
+        print str(html) await fetchUrl url
     ..
 
 ACTORS # NEEDS REVIEW!!!
@@ -1035,6 +1035,15 @@ TYPE DEFINITION
 UNION AND INTERSECTION TYPES
     var pegasus #: Bird&Horse
     var identification #: Str|Int
+
+TYPE CONVERSION FUNCTIONS 
+    # camelCased names of types are by convention meant for type conversion operations
+    type MyInt <: Int  
+    type MyFloat <: Float  
+
+    # new values are constructed out of such conversion. 
+    fun myInt(myFloat): 
+        new truncate myFloat
 
 FIELD EXTENSION
     type Programmer(specializedLanguages) <: Person:
@@ -1261,7 +1270,7 @@ COVARIANCE
     var people = [Person][Teacher(), Employee(), Employee()] # a covariant list.
 
 TYPE CASTING
-    var radianInt = Int(2 * pi) # the resulting value Float of 2*pi is casted to Int.
+    var radianInt = int(2 * pi) # the resulting value Float of 2*pi is casted to Int.
 
     fun Employee(person): #: Person
         Employee(self=>name, =>age)

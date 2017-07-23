@@ -1,12 +1,127 @@
-# 13/06/17
-# Astro 0.1.0
-# 100 DOORS
+# created: 23/07/17 (Astro 0.1.0)
+# edited:
+# Caesar Cipher 
+fun caesar(s, k, decode: false):
+	if decode: k = 26 - k 
+	"".join(char((int(c) - 65 + k) % 26 + 65) | c <- s.upper(), "a" <= c <= "A")
+
+let msg = "The quick brown fox jumped over the lazy dogs"
+println msg
+let enc = caesar(msg, 11)
+println =>(enc) =>(caesar(enc, 11, decode: true))
+
+# created: 23/07/17 (Astro 0.1.0)
+# edited:
+# Averages/Arithmetic Mean
+mean([1,2,3])
+mean([1:10])
+mean([])
+
+# created: 23/07/17 (Astro 0.1.0)
+# edited:
+# Hello World/Text 
+println "Hello world!"
+
+# created: 23/07/17 (Astro 0.1.0)
+# edited:
+# 15 Puzzle 
+type Puzzle(items: {:}, position: -1)
+ 
+fun mainFrame(puz):
+    let d = puz.items
+    println '+-----+-----+-----+-----+'
+    println '|[d[1]]|[d[2]]|[d[3]]|[d[4]]|'
+    println '+-----+-----+-----+-----+'
+    println '|[d[5]]|[d[6]]|[d[7]]|[d[8]]|'
+    println '+-----+-----+-----+-----+'
+    println '|[d[9]]|[d[10]]|[d[11]]|[d[12]]|'
+    println '+-----+-----+-----+-----+'
+    println '|[d[13]]|[d[14]]|[d[15]]|[d[16]]|'
+    println '+-----+-----+-----+-----+'
+
+fun format(puz, ch):
+    let ch = ch.strip()
+    ch.size 
+    | 1 -> '  $ch   '
+    | 2 -> '  $ch '
+    | 0 -> '     '
+
+fun change(puz, to):
+    let fro = puz.position
+    for (a, b) <- puz.items if b == puz.format(str(to)):
+        to = a
+        break
+    swap puz.items.|{fro}, {to}|
+    puz.position = to
+
+fun buildBoard(puz, difficulty):
+    for i <- [1:17]:
+        puz.items{i} = puz.format(str(i))
+    var tmp = 0
+    for (a, b) <- puz.items if b == '  16 ':
+        puz.items{a} = '     '
+        tmp = a
+        break
+    puz.position = tmp
+    let diff = 100
+    difficulty
+    | 0 -> diff = 10
+    | 1 -> diff = 50
+    for _ in [:diff]:
+        let lst  = puz.valid_moves()
+        let lst1 = []
+        for j <- lst: lst1.append(int(j.trim()))
+        puz.change(lst1[randInt(0, size(lst1)-1)])
+
+fun validMoves(puz):
+    let pos = puz.position
+    | 6  || 7 || 10 || 11 -> puz.items.|{pos - 4},{pos - 1}, {pos + 1}, {pos + 4}|
+    | 5  || 9  -> puz.items.|{pos - 4}, {pos + 4}, {pos + 1}|
+    | 8  || 12 -> puz.items.|{pos - 4}, {pos + 4}, {pos - 1}|
+    | 2  || 3  -> puz.items.|{pos - 1}, {pos + 1}, {pos + 4}|
+    | 14 || 15 -> puz.items.|{pos - 1}, {pos + 1}, {pos - 4}|
+    | 1  -> puz.items.|{pos + 1}, {pos + 4}|
+    | 4  -> puz.items.|{pos - 1}, {pos + 4}|
+    | 13 -> puz.items.|{pos + 1}, {pos - 4}|
+    | 16 -> puz.items.|{pos - 1}, {pos - 4}|
+
+fun gameOver(puz):
+    var flag = false
+    for (a, b) <- puz.items if b == (' ' * 5): _
+    else: flag = (a == int trim b)
+    flag
+ 
+ 
+let g = Puzzle()
+g.buildBoard(int scanln 'Enter the difficulty : 0 1 2\n2 '
+'=> highest 0=> lowest\n')
+g.mainFrame()
+println 'Enter 0 to exit'
+loop:
+    println 'Hello user:\nTo change the position just enter the no. near it'
+    let lst  = g.valid_moves()
+    let lst1 = []
+    for i <- lst:
+        lst1.append(int(i.trim()))
+        print '[i.strip()] \t'
+    println()
+    let x = int(input())
+    | 0        -> break
+    | !in lst1 -> println 'Wrong move'
+    | else     -> g.change(x)
+    g.mainFrame()
+    if g.gameOver():
+        print 'You WON'
+        break
+
+# ceated: 13/06/17 (Astro 0.1.0)
+# edited: 23/07/17 (Astro 0.1.0)
+# 100 Doors
 -- unoptimized  
 var doors = falses 100
-for a <- [:100]:
-    for b <- [a:a:100]: 
-        doors[b] = !doors[b]
+for a <- [:101]:
+    for b <- [a:a:101]: doors[b] = !doors[b]
     println "Door $a is ['open.' if doors[a] else 'closed.']"
 
 -- optimized
-for i <- [:10]: println "Door [i^2] is open."
+for i <- [:10]: println "Door [i²] is open."
