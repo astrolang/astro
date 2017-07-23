@@ -97,7 +97,6 @@ EXPRESSION-ORIENTED
 
     let name = setName('John Smith') # error! setName returns no result.
 
-
 LAZY ASSIGNMENT
     # lazy assignment will only execute on access of subject, not before
     let appComponent := iso self.getAppComponent()
@@ -258,32 +257,36 @@ LISTS
         students.|@gpa.sum() / size|
 
     # proposed operations with lists.
-    var concatenate = [1, 2] ++ [3] # [1, 2, 3]
+    var concatenate = [1, 2] ++ [3, 4] # [1, 2, 3, 4]
     var multiply = [1, 2] ** 2 # [1, 2, 1, 2]
-    let subtract = [1, 2, 3, 4, 3] -- [4, 3] # [1, 2]
+    let subtract = [1, 2, 3, 4, 3] -- [4, 3] # [1, 2] 
     let divide = [1, 2, 5, 6, 3, 4] // [5, 6] # [[1, 2], [3, 4]]
 
 ARRAYS
     # List type is an alias of Array type but with overriden constructors to allow pre-allocation
     # Arrays do not pre-allocate and it is adviced to use Array sparinly, with care and only when 
     # high performance matters
+    let calendar = 31*12[Str][] # specifying the size of an Array
 
-
-    let calendar = 31×12[] # specifying the size of an Array
-
-    let a = 2×2[F64][ 
+    let a = 2×2 [ 
         [1, 2, 7, 8]
         [3, 4, 5, 6]
+    ]
+
+    # 2-dimensional list literal can be constructed using horizontal concatenation 
+    let a = 2×2 [ 
+        1, 2, 7, 8;
+        3, 4, 5, 6
     ]
 
     var matrix = Array[Int]([
         [1, 0]
         [0, 1]
     ])
-
-    matA[,] = [
-        [1, 6, 3]
-        [3, 7, 4]
+    
+    matrix[,] = [
+        1, 6;
+        3, 7
     ]
 
     let subset = mat4[1:, 1:2]
@@ -291,27 +294,24 @@ ARRAYS
     # vectorised operations
     var matA = matB *.. matC 
     var matD = matA.dot..matB
+    var matZ = matD ^.. 2
 
     # Astro's lists are by default, row-major order, but you can make it
     # column major by using the transpose function
     let y = [1, 2, 3]
     # [1 2 3]
 
-    let z = [1, 2, 3].tr() # transpose
+    let z = [1, 2, 3]` # transpose
     # [1]
     # [2]
     # [3]
 
-    # splatting a list
-    let a = [
-        [1, 2]
-        [0, 4]
-    ]
+    let a = [1, 2; 0, 4]
 
     # list unpacking 
     let b = [
-        ...a.tr(), ...a
-        ...a, ...a.tr()
+        ...(a` ++ a ) ;
+        ...(a  ++ a`)
     ]
     # [1 0 1 2]
     # [2 4 0 4]
@@ -319,7 +319,7 @@ ARRAYS
     # [0 4 2 4]
 
     # non-standard list literal
-    let spMatrix = 2x2[Int] sp_[]
+    let spMatrix = 2*2[Int] sp_[]
 
 DICTIONARIES
     # dictionaries are basically key-value lists.
