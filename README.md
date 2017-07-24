@@ -1,7 +1,6 @@
 # Astro
--------------------------------
 ![alt text](https://github.com/AppCypher/Astro/blob/master/Images/AstroSyntax.png "Astro Syntax")
-
+-------------------------------
 
 Astro is a high-performance statically-typed programming language that compiles to WebAssembly, with syntax similar to Python and numerical-computing orientation similar to Julia. 
 
