@@ -1,4 +1,4 @@
-# Astro [WIP] :construction:
+# Astro :construction:
 ![alt text](https://github.com/AppCypher/Astro/blob/master/Images/AstroSyntax.png "Astro Syntax")
 -------------------------------
 
