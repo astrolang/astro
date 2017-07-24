@@ -266,7 +266,7 @@ ARRAYS
     # List type is an alias of Array type but with overriden constructors to allow pre-allocation
     # Arrays do not pre-allocate and it is adviced to use Array sparinly, with care and only when 
     # high performance matters
-    let calendar = 31*12[Str][] # specifying the size of an Array
+    let calendar = 31x12[Str][] # specifying the size of an Array
 
     let a = 2×2 [ 
         [1, 2, 7, 8]
@@ -319,15 +319,33 @@ ARRAYS
     # [0 4 2 4]
 
     # non-standard list literal
-    let spMatrix = 2*2[Int] sp_[]
+    let spMatrix = 2x2[Int] sp_[]
 
 DICTIONARIES
     # dictionaries are basically key-value lists.
     let family = {
-        'mum':
+        'mum': { 
             'name': 'Esther Williams'
-            'age' : 41
-        dad: # unquoted keys are taken as strings
+            'age' : 4
+        }
+        dad: { # unquoted keys are taken as strings
+            name: 'Sunday Williams'
+            age : 46
+        }
+        sister: {
+            name: 'Shade Williams'
+            age : 15
+        }
+    }
+
+    let sisterName = family{'sister', 'name'}
+
+    # nested dict can be simplified with indentation 
+    let family = {
+        mum:
+            name: 'Esther Williams'
+            age : 41
+        dad:
             name: 'Sunday Williams'
             age : 46
         sister:
@@ -335,9 +353,7 @@ DICTIONARIES
             age : 15
     }
 
-    let sisterName = family{'sister', 'name'}
-
-    # to use variables from the outer scope, the variable name needs to be escaped wit `\`
+    # to use variables from the outer scope, the variable name needs to be escaped wit `$`
     var professor = {
         $id1: 'Charles Xavier'
         $id2: 56
@@ -376,7 +392,7 @@ SET
     fruits.size # 4
 
     # common set operations can be applied to sets 
-    {'guava',  'mango'}.intersection(fruits)
+    {'guava', 'mango'}.intersection(fruits)
 
     {'pineapple', 'apple'}.union(fruits)
 
@@ -409,7 +425,7 @@ STRINGS
     # by escape sequences, because they are processed verbatim.
     var verbatimStr = r_"Use '\t' to represent tab"
 
-    # here string (DEPRECATED). first and last new lines are always ignored.
+    # multiline string. first and last new lines are always ignored.
     var verbatimStr = '''
     Hello, World!
     '''
@@ -424,7 +440,7 @@ STRINGS
     let divide = 'abcdeabc' / 'de' # ['abc', 'abc']
     let escapeSequences = '\t \n \' \" \[ \q \# \\'
 
-    # multiline string.
+    # string continuation
     var greeting = 'Hello, ' ...
     'World!'
 

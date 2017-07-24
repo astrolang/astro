@@ -1,17 +1,33 @@
+# created: 23/07/17 (Astro 0.1.02)
+# edited:
+# ABC Problem
+fun abc(s, list):
+  return true if s.isEmpty() 
+  for i <- [:list.size]:
+    return any([abc(s[:end], val list.delete(i))]) ...
+    if s[end-1] in list[i] else true
+  false
+
+let test = ["A", "BARK","BOOK","TREAT","COMMON","SQUAD","CONFUSE"]
+let list = ["BO","XK","DQ","CP","NA","GT","RE","TG","QD","FS","JW",
+"HU","VI","AN","OB","ER","FS","LY","PC","ZM"]
+for s <- test:
+    println "[s.%-8s] | [abc(s, list)]" 
+
 # created: 23/07/17 (Astro 0.1.01)
 # edited:
 # 99 Bottles of Beer
 fun bottles(n): 
-	| 0 -> "No more bottles"
-	| 1 -> "1 bottle"
-	| else -> "$n bottles"
-	
+    | 0 -> "No more bottles"
+    | 1 -> "1 bottle"
+    | _ -> "$n bottles"
+    
 for n <- [100:1]:
     println """
-    [bottles(n)] of beer on the wall
-    [bottles(n)] of beer
+    [bottles n] of beer on the wall
+    [bottles n] of beer
     Take one down, pass it around
-    [bottles(n-1)] of beer on the wall
+    [bottles n-1] of beer on the wall\n
     """
 
 # created: 23/07/17 (Astro 0.1.01)
@@ -23,8 +39,8 @@ fun rootMeanSq(l): sqrt(mean(l²))
 # edited:
 # Caesar Cipher 
 fun caesar(s, k, decode: false):
-	if decode: k = 26 - k 
-	"".join(char((int(c) - 65 + k) % 26 + 65) | c <- s.upper(), "a" <= c <= "A")
+    if decode: k = 26 - k 
+    "".join(char((int(c) - 65 + k) % 26 + 65) | c <- s.upper(), "a" <= c <= "A")
 
 let msg = "The quick brown fox jumped over the lazy dogs"
 println msg
