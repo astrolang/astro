@@ -1,4 +1,5 @@
-<h1>Astro :construction:</h1> <h6>Work in Progress</h6>
+<h1>Astro :construction:</h1> 
+#### Work in Progress
 ![alt text](https://github.com/AppCypher/Astro/blob/master/Images/AstroSyntax.png "Astro Syntax")
 -------------------------------
 
