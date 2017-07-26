@@ -1,4 +1,4 @@
-# Astro :construction: __Work in Progress__
+# Astro :construction: ### Work in Progress
 ![alt text](https://github.com/AppCypher/Astro/blob/master/Images/AstroSyntax.png "Astro Syntax")
 -------------------------------
 
