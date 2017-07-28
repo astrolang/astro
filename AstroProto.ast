@@ -1,5 +1,5 @@
 # 27/07/17
-# Astro 0.1.02
+# Astro 0.1.03
 # INDEXING  
 var list = [1, 2, 3, 4] 
 let a = list[:end] # beginning to end
