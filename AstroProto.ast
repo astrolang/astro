@@ -1,3 +1,15 @@
+# 27/07/17
+# Astro 0.1.02
+# INDEXING  
+var list = [1, 2, 3, 4] 
+let a = list[:end] # beginning to end
+let a = list[end-1] # last 
+
+# PROTOTYPE 
+var car = p_{ model: "Camaro", year: 2006 }
+print car.model 
+car.new.make = "Shelby"
+
 # 23/07/17
 # Astro 0.1.01
 # NESTED EXPRESSIONS 

@@ -243,7 +243,9 @@ LISTS
     # Astro uses 0-based indexing, so every list indices start at 1.
     var disqualified = contestants[1:6]
 
-    var reversed = contestants[end:] # end is the lizt length.
+    var reversed = contestants[end:] # end here is equivalent to "contestant.size" 
+
+    var last = contestants[end-1] # basically "contestant.size - 1"
 
     let myGarage = [Car][('Mustang'), ('Eleanor'), ('Bugatti'), ('Lamborghini')] # You can specify a type 
 
@@ -365,8 +367,15 @@ DICTIONARIES
     }
     var class1Scores = testScores{'class room 1'}
 
-    # dicts can also be used like prototypes
-    var john = {
+    var emptyDict = {:} # empty dictionary
+
+    var user = 2x2 Dict[Str, User]()
+    var scoreList = Dict[Str, Int]()
+
+PROTOTYPE 
+    # prototypes are a special type of dicts with keys that can be inferred at compile time 
+    # they start with p_ macro tag.
+    var john = p_{
         name: "John Smith", 
         age : 25
     }
@@ -377,13 +386,9 @@ DICTIONARIES
     john{'name'} = "John Pablo"
 
     john.new.gender = "Male" # adding a gender property to the prototype
+    
     type Person = john.type # aliasing a prototype's type
     john{'job'} = "Computer Programmer" # adding a job key to the dict
-
-    var emptyDict = {:} # empty dictionary
-
-    var user = 2x2 Dict[Str, User]()
-    var scoreList = Dict[Str, Int]()
 
 SET 
     # is an unordered list type with no duplicate elements 
