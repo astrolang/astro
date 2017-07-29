@@ -1,3 +1,24 @@
+# 29/07/17
+# Astro 0.1.03
+let scores = {  Ade:146, Appy:150, Orobo:146, Tim:100, Kay:150, Valon:99 }
+let ordered = sorted(scores.values())
+
+let position, prevPos = 0 
+let printed  = []
+
+
+for (i, x) <- enumerate list: print("hello")
+
+for (i, e) <- enumerate ordered, (k, v) <- scores: 
+    if v == e and k !in printed: 
+        if e == ordered[i-1]:
+            println "$k has $(prevPos)"
+        else: 
+            println "$k has $(position)"
+            prevPos = position
+        position += 1
+        printed.append(k)
+
 # 22/07/17
 # Astro 0.1.0
 fun clean(input): 

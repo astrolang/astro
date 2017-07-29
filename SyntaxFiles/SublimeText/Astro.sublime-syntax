@@ -36,7 +36,7 @@ contexts:
       scope: support.class.astro
       name: typenames
 
-    - match: (?<!\.)(\=\>|\.)([!?]?[A-Za-z_][A-Za-z_0-9]*[!?]?)\b # dot_members
+    - match: (?<=\=\>|[^\.]\.)([!?]?[A-Za-z_][A-Za-z_0-9]*[!?]?)\b # dot_members
       scope: constant.numeric.astro
       name: dot_members
 
@@ -68,13 +68,13 @@ contexts:
       scope: entity.name.function.astro
       name: function_calls
 
+    - match: =|\||&|\>|\<|\!|\+|-|\*|\^|%|\?|\b(and|not|or|in|band|bor|bxor|bnot|shl|shr)\b # operators
+      scope: keyword.operator.astro
+      name: operators
+
     - match: (?<!let |var |rxn )([^=|\:|\;|\.|<|>|'|\"|\*|/|\-|\\+|\^|\%|\\|\}|\{|\)|\(|\!|\&|\$|\@|\||\~|type|fun|abst|let|var|rxn|as|for|end|spill|if|where|\?|else|elif|await|return|at|yield|while|redo|with|do|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|obj|const|NaN|iso|val|ref|acq|const|and|or|in]|\b[a-z_][A-Za-z_0-9!]*)\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|except)\b) # infix_calls 
       scope: entity.name.function.astro
       name: infix_calls
-
-    - match: =|\||&|\>|\<|\!|\+|-|\*|\^|%|\?|\b(and|or|band|bor|bxor|bnot|shl|shr)\b # operators
-      scope: keyword.operator.astro
-      name: operators
 
     - match: ([A-Za-z0-9_]+\_)(?=(\[|\(|\{|\/)|\'|\") # non_standard_literals
       scope: support.function.macro.astro
@@ -96,7 +96,7 @@ contexts:
       scope: constant.character.escape.astro
     - match: \$[A-Za-z0-9_]+
       scope: constant.character.escape.astro
-    - match: \[
+    - match: \$\(
       push: string_interpolate
     - match: \"
       scope: punctuation.definition.string.end.astro
@@ -108,7 +108,7 @@ contexts:
       scope: constant.character.escape.astro
     - match: \$[A-Za-z0-9_]+
       scope: constant.character.escape.astro
-    - match: \[
+    - match: \$\(
       push: string_interpolate
     - match: \'
       scope: punctuation.definition.string.end.astro
@@ -116,9 +116,9 @@ contexts:
 
   string_interpolate:
     - meta_scope: constant.character.escape.astro
-    - match: '\]'
+    - match: '\)'
       pop: true
-    - include: main 
+    - include: main
 
   multiline_comments:
     - meta_scope: comment.line.block.astro

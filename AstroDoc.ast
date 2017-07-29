@@ -420,11 +420,11 @@ STRINGS
     let year = 2015
     var story = "$language was started in the $year" # string interpolation.
 
-    let calc = '5 * 50 = [5 * 50]'
+    let calc = '5 * 50 = $(5 * 50)'
     # both single and double quotes can be used to represent a string literal.
 
     # String formatting
-    println("The price is [price.%0.2f]")
+    println("The price is $(price.%0.2f)")
 
     # non-standard string literals preceded by characters are not affected
     # by escape sequences, because they are processed verbatim.
@@ -552,7 +552,7 @@ IF EXPRESSION
         useEmail()
 
     if stockCode <- getStockCode('APPLE'):
-        println('APPLE: [stockCode]')
+        println('APPLE: $stockCode')
 
     var player = Player() 
     if $player <- getPlayer(name): # reassigning an variable with '$' 
@@ -764,7 +764,7 @@ FUNCTION DEFINITION (2)
     # or its return type may be left empty
     #: Str
     fun greet(name):
-        println "Hello [name]"
+        println "Hello $name"
 
     # to make sure nothing is returned from a function you can use `;` to terminate an exit expression or `_` as the exit expression.
     fun effect(mood):
@@ -796,7 +796,7 @@ FUNCTION DEFINITION (2)
     # between function calls.
     fun callCount():
         var count` = 0
-        println 'count = [count += 1]'
+        println 'count = $(count += 1)'
 
     callCount() # 1
     callCount() # 2
@@ -1012,9 +1012,9 @@ ACTORS # NEEDS REVIEW!!!
         new(name, rand(1, 1_000))
 
     fun sleep(actor): #: Task
-        println "[name] is sleeping for [time]ms"
+        println "$name is sleeping for $(time)ms"
         sleep time
-        println "[name] is done"
+        println "$name is done"
 
     var
         t1 = Task("Task-1") =>sleep

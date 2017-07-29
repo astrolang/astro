@@ -203,7 +203,7 @@
 	    "operators":{
 	        "patterns": [
 				{
-					"match": "=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|\\b(and|or|band|bor|bxor|bnot|shl|shr)\\b",
+					"match": "=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|\\b(and|or|not|band|bor|bxor|bnot|shl|shr)\\b",
 					"name": "keyword.operator.astro"
 				}
 			]
@@ -297,13 +297,10 @@
 	    "string_interpolate":{
 	        "patterns": [
 	            {
-	                "begin": "\\[",
-	                "end": "\\]",
+	                "begin": "\\$\\(",
+	                "end": "\\)",
 	                "name": "constant.character.escape.astro",
 	                "patterns": [
-	                    {
-	                        "include": "#nest_braces_and_self"
-	                    },
 	                    {
 	                        "include": "$self"
 	                    }
@@ -327,32 +324,6 @@
 	                    "0":{
 	                        "name": "punctuation.definition.string.end.astro"}},
 	                "name": "string.quoted.single.astro"
-	            }
-	        ]
-		},
-	    "nest_parens_and_self":{
-	        "patterns": [
-	            {
-	                "begin": "\\(",
-	                "end": "\\)",
-	                "patterns": [
-	                    {
-	                        "include": "$self"
-	                    }
-	                ]
-	            }
-	        ]
-		},
-	    "nest_braces_and_self":{
-	        "patterns": [
-	            {
-	                "begin": "\\[",
-	                "end": "\\]",
-	                "patterns": [
-	                    {
-	                        "include": "$self"
-	                    }
-	                ]
 	            }
 	        ]
 		}
