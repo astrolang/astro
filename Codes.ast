@@ -1,5 +1,5 @@
 # 29/07/17
-# Astro 0.1.03
+# Astro 0.1.04
 let scores = {  Ade:146, Appy:150, Orobo:146, Tim:100, Kay:150, Valon:99 }
 let ordered = sorted(scores.values())
 
