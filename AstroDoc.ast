@@ -546,7 +546,7 @@ SANDWICHED STATEMENTS
     var faveSoccerClub =
         (print 'You suck!'; team) if team == 'Manchester United' else ''
 
-    print('Hello, ', (print('World'); '!'))
+    print('Hello, ' + (print('World'); '!'))
 
 
 IF EXPRESSION
@@ -656,7 +656,7 @@ FOR LOOP
         print '$kind: $number'
 
     for name, (kind, number) <- nameList, table:
-        print(name, key, value)
+        print((name, key, value))
 
     # looping through a number
     for num = 50: num
@@ -773,7 +773,7 @@ FUNCTION DEFINITION (2)
 
     # if a function returns nothing, it can is annotated Nada 
     fun print(point): ## -> Nada 
-        print point.|a, b|
+        print(point.|a, b|)
     
     # or its return type may be left empty
     ## Str
@@ -1242,7 +1242,7 @@ IDENTITY/REFERENCE EQUALITY
 
 FUNCTION == METHODS (UFCS)
     fun show(p): ## Person
-        print(self.name, self.age)
+        print((self.name, self.age))
     ..
 
     show nigel
@@ -1289,7 +1289,7 @@ SUBJECT REPEAT SYNTACTIC SUGARS
     # however tupling cascading dot returns a closed tuple
     var name, version = haskell =>name, =>version
     var first, second = getPerson =>('Seamus'), =>('Flinn')
-    print john.|name, address|.toUppercase()
+    print(john.|name, address|.toUppercase())
 
 COVARIANCE
     type Person(name, age)
@@ -1298,7 +1298,7 @@ COVARIANCE
 
     ## Person
     fun show(p): # a covariant parameter can take a subtype too.
-        print(p.name, p.age)
+        print((p.name, p.age))
 
     show Person('Tony Stark', 36)
     show Employee('Peter Parker', 17, 'Photographer')
