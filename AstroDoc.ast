@@ -1470,15 +1470,22 @@ TRY, CATCH & ENSURE
     
     try: 
         process bigData  
-    catch err:  
+    catch err: ## DataCorruptErr
         print err.msg
     ensure:
-        restore bigDataf
+        restore bigData
 
+    # a catch body can be ommitted if it's only printing the error's message 
+    try:
+        process bigData
+    catch err ## DataCorruptErr
+
+    # managed resource 
     try process(bigData):
     catch err: ## DivByZeroError
         print err.msg
 
+    # managed resource with assignment
     try data <- getData(): 
         use data 
 
