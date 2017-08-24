@@ -83,7 +83,7 @@ fun main(args): ## Array[Str]
     print("astro comes after astro       = $(a > b.lower())")
 
 # created: 23/07/17 (Astro 0.1.02)
-# edited: 05/08/17 (Astro 0.1.04)
+# edited: 24/08/17 (Astro 0.1.05)
 # ABC Problem
 fun abc(s, list):
   return true if s.isEmpty() 
@@ -96,10 +96,10 @@ let test = ["A", "BARK","BOOK","TREAT","COMMON","SQUAD","CONFUSE"]
 let list = ["BO","XK","DQ","CP","NA","GT","RE","TG","QD","FS","JW",
 "HU","VI","AN","OB","ER","FS","LY","PC","ZM"]
 for s <- test:
-    println "$(s.%-8s) | $(abc(s, list))" 
+    print "$(s.%-8s) | $(abc(s, list))" 
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited: 05/08/17 (Astro 0.1.04)
+# edited: 24/08/17 (Astro 0.1.05)
 # 99 Bottles of Beer
 fun bottles(n): 
     | 0 -> "No more bottles"
@@ -107,7 +107,7 @@ fun bottles(n):
     | _ -> "$n bottles"
     
 for n <- [100:1]:
-    println """
+    print """
     $(bottles n) of beer on the wall
     $(bottles n) of beer
     Take one down, pass it around
@@ -120,16 +120,16 @@ for n <- [100:1]:
 fun rootMeanSq(l): sqrt(mean(l²))
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited:
+# edited: 24/08/17 (Astro 0.1.05)
 # Caesar Cipher 
 fun caesar(s, k, decode: false):
     if decode: k = 26 - k 
     "".join(char((int(c) - 65 + k) % 26 + 65) | c <- s.upper(), "a" <= c <= "A")
 
 let msg = "The quick brown fox jumped over the lazy dogs"
-println msg
+print msg
 let enc = caesar(msg, 11)
-println =>(enc) =>(caesar(enc, 11, decode: true))
+print =>(enc) =>(caesar(enc, 11, decode: true))
 
 # created: 23/07/17 (Astro 0.1.01)
 # edited:
@@ -139,26 +139,26 @@ mean([1:10])
 mean([])
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited:
+# edited: 24/08/17 (Astro 0.1.05)
 # Hello World/Text 
-println "Hello world!"
+print "Hello world!"
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited: 05/08/17 (Astro 0.1.04)
+# edited: 24/08/17 (Astro 0.1.05)
 # 15 Puzzle 
 type Puzzle(items: {:}, position: -1)
  
 fun mainFrame(puz):
     let d = puz.items
-    println '+-----+-----+-----+-----+'
-    println '|$(d[1])|$(d[2])|$(d[3])|$(d[4])|'
-    println '+-----+-----+-----+-----+'
-    println '|$(d[5])|$(d[6])|$(d[7])|$(d[8])|'
-    println '+-----+-----+-----+-----+'
-    println '|$(d[9])|$(d[10])|$(d[11])|$(d[12])|'
-    println '+-----+-----+-----+-----+'
-    println '|$(d[13])|$(d[14])|$(d[15])|$(d[16])|'
-    println '+-----+-----+-----+-----+'
+    print '+-----+-----+-----+-----+'
+    print '|$(d[1])|$(d[2])|$(d[3])|$(d[4])|'
+    print '+-----+-----+-----+-----+'
+    print '|$(d[5])|$(d[6])|$(d[7])|$(d[8])|'
+    print '+-----+-----+-----+-----+'
+    print '|$(d[9])|$(d[10])|$(d[11])|$(d[12])|'
+    print '+-----+-----+-----+-----+'
+    print '|$(d[13])|$(d[14])|$(d[15])|$(d[16])|'
+    print '+-----+-----+-----+-----+'
 
 fun format(puz, ch):
     let ch = ch.trim()
@@ -216,18 +216,18 @@ fun gameOver(puz):
 let g = Puzzle()
 g.buildBoard(int scanln 'Enter the difficulty : 0 1 2\n2 => highest 0=> lowest\n')
 g.mainFrame()
-println 'Enter 0 to exit'
+print 'Enter 0 to exit'
 loop:
-    println 'Hello user:\nTo change the position just enter the no. near it'
+    print 'Hello user:\nTo change the position just enter the no. near it'
     let lst  = g.valid_moves()
     let lst1 = []
     for i <- lst:
         lst1.append(int(i.trim()))
         print '[i.strip()] \t'
-    println()
+    print()
     let x = int(input())
     | 0        -> break
-    | !in lst1 -> println 'Wrong move'
+    | !in lst1 -> print 'Wrong move'
     | else     -> g.change(x)
     g.mainFrame()
     if g.gameOver():
@@ -235,13 +235,13 @@ loop:
         break
 
 # ceated: 13/06/17 (Astro 0.1.0)
-# edited: 05/08/17 (Astro 0.1.04)
+# edited: 24/08/17 (Astro 0.1.05)
 # 100 Doors
 -- unoptimized  
 var doors = falses 100
 for a <- [:101]:
     for b <- [a:a:101]: doors[b] = !doors[b]
-    println "Door $a is $('open.' if doors[a] else 'closed.')"
+    print "Door $a is $('open.' if doors[a] else 'closed.')"
 
 -- optimized
-for i <- [:10]: println "Door $(i²) is open."
+for i <- [:10]: print "Door $(i²) is open."
