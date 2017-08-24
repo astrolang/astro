@@ -1341,7 +1341,11 @@ EXPORT
 
 GENERICS
     # declaring a generic type T.
-    #: $T, T, T -> T, = T::Int 
+    fun add(a, b): #: $T, T -> T
+        return a + b
+
+    # where the type of the generic symbol is hinted, '$' can be ommitted from its declaration
+    #: T, T, T -> T = T::Int 
     fun add(a, b, c):
         var d #: T
         d = a + b + c
@@ -1355,7 +1359,7 @@ GENERICS
     # and depending on the staticness of the subject, the an error will be thrown
     # at compile-time or runtime when the range or value is exceeded.
     var age #: Int{1..120} # age is constrained between 1 and 120
-    var name #: $s{}::Str # s is any value constrained to Str 
+    var name #: s{}::Str # s is any value constrained to Str 
 
     # value constraints are subject declarations in their own right 
     # and can cause name clashes
@@ -1369,13 +1373,13 @@ GENERICS
     var list = MyList[Int, 5]()
 
     # type reference
-    #: MyList, Int -> $T = T::MyList.T
+    #: MyList, Int -> T = T::MyList.T
     fun getItem(list, index):
         list[index]
 
-    let identifier #: $T<:Identfiable
+    let identifier #: T<:Identfiable
 
-    var pegasus #: $U<:Horse&Bird
+    var pegasus #: U<:Horse&Bird
     var x = 10
     let y #: x' # this makes y have the same type as x
 
