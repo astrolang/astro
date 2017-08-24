@@ -1,7 +1,7 @@
 import fs = require('fs');
-import {Lexer}   from "./AstroLexer"
-import {Parser}  from "./AstroParser"
-import {Utility} from "./AstroUtility"
+import {Lexer}   from "../AstroCompiler/AstroLexer"
+import {Parser}  from "../AstroCompiler/AstroParser"
+import {Utility} from "../AstroCompiler/AstroUtility"
 
 let fileName1 = './test1.ast';
 let fileName2 = './test2.ast';
