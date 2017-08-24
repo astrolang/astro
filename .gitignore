@@ -12,6 +12,7 @@ Old/
 # generated javascript files 
 AstroCompiler/*.js
 AstroCompiler/*.map
+Tests/js/
 
 # temporary files 
 temporary.abnf
