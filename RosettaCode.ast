@@ -1,5 +1,89 @@
-# created: 23/07/17 (Astro 0.1.02)
+# created: 22/08/17 (Astro 0.1.05)
 # edited:
+# Integer comparison 
+let a = scan('Enter value of a: ')
+let b = scan('Enter value of b: ')
+ 
+if a < b:
+    print 'a is less than b'
+elif a > b:
+    print 'a is greater than b'
+elif a == b:
+    print 'a is equal to b'
+
+# created: 22/08/17 (Astro 0.1.05)
+# edited:
+# Number reversal game
+'''
+number reversal game
+    Given a jumbled list of the numbers 1 to 9
+    Show the list.
+    Ask the player how many digits from the left to reverse.
+    Reverse those digits then ask again.
+    until all the digits end up in ascending order.
+'''.print()
+
+var data, trials = list('123456789'), 0
+shuffle(data) while data == sorted(data):
+    
+while data != sorted(data):
+    trials += 1
+    flip = int(scan('#$:2(trials): LIST: $(join(' ', data)) Flip how many?: '))
+    data[:flip] = reversed(data[:flip])
+ 
+print '\nYou took $:2(trials) attempts to put the digits in order!'
+
+# created: 22/08/17 (Astro 0.1.05)
+# edited:
+# Queue 
+let myQueue = Queue()
+myQueue.put 'foo'
+myQueue.put 'bar'
+myQueue.put 'baz'
+print myQueue.get() # => 'foo'
+print myQueue.get() # => 'bar'
+print myQueue.get() # => 'baz'
+
+# created: 22/08/17 (Astro 0.1.05)
+# edited:
+# Send an unknown method call # currently unsupported
+type Example
+fun foo(ex, x): 42 + x
+ 
+name = 'foo'
+call(name, Example(), 5) # => 47
+
+# created: 22/08/17 (Astro 0.1.05)
+# edited:
+# SHA-1
+let hash = sha1 bytes('Ars longa, vita brevis', encoding:'ascii')
+
+# created: 22/08/17 (Astro 0.1.05)
+# edited:
+# Tokenize a string
+let text = 'Hello,How,Are,You,Today'
+let tokens = text.split(/,/)
+print join('.', tokens)
+
+# created: 22/08/17 (Astro 0.1.05)
+# edited: 
+# String comparison
+fun main(args): ## Array[Str]
+    let a = "astro"
+    let b = "astro"
+    print("Case sensitive comparisons:\n")
+    print("astro and astro are equal     = $(a == b)")
+    print("astro and astro are not equal = $(a != b)")
+    print("astro comes before astro      = $(a < b)")
+    print("astro comes after astro       = $(a > b)")
+    print("\nCase insensitive comparisons:\n")
+    print("astro and astro are equal     = $(a == b.lower())")
+    print("astro and astro are not equal = $(a != b.lower())")
+    print("astro comes before astro      = $(a < b.lower())")
+    print("astro comes after astro       = $(a > b.lower())")
+
+# created: 23/07/17 (Astro 0.1.02)
+# edited: 05/08/17 (Astro 0.1.04)
 # ABC Problem
 fun abc(s, list):
   return true if s.isEmpty() 
@@ -12,10 +96,10 @@ let test = ["A", "BARK","BOOK","TREAT","COMMON","SQUAD","CONFUSE"]
 let list = ["BO","XK","DQ","CP","NA","GT","RE","TG","QD","FS","JW",
 "HU","VI","AN","OB","ER","FS","LY","PC","ZM"]
 for s <- test:
-    println "[s.%-8s] | [abc(s, list)]" 
+    println "$(s.%-8s) | $(abc(s, list))" 
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited:
+# edited: 05/08/17 (Astro 0.1.04)
 # 99 Bottles of Beer
 fun bottles(n): 
     | 0 -> "No more bottles"
@@ -24,10 +108,10 @@ fun bottles(n):
     
 for n <- [100:1]:
     println """
-    [bottles n] of beer on the wall
-    [bottles n] of beer
+    $(bottles n) of beer on the wall
+    $(bottles n) of beer
     Take one down, pass it around
-    [bottles n-1] of beer on the wall\n
+    $(bottles n-1) of beer on the wall\n
     """
 
 # created: 23/07/17 (Astro 0.1.01)
@@ -60,24 +144,24 @@ mean([])
 println "Hello world!"
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited:
+# edited: 05/08/17 (Astro 0.1.04)
 # 15 Puzzle 
 type Puzzle(items: {:}, position: -1)
  
 fun mainFrame(puz):
     let d = puz.items
     println '+-----+-----+-----+-----+'
-    println '|[d[1]]|[d[2]]|[d[3]]|[d[4]]|'
+    println '|$(d[1])|$(d[2])|$(d[3])|$(d[4])|'
     println '+-----+-----+-----+-----+'
-    println '|[d[5]]|[d[6]]|[d[7]]|[d[8]]|'
+    println '|$(d[5])|$(d[6])|$(d[7])|$(d[8])|'
     println '+-----+-----+-----+-----+'
-    println '|[d[9]]|[d[10]]|[d[11]]|[d[12]]|'
+    println '|$(d[9])|$(d[10])|$(d[11])|$(d[12])|'
     println '+-----+-----+-----+-----+'
-    println '|[d[13]]|[d[14]]|[d[15]]|[d[16]]|'
+    println '|$(d[13])|$(d[14])|$(d[15])|$(d[16])|'
     println '+-----+-----+-----+-----+'
 
 fun format(puz, ch):
-    let ch = ch.strip()
+    let ch = ch.trim()
     ch.size 
     | 1 -> '  $ch   '
     | 2 -> '  $ch '
@@ -130,8 +214,7 @@ fun gameOver(puz):
  
  
 let g = Puzzle()
-g.buildBoard(int scanln 'Enter the difficulty : 0 1 2\n2 '
-'=> highest 0=> lowest\n')
+g.buildBoard(int scanln 'Enter the difficulty : 0 1 2\n2 => highest 0=> lowest\n')
 g.mainFrame()
 println 'Enter 0 to exit'
 loop:
@@ -152,13 +235,13 @@ loop:
         break
 
 # ceated: 13/06/17 (Astro 0.1.0)
-# edited: 23/07/17 (Astro 0.1.0)
+# edited: 05/08/17 (Astro 0.1.04)
 # 100 Doors
 -- unoptimized  
 var doors = falses 100
 for a <- [:101]:
     for b <- [a:a:101]: doors[b] = !doors[b]
-    println "Door $a is ['open.' if doors[a] else 'closed.']"
+    println "Door $a is $('open.' if doors[a] else 'closed.')"
 
 -- optimized
-for i <- [:10]: println "Door [i²] is open."
+for i <- [:10]: println "Door $(i²) is open."

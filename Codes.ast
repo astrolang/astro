@@ -1,6 +1,117 @@
+# 22/08/17
+# Astro 0.1.04+
+
+# Integer comparison 
+let a = scan('Enter value of a: ')
+let b = scan('Enter value of b: ')
+ 
+if a < b:
+    print 'a is less than b'
+elif a > b:
+    print 'a is greater than b'
+elif a == b:
+    print 'a is equal to b'
+
+# Number reversal game
+'''
+number reversal game
+    Given a jumbled list of the numbers 1 to 9
+    Show the list.
+    Ask the player how many digits from the left to reverse.
+    Reverse those digits then ask again.
+    until all the digits end up in ascending order.
+'''.print()
+
+var data, trials = list('123456789'), 0
+shuffle(data) while data == sorted(data):
+    
+while data != sorted(data):
+    trials += 1
+    flip = int(scan('#$:2(trials): LIST: $(join(' ', data)) Flip how many?: '))
+    data[:flip] = reversed(data[:flip])
+ 
+print '\nYou took $:2(trials) attempts to put the digits in order!'
+
+# Queue 
+let myQueue = Queue()
+myQueue.put 'foo'
+myQueue.put 'bar'
+myQueue.put 'baz'
+print myQueue.get() # => 'foo'
+print myQueue.get() # => 'bar'
+print myQueue.get() # => 'baz'
+
+# Send an unknown method call # currently unsupported
+type Example
+fun foo(ex, x): 42 + x
+ 
+name = 'foo'
+call(name, Example(), 5) # => 47
+
+# SHA-1
+let hash = sha1 bytes('Ars longa, vita brevis', encoding:'ascii')
+
+# Tokenize a string
+let text = 'Hello,How,Are,You,Today'
+let tokens = text.split(/,/)
+print join('.', tokens)
+
+# String comparison
+fun main(args): ## Array[Str]
+    let a = "astro"
+    let b = "astro"
+    print("Case sensitive comparisons:\n")
+    print("astro and astro are equal     = $(a == b)")
+    print("astro and astro are not equal = $(a != b)")
+    print("astro comes before astro      = $(a < b)")
+    print("astro comes after astro       = $(a > b)")
+    print("\nCase insensitive comparisons:\n")
+    print("astro and astro are equal     = $(a == b.lower())")
+    print("astro and astro are not equal = $(a != b.lower())")
+    print("astro comes before astro      = $(a < b.lower())")
+    print("astro comes after astro       = $(a > b.lower())")
+
+# 19/08/17
+# Astro 0.1.04
+import csv
+import selenium [webdriver]
+
+let keyword     = 'restaurant'
+let coordLat    = '6.5550212'
+let coordLong   = '3.3060765'
+let chromePath  = 'C:/Users/Nypro/Desktop/chromedriver'
+let url         = 'https://www.google.com/maps/search/$keyword/@$coordLat,$coordLong,11z'
+let driver      = webdriver.Chrome(chromePath)
+
+fun main():
+    driver.get(url)
+    time.sleep(5)
+
+    let businessDivs = driver.findElementsByClassName('section-result')
+    let businessList = []
+
+    for biz <- businessDivs[:3]:  # testing with three first
+        biz.click()
+        time.sleep(3)
+        let name = driver.findElementByClassName('section-hero-header-title').text
+        let addy = driver.findElementByClassName('section-result-title').text
+        let contact = driver.findElementByClassName('section-result-title').text
+        let site = driver.findElementByClassName('section-result-title').text
+        let row = [name, addy, contact, site]
+        businessList.append(row)
+
+    columns = ['NAME', 'ADDRESS', 'CONTACT', 'SITE']
+
+    try dataFile <- open('map_scrape_data.csv', 'w'):
+        let dataWriter = csv.writer(dataFile)
+        dataWriter.writerow(columns)
+        for biz <- businessList:
+            dataWriter.writerow(biz)
+
+
 # 29/07/17
 # Astro 0.1.04
-let scores = {  Ade:146, Appy:150, Orobo:146, Tim:100, Kay:150, Valon:99 }
+let scores = { Ade:146, Appy:150, Orobo:146, Tim:100, Kay:150, Valon:99 }
 let ordered = sorted(scores.values())
 
 let position, prevPos = 0 
@@ -144,6 +255,8 @@ type ShoppingCart(!totals:0, !items:{:})
 fun addItem(cart, itemName, quantity, price): 
     cart.total += price * quantity
     cart.items{itemName} = quantity
+    card.items{"key"}
+
 
 fun removeItem(cart, itemName, quantity, price): 
     if quantity > cart.items{itemName}:
