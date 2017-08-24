@@ -1,6 +1,69 @@
-# 29/07/17
+# 21/08/17
+# Astro 0.1.05
+# STRING FORMATTING 
+# padding 
+let formatted = '$:>10(string)' 
+let formatted = '$:<10(string)'
+let formatted = '$:_<10(string)'
+let formatted = '$:^10(string)'
+# truncation 
+let formatted = '$:.10(string)'
+# numbers 
+let formatted = '$:d(number)'
+let formatted = '$:f(number)'
+let formatted = '$:6.2f(number)'
+let formatted = '$:+d(number)'
+let formatted = '$:-f(number)'
+let formatted = '$:=-5f(number)'
+# date-time | custom objects 
+let formatted = '$:|Y-m-d H:M|(date)'
+
+
+# SHORTENED CATCH
+try dataFile <- open('map_scrape_data.csv', 'w'):
+    let dataWriter = csv.writer dataFile
+    dataWriter.writeRow data
+catch fnfe ## FileNotFoundErr
+# same as 
+catch fnfe: ## FileNotFoundErr
+    print fnfe.msg
+
+# PRINT STATEMENT (NO MORE -ln)
+print 'Hello, world!'
+
+# TYPE ANNOTATION (##)
+fun gcd(n, m): ## T, T -> T = T<:Integer
+    assert n && m != 0 
+    while m != 0:
+        if m < n: swap(m, n)
+    m = m % n 
+    n 
+
+# NO MORE ORDER SPECIFICATION IN GENERICS 
+type MyList: ## $T, l() = l::Int
+    let list = List[T](l, 0)
+    let size = l
+
+# VALUE CONSTRAINT SYNTAX CHANGED
+type MyList: ## T, l(1:10) = l::Int
+    let list = List[T](l, 0)
+    let size = l
+
+# CHANGED WHERE SYNTAX AND $ OPTIONAL IF GENERICS TYPE IS SPECIFIED
+fun min(a, b): ## T, T -> T = T<:Integer
+    a if a <= b else b 
+
+fun min(a, b): ## $T, T -> T
+    a if a <= b else b 
+
+
+# 19/08/17
 # Astro 0.1.04
-# 
+# IMPORT PATH 
+import selenium [webdriver]
+import selenium/webdriver/support/ui [WebDriverWait]
+
+# =====================================================
 
 # 27/07/17
 # Astro 0.1.03
