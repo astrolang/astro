@@ -1341,7 +1341,7 @@ EXPORT
 
 GENERICS
     # declaring a generic type T.
-    #: $T, T, T -> T, where T::Int 
+    #: $T, T, T -> T, = T::Int 
     fun add(a, b, c):
         var d #: T
         d = a + b + c
@@ -1351,7 +1351,7 @@ GENERICS
     var sum = add(2, 4, 6)
 
     # value constraints 
-    # they allow the code to specify a range of valuesa subject should have, 
+    # they allow the code to specify a range of values a subject should have, 
     # and depending on the staticness of the subject, the an error will be thrown
     # at compile-time or runtime when the range or value is exceeded.
     var age #: Int{1..120} # age is constrained between 1 and 120
@@ -1361,7 +1361,7 @@ GENERICS
     # and can cause name clashes
 
     # you can specify the order generic parameters
-    type MyList: #: ${T, l{}} where l<:Int
+    type MyList: #: ${T, l{}} = l<:Int
         let list = List[T](l, 0)
         let size = l
     ..
@@ -1369,7 +1369,7 @@ GENERICS
     var list = MyList[Int, 5]()
 
     # type reference
-    #: MyList, Int -> $T where T::MyList.T
+    #: MyList, Int -> $T = T::MyList.T
     fun getItem(list, index):
         list[index]
 
