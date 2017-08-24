@@ -32,11 +32,11 @@ IDENTIFIERS
     # can be followed with characters, digits or underscore.
     var name
     fun show99BottlesOfBeer():
-        println lyrics
+        print lyrics
 
     # by convention, names use camel case style
     fun createMeme():
-        println(memes[rand()])
+        print(memes[rand()])
 
     # by convention, subject and function names start with a lowercase character
     # by convention, type names start with an uppercase character.
@@ -63,8 +63,7 @@ FUNCTION DEFINITION (1)
     var sum = add(25, 52)
 
     fun echo(value):
-        print value
-        return value 
+        print(value, last:'')
         
     # if a function takes one argument, the brackets can be ommitted
     # the argument one of BRINSL (boolean, regex, identifier, number, string, lambda)
@@ -226,7 +225,7 @@ TUPLES
     # practical example 
     fun check(f, ...args):
         let test = f(...args[:end-1]) == args[end]
-        println =>('Test passed') if test else =>('Test failed')
+        print =>('Test passed') if test else =>('Test failed')
     
     check(add, 5, 3, 8)
 
@@ -424,7 +423,7 @@ STRINGS
     # both single and double quotes can be used to represent a string literal.
 
     # String formatting
-    println("The price is $(price.%0.2f)")
+    print("The price is $(price.%0.2f)")
 
     # non-standard string literals preceded by characters are not affected
     # by escape sequences, because they are processed verbatim.
@@ -467,16 +466,16 @@ MULTILINE EXPRESSIONS
 
     if x == 0, ...
     if y == 1: 
-        println 'cool!'
+        print 'cool!'
 
 DO BLOCK
     # a do block represents a scope
     let country = 'India'
     do:
         let country = 'Nigeria'
-        println(country) # Nigeria
+        print(country) # Nigeria
 
-    println(country) # India
+    print(country) # India
 
     # multiple statements can be written on one line separated by semi-colons.
     var temp = a ; a = b ; b = temp
@@ -487,8 +486,8 @@ USE BLOCK:
     # declared in it's parameter section.
     let x, y, z = 1, 2, 3
     use x, y:
-        println x 
-        println z # Error! can't access z from this scope
+        print x 
+        print z # Error! can't access z from this scope
 
 
 PASS KEYWORD
@@ -510,7 +509,7 @@ INDENTATION
         =>trim()
         =>reverse()
         # indented dot/arrow notation links with the argument of the previous  line.
-    =>println()
+    =>print()
 
     playMusic(
         'Asa',
@@ -530,9 +529,9 @@ SANDWICHED STATEMENTS
     # you can sandwich multiple expressions where a single expression is expected.
     # by putting them in brackets. This is however discouraged.+
     var faveSoccerClub =
-        (println 'You suck!'; team) if team == 'Manchester United' else ''
+        (print 'You suck!'; team) if team == 'Manchester United' else ''
 
-    println('Hello, ', (println('World'); '!'))
+    print('Hello, ', (print('World'); '!'))
 
 
 IF EXPRESSION
@@ -552,14 +551,14 @@ IF EXPRESSION
         useEmail()
 
     if stockCode <- getStockCode('APPLE'):
-        println('APPLE: $stockCode')
+        print('APPLE: $stockCode')
 
     var player = Player() 
     if $player <- getPlayer(name): # reassigning an variable with '$' 
-        println player.fitness
+        print player.fitness
 
     if copy <- copy(document):
-        println(copy)
+        print(copy)
 
     # nested if statements can be written together with their corresponding
     # else statements stacked accordingly
@@ -577,7 +576,7 @@ NIL
     # sometimes, it is important to represent an empty or missing state, this can be
     # achieved in Astro with optional typing.
     var code ## Str # cannot be nil
-    var program = 'println(\"Hello World\")' ## Str|Nil
+    var program = 'print(\"Hello World\")' ## Str|Nil
     var anotherProgram ## Str?
 
     # a nilable cannot be assigned to a non-nilable subject without a proper nil coalescing with a fallback value.
@@ -600,9 +599,9 @@ NIL
     b if b? else 5
 
     if isRecieving? == true:
-        println('boolean value recieved')
+        print('boolean value recieved')
     elif isRecieving.nil:
-        println('remote server stopped recieving')
+        print('remote server stopped recieving')
 
 BOOLEAN EXPRESSIONS
     # Astro discourages reptition in conditional expression.
@@ -629,7 +628,7 @@ BOOLEAN EXPRESSIONS
 
 FOR LOOP
     for i <- [1:11]:
-        println i
+        print i
 
     let interestingNumbers = {
         prime      : 2, 3, 5, 7, 11, 13
@@ -639,19 +638,19 @@ FOR LOOP
 
     # pattern matching with for loop
     for (kind, number) <- interestingNumbers: # parallel pairing through a dictionary.
-        println '$kind: $number'
+        print '$kind: $number'
 
     for name, (kind, number) <- nameList, table:
-        println(name, key, value)
+        print(name, key, value)
 
     # looping through a number
     for num = 50: num
 
     for up, down ← [1:21], [21:1]: # parallel pairing through ranges.
-        println '$up <=> $down'
+        print '$up <=> $down'
 
     for upper <- [1:21], lower <- [1:21]: # nested iterations through ranges.
-        println '$upper <=> $lower'
+        print '$upper <=> $lower'
 
     for i <- [1:21]:
         i += 1 # error! immutable subject.
@@ -666,15 +665,15 @@ FOR LOOP
     #  the 'end' block which executes when a loop does not break
     for line <- file:
         if line.contains code:
-            print "code found!"
+            echo "code found!"
             break 
     end:
-        print "code not found!"
+        echo "code not found!"
 
     file.writeln =>(el) for el <- array end =>()
 
     for _ <- [1:fifty]:
-        println('Hello')
+        print('Hello')
     
     yield x for x <- stream()
 
@@ -698,13 +697,13 @@ BREAK WITH
 
 IN
     if student.name in defaulterList:
-        println '[student.name] hasn\'t paid yet. Contact parents'
+        print '[student.name] hasn\'t paid yet. Contact parents'
 
     if 'ps4' !in birthdayPresents:
-        println 'Aaargh! Everyone hates me'
+        print 'Aaargh! Everyone hates me'
 
     if /dollar[s]?/ in sentence:
-        println 'Change occurrences of "Dollar" to "Pound"'
+        print 'Change occurrences of "Dollar" to "Pound"'
 
 CHAINED CONDITION CONSTRUCTS
     if person in auditionRoster, if person.mark > 40.0:
@@ -716,24 +715,24 @@ CHAINED CONDITION CONSTRUCTS
 
 WHILE LOOP & LOOP
     while file.hasNext():
-        println file.next()
+        print file.next()
     
     # loop
     loop: # synonymous with while true
-        println '>>> '
+        print '>>> '
         let input = scan
         let tokens = lex input
         let ast = parse tokens
         let bytecodes = compile ast
         let result = interpret bytecodes
-        println result
+        print result
 
     redo:
         lines = gen.readLine() # evaluated at least once.
     while gen.hasNext()
 
     while list.size > 0, for name <- list:
-        print(name, newline)
+        echo('$name $newline')
         list.removeTop()
 
 CONDITION EXPRESSION
@@ -742,16 +741,16 @@ CONDITION EXPRESSION
 
     var absValue = a if a > 0 else -a
 
-    println =>('Test passed') if test else =>('Test failed')
+    print =>('Test passed') if test else =>('Test failed')
 
     # a ternary operator statement needs to be encapsulated in brackets
     # where a semicolon is expected
-    if a == (b if b > c else c): print a
+    if a == (b if b > c else c): echo a
 
 MAIN FUNCTION  
     # if a module provides a main function, it will become the module's entry point
     fun main(): 
-        println "Hello World!"
+        print "Hello World!"
 
 FUNCTION DEFINITION (2)
     fun multiply(a, b):
@@ -764,7 +763,7 @@ FUNCTION DEFINITION (2)
     # or its return type may be left empty
     ## Str
     fun greet(name):
-        println "Hello $name"
+        print "Hello $name"
 
     # to make sure nothing is returned from a function you can use `;` to terminate an exit expression or `_` as the exit expression.
     fun effect(mood):
@@ -796,7 +795,7 @@ FUNCTION DEFINITION (2)
     # between function calls.
     fun callCount():
         var count` = 0
-        println 'count = $(count += 1)'
+        print 'count = $(count += 1)'
 
     callCount() # 1
     callCount() # 2
@@ -821,7 +820,7 @@ FUNCTION DEFINITION (2)
     signUp(username:'appcypher', password:'bazinga')
 
     fun sendMessage(message, to.recipient):
-        println((message + recipient).toUppercase())
+        print((message + recipient).toUppercase())
 
     sendMessage('Hello', to:'Cantell')
 
@@ -903,7 +902,7 @@ CONTEXT LABELLING
         while file.hasNext(): 
             var line = file.nextLine()
             if line != "":
-                println line
+                print line
             else: 
                 break at outer
     ..
@@ -925,20 +924,20 @@ USEFUL CONSTANTS
 PATTERN MATCHING
     # match block is like switch-case statement, and it matches against the expression on the previous line.
     object
-    | 0           -> 1, spill # a keyword for moving to the next case
+    | 0           -> spill # a keyword for moving to the next case
     | 1||23||40   -> .name + n
     | n           -> n * n
     | = getVal()? -> .value
-    | [x, ...y]   -> println "list"
+    | [x, ...y]   -> print "list"
     | Point(x, y) -> x * y
-    | /[a-z]+/    -> println "regex"
-    | [x, y, z]   -> println "list"
-    | {x, y, z}   -> println "set"
-    | {x:, y:}    -> println "dict"
-    | (x, y)      -> println "list"
-    | {a:b}       -> println "dict"
-    | [a:b]       -> println "range"
-    | Int         -> println "integer"
+    | /[a-z]+/    -> print "regex"
+    | [x, y, z]   -> print "list"
+    | {x, y, z}   -> print "set"
+    | {x:, y:}    -> print "dict"
+    | (x, y)      -> print "list"
+    | {a:b}       -> print "dict"
+    | [a:b]       -> print "range"
+    | Int         -> print "integer"
     | $outer      -> outer
     | 5 if x == z -> doSth() # exhaustive pattern matching
     | .name == 45 -> 45
@@ -962,7 +961,7 @@ PATTERN MATCHING
     while turn in ['y', 'Y', 'n', 'N']:
         | 'y'||'Y' -> return 1
         | 'n'||'N' -> return 0
-        | _       -> print "its an invalid choice"
+        | _        -> print "its an invalid choice"
 
 ASSIGNMENT PATTERN MATCHING
     let [name, age, _, ...rest] = list
@@ -982,7 +981,7 @@ ASSIGNMENT PATTERN MATCHING
 
     # pattern matching with iterators
     for (x, y) <- dictionary:
-        println "$x : $y"
+        print "$x : $y"
 
 PATTERN MATCHING OPERATOR  
     let pattern = /\d+/
@@ -1001,7 +1000,7 @@ COROUTINES & GENERATORS
 
 ASYNC AND AWAIT
     fun showUrlText(url): #@ async
-        println(str html) await fetch url
+        print(str html) await fetch url
     ..
 
 ACTORS # NEEDS REVIEW!!!
@@ -1012,9 +1011,9 @@ ACTORS # NEEDS REVIEW!!!
         new(name, rand(1, 1_000))
 
     fun sleep(actor): ## Task
-        println "$name is sleeping for $(time)ms"
+        print "$name is sleeping for $(time)ms"
         sleep time
-        println "$name is done"
+        print "$name is done"
 
     var
         t1 = Task("Task-1") =>sleep
@@ -1093,15 +1092,15 @@ TYPE EXTENSION
 INHERITANCE
     type Animal
     fun sound(animal): ## Animal
-        println 'Nothing'
+        print 'Nothing'
 
     type Bird <: Animal
     fun sound(bird): ## Bird # overrides supertype function.
-        println 'Chirp!'
+        print 'Chirp!'
 
     type Horse <: Animal:
     fun sound(horse): ## Horse
-        println 'Neigh!'
+        print 'Neigh!'
 
     # Astro supports multiple inheritance.
     type Pegasus <: Horse, Bird:
@@ -1203,18 +1202,18 @@ SINGLETONS
 
     window.addMouseListener(obj <: MouseAdapter:
         fun mouseClicked(self, event): ## _, MouseEvent
-            println "Mouse Clicked!"
+            print "Mouse Clicked!"
     )
 
 TYPE CHECKING
     if myCar :: Car:
-        println 'myCar is a Car'
+        print 'myCar is a Car'
 
     if myCar <: Car:
-        println 'myCar is a supertype of Car'
+        print 'myCar is a supertype of Car'
 
     if myCar !>: Car:
-        println 'myCar is not a supertype of Car'
+        print 'myCar is not a supertype of Car'
 
     head([1, 2, 3]) :: ([Int] -> Int)
 
@@ -1228,7 +1227,7 @@ IDENTITY/REFERENCE EQUALITY
 
 FUNCTION == METHODS (UFCS)
     fun show(p): ## Person
-        println(self.name, self.age)
+        print(self.name, self.age)
     ..
 
     show nigel
@@ -1275,7 +1274,7 @@ SUBJECT REPEAT SYNTACTIC SUGARS
     # however tupling cascading dot returns a closed tuple
     var name, version = haskell =>name, =>version
     var first, second = getPerson =>('Seamus'), =>('Flinn')
-    println john.|name, address|.toUppercase()
+    print john.|name, address|.toUppercase()
 
 COVARIANCE
     type Person(name, age)
@@ -1284,7 +1283,7 @@ COVARIANCE
 
     ## Person
     fun show(p): # a covariant parameter can take a subtype too.
-        println(p.name, p.age)
+        print(p.name, p.age)
 
     show Person('Tony Stark', 36)
     show Employee('Peter Parker', 17, 'Photographer')
@@ -1429,7 +1428,7 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
     / = prefix and postfix
 
     # you can call an operator like a function
-    println(+(56, 5))
+    print(+(56, 5))
 
     fun in(x, y): #@ infixl(5, left)
         for a <- y: 
@@ -1457,13 +1456,13 @@ TRY, CATCH & ENSURE
     try: 
         process bigData  
     catch err:  
-        println err.msg
+        print err.msg
     ensure:
         restore bigDataf
 
     try process(bigData):
     catch err: ## DivByZeroError
-        println err.msg
+        print err.msg
 
     try data <- getData(): 
         use data 
@@ -1473,9 +1472,9 @@ TRY, CATCH & ENSURE
     defer: file.close()
 
     try, while line <- file.readNextLine(): 
-        println line
+        print line
     catch err: ## FileNotFounError
-        println 'File missing!'
+        print 'File missing!'
 
     # error coalescing  
     let x = getValue() !! 78
@@ -1632,7 +1631,7 @@ WHAT IF
     var sum = 5 + 6
 
     for i <- stream() if i > 25 {
-        println i
+        print i
     }
 
     fun fib(n) {
@@ -1653,7 +1652,7 @@ WHAT IF
     var students = getStudentList()
     students.@gpa.map -> ($1 + 1)
 
-    20.each -> { println "Hello" }
+    20.each -> { print "Hello" }
 
     type {
         Person(!name, !age)
