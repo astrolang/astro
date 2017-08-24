@@ -94,9 +94,9 @@ contexts:
     - meta_scope: string.quoted.double.astro
     - match: \\(\[|t|n|r|b|q|\"|'|\$|\\)
       scope: constant.character.escape.astro
-    - match: \$[A-Za-z0-9_]+
+    - match: \$[A-Za-z_][A-Za-z0-9_]*
       scope: constant.character.escape.astro
-    - match: \$\(
+    - match: \$(:.+)?\(
       push: string_interpolate
     - match: \"
       scope: punctuation.definition.string.end.astro
@@ -106,9 +106,9 @@ contexts:
     - meta_scope: string.quoted.single.astro
     - match: \\(\[|t|n|r|b|q|\"|'|\$|\\)
       scope: constant.character.escape.astro
-    - match: \$[A-Za-z0-9_]+
+    - match: \$[A-Za-z_][A-Za-z0-9_]*
       scope: constant.character.escape.astro
-    - match: \$\(
+    - match: \$(:.+)?\(
       push: string_interpolate
     - match: \'
       scope: punctuation.definition.string.end.astro
