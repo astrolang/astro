@@ -528,7 +528,7 @@ INDENTATION
 
 SANDWICHED STATEMENTS
     # you can sandwich multiple expressions where a single expression is expected.
-    # by putting them in brackets.
+    # by putting them in brackets. This is however discouraged.+
     var faveSoccerClub =
         (println 'You suck!'; team) if team == 'Manchester United' else ''
 
@@ -558,7 +558,7 @@ IF EXPRESSION
     if $player <- getPlayer(name): # reassigning an variable with '$' 
         println player.fitness
 
-    if copy <- getCopy():
+    if copy <- copy(document):
         println(copy)
 
     # nested if statements can be written together with their corresponding
@@ -1333,6 +1333,8 @@ MODULES AND IMPORTS # NEEDS REVIEW!!!
     import math, dataframes # import all
     import math except [tan, atan] # import all except
     import math [pi:π, cos, sin:sine] # aliasing
+    import nypro/code/math [pi, cos] # module path  
+    import ../math 
 
 EXPORT  
     export math except [cos, sin]
