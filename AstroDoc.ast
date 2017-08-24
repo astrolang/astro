@@ -422,9 +422,6 @@ STRINGS
     let calc = '5 * 50 = $(5 * 50)'
     # both single and double quotes can be used to represent a string literal.
 
-    # String formatting
-    print("The price is $(price.%0.2f)")
-
     # non-standard string literals preceded by characters are not affected
     # by escape sequences, because they are processed verbatim.
     var verbatimStr = r_"Use '\t' to represent tab"
@@ -447,6 +444,24 @@ STRINGS
     # string continuation
     var greeting = 'Hello, ' ...
     'World!'
+
+STRING FORMATTING  
+    # padding 
+    let leftPadding        = 'left padding:        $:>10(string)' 
+    let rightPadding       = 'right padding:       $:<10(string)'
+    let placeholderPadding = 'placeholder padding: $:_<10(string)'
+    let centering          = 'centering:           $:^10(string)'
+    # truncation 
+    let truncating         = 'truncate string:     $:.10(string)'
+    # numbers 
+    let integer            = 'integer:             $:d(number)'
+    let float              = 'float:               $:f(number)'
+    let truncation         = 'figure truncation:   $:6.2f(number)'
+    let positive           = 'positive:            $:+d(number)'
+    let negative           = 'negative:            $:-f(number)'
+    let negTruncation      = 'negative truncation: $:=-5f(number)'
+    # date-time | custom objects 
+    let date               = 'date:                $:|Y-m-d H:M|(date)'
 
 MULTILINE EXPRESSIONS
     # expressions that spread accross multiple lines must be enclosed in brackets
