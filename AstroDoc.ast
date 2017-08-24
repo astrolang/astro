@@ -76,7 +76,7 @@ FUNCTION DEFINITION (1)
         a, b = b, a
 
     # you can annotate the argument and return types of a function
-    #: Int, Int -> Int # is a type annotation
+    ## Int, Int -> Int # is a type annotation
     fun mod(a, b):
         return a % b
 
@@ -91,7 +91,7 @@ EXPRESSION-ORIENTED
 
     # a semi-colon at the end of a block, stops it from returning its evaluated
     # result
-    fun setName(p, name): #: Person, Str
+    fun setName(p, name): ## Person, Str
         p.name = name;
     ..
 
@@ -103,17 +103,17 @@ LAZY ASSIGNMENT
     lazyStr := "I'm lazy!"
 
 SPECIFYING TYPES
-    var number #: Int # type specification  
+    var number ## Int # type specification  
     var todo = Str('Create a programming language')
 
     var address = 506 # initialization
     let job = Str() # default construction.
 
     # optional type specification.
-    var identifier #: Str|Int 
+    var identifier ## Str|Int 
 
     # inclusive type specification.
-    var pegasus #: Horse&Bird 
+    var pegasus ## Horse&Bird 
 
 SOME BUILT-IN TYPES
     var index = UInt(2_000) # UInt represents unsigned integer; no negative values.
@@ -156,7 +156,7 @@ VALUES & REFERENCES
     fun getAmount():
         return let amount # passed by reference, but it cannot be written to.
 
-    fun swap(!a, !b): #: ref, ref -> _
+    fun swap(!a, !b): ## ref, ref -> _
         a, b = b, a;
     ..
 
@@ -235,7 +235,7 @@ LISTS
 
     var emptyList = []
 
-    var names #: [Str] # specifying type of list
+    var names ## [Str] # specifying type of list
     
     # heterogenous list
     var stuffs = [200USD, 'Steve', 1f, Car('Eleanor')]
@@ -576,13 +576,13 @@ IF EXPRESSION
 NIL
     # sometimes, it is important to represent an empty or missing state, this can be
     # achieved in Astro with optional typing.
-    var code #: Str # cannot be nil
-    var program = 'println(\"Hello World\")' #: Str|Nil
-    var anotherProgram #: Str?
+    var code ## Str # cannot be nil
+    var program = 'println(\"Hello World\")' ## Str|Nil
+    var anotherProgram ## Str?
 
     # a nilable cannot be assigned to a non-nilable subject without a proper nil coalescing with a fallback value.
     var programList = Str()?
-    var cartoonList #: [Str?]
+    var cartoonList ## [Str?]
 
     # nilable unwrap
     let name = dave?.name
@@ -758,11 +758,11 @@ FUNCTION DEFINITION (2)
         a * b
 
     # if a function returns nothing, it can is annotated Nada 
-    fun print(point): #: -> Nada 
+    fun print(point): ## -> Nada 
         print point.|a, b|
     
     # or its return type may be left empty
-    #: Str
+    ## Str
     fun greet(name):
         println "Hello $name"
 
@@ -774,7 +774,7 @@ FUNCTION DEFINITION (2)
             sadSong.play();
 
     # varargs.
-    #: Int -> F64
+    ## Int -> F64
     fun arithMean(...numbers): # variable number of arguments 
         var total = 0d
         for number = numbers:
@@ -830,11 +830,11 @@ FUNCTION DEFINITION (2)
 
 FIRST-CLASS FUNCTIONS
     # creating new functions from existing functions
-    var details = getDetails #: User
-    var plus = add  #: Int, Int -> Int
-    fun times = mul #: F64, F64
+    var details = getDetails ## User
+    var plus = add  ## Int, Int -> Int
+    fun times = mul ## F64, F64
 
-    var binaryOp #: Number, Number -> Number
+    var binaryOp ## Number, Number -> Number
 
     # passing functions to functions
     fun compress(image, f): #! Image, (Image -> Image)
@@ -885,7 +885,7 @@ CLOSURE
     var dbCallback = genDbConnector(host:'localhost', username:'nypro', password:'willdiearobot')
 
 COFUNCTIONS # NEEDS REVIEW!!!
-    fun remove(list, index): #:List[T], Int
+    fun remove(list, index): ##List[T], Int
         list -= list[index]
 
     remove += refreshUI # attaching a cofunction.
@@ -1006,12 +1006,12 @@ ASYNC AND AWAIT
 
 ACTORS # NEEDS REVIEW!!!
     type Task: #@ actor
-        var name, time #: Str, Int
+        var name, time ## Str, Int
 
     fun Task(name):
         new(name, rand(1, 1_000))
 
-    fun sleep(actor): #: Task
+    fun sleep(actor): ## Task
         println "$name is sleeping for $(time)ms"
         sleep time
         println "$name is done"
@@ -1023,9 +1023,9 @@ ACTORS # NEEDS REVIEW!!!
 
 TYPE DEFINITION
     type Car:
-        var make, model #: Str
+        var make, model ## Str
 
-    fun move(car): #: Car
+    fun move(car): ## Car
         "Moving"
     
     # multiple type declaration is allowed for types without
@@ -1033,7 +1033,7 @@ TYPE DEFINITION
     type Duck, Person 
 
     # initializer
-    fun Car(make, model): #: Str, Str
+    fun Car(make, model): ## Str, Str
         new(make, model)
     # new is a special function that creates a new object and maps
     # the arguments to corresponding fields
@@ -1056,8 +1056,8 @@ TYPE DEFINITION
         Lamp 'White'
 
 UNION AND INTERSECTION TYPES
-    var pegasus #: Bird&Horse
-    var identification #: Str|Int
+    var pegasus ## Bird&Horse
+    var identification ## Str|Int
 
 TYPE CONVERSION FUNCTIONS 
     # camelCased names of types are by convention meant for type conversion operations
@@ -1070,9 +1070,9 @@ TYPE CONVERSION FUNCTIONS
 
 FIELD EXTENSION
     type Programmer(specializedLanguages) <: Person:
-        let languages #: [Str]
+        let languages ## [Str]
 
-    let orobogenius #: Programmer
+    let orobogenius ## Programmer
     orobogenius.languages = ["Java", "PHP", "JavaScript"]
 
     let appcypher = Programmer(["Astro", "Java", "C++"])
@@ -1084,7 +1084,7 @@ FIELD EXTENSION
 
 TYPE EXTENSION
     type Programmer(specializedLanguages) <: Person:
-        let languages #: [Str]
+        let languages ## [Str]
 
     # the `fork`  allows a type to be extended within a scope.
     type Programmer: #@ fork
@@ -1092,20 +1092,20 @@ TYPE EXTENSION
 
 INHERITANCE
     type Animal
-    fun sound(animal): #: Animal
+    fun sound(animal): ## Animal
         println 'Nothing'
 
     type Bird <: Animal
-    fun sound(bird): #: Bird # overrides supertype function.
+    fun sound(bird): ## Bird # overrides supertype function.
         println 'Chirp!'
 
     type Horse <: Animal:
-    fun sound(horse): #: Horse
+    fun sound(horse): ## Horse
         println 'Neigh!'
 
     # Astro supports multiple inheritance.
     type Pegasus <: Horse, Bird:
-    fun sound(pegasus): #: Pegasus
+    fun sound(pegasus): ## Pegasus
         sound pegasus as Horse
 
     # due to Astro's multiple dispatch, Inheritance applies equally to all
@@ -1113,14 +1113,14 @@ INHERITANCE
     type A
     type B <: A
 
-    fun foo(a, x) #: A, X
-    fun foo(b, x) #: B, X # this overrides top
+    fun foo(a, x) ## A, X
+    fun foo(b, x) ## B, X # this overrides top
 
-    fun bar(x, a) #: X, A
-    fun bar(x, b) #: X, B # this also overrides top
+    fun bar(x, a) ## X, A
+    fun bar(x, b) ## X, B # this also overrides top
 
     # a super method can be called directly or by using super
-    fun baz(x, b): #: X, B
+    fun baz(x, b): ## X, B
         baz(x, b as base)
 
 INITIALIZER TRAIN
@@ -1145,16 +1145,16 @@ INITIALIZER TRAIN
     # if the compiler finds out an initializer doesn't initialize a field, it complains.
 
 DIAMOND PROBLEM
-    fun register(teacher): #: Teacher
+    fun register(teacher): ## Teacher
         staffList teacher.name
 
-    fun register(student): #: Student
+    fun register(student): ## Student
         studentList student.name
 
     # when TeachingStudent type is declared, an ambiguity error will be issued about `register`.
 
     # the function needs to be overridden
-    fun register(teachingStudent): #: TeachingStudent
+    fun register(teachingStudent): ## TeachingStudent
         staffList teachingStudent.name
         studentList teachingStudent.name
 
@@ -1169,22 +1169,22 @@ ABSTRACT TYPES & FUNCTIONS # @INC
 
     # a function without a body (apart from initializers) is an abstract function and an error is raised if it is called directly.
     # An abstract function is expected to be implemented by a corresponding subtype function.
-    fun play(pl) #: Player
-    fun rewind(pl) #: Player
-    fun fastForward(pl) #: Player
+    fun play(pl) ## Player
+    fun rewind(pl) ## Player
+    fun fastForward(pl) ## Player
 
     type DigitalPlayer <: Player
-    fun play(dpl): #: DigitalPlayer # this overrides and implements play.
+    fun play(dpl): ## DigitalPlayer # this overrides and implements play.
         initPlaylist()
         playPlaylist()
 
 ABSTRACT TYPES AS ENUMS
     # abstract types can be used like enums in other languages
     abst Tree:
-        Leaf(value) #: $T -> Leaf
-        Node(l, r) #: Leaf, Tree -> Node
+        Leaf(value) ## $T -> Leaf
+        Node(l, r) ## Leaf, Tree -> Node
 
-    #: Tree -> _
+    ## Tree -> _
     fun sum(t):
         | Leaf -> .value
         | Node -> sum(.l) + sum(.r)
@@ -1196,13 +1196,13 @@ SINGLETONS
     obj switch: 
         var on = false
 
-    fun toggle(switch): #: switch 
+    fun toggle(switch): ## switch 
         | .on == true  -> .on = false
         | .on == false -> .on = true
     ..
 
     window.addMouseListener(obj <: MouseAdapter:
-        fun mouseClicked(self, event): #: _, MouseEvent
+        fun mouseClicked(self, event): ## _, MouseEvent
             println "Mouse Clicked!"
     )
 
@@ -1227,7 +1227,7 @@ IDENTITY/REFERENCE EQUALITY
     (one === other) == (one.ref === other.ref) # true
 
 FUNCTION == METHODS (UFCS)
-    fun show(p): #: Person
+    fun show(p): ## Person
         println(self.name, self.age)
     ..
 
@@ -1263,7 +1263,7 @@ SUBJECT REPEAT SYNTACTIC SUGARS
     fun |>(f, x): f(a)
 
     # call chain
-    var nameList #: [Str]
+    var nameList ## [Str]
     nameList.add =>('Badmus') =>('Travis') =>('Gabriel')
     
     # cascading dot
@@ -1282,7 +1282,7 @@ COVARIANCE
     type Employee(<name, age>, job ) <: Person
     type Teacher(<name, age>, course) <: Person
 
-    #: Person
+    ## Person
     fun show(p): # a covariant parameter can take a subtype too.
         println(p.name, p.age)
 
@@ -1295,7 +1295,7 @@ COVARIANCE
 TYPE CASTING
     var radianInt = int(2 * pi) # the resulting value Float of 2*pi is casted to Int.
 
-    fun Employee(person): #: Person
+    fun Employee(person): ## Person
         Employee(self=>name, =>age)
 
     var deitel = Person('Paul Deitel', 57)
@@ -1304,7 +1304,7 @@ TYPE CASTING
     var yearStr = Str 1990
     let sorted = Int yearStr.sort()
 
-    #: Float -> MyInteger
+    ## Float -> MyInteger
     fun MyInteger(num): new(Int num)
     let cost = (MyInteger price) * qty
 
@@ -1314,7 +1314,7 @@ NAME ALIASES
     let pi = piConstant
 
 FUNCTION & TYPE OBJECTS
-    fun foo = bar #: Int -> Int 
+    fun foo = bar ## Int -> Int 
     type BookTitle = Str
 
     var
@@ -1341,13 +1341,13 @@ EXPORT
 
 GENERICS
     # declaring a generic type T.
-    fun add(a, b): #: $T, T -> T
+    fun add(a, b): ## $T, T -> T
         return a + b
 
     # where the type of the generic symbol is hinted, '$' can be ommitted from its declaration
-    #: T, T, T -> T = T::Int 
+    ## T, T, T -> T = T::Int 
     fun add(a, b, c):
-        var d #: T
+        var d ## T
         d = a + b + c
 
     var sum = add[Int](2, 4, 6)
@@ -1358,14 +1358,14 @@ GENERICS
     # they allow the code to specify a range of values a subject should have, 
     # and depending on the staticness of the subject, the an error will be thrown
     # at compile-time or runtime when the range or value is exceeded.
-    var age #: Int{1..120} # age is constrained between 1 and 120
-    var name #: s{}::Str # s is any value constrained to Str 
+    var age ## Int{1..120} # age is constrained between 1 and 120
+    var name ## s{}::Str # s is any value constrained to Str 
 
     # value constraints are subject declarations in their own right 
     # and can cause name clashes
 
     # you can specify the order generic parameters
-    type MyList: #: ${T, l{}} = l<:Int
+    type MyList: ## ${T, l{}} = l<:Int
         let list = List[T](l, 0)
         let size = l
     ..
@@ -1373,18 +1373,18 @@ GENERICS
     var list = MyList[Int, 5]()
 
     # type reference
-    #: MyList, Int -> T = T::MyList.T
+    ## MyList, Int -> T = T::MyList.T
     fun getItem(list, index):
         list[index]
 
-    let identifier #: T<:Identfiable
+    let identifier ## T<:Identfiable
 
-    var pegasus #: U<:Horse&Bird
+    var pegasus ## U<:Horse&Bird
     var x = 10
-    let y #: x' # this makes y have the same type as x
+    let y ## x' # this makes y have the same type as x
 
     # unsure types 
-    #: !T, !U -> T|U # T and U could be the same types
+    ## !T, !U -> T|U # T and U could be the same types
     fun max(a, b): 
         if a > b: return a 
         else: return b
@@ -1443,11 +1443,11 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
 
     # there are certain special operators like [] and {} that can be overloaded
     # with special names
-    fun getIndex(myList, index): #: MyList 
+    fun getIndex(myList, index): ## MyList 
         return myList.items[index]
     # NOTE: getIndex 2nd argument can only be of Integer datatype
     
-    fun getValue(myTable, key): #: MyTable
+    fun getValue(myTable, key): ## MyTable
         return myList.keys{index}
 
 TRY, CATCH & ENSURE
@@ -1462,7 +1462,7 @@ TRY, CATCH & ENSURE
         restore bigData
 
     try process(bigData):
-    catch err: #: DivByZeroError
+    catch err: ## DivByZeroError
         println err.msg
 
     try data <- getData(): 
@@ -1474,7 +1474,7 @@ TRY, CATCH & ENSURE
 
     try, while line <- file.readNextLine(): 
         println line
-    catch err: #: FileNotFounError
+    catch err: ## FileNotFounError
         println 'File missing!'
 
     # error coalescing  
@@ -1661,7 +1661,7 @@ WHAT IF
     }
 
     type Employee <: Person {
-        var job #: Str
+        var job ## Str
     }
 
     dsl(src: 'hello', link: 'bar.io') {
