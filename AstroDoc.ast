@@ -1216,7 +1216,7 @@ TYPE CHECKING
     if myCar !>: Car:
         println 'myCar is not a supertype of Car'
 
-    head(List[$T] -> T) :: ([T] -> T)
+    head([1, 2, 3]) :: ([Int] -> Int)
 
 IDENTITY/REFERENCE EQUALITY
     let a = Person 'John Smith', 25
