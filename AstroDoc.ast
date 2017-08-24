@@ -1358,14 +1358,14 @@ GENERICS
     # they allow the code to specify a range of values a subject should have, 
     # and depending on the staticness of the subject, the an error will be thrown
     # at compile-time or runtime when the range or value is exceeded.
-    var age ## Int{1..120} # age is constrained between 1 and 120
-    var name ## s{}::Str # s is any value constrained to Str 
+    var age ## Int(1:120) # age is constrained between 1 and 120
+    var name ## s()::Str # s is any value constrained to Str 
 
     # value constraints are subject declarations in their own right 
     # and can cause name clashes
 
     # you can specify the order generic parameters
-    type MyList: ## ${T, l{}} = l<:Int
+    type MyList: ## ${T, l()} = l<:Int
         let list = List[T](l, 0)
         let size = l
     ..
@@ -1390,7 +1390,7 @@ GENERICS
         else: return b
     
     # generics symbols
-    # $X, x', !X, X.Y, $T{}
+    # $X, x', !X, X.Y, x()
 
 TYPE OBJECTS # @INC
     Int <: Integer # true
@@ -1459,7 +1459,7 @@ TRY, CATCH & ENSURE
     catch err:  
         println err.msg
     ensure:
-        restore bigData
+        restore bigDataf
 
     try process(bigData):
     catch err: ## DivByZeroError
