@@ -1364,8 +1364,8 @@ GENERICS
     # value constraints are subject declarations in their own right 
     # and can cause name clashes
 
-    # you can specify the order generic parameters
-    type MyList: ## ${T, l()} = l<:Int
+    # types can have generics too
+    type MyList: ## $T, l() = l<:Int
         let list = List[T](l, 0)
         let size = l
     ..
