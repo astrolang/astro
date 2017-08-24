@@ -15,6 +15,9 @@
 	        "include": "#lambda_var"
 	    },
 	    {
+	        "include": "#parens"
+	    },
+	    {
 	        "include": "#brackets"
 	    },
 	    {
@@ -49,9 +52,6 @@
 	    },
 	    {
 	        "include": "#regex"
-	    },
-	    {
-	        "include": "#nest_braces_and_self"
 	    },
 	    {
 	        "include": "#operators"
@@ -89,6 +89,20 @@
 	            {
 	                "match": "(?<!\\.|\\|)@(?:[A-Za-z][A-Za-z_0-9]*)|\\@\\(.*\\)", 
 	                "name": "support.function.macro.astro"
+	            }
+	        ]
+		},
+	    "parens":{
+	        "patterns": [
+	            {
+	                "begin": "\\(",
+	                "end": "\\)",
+	                "name": "astro",
+	                "patterns": [
+	                    {
+	                        "include": "$self"
+	                    }
+	                ]
 	            }
 	        ]
 		},
@@ -297,7 +311,7 @@
 	    "string_interpolate":{
 	        "patterns": [
 	            {
-	                "begin": "\\$\\(",
+	                "begin": "\\$(\\:.+)?\\(",
 	                "end": "\\)",
 	                "name": "constant.character.escape.astro",
 	                "patterns": [
