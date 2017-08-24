@@ -1,0 +1,20 @@
+{
+  "name": "Astro",
+  "version": "1.0.0",
+  "description": "Astro is a high-level, high-performance statically-typed programming language that compiles to WebAssembly, with syntax similar to Python and technical-computing orientation similar to Julia.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node Tests/js/Tests/AstroMain.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AppCypher/Project-ABC.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AppCypher/Project-ABC/issues"
+  },
+  "homepage": "https://github.com/AppCypher/Project-ABC#readme"
+}
