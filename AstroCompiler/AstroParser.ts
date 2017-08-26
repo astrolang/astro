@@ -626,7 +626,7 @@ export class Parser {
     }
 
     ///////////////////////////
-    ///////// TESTERS /////////
+    ////////// TESTS //////////
     ///////////////////////////
     private parserTest(parser) {
         if(parser.success) {
