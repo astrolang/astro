@@ -396,11 +396,11 @@ SET
     fruits.size # 4
 
     # common set operations can be applied to sets 
-    {'guava', 'mango'}.intersection(fruits)
+    {'guava', 'mango'}.intersect(fruits)
 
     {'pineapple', 'apple'}.union(fruits)
 
-    'mango'.in(fruits)
+    'mango' in fruits
 
     let emptySet = {}
 
