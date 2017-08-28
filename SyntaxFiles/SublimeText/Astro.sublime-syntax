@@ -116,7 +116,9 @@ contexts:
 
   string_interpolate:
     - meta_scope: constant.character.escape.astro
-    - match: '\)'
+    - match: \(
+      push: parens_match
+    - match: \)
       pop: true
     - include: main
 
@@ -126,3 +128,8 @@ contexts:
       push: multiline_comments
     - match: =#|=##
       pop: true
+
+  parens_match:
+    - meta_scope: markup.bold.astro
+    - match: \)
+      pop: true 
