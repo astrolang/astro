@@ -24,7 +24,7 @@ contexts:
     - match: (#=|##=) # multiline_comments
       push: multiline_comments
 
-    - match: (#|##).+$ # singleline_comments
+    - match: (#|##).*$ # singleline_comments
       scope: comment.line.number-sign.astro
       name: singleline_comments
 
