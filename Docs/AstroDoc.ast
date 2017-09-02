@@ -881,12 +881,12 @@ list.map add3
 
 IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
     # The value is passed as parameter to the lambda
-    (2:a, 5:b) -> a + b
+    (a:5, b:10) -> a + b
 
     var primes = ([2:]) ->
         | [p, ...xs]: p ++ fn([i <- xs, i .mod p != 0])
 
-    var x = (|a, b| -> a + b)(2, 3) # warning!
+    var x = (|a, b| -> a + b)(2, 3) # deprecation warning!
     
 
     
