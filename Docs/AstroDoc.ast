@@ -1206,6 +1206,7 @@ ABSTRACT TYPES AS ENUMS
         | Node -> sum(.l) + sum(.r)
     ..
 
+    # abst typevalues don't need namespacing when used in the same module as they are declared
     var x = Node(Leaf 1, Node(Leaf 2, Leaf 3))
 
 SINGLETONS
