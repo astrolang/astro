@@ -842,7 +842,7 @@ FUNCTION DEFINITION (2)
     sendMessage('Hello', to:'Cantell')
 
     fun sum(first., ...rest.): 
-        first +.. rest
+        first + rest
 
 FIRST-CLASS FUNCTIONS
     # creating new functions from existing functions
@@ -861,7 +861,6 @@ LAMBDAS
     let scoreListWithExtraMarks = scoreList.map(markFilter)
 
     fixtureList.filter(|game| -> game.!isCancelled)
-    fixtureList.filter(->$1.!isCancelled)
 
     var pplBelow25 = census.filter |person| ->
         person.age += 1
@@ -871,9 +870,8 @@ LAMBDAS
     
     # recursion
     # you can recall an anonymous function using the fn keyword
-    list.aggregate(0) -> 
-        if $1 == 0: 1
-        else: $1 + fn($1 - 1)
+    list.aggregate(0) |a| -> 
+        1 if a == 0 else a + fn(a - 1)
 
 PARTIAL APPLICATION
 # partially applied functions are function calls with one or more of it's argument not applied
@@ -1675,7 +1673,7 @@ WHAT IF
     }
 
     var students = getStudentList()
-    students.@gpa.map -> ($1 + 1)
+    students.@gpa.map |gpa| -> (gpa + 1)
 
     20.each -> { print "Hello" }
 
