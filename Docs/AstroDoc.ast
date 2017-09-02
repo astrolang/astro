@@ -239,12 +239,14 @@ LISTS
     # heterogenous list
     var stuffs = [200USD, 'Steve', 1f, Car('Eleanor')]
 
-    # Astro uses 0-based indexing, so every list indices start at 1.
+    # Astro uses 0-based indexing, so every list indices start at 0.
     var disqualified = contestants[1:6]
 
-    var reversed = contestants[end:] # end here is equivalent to "contestant.size" 
+    var all = contestants[:end] # "end" here is equivalent to "contestant.size"
 
     var last = contestants[end-1] # basically "contestant.size - 1"
+
+    var reversed = contestants[::-1] # using negative step to reverse index access 
 
     let myGarage = [Car][('Mustang'), ('Eleanor'), ('Bugatti'), ('Lamborghini')] # You can specify a type 
 
