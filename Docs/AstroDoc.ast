@@ -65,8 +65,8 @@ FUNCTION DEFINITION (1)
     fun echo(value):
         print(value, last:'')
         
-    # if a function takes one argument, the brackets can be ommitted
-    # the argument one of BRINSL (boolean, regex, identifier, number, string, lambda)
+    # if a function takes only one argument, the call parens can be removed only
+    # if the argument is not a list/set/dict literal or a prefix operator
     echo value 
     echo [1] # will evaluate as echo[1] not echo([1])
     echo +5 # will evaluate as echo + 5 not echo(+5)
