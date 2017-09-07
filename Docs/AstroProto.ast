@@ -1,3 +1,131 @@
+# 07/03/17
+# Astro 0.1.06
+# FROM BACK, REMOVE END 
+let array = [1, 2, 3, 5]
+array[!0] = 4
+
+# 02/03/17
+# Astro 0.1.05+
+# REMOVE MULTIPLE EXPRESSION WHERE SINGLE EXPRESSION IS NEEDED
+let age = (print 'hello'; 56) # error!
+let age = do: 
+    print 'hello'
+    56
+
+# REMOVE SINGLETON 'obj'
+obj inventoryManager(name, inventory) # error!
+let inventoryManager = {name:, inventory:}
+
+# PROPERTIES
+let size = {} -> {elements.count()}
+
+# 29/08/17
+# Astro 0.1.05+
+# CASCADING NOTATION
+vec
+	..set(5f, 6f)
+	..normalize()
+
+vec.|(x * 6) + (y * 8)|
+
+# REMOVE VECTORIZATION SYNTAX
+let mat = a.dot..b # wrong!
+let mat = vec.dot(a, b)
+
+# IMPORT ALL 
+import plotter [...]
+penDown(20, 40)
+penMove(23, 56)
+
+# NILLABLE TYPES AND GENERICS 
+let nillable ## Str?
+
+# MACROS 
+type Tuple #! Class
+
+# ACTORS 
+type BookManager <: Actor
+
+# INTEROP PRTOPOSAL WITH JS AND PYTHON
+@pyimport math [.]
+math.sin(45)
+math.cos(70)
+
+@jsimport express [.]
+let app = express()
+let router = app.Router()
+
+router.get('/') |req, res| -> 
+	res.status(200).sendFile('index.html')
+
+# REMOVE MULTIPLE EXPRESSION IN PARENS  
+let a = (print 'hello'; 5) # error
+let a = do: print 'hello'; 5
+
+# DICTIONARIES, REMOVE PROTOTYPE 
+let family = {
+	dad: 'Shade'
+	mum: 'Tunde'
+	sister:   ['Wale', 'Gbenga']
+	brothers: ['Bisi', 'Dupe']
+}
+
+print family['sister']
+print family.sister 
+
+var john = {
+	name: 'John' ## Str 
+	age:  nil ## Int?
+}
+
+print john.name 
+john.gender = 'female' 
+
+# TYPE EXTENSION 
+type Person(!name, !age) 
+
+let john = Person('John', 25)
+
+let Person.gender ## Str
+
+# ARGS 
+fun printPerson(name., age.):
+	print args
+
+printPerson(john) # [name: 'John', age: 25]
+
+# REMOVE UNNAMED LAMBDA ARGUMENTS 
+app.get -> 
+	$2.status(200).send({msg: 'sent successfully'}) # error!
+
+app.get |req, res| ->  
+	res.status(200).send({msg: 'sent successfully'})
+
+
+# 28/08/17
+# Astro 0.1.05+
+# BRACKETLESS FUNCTION CALL 
+# if a function takes only one argument, the call parens can be removed 
+# if the argument is not a list/set/dict literal or a prefix operator
+echo value 
+echo [1] # will evaluate as echo[1] not echo([1])
+echo +5 # will evaluate as echo + 5 not echo(+5)
+
+# ENUM  
+# abst typevalues don't need scoping when used in the same module as they are declared
+abst Switch: On, Off 
+fun check(state): ## Bool 
+    | On  -> print 'On'
+    | Off -> print 'Off'
+
+# CHANGE REVERSE INDEXING AND STEP
+ls = [4, 5, 2, 3, 7, 8]
+ls[::-1] # reverse
+
+# IIFE  
+(a:6, b:10) -> a + b 
+
+
 # 21/08/17
 # Astro 0.1.05
 # STRING FORMATTING 
