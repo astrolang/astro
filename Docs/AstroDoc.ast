@@ -1000,7 +1000,7 @@ ASYNC AND AWAIT
     ..
 
 ACTORS # NEEDS REVIEW!!!
-    type Task: #@ actor
+    type Task <: Actor:
         var name, time ## Str, Int
 
     fun Task(name):
