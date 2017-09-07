@@ -219,12 +219,12 @@ TUPLES
     # named tuple
     let http200Status = (statusCode:200, description:'Ok')
 
-    let args = (5, 6)
-    add(...args) # tuple unpacking 
+    let arguments = (5, 6)
+    add(...arguments) # tuple unpacking 
 
     # practical example 
-    fun check(f, ...args):
-        let test = f(...args[:end-1]) == args[end]
+    fun check(f, ...arguments):
+        let test = f(...arguments[:end-1]) == [end]
         print =>('Test passed') if test else =>('Test failed')
     
     check(add, 5, 3, 8)
@@ -843,6 +843,13 @@ FUNCTION DEFINITION (2)
 
     fun sum(first., ...rest.): 
         first + rest
+
+    # accessing a function's arguments with args
+    fun printPerson(name., age.):
+	    print args
+
+    printPerson(john) # [name: 'John', age: 25]
+
 
 FIRST-CLASS FUNCTIONS
     # creating new functions from existing functions
