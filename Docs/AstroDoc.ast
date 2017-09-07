@@ -1453,15 +1453,15 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
     # NOTE: getIndex 2nd argument can only be of Integer datatype
     
     fun getValue(myTable, key): ## MyTable
-        return myList.keys{index}
+        return myTable{key}
 
 TRY, CATCH & ENSURE
     if numerator && denominator == 0:
-        raise DomainError() # raising an exception.
+        raise DomainErr() # raising an exception.
     
     try: 
         process bigData  
-    catch err: ## DataCorruptErr
+    catch err: ## DataCorruptionErr
         print err.msg
     ensure:
         restore bigData
@@ -1469,7 +1469,7 @@ TRY, CATCH & ENSURE
     # a catch body can be ommitted if it's only printing the error's message 
     try:
         process bigData
-    catch err ## DataCorruptErr
+    catch err ## DataCorruptionErr
 
     # managed resource 
     try process(bigData):
