@@ -1,10 +1,10 @@
-# 07/03/17
+# 07/09/17
 # Astro 0.1.06
 # FROM BACK, REMOVE END 
 let array = [1, 2, 3, 5]
 array[!0] = 4
 
-# 02/03/17
+# 02/09/17
 # Astro 0.1.05+
 # REMOVE MULTIPLE EXPRESSION WHERE SINGLE EXPRESSION IS NEEDED
 let age = (print 'hello'; 56) # error!
