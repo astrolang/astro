@@ -818,7 +818,7 @@ FUNCTION DEFINITION (2)
     callCount() # 2
 
     # functions that change values of arguments must be annotated with `!`.
-    #! ref Person, ref Person
+    ## ref Person, ref Person
     fun swap(!a, !b):
         a, b = b, a;
 
@@ -854,13 +854,13 @@ FUNCTION DEFINITION (2)
 FIRST-CLASS FUNCTIONS
     # creating new functions from existing functions
     var details = getDetails ## User
-    var plus = add  ## Int, Int -> Int
-    fun times = mul ## F64, F64
+    var plus    = add  ## Int, Int -> Int
+    fun times   = mul ## F64, F64
 
     var binaryOp ## Number, Number -> Number
 
     # passing functions to functions
-    fun compress(image, f): #! Image, (Image -> Image)
+    fun compress(image, f): ## Image, (Image -> Image)
         f image
 
 LAMBDAS
