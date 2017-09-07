@@ -329,34 +329,30 @@ DICTIONARIES
     let family = {
         'mum': { 
             'name': 'Esther Williams'
-            'age' : 4
+            'age' : 42
         }
-        dad: { # unquoted keys are taken as strings
+        # unquoted keys are taken as strings as well
+        dad: { 
             name: 'Sunday Williams'
             age : 46
         }
-        sister: {
-            name: 'Shade Williams'
-            age : 15
-        }
-    }
-
-    let sisterName = family{'sister', 'name'}
-
-    # nested dict can be simplified with indentation 
-    let family = {
-        mum:
-            name: 'Esther Williams'
-            age : 41
-        dad:
-            name: 'Sunday Williams'
-            age : 46
+        # nested dict can be simplified with indentation 
         sister:
             name: 'Shade Williams'
             age : 15
     }
 
-    # to use variables from the outer scope, the variable name needs to be escaped wit `$`
+    # accessing a value 
+    let sisterName = family{'sister', 'name'}
+    let dadName    = family.dad.name 
+
+    # adding a new key-value pair 
+    family.brother = {
+        name: "Daniel Williams"
+        age : 23
+    }
+
+    # to use variables from the outer scope, the variable name needs to be escaped with `$`
     var professor = {
         $id1: 'Charles Xavier'
         $id2: 56
@@ -373,23 +369,14 @@ DICTIONARIES
     var user = 2x2 Dict[Str, User]()
     var scoreList = Dict[Str, Int]()
 
-PROTOTYPE 
-    # prototypes are a special type of dicts with keys that can be inferred at compile time 
-    # they start with p_ macro tag.
-    var john = p_{
-        name: "John Smith", 
-        age : 25
+    # types of individual values can be specified
+    var john = {
+        name: ## Str
+        age : ## Int
     }
     
-    # so you can use dot notation with them or use the regular index brackets.
-    # and depending on certain criterion, a property could be assigned at compile-time. 
-    john.age = 45
-    john{'name'} = "John Pablo"
-
-    john.new.gender = "Male" # adding a gender property to the prototype
-    
-    type Person = john.type # aliasing a prototype's type
-    john{'job'} = "Computer Programmer" # adding a job key to the dict
+    # aliasing the type of a dict
+    type Person = john.type 
 
 SET 
     # is an unordered list type with no duplicate elements 
