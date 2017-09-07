@@ -1682,4 +1682,13 @@ INSTANCE TYPES
 add(3, 4) :: Fun:(Int, Int) -> Int 
 car :: Car:{Str, Str, Int}
 
+INTEROP PRTOPOSAL WITH JS AND PYTHON
+@pyimport math [...]
+math.sin(45)
+math.cos(70)
+
+@jsimport express [...]
+let app = express()
+let router = app.Router()
+
 # END
