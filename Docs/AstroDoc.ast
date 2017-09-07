@@ -191,15 +191,15 @@ MULTIPLE DECLARATION # DEPRECATING
 
 PROPERTIES
     # properties provide getter/setter behavior.
-    # first bracket is the setter, and second bracket the getter
-    var age  = (age + 5) >> (age - 5)
+    # first bracket pair contains the setter, the second bracket pair, the getter
+    var age  = {age + 5} -> {age - 5}
 
     # the last expression in the setter parens becomes the properties value
     # the last expression in the getter parens is the properties returned value
-    var name = (name) >> (name + "Smith")
+    var name = {name} -> {name + "Smith"}
 
     # empty parens means the setter/getter is inaccessible
-    var date = (date) >> () 
+    var date = {date} -> {}
 
 TUPLES
     # tuple is a datatype whose element types and length are determined statically
@@ -1589,9 +1589,9 @@ FEATURE SUMMARY
 - Metaprogramming with hygenic macros and operator overloading.
 
 WHERE USED
-{} - dict, dictvalueaccess, dictpattern, setpattern
-[] - list, range, typevar
-() - tuplepattern
+{} - dictvalueaccess, dictliteral, setliteral, setpatternmatching, dictpatternmatching, properties
+[] - listliteral, range, typevar, listpatternmatching
+() - tupleliteral, tuplepatternmatching
 _ - patternmatching, partialapplication, anonymousname, unknowntypesig, importall, donothing, initialisertrain
 . - dotnotation
 ~ - match
@@ -1611,7 +1611,6 @@ $ - generictypedecl, unnamedargs, outersubjects, stringinterpolation
 _ (post) - nonstandardliteral
 , NL - list, dict, enums, chainedconditionalconstruct
 << -
->> - properties
 
 ASTRO STRUCTURED LANGUAGE PROPOSAL 
 dsl(src: 'hello', link: 'bar.io'):
