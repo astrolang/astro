@@ -525,15 +525,6 @@ INDENTATION
     if studio.isLive: blockAccess \\ else: openAccess
 
 
-SANDWICHED STATEMENTS
-    # you can sandwich multiple expressions where a single expression is expected.
-    # by putting them in brackets. This is however discouraged.+
-    var faveSoccerClub =
-        (print 'You suck!'; team) if team == 'Manchester United' else ''
-
-    print('Hello, ' + (print('World'); '!'))
-
-
 IF EXPRESSION
     if isAdrianRich:
         spendAll('on parties')
