@@ -1186,18 +1186,16 @@ ABSTRACT TYPES AS ENUMS
     var x = Node(Leaf 1, Node(Leaf 2, Leaf 3))
 
 SINGLETONS
-    obj switch: 
-        var on = false
+    let switch = { on: false }
 
-    fun toggle(switch): ## switch 
+    fun toggle(switch): ## switch' 
         | .on == true  -> .on = false
         | .on == false -> .on = true
     ..
 
-    window.addMouseListener(obj <: MouseAdapter:
-        fun mouseClicked(self, event): ## _, MouseEvent
-            print "Mouse Clicked!"
-    )
+    window.addMouseListener({
+        mouseClicked: |self, event| -> print "Mouse Clicked!"
+    })
 
 TYPE CHECKING
     if myCar :: Car:
