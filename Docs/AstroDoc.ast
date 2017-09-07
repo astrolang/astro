@@ -1084,9 +1084,9 @@ FIELD EXTENSION
     orobogenius.languages = ["Java", "PHP", "JavaScript"]
 
     let appcypher = Programmer(["Astro", "Java", "C++"])
-    appcypher.new.philosophies = ["Open Source", "Transhumanism"]
-    appcypher.new.resume = "chicken.poop.com/appcypher"
-    appcypher.new.mentor = "Captain Jack Sparrow"
+    appcypher.philosophies = ["Open Source", "Transhumanism"]
+    appcypher.resume = "chicken.poop.com/appcypher"
+    appcypher.mentor = "Captain Jack Sparrow"
 
     var nypro = appcypher
 
