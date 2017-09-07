@@ -1100,9 +1100,9 @@ TYPE EXTENSION
     type Programmer(specializedLanguages) <: Person:
         let languages ## [Str]
 
-    # the `fork`  allows a type to be extended within a scope.
-    type Programmer: #@ fork
-        var philosophies, resume, mentor
+    Programmer.philosophies ## [Str]
+    Programmer.resume 
+    Programmer.mentor
 
 INHERITANCE
     type Animal
