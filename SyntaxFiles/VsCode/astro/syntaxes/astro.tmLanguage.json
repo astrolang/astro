@@ -159,7 +159,7 @@
 	    "dot_members":{
 	        "patterns": [
 	            {
-	                "match": "(?<!\\.)(?:\\=\\>|\\.)([!?]?[A-Za-z_][A-Za-z_0-9]*[!?]?)\\b",
+	                "match": "(?<!\\.)(?:\\.\\.?)([!?]?[A-Za-z_][A-Za-z_0-9]*[!?]?)\\b",
 	                "captures":{
 	                    "1":{
 	                        "name": "variable.language.astro"}}
