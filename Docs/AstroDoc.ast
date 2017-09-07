@@ -224,7 +224,7 @@ TUPLES
 
     # practical example 
     fun check(f, ...arguments):
-        let test = f(...arguments[:end-1]) == [end]
+        let test = f(...arguments[:!1]) == arguments[!0]
         print ..('Test passed') if test else ..('Test failed')
     
     check(add, 5, 3, 8)
@@ -240,13 +240,22 @@ LISTS
     var stuffs = [200USD, 'Steve', 1f, Car('Eleanor')]
 
     # Astro uses 0-based indexing, so every list indices start at 0.
-    var disqualified = contestants[1:6]
+    stuffs[0] # 200USD
 
-    var all = contestants[:end] # "end" here is equivalent to "contestant.size"
+    # the start index of a list view is inclusive but the end index non-inclusive 
+    var disqualified = contestants[1:6] # 2nd index to the 5th
 
-    var last = contestants[end-1] # basically "contestant.size - 1"
+    # "!" can be used to access the index backwards
+    var last = contestants[!0] # last index
 
-    var reversed = contestants[::-1] # using negative step to reverse index access 
+    # getting a view of the array from first to last index
+    var all = contestants[:] # all indices
+
+    # using negative step to reverse index access 
+    var reversed = contestants[::-1] # all indices backwards
+
+    # reverse access can also be done by making the "!" index the start index
+    var reversed = contestants[!0:] # all indices backwards  
 
     let myGarage = [Car][('Mustang'), ('Eleanor'), ('Bugatti'), ('Lamborghini')] # You can specify a type 
 
