@@ -358,12 +358,6 @@ DICTIONARIES
         $id2: 56
     }
 
-    let testScores = {
-        'class room 1': [0, 15, 30, 15, 76, 50],
-        'class room 2': 45, 50, 83, 9, 39, 81
-    }
-    var class1Scores = testScores{'class room 1'}
-
     var emptyDict = {:} # empty dictionary
 
     var user = 2x2 Dict[Str, User]()
@@ -375,6 +369,8 @@ DICTIONARIES
         age : ## Int
     }
     
+    # when a dictionary is not used dynamically, the compiler
+    # treats it as an object and optimizes it
     # aliasing the type of a dict
     type Person = john.type 
 
