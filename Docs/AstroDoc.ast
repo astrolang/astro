@@ -36,7 +36,7 @@ IDENTIFIERS
 
     # by convention, names use camel case style
     fun createMeme():
-        print(memes[rand()])
+        print(memes[random(1,11)])
 
     # by convention, subject and function names start with a lowercase character
     # by convention, type names start with an uppercase character.
@@ -153,7 +153,7 @@ VALUES & REFERENCES
     let player = team.player
 
     fun getAmount():
-        return let amount # passed by reference, but it cannot be written to.
+        return const amount # passed by reference, but it cannot be written to.
 
     fun swap(!a, !b): ## ref, ref -> _
         a, b = b, a;
@@ -280,13 +280,13 @@ ARRAYS
     # high performance matters
     let calendar = 31x12[Str][] # specifying the size of an Array
 
-    let a = 2×2 [ 
+    let a = 2×4 [ 
         [1, 2, 7, 8]
         [3, 4, 5, 6]
     ]
 
     # 2-dimensional list literal can be constructed using horizontal concatenation 
-    let a = 2×2 [ 
+    let a = 2×4 [ 
         1, 2, 7, 8;
         3, 4, 5, 6
     ]
@@ -716,8 +716,7 @@ WHILE LOOP & LOOP
     
     # loop
     loop: # synonymous with while true
-        print '>>> '
-        let input = scan
+        let input = scan '>>> '
         let tokens = lex input
         let ast = parse tokens
         let bytecodes = compile ast
@@ -1122,7 +1121,7 @@ INHERITANCE
 
     # a super method can be called directly or by using super
     fun baz(x, b): ## X, B
-        baz(x, b as base)
+        baz(x, b as super)
 
 INITIALIZER TRAIN
     # initializer train is the way Astro ensures the initialization of all declared and inherited fields of a particular type.
@@ -1295,18 +1294,14 @@ COVARIANCE
 TYPE CASTING
     var radianInt = int(2 * pi) # the resulting value Float of 2*pi is casted to Int.
 
-    fun Employee(person): ## Person
+    fun employee(person): ## Person
         Employee(self..name, ..age)
 
     var deitel = Person('Paul Deitel', 57)
-    var editor = Employee dietel
+    var editor = employee dietel
 
-    var yearStr = Str 1990
-    let sorted = Int yearStr.sort()
-
-    ## Float -> MyInteger
-    fun MyInteger(num): new(Int num)
-    let cost = (MyInteger price) * qty
+    var yearStr = str 1990
+    let sorted = int yearStr.sort()
 
 NAME ALIASES
     type Number = Integer|Float|Complex
