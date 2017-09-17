@@ -1,4 +1,27 @@
 # 17/09/17
+# Astro 0.1.8a
+# FIX: HIGHLIGHT
+- mod in command notation
+- command notation and literals [, {, /, 
+- remove \[ from escape sequence
+# REMOVE LAZY ASSIGNMENT
+# RETURN NOTHING
+# if a function returns nothing, it can be annotated None 
+    fun print(point): ## -> None 
+        print(point.|a, b|)
+
+# SPECIAL FUNCTIONS/SUBJECTS HAVE PRECEDING UNDERSCORES
+fun _get_index(my_list, index): pass
+print _args[56]
+
+# REPLACE FOR <- WITH FOR IN 
+for i in scoreList: print i
+
+# COMPREHENSION 
+let ls = [i | i in [1:21].map(_^2) where i mod 5 != 0]
+let ls = list(yield i for i in [1:21].map(_^2) if i mod 5 != 0)
+
+# 17/09/17
 # Astro 0.1.7a
 # FIX: HIGHLIGHT 
 - preceding '-' in function highlight
