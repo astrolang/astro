@@ -70,7 +70,7 @@
 		"functions":{
 	        "patterns": [
 	            {
-	                "match": "(?<=fun |catch |ensure )[a-z][A-Za-z0-9_!]*`?",
+	                "match": "(?<=fun |catch |ensure )[a-z_][A-Za-z0-9_!]*`?",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
@@ -185,7 +185,7 @@
 	                "name": "astro"
 	            },
 	            {
-	                "match": "\\b(?:for|end|spill|if|where|\\?|else|elif|await|return|at|delegate|yield|while|redo|do|use|loop|try|catch|ensure|defer|raise|continue|break|pass|export|except|import)\\b",
+	                "match": "\\b(?:for|end|spill|if|where|\\?|else|elif|await|return|at|delegate|yield|while|redo|use|loop|try|catch|ensure|defer|raise|continue|break|pass|export|except|import|namespace)\\b",
 	                "name": "keyword.control.astro"
 	            },
 	            {
@@ -201,7 +201,7 @@
 	    "function_calls":{
 	        "patterns": [
 	            {
-	                "match": "([A-Za-z][_A-Za-z0-9]*[!?]?)(?=\\s*(\\[.+\\]\\s*)?\\()",
+	                "match": "([A-Za-z_][_A-Za-z0-9]*[!?]?)(?=\\s*(\\[.+\\]\\s*)?\\()",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
@@ -209,7 +209,7 @@
 	    "infix_calls":{
 	        "patterns":[
 	            {
-	                "match": "(?<!let |var |rxn )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|rxn|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|redo|with|do|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in]|\\b[a-z_][A-Za-z_0-9!]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|except)\\b)",
+	                "match": "(?<!let |var |rxn )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|rxn|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|redo|with|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|namespace|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in]|\\b[a-z_][A-Za-z_0-9!]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|except)\\b)",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
@@ -247,19 +247,6 @@
 	                ]
 	            },
 	            {
-	                "begin": "([A-Za-z0-9_]+_)(')",
-	                "beginCaptures":{
-	                    "1":{
-	                        "name": "support.function.macro.astro"},
-	                    "2":{
-	                        "name": "punctuation.definition.string.begin.astro"}},
-	                "end": "'",
-	                "endCaptures":{
-	                    "0":{
-	                        "name": "punctuation.definition.string.end.astro"}},
-	                "name": "string.quoted.single.astro"
-	            },
-	            {
 	                "begin": "\"",
 	                "beginCaptures":{
 	                    "0":{
@@ -280,23 +267,6 @@
 	                        "include": "#comments"
 	                    }
 	                ]
-	            },
-	            {
-	                "begin": "([A-Za-z0-9_]+_)(\")",
-	                "beginCaptures":{
-	                    "1":{
-	                        "name": "support.function.macro.astro"},
-	                    "2":{
-	                        "name": "punctuation.definition.string.begin.astro"}},
-	                "end": "\"",
-	                "endCaptures":{
-	                    "0":{
-	                        "name": "punctuation.definition.string.end.astro"}},
-	                "name": "string.quoted.single.astro"
-	            },
-	            {
-	                "match": "([A-Za-z0-9_]+\\_)(?=(\\[|\\(|\\{|\\/))",
-	                "name": "support.function.macro.astro"
 	            }
 	        ]
 		},
