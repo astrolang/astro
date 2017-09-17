@@ -1390,54 +1390,30 @@ TYPE OBJECTS # @INC
         x && y == x'
     ..
 
-OPERATOR OVERLOADING # NEEDS REVIEW!!!
-    # special characters
-    # these are characters that cannot be combined with conventional identifier
-    # characters to form new identifiers. The only exclusions to this are
-    and, or, not, in # they can be used in conventional identifiers
-    # special operators are to be infixed without the dot notation.
-
-    # indefinite characters
-    # these characters can only be used with other special characters of
-    # the same set to create new special identifier.
-    = + - * / ^ √ & | > < =(special_chars)
-
-    # definite characters
-    # these group of characters cannot be overloaded as is, but can be combined
-    # to form new identifiers.
-    (special_chars)= :: <: >: << . ~ => !
-
-    # language-level characters
-    # this group of characters cannot be overloaded nor can they be combined
-    # with other special characters to form new characters.
-    => , . $ \\
-
-    # reserved operstors
-    \ = prefix
-    | = prefix and postfix
-    / = prefix and postfix
+OPERATOR OVERLOADING
+    # operators are special characters: +-/\&|=%$
 
     # you can call an operator like a function
     print(+(56, 5))
 
-    fun in(x, y): #@ infixl(5, left)
-        for a <- y: 
-            return true if a == x
-        false 
-
+    # you can create a custom operator
     fun ++(x): #@ postfix(5)
         var t = val x 
         x += 1
         t
-
-    # there are certain special operators like [] and {} that can be overloaded
-    # with special names
-    fun _getIndex(myList, index): ## MyList 
-        return myList.items[index]
-    # NOTE: getIndex 2nd argument can only be of Integer datatype
     
-    fun _getValue(myTable, key): ## MyTable
-        return myTable{key}
+    # certain special operators like [] and {} that can be overloaded with special names
+    fun _getIndex(myList, index): ## MyList, Signed
+        return myList.items[index]
+
+    # you can make a function infix but not prefix or postfix
+    fun in(x, y): #@ infixl(5, left)
+        for a <- y: 
+            return true if a == x
+        false
+    
+    # special characters such as $=-/& etc., can be combined in deffernt ways to form new operators 
+    # but reserved characters like .,`@(){}[] can't
 
 TRY, CATCH & ENSURE
     if numerator && denominator == 0:
