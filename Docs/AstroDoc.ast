@@ -263,10 +263,10 @@ LISTS
 
     # list field generator
     let students = getStudentList()
-    let totalGpas = students.@gpa.sum()
+    let totalGpas = students.:gpa.sum()
 
     fun average(students):
-        students.|@gpa.sum() / size|
+        students.|:gpa.sum() / size|
 
     # proposed operations with lists.
     var concatenate = [1, 2] ++ [3, 4] # [1, 2, 3, 4]
