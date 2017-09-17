@@ -474,19 +474,6 @@ MULTILINE EXPRESSIONS
     if y == 1: 
         print 'cool!'
 
-DO BLOCK
-    # a do block represents a scope
-    let country = 'India'
-    do:
-        let country = 'Nigeria'
-        print(country) # Nigeria
-
-    print(country) # India
-
-    # multiple statements can be written on one line separated by semi-colons.
-    var temp = a ; a = b ; b = temp
-
-
 USE BLOCK: 
     # a use block is like 'do' block but can only access parent scope subjects
     # declared in it's parameter section.
@@ -866,7 +853,11 @@ PARTIAL APPLICATION
     list.map add3
 
 IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
-    # The value is passed as parameter to the lambda
+    () -> 
+        let sum = 45 + 23
+        print sum
+
+    # the value is passed as parameter to the lambda
     (a:5, b:10) -> a + b
 
     var primes = ([2:]) ->
