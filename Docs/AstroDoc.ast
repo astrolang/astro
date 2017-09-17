@@ -1324,7 +1324,7 @@ FUNCTION & TYPE OBJECTS
     var bin = mix 1
 
 MODULES AND IMPORTS # NEEDS REVIEW!!!
-    import math [...] # import all
+    import math # import all
     import math, dataframes # import all
     import math except [tan, atan] # import all except
     import math [pi:π, cos, sin:sine] # aliasing
