@@ -949,7 +949,7 @@ PATTERN MATCHING
         | 'n'||'N' -> return 0
         | _        -> print "its an invalid choice"
 
-ASSIGNMENT PATTERN MATCHING
+ASSIGNMENT DESTRUCTURING
     let [name, age, _, ...rest] = list
     let (name, age, _, ...rest) = tuple
     let {name, age, _, ...rest} = set
@@ -1606,7 +1606,7 @@ OPTIONAL COMPILE-TIME GUARANTEES
 - Exception Tracking 
 - Index Bound Tracking
 - Compile Time Type Checking Guarantee 
-    - for some language constructs like assignment pattern matching 
+    - for some language constructs like assignment destructuring
     var a, b = ...list
 
 WHAT IF 
