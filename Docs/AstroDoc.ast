@@ -860,10 +860,10 @@ LAMBDAS
         1 if a == 0 else a + fn(a - 1)
 
 PARTIAL APPLICATION
-# partially applied functions are function calls with one or more of it's argument not applied
-let add3 = add(3, _)
+    # partially applied functions are function calls with one or more of it's argument not applied
+    let add3 = add(3, _)
 
-list.map add3
+    list.map add3
 
 IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
     # The value is passed as parameter to the lambda
@@ -1535,28 +1535,28 @@ INTEGER BITWISE FUNCTIONS
     var c = b .shr a # bit shift right
 
 UNICODE SUPPORT 
-numbers.map|x| -> x²
+    numbers.map|x| -> x²
 
-if ade.mood != happy: 
-    ade.mood == ☹
+    if ade.mood != happy: 
+        ade.mood == ☹
 
 POINTERS 
-# getting pointer to a primitive address
-let num = 55 
-let pointer = ptr(num)
+    # getting pointer to a primitive address
+    let num = 55 
+    let pointer = ptr(num)
 
-# setting address value
-pointer.value = 57
-print pointer
+    # setting address value
+    pointer.value = 57
+    print pointer
 
-# set pointer address 
-pointer.set 0xFFFE
+    # set pointer address 
+    pointer.set 0xFFFE
 
-# allocating memory on the heap
-let memory = malloc[Byte](5)
+    # allocating memory on the heap
+    let memory = malloc[Byte](5)
 
-# free pointer memory
-free([memory, pointer]) # throws compile time error if dangling pointer or aliasing problem is detected
+    # free pointer memory
+    free([memory, pointer]) # throws compile time error if dangling pointer or aliasing problem is detected
 
 
 PREDEFINED TYPE HIERARCHY
@@ -1701,16 +1701,16 @@ BLOCKS
     [  block_expr]
 
 INSTANCE TYPES 
-add(3, 4) :: Fun:(Int, Int) -> Int 
-car :: Car:{Str, Str, Int}
+    add(3, 4) :: Fun:(Int, Int) -> Int 
+    car :: Car:{Str, Str, Int}
 
 INTEROP PRTOPOSAL WITH JS AND PYTHON
-@pyimport math [...]
-math.sin(45)
-math.cos(70)
+    @pyimport math [...]
+    math.sin(45)
+    math.cos(70)
 
-@jsimport express [...]
-let app = express()
-let router = app.Router()
+    @jsimport express [...]
+    let app = express()
+    let router = app.Router()
 
 # END
