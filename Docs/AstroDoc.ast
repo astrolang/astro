@@ -1540,6 +1540,25 @@ numbers.map|x| -> x²
 if ade.mood != happy: 
     ade.mood == ☹
 
+POINTERS 
+# getting pointer to a primitive address
+let num = 55 
+let pointer = ptr(num)
+
+# setting address value
+pointer.value = 57
+print pointer
+
+# set pointer address 
+pointer.set 0xFFFE
+
+# allocating memory on the heap
+let memory = malloc[Byte](5)
+
+# free pointer memory
+free([memory, pointer]) # throws compile time error if dangling pointer or aliasing problem is detected
+
+
 PREDEFINED TYPE HIERARCHY
     Type
     Any
