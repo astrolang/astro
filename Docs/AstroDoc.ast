@@ -102,11 +102,6 @@ EXPRESSION-ORIENTED
 
     let name = setName('John Smith') # error! setName returns no result.
 
-LAZY ASSIGNMENT
-    # lazy assignment will only execute on access of subject, not before
-    let appComponent := iso self.getAppComponent()
-    lazyStr := "I'm lazy!"
-
 SPECIFYING TYPES
     var number ## Int # type specification  
     var todo = Str('Create a programming language')
