@@ -936,11 +936,7 @@ PATTERN MATCHING
     | _           -> 'default' # otherwise
     | else        -> 'default' # same as above 
 
-    # if-match block
-    return "Hello" if x 
-    | 'a' -> _
-    | 'b' -> _
-
+    # do-match
     print $ if fruit
     | 'grape' -> 'fruit is a grape'
     | 'apple' -> 'fruit is a sweet apple'
