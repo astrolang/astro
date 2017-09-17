@@ -614,7 +614,7 @@ BOOLEAN EXPRESSIONS
 
 
 FOR LOOP
-    for i <- [1:11]:
+    for i in [1:11]:
         print i
 
     let interestingNumbers = {
@@ -624,10 +624,10 @@ FOR LOOP
     }
 
     # pattern matching with for loop
-    for (kind, number) <- interestingNumbers: # parallel pairing through a dictionary.
+    for (kind, number) in interestingNumbers: # parallel pairing through a dictionary.
         print '$kind: $number'
 
-    for name, (kind, number) <- nameList, table:
+    for name, (kind, number) in nameList, table:
         print((name, key, value))
 
     # looping through a number
@@ -636,36 +636,36 @@ FOR LOOP
     for up, down ← [1:21], [21:1]: # parallel pairing through ranges.
         print '$up <=> $down'
 
-    for upper <- [1:21], lower <- [1:21]: # nested iterations through ranges.
+    for upper in [1:21], lower in [1:21]: # nested iterations through ranges.
         print '$upper <=> $lower'
 
-    for i <- [1:21]:
+    for i in [1:21]:
         i += 1 # error! immutable subject.
         j = i
     ..
 
-    for !i <- [1:21]:
+    for !i in [1:21]:
         i += 1
         j = i
     ..
 
     #  the 'end' block which executes when a loop does not break
-    for line <- file:
+    for line in file:
         if line.contains code:
             echo "code found!"
             break 
     end:
         echo "code not found!"
 
-    file.writeln ..(el) for el <- array end ..()
+    file.writeln ..(el) for el in array end ..()
 
-    for _ <- [1:fifty]:
+    for _ in [1:fifty]:
         print('Hello')
     
-    yield x for x <- stream()
+    yield x for x in stream()
 
 COMPREHENSION
-    var listComprehension = list(yield x for i <- [1:21] if i mod 2 != 0)
+    var listComprehension = list(yield x for i in [1:21] if i mod 2 != 0)
     var listComprehension = [x <- [1:21], x mod 2 != 0]
     let dictComprehension = {x : y | x <- [1:11], y <- [21:1], even(y)}
     var setComprehension  = {i <- random(0, 200, ->20)}
@@ -677,7 +677,7 @@ COMPREHENSION
     x² * y² == z²]
 
 BREAK WITH
-    for name <- register():
+    for name in register:
         if name == 'Tony':
             break name
         ""
@@ -697,7 +697,7 @@ CHAINED CONDITION CONSTRUCTS
         acceptanceList.add person
 
     # there can ohly be two conditional constructs in a chain.
-    for book <- library, if book.title.contains('adventure'):
+    for book in library, if book.title.contains('adventure'):
         personalLibrary.add book
 
 WHILE LOOP & LOOP
@@ -717,7 +717,7 @@ WHILE LOOP & LOOP
         lines = gen.readLine() # evaluated at least once.
     while gen.hasNext()
 
-    while list.size > 0, for name <- list:
+    while list.size > 0, for name in list:
         echo('$name $newline')
         list.removeTop()
 
@@ -966,7 +966,7 @@ ASSIGNMENT PATTERN MATCHING
 
 
     # pattern matching with iterators
-    for (x, y) <- dictionary:
+    for (x, y) in dictionary:
         print "$x : $y"
 
 PATTERN MATCHING OPERATOR  
@@ -977,7 +977,7 @@ PATTERN MATCHING OPERATOR
 
 COROUTINES & GENERATORS
     def count(num):
-        for x <- [:num]: var z = yield x
+        for x in [:num]: var z = yield x
 
     var counter = count(25) # instantiating coroutine
     count.next(25)
@@ -1408,7 +1408,7 @@ OPERATOR OVERLOADING
 
     # you can make a function infix but not prefix or postfix
     fun in(x, y): #@ infixl(5, left)
-        for a <- y: 
+        for a in y: 
             return true if a == x
         false
     
@@ -1612,7 +1612,7 @@ WHAT IF
 - Astro had Braces 
     var sum = 5 + 6
 
-    for i <- stream() if i > 25 {
+    for i in stream() if i > 25 {
         print i
     }
 
