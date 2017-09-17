@@ -745,16 +745,15 @@ FUNCTION DEFINITION (2)
     fun multiply(a, b):
         a * b
 
-    # if a function returns nothing, it can is annotated Nada 
-    fun print(point): ## -> Nada 
+    # if a function returns nothing, it can be annotated Nons 
+    fun print(point): ## -> None 
         print(point.|a, b|)
     
-    # or its return type may be left empty
-    ## Str
-    fun greet(name):
+    # or the return type can be left empty
+    fun greet(name): ## Str
         print "Hello $name"
 
-    # to make sure nothing is returned from a function you can use `;` to terminate an exit expression or `_` as the exit expression.
+    # to make sure nothing is returned from a function you can use `;`
     fun effect(mood):
         if mood.isHappy:
             happySong.play();
