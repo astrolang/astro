@@ -328,7 +328,7 @@ ARRAYS
     # [0 4 2 4]
 
     # non-standard list literal
-    let spMatrix = 2x2[Int] sp_[]
+    let spMatrix = 2x2[Int] sp.[]
 
 DICTIONARIES
     # dictionaries are basically key-value lists.
@@ -415,7 +415,7 @@ STRINGS
 
     # non-standard string literals preceded by characters are not affected
     # by escape sequences, because they are processed verbatim.
-    var verbatimStr = r_"Use '\t' to represent tab"
+    var verbatimStr = r."Use '\t' to represent tab"
 
     # multiline string. first and last new lines are always ignored.
     var verbatimStr = '''
@@ -423,7 +423,7 @@ STRINGS
     '''
 
     var string = 'Hello' # Str
-    var chars = ch_'π' # Char is 32-bit UTF8 type
+    var chars = ch.'π' # Char is 32-bit UTF8 type
 
     # proposed operations with strings.
     var concatenate = 'ab' + 'c' # 'abc'
@@ -1492,13 +1492,13 @@ OTHER LITERALS # @INC
 
     # non-standard literals
     var ns_number = 345_NGN
-    var ns_str = ns_'1, 2, 3, 4'
-    var ns_list = ns_[1, 2, 3, 5]
-    var ns_dict = ns_{name: 'Steve', age: 24}
-    let ns_tuple = ns_(name: 'Steve')
+    var ns_str = ns.'1, 2, 3, 4'
+    var ns_list = ns.[1, 2, 3, 5]
+    var ns_dict = ns.{name: 'Steve', age: 24}
+    let ns_tuple = ns.(name: 'Steve')
 
     # builtin non-standard literals
-    var raw_string = r_"\t represnts a tab character"
+    var raw_string = r."\t represnts a tab character"
 
 BASIC ARITHMETIC OPERATIONS
     let t = 2 + 2
