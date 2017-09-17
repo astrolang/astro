@@ -275,7 +275,7 @@ LISTS
     let divide = [1, 2, 5, 6, 3, 4] // [5, 6] # [[1, 2], [3, 4]]
 
 ARRAYS
-    # List type is an alias of Array type but with overriden constructors to allow pre-allocation
+    # List type is an subtype of Array that requires preallocating its indices
     # Arrays do not pre-allocate and it is adviced to use Array sparinly, with care and only when 
     # high performance matters
     let calendar = 31x12[Str][] # specifying the size of an Array
