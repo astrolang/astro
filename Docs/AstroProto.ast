@@ -1,3 +1,112 @@
+# 17/09/17
+# Astro 0.1.7a
+# FIX: HIGHLIGHT 
+- preceding '-' in function highlight
+    fun _getIndex(myList, index): pass
+- super keyword
+    print super
+- namespace keyword
+    namespace nmath = nypro/math
+- remove do highlight
+- remove non-standard literal highlight
+
+# NON-STANDARD LITERAL
+let n = 123f
+let s = r."abc"
+let r = r./abc/
+let s = r.{456}
+let l = r.[1,2]
+let p = r.(1,2)
+
+# SPECIAL FUNCTIONS/SUBJECTS HAVE PRECEDING UNDERSCORES
+fun _get_index(my_list, index): pass
+print _args[56]
+
+# LIST FIELDS
+let students = get_students()
+print students.:gpa
+
+# 13/09/17
+# Astro 0.1.7a
+# FIX: REGEX LITERAL TO BE EXEMPTED FROM BRACKETLESS CALLS 
+# LIST IS A SUBTYPE OF ARRAY 
+type List <: Array 
+fun List(...sizes, fill): # Int, $T
+    new().Array(...sizes).populate(fill)
+
+# DO BLOCK UNNECESSARY
+() ->
+    let country = 'Nigeria'
+    print(country) # Nigeria
+
+# NAMING CONVENTION
+# snake case for variables, constants and function names
+let book_title = "Ender's Game"
+var current_year = 2017
+fun add_numbers(a, b): a + b
+
+# camel case for type names
+type InventoryManager(name, id)
+abst LightSource: SpotLight, Directional, Ambient
+
+# acronyms in snake-cased names should be in lower case 
+var http_server = Server(3000)
+
+# acronyms in camel-cased names should be in camel case
+type XmlParser <: Parser
+
+# # STANDARD NON-STANDARD LITERAL
+# var ns_string = ns"name"
+# var ns_regex  = ns/hello/
+# var ns_dict   = ns{ title:, author: }
+# var ns_list   = ns[1, 2, 3]
+
+# POINTERS
+# getting pointer to a primitive address
+let num = 55 
+let pointer = ptr(num)
+
+# setting address value
+pointer.value = 57
+print pointer
+
+# set pointer address 
+pointer.set 0xFFFE
+
+# allocating memory on the heap
+let memory = malloc[Byte](5)
+
+# free pointer memory
+free([memory, pointer]) # throws compile time error if dangling pointer or aliasing problem is detected
+
+# 10/09/17
+# Astro 0.1.7a
+# builtin modules are imported by default
+math.cos(45)
+
+# IMPORT ALL
+import math 
+sin(34)
+cos(25)
+
+# when there is a clash you can use module namespace to disambiguate 
+import myMath [cos, sin]
+math.sin(45)
+sin(78) # you can use the one declared in your module without namespacing
+
+# NAMESPACES 
+# when there is a module name clash, you can use namespace aliases
+import nypro/math [sin]
+namespace nmath = nypro/math
+nmath.sin(78)
+
+# SIMILAR KEY-VALUE NAME
+let book = {
+    title:
+    author:
+    isbn:
+}
+
 # 07/09/17
 # Astro 0.1.06
 # FROM BACK, REMOVE END 
