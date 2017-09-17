@@ -1024,8 +1024,9 @@ TYPE DEFINITION
     # the arguments to corresponding fields
 
     fun Car(maker, model, year)
-    fun Car() #@ destructor # normal # called on Car object during destruction.
-    fun Car() #@ exception # exception # called on Car object during an exception.
+
+    # a destructor can be used for cleanups
+    fun Car(!) 
 
     type Person(!name, !age) # Person is a initializer type.
     # Initializer types have just main initializer and the parameters
