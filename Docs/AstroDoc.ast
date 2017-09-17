@@ -369,10 +369,10 @@ DICTIONARIES
     var user = 2x2 Dict[Str, User]()
     var scoreList = Dict[Str, Int]()
 
-    # types of individual values can be specified
+    # a value name as the key can be ommitted
     var john = {
-        name: ## Str
-        age : ## Int
+        name:
+        age:
     }
     
     # when a dictionary is not used dynamically, the compiler
