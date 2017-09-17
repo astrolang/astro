@@ -10,7 +10,7 @@ Astro has support for first-class functions, generics, object-oriented programmi
 
 Current Version: 0.1.04
 
-![alt text](https://github.com/AppCypher/Astro/blob/master/Images/AstroSyntax.png "Astro Syntax")
+![alt text](https://github.com/AppCypher/Astro/blob/master/Images/AstroSyntax2.png "Astro Syntax")
 
 
 
