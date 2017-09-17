@@ -769,8 +769,8 @@ FUNCTION DEFINITION (2)
         total / numbers.size
     ..
 
-    arithMean(1, 2, 3, 4)
-    arithMean(...list)
+    arithMean(1, 2, 3, 4) # multiple arguments can be passed to it
+    arithMean(...list) # or a splatted tuple can be passed to it 
 
     # anonymous functions are nameless functions
     # and they are excuted at the point of declaration.
