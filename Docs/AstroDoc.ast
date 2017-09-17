@@ -1328,8 +1328,11 @@ MODULES AND IMPORTS # NEEDS REVIEW!!!
     import math, dataframes # import all
     import math except [tan, atan] # import all except
     import math [pi:π, cos, sin:sine] # aliasing
-    import nypro/code/math [pi, cos] # module path  
+    import nypro/math [pi, cos] # module path  
     import ../math 
+    # namespace can help disambiguate imports 
+    namespace nmath = nypro/math 
+    nmath.cos(45)
 
 EXPORT  
     export math except [cos, sin]
