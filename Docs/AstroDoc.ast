@@ -976,7 +976,7 @@ PATTERN MATCHING OPERATOR
     if number ~ Str: print number 
 
 COROUTINES & GENERATORS
-    def count(num):
+    fun count(num):
         for x in [:num]: var z = yield x
 
     var counter = count(25) # instantiating coroutine
@@ -1579,18 +1579,19 @@ _ - patternmatching, partialapplication, anonymousname, unknowntypesig, importal
 & - typeintersection
 || - chainedor 
 && - chainedand
-<- - iteration
+<- - ifassignment, whileassignment, tryassignment
 -> - returntypearrow, lambdas, match
 @ - macrosignature 
-` - staticlocalsubjects
+` - exported
+in - forloop
 as - contravariantconversion
+at - labeljump
 $ - generictypedecl, unnamedargs, outersubjects, stringinterpolation
 .. - blockend, constrainedvalue, cascadingnotation
 ... - rest, unpack, linecontinuation
 : - blockstart, range, importalias
 _ (post) - nonstandardliteral
 , NL - list, dict, enums, chainedconditionalconstruct
-<< -
 
 ASTRO STRUCTURED LANGUAGE PROPOSAL 
 dsl(src: 'hello', link: 'bar.io'):
