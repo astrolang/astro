@@ -30,18 +30,24 @@ SUBJECT DECLARATION & DEFINITION
 IDENTIFIERS
     # name of subjects must always start with a character and
     # can be followed with characters, digits or underscore.
-    var name
-    fun show99BottlesOfBeer():
-        print lyrics
+    var my_name
+    fun show99BottlesOfBeer(): pass 
+        
+    # naming convention
+    # camel case for variables, constants, function names and module names
+    let bookTitle = "Ender's Game"
+    var currentYear = 2017
+    fun addNumbers(a, b): a + b
 
-    # by convention, names use camel case style
-    fun createMeme():
-        print(memes[random(1,11)])
+    # pascal case for type names
+    type InventoryManager(name, id)
+    abst LightSource: SpotLight, Directional, Ambient
 
-    # by convention, subject and function names start with a lowercase character
-    # by convention, type names start with an uppercase character.
-    type Cat:
-        let name, tag
+    # for acronyms, only the first charcater should be upper case
+    type XmlParser <: Parser
+
+    # names preceded by underscores are special to the compiler 
+    print _args 
 
 CONSTANTS
     let b # deferred constant initialization
@@ -64,21 +70,21 @@ FUNCTION DEFINITION (1)
 
     fun echo(value):
         print(value, last:'')
-        
-    # if a function takes only one argument, the call parens can be removed only
-    # if the argument is not a list/set/dict literal or a prefix operator
-    echo value 
-    echo [1] # will evaluate as echo[1] not echo([1])
-    echo +5 # will evaluate as echo + 5 not echo(+5)
-
-    fun swap(!a, !b): # the bang character signifies mutability
-        a, b = b, a
-
+    
     # you can annotate the argument and return types of a function
     ## Int, Int -> Int # is a type annotation
     fun mod(a, b):
         return a % b
+    
+    fun swap(!a, !b): # the bang character signifies mutability
+        a, b = b, a
 
+COMMAND NOTATION     
+    # if a function takes only one argument, the call parens can be removed only
+    # if the argument is not a list/set/dict literal or a prefix operator
+    echo value 
+    echo [1] # will evaluate as echo[1] not echo([1])
+    echo +5 # will evaluate as echo + 5 not echo(+5)   
 
 EXPRESSION-ORIENTED
     var isNyproCrazy = faveHobby == 'CountingBirds' # returns true or false to isNyproCrazy
@@ -191,14 +197,14 @@ MULTIPLE DECLARATION # DEPRECATING
 
 PROPERTIES
     # properties provide getter/setter behavior.
-    # first bracket pair contains the setter, the second bracket pair, the getter
+    # first braces pair contains the setter, the second braces pair, the getter
     var age  = {age + 5} -> {age - 5}
 
-    # the last expression in the setter parens becomes the properties value
-    # the last expression in the getter parens is the properties returned value
+    # the last expression in the setter braces becomes the properties value
+    # the last expression in the getter braces is the properties returned value
     var name = {name} -> {name + "Smith"}
 
-    # empty parens means the setter/getter is inaccessible
+    # empty braces means the setter/getter is inaccessible
     var date = {date} -> {}
 
 TUPLES
@@ -617,7 +623,7 @@ FOR LOOP
     let interestingNumbers = {
         prime      : 2, 3, 5, 7, 11, 13
         square     : 1, 2, 4, 9, 25, 36
-        fibonacci' : 1, 1, 2, 3, 5, 8
+        fibonacci  : 1, 1, 2, 3, 5, 8
     }
 
     # pattern matching with for loop
@@ -662,10 +668,10 @@ FOR LOOP
     yield x for x <- stream()
 
 COMPREHENSION
-    var listComprehension = List(yield x for i <- [1:21] if i .mod(2) != 0)
-    var listComprehension = [x <- [1:21], x .mod(2) != 0]
+    var listComprehension = list(yield x for i <- [1:21] if i mod 2 != 0)
+    var listComprehension = [x <- [1:21], x mod 2 != 0]
     let dictComprehension = {x : y | x <- [1:11], y <- [21:1], even(y)}
-    var setComprehension  = {i <- rand(0, 200, ->20)}
+    var setComprehension  = {i <- random(0, 200, ->20)}
 
     var pythagorasList = [(x, y, z) | 
     z <- [1:21]
@@ -812,7 +818,7 @@ FUNCTION DEFINITION (2)
 
     # accessing a function's arguments with args
     fun printPerson(name., age.):
-	    print args
+	    print _args
 
     printPerson(john) # [name: 'John', age: 25]
 
@@ -861,7 +867,7 @@ IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
     (a:5, b:10) -> a + b
 
     var primes = ([2:]) ->
-        | [p, ...xs]: p ++ fn([i <- xs, i .mod p != 0])
+        | [p, ...xs]: p ++ fn([i <- xs, i mod p != 0])
 
     var x = (|a, b| -> a + b)(2, 3) # deprecation warning!
     
@@ -909,10 +915,6 @@ EXT SUBJECTS
             activateState ext.state # ext refers to the parent scope.
     ..
 
-USEFUL CONSTANTS 
-    pi == 3.141_592_653_589
-    e == 2.7182818284590
-
 PATTERN MATCHING
     # match block is like switch-case statement, and it matches against the expression on the previous line.
     object
@@ -931,7 +933,7 @@ PATTERN MATCHING
     | [a:b]       -> print "range"
     | Int         -> print "integer"
     | $outer      -> outer
-    | 5 if x == z -> doSth() # exhaustive pattern matching
+    | 5 if x == z -> doSth() 
     | .name == 45 -> 45
     | .> 25       -> 'Greater than 25'
     ~ x > 25      -> x * 2 / 5
@@ -1000,7 +1002,7 @@ ACTORS # NEEDS REVIEW!!!
         var name, time ## Str, Int
 
     fun Task(name):
-        new(name, rand(1, 1_000))
+        new(name, random(1, 1_000))
 
     fun sleep(actor): ## Task
         print "$name is sleeping for $(time)ms"
@@ -1051,7 +1053,7 @@ UNION AND INTERSECTION TYPES
     var identification ## Str|Int
 
 TYPE CONVERSION FUNCTIONS 
-    # camelCased names of types are by convention meant for type conversion operations
+    # camelCased version of type names are, by convention, meant for type conversion operations
     type MyInt <: Int  
     type MyFloat <: Float  
 
@@ -1099,7 +1101,7 @@ INHERITANCE
     fun sound(pegasus): ## Pegasus
         sound pegasus as Horse
 
-    # due to Astro's multiple dispatch, Inheritance applies equally to all
+    # due to Astro's multiple dispatch nature, Inheritance applies equally to all
     # arguments of a function.
     type A
     type B <: A
@@ -1118,21 +1120,21 @@ INITIALIZER TRAIN
     # initializer train is the way Astro ensures the initialization of all declared and inherited fields of a particular type.
 
     # it's basically about making each type responsible for the initialisation of the fields it introduced.
-
     type Person(name)
     type Teacher(subject) <: Person
     type Student(course) <: Person
-    # the initializer train of an initializer type is created automatically
 
     type TeachingStudent <: Teacher, Student:
         var schedule
 
     fun Teacher(name, subject): new(name).super(subject)
+
     fun Student(<name>, course) # single inheritance can be shortened
+
     fun TeachingStudent(name, subject, course, timetable):
+        # a subtype cannot assign to an inherited field in the initializer train.
         new(timetable).Teacher(name, subject).Student(_, course)
 
-    # a sub type should not assign to inherited fields in the initializer.
     # if the compiler finds out an initializer doesn't initialize a field, it complains.
 
 DIAMOND PROBLEM
@@ -1143,6 +1145,7 @@ DIAMOND PROBLEM
         studentList student.name
 
     # when TeachingStudent type is declared, an ambiguity error will be issued about `register`.
+    type TeachingStudent <: Teacher, Student:
 
     # the function needs to be overridden
     fun register(teachingStudent): ## TeachingStudent
@@ -1214,7 +1217,7 @@ IDENTITY/REFERENCE EQUALITY
     let c = val a
     a === b # true
     a === c # false
-    (one === other) == (one.ref === other.ref) # true
+    (this === that) == (this.ref == that.ref) # true
 
 FUNCTION == METHODS (UFCS)
     fun show(p): ## Person
@@ -1223,7 +1226,7 @@ FUNCTION == METHODS (UFCS)
 
     show nigel
     # In Astro, a function is a method of its first argument.
-    nigel.show
+    nigel.show()
 
     # The only two set of functions that cannot be used with dot operator are
     # contructor functions and new functions.
@@ -1296,8 +1299,8 @@ TYPE CASTING
 
 NAME ALIASES
     type Number = Integer|Float|Complex
-    fun cheb = chebyshevCoefficient
-    let pi = piConstant
+    fun cheb    = chebyshevCoefficient
+    let pi      = piConstant
 
 FUNCTION & TYPE OBJECTS
     fun foo = bar ## Int -> Int 
@@ -1340,7 +1343,8 @@ GENERICS
         d = a + b + c
 
     var sum = add[Int](2, 4, 6)
-    # if the generic parameter can be readily inferred, then type argument can be ommited.
+
+    # if the generic arguments can be readily inferred, then type argument can be ommited.
     var sum = add(2, 4, 6)
 
     # value constraints 
@@ -1435,11 +1439,11 @@ OPERATOR OVERLOADING # NEEDS REVIEW!!!
 
     # there are certain special operators like [] and {} that can be overloaded
     # with special names
-    fun getIndex(myList, index): ## MyList 
+    fun _getIndex(myList, index): ## MyList 
         return myList.items[index]
     # NOTE: getIndex 2nd argument can only be of Integer datatype
     
-    fun getValue(myTable, key): ## MyTable
+    fun _getValue(myTable, key): ## MyTable
         return myTable{key}
 
 TRY, CATCH & ENSURE
@@ -1594,19 +1598,6 @@ FEATURE SUMMARY
 - Free and open source.
 - Powerful type sytem with multiple dispatch, variance and generics.
 - Metaprogramming with hygenic macros and operator overloading.
-
-NAMING CONVENTION
-- camel case for variables, constants, function names and module names
-    let bookTitle = "Ender's Game"
-    var currentYear = 2017
-    fun addNumbers(a, b): a + b
-
-- pascal case for type names
-    type InventoryManager(name, id)
-    abst LightSource: SpotLight, Directional, Ambient
-
-- for acronyms, only the first charcater should be upper case
-    type XmlParser <: Parser
 
 WHERE USED
 {} - dictvalueaccess, dictliteral, setliteral, setpatternmatching, dictpatternmatching, properties
