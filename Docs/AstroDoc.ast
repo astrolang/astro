@@ -1495,17 +1495,9 @@ MACROS # NEEDS REVIEW!!!
 OTHER LITERALS # @INC
     let fraction = 3//2 # rational numbers.
 
-    var complex = 1 - 1im # complex numbers.
+    var complex = 1 - 1i # complex numbers.
 
     var regex = /\d+(.\d+)?/ # regex.
-
-    var block_regex = //^ (
-      ?: [-=]>
-       | [-+*/%<>&|^!?=]=
-       | >>>=?
-       | \.{2,3}
-    )
-    //
 
     # non-standard literals
     var ns_number = 345_NGN
