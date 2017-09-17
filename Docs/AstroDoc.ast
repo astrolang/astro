@@ -1612,6 +1612,19 @@ FEATURE SUMMARY
 - Powerful type sytem with multiple dispatch, variance and generics.
 - Metaprogramming with hygenic macros and operator overloading.
 
+NAMING CONVENTION
+- camel case for variables, constants, function names and module names
+    let bookTitle = "Ender's Game"
+    var currentYear = 2017
+    fun addNumbers(a, b): a + b
+
+- pascal case for type names
+    type InventoryManager(name, id)
+    abst LightSource: SpotLight, Directional, Ambient
+
+- for acronyms, only the first charcater should be upper case
+    type XmlParser <: Parser
+
 WHERE USED
 {} - dictvalueaccess, dictliteral, setliteral, setpatternmatching, dictpatternmatching, properties
 [] - listliteral, range, typevar, listpatternmatching
