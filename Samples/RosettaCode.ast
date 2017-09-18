@@ -1,6 +1,6 @@
 # created: 13/09/17 (Astro 0.1.7a)
 # edited: 
-# ACCUMULATOR FACTORY 
+# Accumulator Factory 
 fun accumulator(sum): |n| -> sum += n 
 let f = accumulator(5)
 print f(5)   # 10
@@ -9,54 +9,54 @@ print f(2.4) # 22.4
 
 # created: 13/09/17 (Astro 0.1.7a)
 # edited: 
-# READ A FILE LINE BY LINE 
+# Read a File Line By Line 
 try f <- open('foobar.txt'): 
-	print line for line in f
+    print line for line in f
 
 # created: 13/09/17 (Astro 0.1.7a)
 # edited: 17/09/17 (Astro 0.1.7)
-# MERGE SORT 
+# Sorting Algorithms/Merge Sort
 fun mergeSort(m): 
-	return m if m.size <= 1
-	let middle = m.size / 2
-	let left   = merge(m[:middle])
-	let right  = merge(m[middle:]);
+    return m if m.size <= 1
+    let middle = m.size / 2
+    let left   = merge(m[:middle])
+    let right  = merge(m[middle:]);
 
 fun merge(left, right): 
-	let result = []
-	while |left or right|.!empty: 
-		result ++ (left.shift() if |left <= right|.first ...
-		else right.shift())
-		result ++ left ++ right 
+    let result = []
+    while |left or right|.!empty: 
+        result ++ (left.shift() if |left <= right|.first ...
+        else right.shift())
+        result ++ left ++ right 
 
 let arr = [7, 6, 5, 9, 8, 4, 3, 1, 2, 0]
 print mergeSort arr
 
 # created: 10/09/17 (Astro 0.1.6)
 # edited: 19/09/17 (Astro 0.1.8)
-# CONCURRENT COMPUTING  
+# Concurrent Computing  
 fun main(): 
-	let words = ['Enjoy', 'Rosetta', 'Code']
-	random.seed(time.now())
-	let q = Chan[Str]()
+    let words = ['Enjoy', 'Rosetta', 'Code']
+    random.seed(time.now())
+    let q = Chan[Str]()
 
-	for w in words: 
-		run (w:) -> 
-			time.sleep(random())
-			q << w 
+    for w in words: 
+        run (w:) -> 
+            time.sleep(random())
+            q << w 
 
-	for i in [:words.size]:
-		print q
+    for i in [:words.size]:
+        print q
 
 # created: 07/09/17 (Astro 0.1.6)
 # edited: 19/09/17 (Astro 0.1.8)
-# MAXIMUM TRIANGLE PATH SUM
+# Maximum Triangle Path Sum
 fun solve(!tri): 
-	while tri.size > 1: 
-		let t0 = tri.pop() 
-		for (i, t) in enumerate(tri[!0]):
-			tri[!0, i] = max(t0[i], t0[i+1]) + t
-	tri[0, 0]
+    while tri.size > 1: 
+        let t0 = tri.pop() 
+        for (i, t) in enumerate(tri[!0]):
+            tri[!0, i] = max(t0[i], t0[i+1]) + t
+    tri[0, 0]
 
 let data = """
                           55
@@ -82,7 +82,7 @@ print solve data.lines.map |x| -> x.trim().split().map(int)
 
 # created: 07/09/17 (Astro 0.1.6)
 # edited: 
-# ADDRESS OF A VARIABLE
+# Address of a Variable
 var x = 12
 var pointer = ptr(x) # get pointer
 print pointer        # print address
@@ -90,15 +90,15 @@ pointer.set 0xFFFE   # set the address
 
 # created: 07/09/17 (Astro 0.1.6)
 # edited: 
-# CONDITIONAL STRUCTURES
+# Conditional Structures
 if x == 0: 
-	foo()
+    foo()
 elif x == 1: 
-	bar()
+    bar()
 elif x == 2: 
-	baz()
+    baz()
 else: 
-	qux()
+    qux()
 
 x 
 | 0 -> foo()
@@ -109,20 +109,20 @@ x
 
 # created: 07/09/17 (Astro 0.1.6)
 # edited: 19/09/17 (Astro 0.1.8)
-# APPLY A CALLBACK TO AN ARRAY
+# Apply a Callback To an Array
 var arr = [1, 2, 3, 4]
 arr.each |x| -> print "$x squared = $(x²)"
 
 # created: 07/09/17 (Astro 0.1.6)
 # edited: 19/09/17 (Astro 0.1.8)
-# COMMA QUIBBLING 
+# Comma Quibbling 
 fun commaQuibble(s):
-	result = ""
-	for (i, c) in enumerate(s):
-		if i > 0: 
+    result = ""
+    for (i, c) in enumerate(s):
+        if i > 0: 
             result += ", " if i < s[!0] else "and "
-		result += c 
-	result = "{ $result }"
+        result += c 
+    result = "{ $result }"
 
 var s = [ [] ["ABC"] ["ABC", "DEF"] ["ABC", "DEF", "G", "H"] ]
 
@@ -130,7 +130,7 @@ for i in s: print commaQuibble i
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited:
-# Integer comparison 
+# Integer Comparison 
 let a = scan('Enter value of a: ')
 let b = scan('Enter value of b: ')
  
@@ -143,7 +143,7 @@ elif a == b:
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited: 19/09/17 (Astro 0.1.8)
-# Number reversal game
+# Number Reversal Game
 '''
 number reversal game
     Given a jumbled list of the numbers 1 to 9
@@ -157,16 +157,16 @@ var data   = list('123456789')
 var trials = 0 
 while data == sorted(data): random.shuffle data 
 while data != sorted(data): 
-	trials += 1
-	flip = int scan '#$trials: LIST: $(join data) Flip how many?: '
-	data[:flip] = data[!flip:]
+    trials += 1
+    flip = int scan '#$trials: LIST: $(join data) Flip how many?: '
+    data[:flip] = data[!flip:]
 
 print '\nYou took $trials attempts to put digits in order!'
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited: 19/09/17 (Astro 0.1.8)
-# Queue 
-let myQueue = Queue[Str]()
+# Queue?
+let myQueue = Queue()
 myQueue.push 'foo'
 myQueue.push 'bar'
 myQueue.push 'baz'
@@ -176,7 +176,7 @@ print myQueue.pop() # => 'baz'
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited:
-# Send an unknown method call # currently unsupported
+# Send an Unknown Method Call # currently unsupported
 type Example
 fun foo(ex, x): 42 + x
  
@@ -191,14 +191,14 @@ let hash = sha1 bytes('Ars longa, vita brevis', encoding:'ascii')
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited:
-# Tokenize a string
+# Tokenize a String
 let text = 'Hello,How,Are,You,Today'
-let tokens = text.split(/,/)
+let tokens = text.split /,/
 print join('.', tokens)
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited: 19/09/17 (Astro 0.1.8)
-# String comparison
+# String Comparison
 fun main(args): ## Array[Str]
     let a = "astro"
     let b = "astro"
@@ -218,11 +218,11 @@ fun main(args): ## Array[Str]
 # edited: 19/09/17 (Astro 0.1.8)
 # ABC Problem
 fun abc(s, list):
-  return true if s.empty
-  for i in [:list.size]:
-    return any([abc(s[:!1], delete(val list, i))]) ...
-    if s[!0] in list[i] else true
-  false
+    return true if s.empty
+    for i in [:list.size]:
+        return any([abc(s[:!1], delete(val list, i))]) ...
+        if s[!0] in list[i] else true
+    false
 
 let test = ["A", "BARK","BOOK","TREAT","COMMON","SQUAD","CONFUSE"]
 let list = ["BO","XK","DQ","CP","NA","GT","RE","TG","QD","FS","JW",
