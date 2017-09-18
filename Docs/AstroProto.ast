@@ -1,9 +1,38 @@
+# 18/09/17
+# Astro 0.1.9
+# FIX: HIGHLIGHT
+- import dynamic module
+    import !vector [Vec3]
+
+# AGGREGATE MODULE 
+# a single module can be split between different files by numbering them in certain way. 
+# vector.ast, vector-1.ast, vector-2.ast, etc. all combine to a single module 
+import vector
+
+# REMOVE NAMESPACE 
+import nmath:nypro/math [cosine:cos, sine:sin, π:pi]
+
+# DYNAMIC IMPORT
+# importing a module that is only available at runtime 
+import !vector
+let y = Vec3(1, 2, 3)
+
 # 17/09/17
-# Astro 0.1.8a
+# Astro 0.1.8
 # FIX: HIGHLIGHT
 - mod in command notation
+    x mod 6 == 0
 - command notation and literals [, {, /, 
+    print {}
+    print []
+    print //
+    print[Int]()
 - remove \[ from escape sequence
+    '\ttest\['
+- cascading call 
+    print..(6)
+- remove namespace highlight
+    namespace math 
 # REMOVE LAZY ASSIGNMENT
 # RETURN NOTHING
 # if a function returns nothing, it can be annotated None 
