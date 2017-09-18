@@ -1317,9 +1317,14 @@ MODULES AND IMPORTS # NEEDS REVIEW!!!
     import math [pi:π, cos, sin:sine] # aliasing
     import nypro/math [pi, cos] # module path  
     import ../math 
+    
     # namespace can help disambiguate imports 
     namespace nmath = nypro/math 
     nmath.cos(45)
+
+    # importing a module that is only available at runtime 
+    import !vector
+    let y = Vec3(1, 2, 3)
 
 EXPORT  
     export math except [cos, sin]
