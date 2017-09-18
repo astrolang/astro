@@ -256,7 +256,7 @@ fun rootMeanSq(l): sqrt(mean(l²))
 # Caesar Cipher 
 fun caesar(s, k, decode: false):
     if decode: k = 26 - k 
-    join(char((int(c) - 65 + k) % 26 + 65) | c in s.upper() where "a" <= c <= "A")
+    join(char((ord(c) - 65 + k) % 26 + 65) | c in s.upper() where "a" <= c <= "A")
 
 let msg = "The quick brown fox jumped over the lazy dogs"
 print msg
