@@ -34,15 +34,15 @@ while data != sorted(data):
 print '\nYou took $trials attempts to put digits in order!'
 
 # created: 22/08/17 (Astro 0.1.05)
-# edited:
+# edited: 19/09/17 (Astro 0.1.8)
 # Queue 
-let myQueue = Queue()
-myQueue.put 'foo'
-myQueue.put 'bar'
-myQueue.put 'baz'
-print myQueue.get() # => 'foo'
-print myQueue.get() # => 'bar'
-print myQueue.get() # => 'baz'
+let myQueue = Queue[Str]()
+myQueue.push 'foo'
+myQueue.push 'bar'
+myQueue.push 'baz'
+print myQueue.pop() # => 'foo'
+print myQueue.pop() # => 'bar'
+print myQueue.pop() # => 'baz'
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited:
