@@ -212,7 +212,7 @@
 		"import":{
 	        "patterns":[
 	            {
-	                "match": "(?<=import)\\s+[a-z\\/\\.]+\\s+(?=\\[)",
+	                "match": "(?<=import)\\s+!?[a-z/\\.\\:]+\\s+(?=\\[)",
 	                "name": "astro"
 	            }
 	        ]

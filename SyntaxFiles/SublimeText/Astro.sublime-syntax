@@ -73,7 +73,7 @@ contexts:
       name: operators
     
     # used to counter command notation highlight in "import math [cos]" for example
-    - match: (?<=import)\s+[a-z/\.]+\s+(?=\[) # import
+    - match: (?<=import)\s+!?[a-z/\.\:]+\s+(?=\[) # import
       scope: astro
       name: command_notation
 
