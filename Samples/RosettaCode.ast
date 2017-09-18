@@ -12,7 +12,7 @@ elif a == b:
     print 'a is equal to b'
 
 # created: 22/08/17 (Astro 0.1.05)
-# edited:
+# edited: 19/09/17 (Astro 0.1.8)
 # Number reversal game
 '''
 number reversal game
@@ -23,15 +23,15 @@ number reversal game
     until all the digits end up in ascending order.
 '''.print()
 
-var data, trials = list('123456789'), 0
-shuffle(data) while data == sorted(data):
-    
-while data != sorted(data):
-    trials += 1
-    flip = int(scan('#$:2(trials): LIST: $(join(' ', data)) Flip how many?: '))
-    data[:flip] = reversed(data[:flip])
- 
-print '\nYou took $:2(trials) attempts to put the digits in order!'
+var data   = list('123456789')
+var trials = 0 
+while data == sorted(data): random.shuffle data 
+while data != sorted(data): 
+	trials += 1
+	flip = int scan '#$trials: LIST: $(join data) Flip how many?: '
+	data[:flip] = data[!flip:]
+
+print '\nYou took $trials attempts to put digits in order!'
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited:
@@ -54,8 +54,9 @@ name = 'foo'
 call(name, Example(), 5) # => 47
 
 # created: 22/08/17 (Astro 0.1.05)
-# edited:
+# edited: 19/09/17 (Astro 0.1.8)
 # SHA-1
+import crypto
 let hash = sha1 bytes('Ars longa, vita brevis', encoding:'ascii')
 
 # created: 22/08/17 (Astro 0.1.05)
@@ -66,47 +67,48 @@ let tokens = text.split(/,/)
 print join('.', tokens)
 
 # created: 22/08/17 (Astro 0.1.05)
-# edited: 
+# edited: 19/09/17 (Astro 0.1.8)
 # String comparison
 fun main(args): ## Array[Str]
     let a = "astro"
     let b = "astro"
-    print("Case sensitive comparisons:\n")
-    print("astro and astro are equal     = $(a == b)")
-    print("astro and astro are not equal = $(a != b)")
-    print("astro comes before astro      = $(a < b)")
-    print("astro comes after astro       = $(a > b)")
-    print("\nCase insensitive comparisons:\n")
-    print("astro and astro are equal     = $(a == b.lower())")
-    print("astro and astro are not equal = $(a != b.lower())")
-    print("astro comes before astro      = $(a < b.lower())")
-    print("astro comes after astro       = $(a > b.lower())")
+    print
+        ..("Case sensitive comparisons:\n")
+        ..("astro and astro are equal     = $(a == b)")
+        ..("astro and astro are not equal = $(a != b)")
+        ..("astro comes before astro      = $(a < b)")
+        ..("astro comes after astro       = $(a > b)")
+        ..("\nCase insensitive comparisons:\n")
+        ..("astro and astro are equal     = $(a == b.lower())")
+        ..("astro and astro are not equal = $(a != b.lower())")
+        ..("astro comes before astro      = $(a < b.lower())")
+        ..("astro comes after astro       = $(a > b.lower())")
 
 # created: 23/07/17 (Astro 0.1.02)
-# edited: 24/08/17 (Astro 0.1.05)
+# edited: 19/09/17 (Astro 0.1.8)
 # ABC Problem
 fun abc(s, list):
-  return true if s.isEmpty() 
-  for i <- [:list.size]:
-    return any([abc(s[:end], val list.delete(i))]) ...
-    if s[end-1] in list[i] else true
+  return true if s.empty
+  for i in [:list.size]:
+    return any([abc(s[:!1], delete(val list, i))]) ...
+    if s[!0] in list[i] else true
   false
 
 let test = ["A", "BARK","BOOK","TREAT","COMMON","SQUAD","CONFUSE"]
 let list = ["BO","XK","DQ","CP","NA","GT","RE","TG","QD","FS","JW",
 "HU","VI","AN","OB","ER","FS","LY","PC","ZM"]
-for s <- test:
-    print "$(s.%-8s) | $(abc(s, list))" 
+for s in test:
+    print "$:.-8(s) | $(abc(s, list))" 
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited: 24/08/17 (Astro 0.1.05)
+# edited: 19/09/17 (Astro 0.1.8)
 # 99 Bottles of Beer
 fun bottles(n): 
     | 0 -> "No more bottles"
     | 1 -> "1 bottle"
     | _ -> "$n bottles"
     
-for n <- [100:1]:
+for n in [100:1]:
     print """
     $(bottles n) of beer on the wall
     $(bottles n) of beer
@@ -120,16 +122,16 @@ for n <- [100:1]:
 fun rootMeanSq(l): sqrt(mean(l²))
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited: 24/08/17 (Astro 0.1.05)
+# edited: 19/09/17 (Astro 0.1.8)
 # Caesar Cipher 
 fun caesar(s, k, decode: false):
     if decode: k = 26 - k 
-    "".join(char((int(c) - 65 + k) % 26 + 65) | c <- s.upper(), "a" <= c <= "A")
+    join(char((int(c) - 65 + k) % 26 + 65) | c in s.upper() where "a" <= c <= "A")
 
 let msg = "The quick brown fox jumped over the lazy dogs"
 print msg
 let enc = caesar(msg, 11)
-print =>(enc) =>(caesar(enc, 11, decode: true))
+print ..(enc) ..(caesar(enc, 11, decode: true))
 
 # created: 23/07/17 (Astro 0.1.01)
 # edited:
@@ -144,9 +146,9 @@ mean([])
 print "Hello world!"
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited: 24/08/17 (Astro 0.1.05)
-# 15 Puzzle 
-type Puzzle(items: {:}, position: -1)
+# edited: 18/09/17 (Astro 0.1.8)
+# 15 Puzzle Game
+type Puzzle(!items:{:}, !position:-1)
  
 fun mainFrame(puz):
     let d = puz.items
@@ -163,36 +165,36 @@ fun mainFrame(puz):
 fun format(puz, ch):
     let ch = ch.trim()
     ch.size 
-    | 1 -> '  $ch   '
+    | 1 -> '  $ch  '
     | 2 -> '  $ch '
     | 0 -> '     '
 
 fun change(puz, to):
     let fro = puz.position
-    for (a, b) <- puz.items if b == puz.format(str(to)):
+    for (a, b) in puz.items if b == puz.format(str(to)):
         to = a
         break
     swap puz.items.|{fro}, {to}|
     puz.position = to
 
 fun buildBoard(puz, difficulty):
-    for i <- [1:17]:
+    for i in [1:17]:
         puz.items{i} = puz.format(str(i))
     var tmp = 0
-    for (a, b) <- puz.items if b == '  16 ':
+    for (a, b) in puz.items if b == '  16 ':
         puz.items{a} = '     '
         tmp = a
         break
     puz.position = tmp
-    let diff = 100
-    difficulty
-    | 0 -> diff = 10
-    | 1 -> diff = 50
+    let diff = $ if difficulty
+        | 0 -> 10
+        | 1 -> 50
+        | _ -> 100
     for _ in [:diff]:
         let lst  = puz.valid_moves()
         let lst1 = []
-        for j <- lst: lst1.append(int(j.trim()))
-        puz.change(lst1[randInt(0, size(lst1)-1)])
+        for j in lst: lst1.append(int(j.trim()))
+        puz.change(lst1[random(0, size(lst1)-1)])
 
 fun validMoves(puz):
     let pos = puz.position
@@ -208,11 +210,10 @@ fun validMoves(puz):
 
 fun gameOver(puz):
     var flag = false
-    for (a, b) <- puz.items if b == (' ' * 5): _
+    for (a, b) in puz.items if b == (' ' * 5): pass
     else: flag = (a == int trim b)
     flag
- 
- 
+  
 let g = Puzzle()
 g.buildBoard(int scanln 'Enter the difficulty : 0 1 2\n2 => highest 0=> lowest\n')
 g.mainFrame()
@@ -221,27 +222,27 @@ loop:
     print 'Hello user:\nTo change the position just enter the no. near it'
     let lst  = g.valid_moves()
     let lst1 = []
-    for i <- lst:
+    for i in lst:
         lst1.append(int(i.trim()))
-        print '[i.strip()] \t'
+        print '$(i.strip()) \t'
     print()
     let x = int(input())
-    | 0        -> break
-    | !in lst1 -> print 'Wrong move'
-    | else     -> g.change(x)
+    | 0       -> break
+    ! in lst1 -> print 'Wrong move'
+    | _       -> g.change(x)
     g.mainFrame()
     if g.gameOver():
         print 'You WON'
         break
 
 # ceated: 13/06/17 (Astro 0.1.0)
-# edited: 24/08/17 (Astro 0.1.05)
+# edited: 17/09/17 (Astro 0.1.8)
 # 100 Doors
 -- unoptimized  
 var doors = falses 100
-for a <- [:101]:
-    for b <- [a:a:101]: doors[b] = !doors[b]
+for a in [:101]:
+    for b in [a:a:101]: doors[b] = !doors[b]
     print "Door $a is $('open.' if doors[a] else 'closed.')"
 
 -- optimized
-for i <- [:10]: print "Door $(i²) is open."
+for i in [:10]: print "Door $(i²) is open."
