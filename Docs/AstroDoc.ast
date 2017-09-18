@@ -1314,13 +1314,13 @@ MODULES AND IMPORTS # NEEDS REVIEW!!!
     import math # import all
     import math, dataframes # import all
     import math except [tan, atan] # import all except
-    import math [pi:π, cos, sin:sine] # aliasing
     import nypro/math [pi, cos] # module path  
     import ../math 
-    
+
     # namespace can help disambiguate imports 
-    namespace nmath = nypro/math 
-    nmath.cos(45)
+    import nmath:nypro/math [cosine:cos, sine:sin, π:pi]
+    let b = nmath.tan(45)
+    let d = cosine(30)
 
     # importing a module that is only available at runtime 
     import !vector
