@@ -1326,6 +1326,11 @@ MODULES AND IMPORTS # NEEDS REVIEW!!!
     import !vector
     let y = Vec3(1, 2, 3)
 
+    # aggregate module 
+    # a single module can be split between different files by numbering them in certain way. 
+    # vector.ast, vector-1.ast, vector-2.ast, etc. all combine to a single module 
+    import vector
+
 EXPORT  
     export math except [cos, sin]
 
