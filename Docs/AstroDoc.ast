@@ -1662,11 +1662,11 @@ INSTANCE TYPES
     car :: Car:{Str, Str, Int}
 
 INTEROP PRTOPOSAL WITH JS AND PYTHON
-    @pyimport math [...]
+    @pyimport math
     math.sin(45)
     math.cos(70)
 
-    @jsimport express [...]
+    @jsimport express
     let app = express()
     let router = app.Router()
 
