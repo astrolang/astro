@@ -9,13 +9,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AppCypher/Project-ABC.git"
+    "url": "git+https://github.com/AppCypher/Astro.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AppCypher/Project-ABC/issues"
+    "url": "https://github.com/AppCypher/Astro/issues"
   },
-  "homepage": "https://github.com/AppCypher/Project-ABC#readme"
+  "homepage": "https://github.com/AppCypher/Astro#readme"
 }
