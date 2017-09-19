@@ -4,7 +4,8 @@
   "description": "Astro is a high-level, high-performance statically-typed programming language that compiles to WebAssembly, with syntax similar to Python and technical-computing orientation similar to Julia.",
   "main": "index.js",
   "scripts": {
-    "test": "node Tests/js/Tests/AstroMain.js"
+    "build": "tsc --watch AstroCompiler/",
+    "start": "node Tests/js/Tests/AstroMain.js"
   },
   "repository": {
     "type": "git",
