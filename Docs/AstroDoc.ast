@@ -1634,23 +1634,20 @@ WHAT IF
         }
     }
 
-    var age = (age += 5) -> (age -= 5)
+    var age = { age += 5 } -> { age -= 5 }
     
-    list.foldl(0) |a, b| -> a + b
+    list.foldl(0) |a, b| { a + b }
 
-    list.foldl(0) |a, b| -> {
+    list.foldl(0) |a, b| {
         a + b
     }
 
     var students = getStudentList()
-    students.@gpa.map |gpa| -> (gpa + 1)
+    students.:gpa.map |gpa| { gpa + 1 }
 
-    20.each -> { print "Hello" }
+    20.each { print "Hello" }
 
-    type {
-        Person(!name, !age)
-        Car(!model, !make)
-    }
+    # no multiple declaration syntaz
 
     type Employee <: Person {
         var job ## Str
