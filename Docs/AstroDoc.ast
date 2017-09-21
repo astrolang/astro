@@ -166,11 +166,11 @@ NUMBERS
     var index    = 5
     var axis     = -3
     let meters   = 0.25e-5
-    let salary   = 10_000f
+    let salary   = 10_000'f # 'f marks it as float
     var price    = 0x6FFF00p+12 # hex
     var opCode   = 0b10110001 # bin
     var interest = 0o566768 # oct
-    let pi       = 3.14bf # BigFloat
+    let pi       = 3.14'bf # BigFloat
 
 ACCESS MODIFIERS
     var money = 0 # subjects, functions, types, etc. are public by default.
@@ -240,7 +240,7 @@ LISTS
     var names ## [Str] # specifying type of list
     
     # heterogenous list
-    var stuffs = [200USD, 'Steve', 1f, Car('Eleanor')]
+    var stuffs = [200USD, 'Steve', 1'f, Car('Eleanor')]
 
     # Astro uses 0-based indexing, so every list indices start at 0.
     stuffs[0] # 200USD
@@ -760,7 +760,7 @@ FUNCTION DEFINITION (2)
     # varargs.
     ## Int -> F64
     fun arithMean(...numbers): # variable number of arguments 
-        var total = 0d
+        var total = 0
         for number = numbers:
             total += number
         total / numbers.size
@@ -934,7 +934,7 @@ PATTERN MATCHING
     | .> 25       -> 'Greater than 25'
     ~ x > 25      -> x * 2 / 5
     ~ x < 25      -> 'x is lesser than 25'
-    ! in [1..10]  -> 78_324b
+    ! in [1..10]  -> 78_324'b
     | _           -> 'default' # otherwise
     | else        -> 'default' # same as above 
 
@@ -1469,12 +1469,10 @@ MACROS # NEEDS REVIEW!!!
 OTHER LITERALS # @INC
     let fraction = 3//2 # rational numbers.
 
-    var complex = 1 - 1i # complex numbers.
-
     var regex = /\d+(.\d+)?/ # regex.
 
     # non-standard literals
-    var ns_number = 345_NGN
+    var ns_number = 345'NGN
     var ns_str = ns.'1, 2, 3, 4'
     var ns_list = ns.[1, 2, 3, 5]
     var ns_dict = ns.{name: 'Steve', age: 24}
@@ -1484,13 +1482,13 @@ OTHER LITERALS # @INC
     var raw_string = r."\t represnts a tab character"
 
 BASIC ARITHMETIC OPERATIONS
-    let t = 2 + 2
-    let u = 5f * 20d
+    let t = 2 + 2'f
+    let u = 5f * 20 # => 5 * f + 20
     var v = 5 / 2 # this returns an F64 even though the operands are Ints
     var w = 5 // 2 # this returns a clamped Int result of the above
-    var x = 6 % 5
-    let y = 5i16²
-    let z = I8 √25
+    var x = 1 - 1'i # complex numbers.
+    let y = 5'i16²
+    let z = i8 √25
 
 INTEGER BITWISE FUNCTIONS
     var x = 2 .band 5 # and
