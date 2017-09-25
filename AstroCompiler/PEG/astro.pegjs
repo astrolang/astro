@@ -3,27 +3,29 @@
 }
 
 start
-	= expression ((";" / "\n") expression)*
+	= expression ((";" / newline) expression?)*
 
 expression
 	= subject_declaration
 	/ comment
 
 subject_declaration 
-	= ("let" / "var") name "=" (integer / string) "\n"? { return "subject-declaration"; } 
+	= ("let" / "var") name "=" (integer / string) { return "\nsubject-declaration"; } 
 
 name
-	= [a-zA-Z_][a-zA-Z0-9_]*" "*
+	= n:" "*[a-zA-Z_][a-zA-Z0-9_]*" "* { return n; }
 
 // literals 
 string 
-	= '"'.+'"'
-	/ "'".+"' {"
+	= s:" "*'"'[^\"]+'"' { return s; }
+	/ s:" "*"'"[^\']+"'" { return s; }
 
 integer
-	= [0-9]+" "*
+	= i:" "*[0-9]+" "* { return i; }
 
 // comments
 comment
-	= "#".+"\n" { return "comment"; }
+	= "#"[^\n]* { return "\ncomment"; }
 
+newline 
+	= "\r"? "\n" { return; } // skip
