@@ -15,3 +15,6 @@ Tests/js/
 
 # temporary files 
 Docs/temporary.abnf
+
+# node 
+node_modules/
