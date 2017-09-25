@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc --watch AstroCompiler/",
-    "start": "node Tests/js/Tests/AstroMain.js"
+    "start": "node Tests/js/Tests/AstroMain.js", 
+    "parse": "node AstroCompiler/PEG/parser.js"
   },
   "repository": {
     "type": "git",
