@@ -1,7 +1,8 @@
 # 25/09/17
 # constants and variables
-let name = 25
-var age  = "Hello"
+let age = 25
+let age = "name"
+var name = 500
 
 
 
