@@ -10,7 +10,7 @@ const grammar = fs.readFileSync("./astro.pegjs", "utf8");
 
 // generate paser from grammar
 const parser = peg.generate(grammar);
-print("== Parser Tree Generated Successfully! ==");
+print("== Parser Generated Successfully! ==");
 
 // read sample code file
 const code = fs.readFileSync("./code.ast", "utf8");
