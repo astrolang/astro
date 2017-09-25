@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/AppCypher/Astro/issues"
   },
-  "homepage": "https://github.com/AppCypher/Astro#readme"
+  "homepage": "https://github.com/AppCypher/Astro#readme",
+  "devDependencies": {
+    "pegjs": "^0.10.0"
+  }
 }
