@@ -1,4 +1,5 @@
 # Astro 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 #### Work in Progress :construction:
 Astro is a high-level, high-performance statically-typed programming language that compiles to WebAssembly, with syntax similar to Python and technical-computing orientation similar to Julia.
 
