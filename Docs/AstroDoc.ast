@@ -1483,7 +1483,7 @@ OTHER LITERALS # @INC
 
 BASIC ARITHMETIC OPERATIONS
     let t = 2 + 2'f
-    let u = 5f * 20 # => 5 * f + 20
+    let u = 5f * 20(5 - 6) # => 5 * f + 20 * (5 - 6)
     var v = 5 / 2 # this returns an F64 even though the operands are Ints
     var w = 5 // 2 # this returns a clamped Int result of the above
     var x = 1 - 1'i # complex numbers.
