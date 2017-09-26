@@ -4,5 +4,11 @@ let age = 25
 let age = "name"
 var name = 500
 
+var    days    =   761324354011       ;
+type P(a, b) <: X, Y, Z
+type Z <: Z, X, Y: let x = 67
+type Person(name, age)
+type Human
 
-
+let x = 
+    let y = 5 
