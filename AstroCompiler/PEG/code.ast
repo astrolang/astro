@@ -12,3 +12,5 @@ type Human
 
 let x = 
     let y = 5 
+    var z = 7
+
