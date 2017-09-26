@@ -19,7 +19,7 @@ const code = fs.readFileSync("./code.ast", "utf8");
 try {
   const result = parser.parse(code);
   print("== Code Parsed Successfully! ==");
-  print(`result: { \n${result}s\n}`);
+  print(`result: { \n${result}\n}`);
 }
 catch (err) {
   print(`Error!: ${err.message}`);
