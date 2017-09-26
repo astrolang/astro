@@ -1,14 +1,16 @@
 // 25/09/17
 {
+	let firstIndentCount = 0;
+	let prevIndentCount = 0;
 	function print(s) { console.log(s); }
 	function stringify(s) { return s.toString().replace(/,/g, "").trim(); }
 }
 
 Start
-	= Program
+	= Program 
 
 Program 
-	= (Expression / Comment) (_ (";" / Newline) _ (Expression / Comment)?)*
+	= (Expression / Comment) (_ (";" / Newline) Indent? (Expression / Comment)?)*
 
 Expression
 	= SubjectDeclaration
@@ -37,13 +39,31 @@ LineOrBlockExpression
 	/ Identifier
 
 Block
-	= Indent SubjectDeclaration Dedent
+	= "\n" Indent SubjectDeclaration Dedent
 
 _ 
 	= Whitespace*
 
 Indent
-	= "\n" ("    " / "  ") { return "[indent]" } // 2 and 4 spaces
+	= ind:(" "*) { 
+		let currentIndentCount = ind.toString().replace(/,/g, "").length;
+		print("=== Indent === \n" + currentIndentCount); print(firstIndentCount); print(prevIndentCount)
+		if (firstIndentCount > 0 &&  
+				currentIndentCount % firstIndentCount != 0 && (
+				currentIndentCount == prevIndentCount + 4 ||
+				currentIndentCount == prevIndentCount + 2 ||
+				currentIndentCount == prevIndentCount         )) {
+			if (currentIndentCount == prevIndentCount) return;
+			prevIndentCount = currentIndentCount;
+			return "[indent]" 
+		}
+		else if (firstIndentCount == 0) {
+			firstIndentCount = currentIndentCount;
+			prevIndentCount  = currentIndentCount;
+			return "[indent]" 
+		}
+		error("error: mismatched indentation!")
+	} // 2 and 4 spaces
 
 Dedent 
 	= "" { return "[dedent]"; }
@@ -51,24 +71,24 @@ Dedent
 // == LEXER =
 // TODO: support unicode properly 
 Identifier
-	= n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); print(n); return "identifier"; }
+	= n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); return `identifier:(${n})`; }
 
 Literal
 	= StringLiteral
 	/ IntegerLiteral
  
 StringLiteral 
-	= s1:('"'[^\"]+'"') { s1 = stringify(s1); print(s1); return "string"; }
-	/ s2:("'"[^\']+"'") { s2 = stringify(s2); print(s2); return "string"; }
+	= s1:('"'[^\"]+'"') { s1 = stringify(s1); return `string:(${s1})`; }
+	/ s2:("'"[^\']+"'") { s2 = stringify(s2); return `string:(${s2})`; }
 
 IntegerLiteral
-	= i:(" "*[0-9]+" "*) { i = stringify(i); print(i); return "integer"; }
+	= i:(" "*[0-9]+" "*) { i = stringify(i); return `integer:(${i})`; }
 
 Comment
 	= "#" CommentCharacter* { return "comment"; }
 
 Newline 
-	= "\r"? "\n" { return "\n"; } 
+	= "\r"? "\n" { return "\nnewline"; } 
 
 Whitespace
 	= ("\t"
@@ -100,8 +120,6 @@ AssignOperator    = "="
 SubTypeOperator   = "<:"
 SuperTypeOperator = ">:"
 EqualTypeOperator = "::"
-
-
  
 // == UNICODE TOKENS ==
 // Extracted from the following Unicode Character Database file:
