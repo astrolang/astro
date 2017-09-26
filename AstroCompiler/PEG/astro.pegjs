@@ -8,31 +8,64 @@ Start
 	= Program
 
 Program 
-	= (Expression / Comment) _ ((";" / Newline) _ (Expression / Comment)?)*
+	= (Expression / Comment) (_ (";" / Newline) _ (Expression / Comment)?)*
 
 Expression
 	= SubjectDeclaration
+	/ TypeDeclaration
 
 SubjectDeclaration 
-	= (Let / Var) _ Identifier _ AssignOperator _ (IntegerLiteral / StringLiteral) 
+	= (Let / Var) _ Identifier _ AssignOperator _ LineOrBlockExpression
+
+FunctionDeclaration
+	= Fun _ Identifier _ TypeParameter (_ ":" LineOrBlockExpression)?
+
+TypeDeclaration
+	= Type _ Identifier (_ SuperTypeDeclaration)? _ ":" _ LineOrBlockExpression
+	/ Type _ Identifier (_ TypeParameter)? (_ SuperTypeDeclaration)?
+
+TypeParameter
+	= "(" _ Identifier (_ "," _ Identifier)* _ ")"
+
+SuperTypeDeclaration
+	= SubTypeOperator _ Identifier (_ "," _ Identifier)*
+
+LineOrBlockExpression
+	= Block
+	/ SubjectDeclaration
+	/ Literal
+	/ Identifier
+
+Block
+	= Indent SubjectDeclaration Dedent
 
 _ 
 	= Whitespace*
 
-// == LEXER == //
+Indent
+	= "\n" ("    " / "  ") { return "[indent]" } // 2 and 4 spaces
+
+Dedent 
+	= "" { return "[dedent]"; }
+
+// == LEXER =
 // TODO: support unicode properly 
 Identifier
-	= n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); print(n); return "\nname"; }
+	= n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); print(n); return "identifier"; }
+
+Literal
+	= StringLiteral
+	/ IntegerLiteral
  
 StringLiteral 
-	= s1:('"'[^\"]+'"') { s1 = stringify(s1); print(s1); return "\nstring"; }
-	/ s2:("'"[^\']+"'") { s2 = stringify(s2); print(s2); return "\nstring"; }
+	= s1:('"'[^\"]+'"') { s1 = stringify(s1); print(s1); return "string"; }
+	/ s2:("'"[^\']+"'") { s2 = stringify(s2); print(s2); return "string"; }
 
 IntegerLiteral
-	= i:(" "*[0-9]+" "*) { i = stringify(i); print(i); return "\ninteger"; }
+	= i:(" "*[0-9]+" "*) { i = stringify(i); print(i); return "integer"; }
 
 Comment
-	= "#" CommentCharacter* 
+	= "#" CommentCharacter* { return "comment"; }
 
 Newline 
 	= "\r"? "\n" { return "\n"; } 
@@ -63,8 +96,13 @@ Type   = "type"
 Abst   = "abst"
 
 // == OPERATOR TOKENS ==
-AssignOperator = "="
+AssignOperator    = "="
+SubTypeOperator   = "<:"
+SuperTypeOperator = ">:"
+EqualTypeOperator = "::"
 
+
+ 
 // == UNICODE TOKENS ==
 // Extracted from the following Unicode Character Database file:
 //
