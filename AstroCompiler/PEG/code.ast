@@ -10,8 +10,7 @@ var    days    =   761324354011
 
 # TYPE DECLARATION   
 type Game(a, b) <: X, Y, Z
-type Z <: Z, X, Y: let x = 67
-type 
+type Z <: Z, X, Y: let x = 67 
 type Person(name, age)
 type Human
 
