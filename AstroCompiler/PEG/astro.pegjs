@@ -44,7 +44,7 @@ Line 'line'
 	/ Identifier
 
 Block 'block'
-	= EmptyLine* Indent SubjectDeclaration Dedent
+	= EmptyLine* Indent SubjectDeclaration EmptyLine* Dedent
 
 EmptyLine 'emptyline'
 	= Whitespace+ Newline { return "[emptyline]\n"; }
