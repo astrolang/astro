@@ -7,7 +7,7 @@ let age = "name"
 var name = 500
 # var 6game = 77
 var    days    =   761324354011    
-
+    
 # TYPE DECLARATION   
 type Game(a, b) <: X, Y, Z
 type Z <: Z, X, Y: let x = 67 
@@ -23,7 +23,7 @@ let x =
     let y =
 	       
     
-
+    
         var z = 7
 # let x = 
 #     var y =
