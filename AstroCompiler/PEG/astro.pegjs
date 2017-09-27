@@ -9,22 +9,24 @@
 Start
 	= Program 
 
-Program 
-	= (Expression / Comment) (_ (";" / Newline) Indent? (Expression / Comment)?)*
+Program 	
+	= ProgramExpression*
 
-Expression
-	= SubjectDeclaration
-	/ TypeDeclaration
+ProgramExpression
+	= SubjectDeclaration _ Newline
+	/ TypeDeclaration _ Newline
+	/ Comment _ Newline
+	/ EmptyLine
 
 SubjectDeclaration 
 	= (Let / Var) _ Identifier _ AssignOperator _ LineOrBlockExpression
 
 FunctionDeclaration
-	= Fun _ Identifier _ TypeParameter (_ ":" LineOrBlockExpression)?
+	= Fun _ Identifier _ TypeParameter _ (":" LineOrBlockExpression)?
 
 TypeDeclaration
-	= Type _ Identifier (_ SuperTypeDeclaration)? _ ":" _ LineOrBlockExpression
-	/ Type _ Identifier (_ TypeParameter)? (_ SuperTypeDeclaration)?
+	= Type _ Identifier _ SuperTypeDeclaration? _ ":" _ LineOrBlockExpression
+	/ Type _ Identifier _ TypeParameter? _ SuperTypeDeclaration?
 
 TypeParameter
 	= "(" _ Identifier (_ "," _ Identifier)* _ ")"
@@ -33,40 +35,62 @@ SuperTypeDeclaration
 	= SubTypeOperator _ Identifier (_ "," _ Identifier)*
 
 LineOrBlockExpression
-	= Block
-	/ SubjectDeclaration
+	= Newline Block
+	/ Line
+
+Line 'line'
+	= SubjectDeclaration
 	/ Literal
 	/ Identifier
 
-Block
-	= "\n" Indent SubjectDeclaration Dedent
+Block 'block'
+	= EmptyLine* Indent SubjectDeclaration Dedent
 
+EmptyLine 'emptyline'
+	= Whitespace+ Newline { return "[emptyline]\n"; }
+    / Newline { return "\nnewline"; }
 _ 
 	= Whitespace*
 
-Indent
-	= ind:(" "*) { 
+Indent 'indent'
+	= ind:("    "+) { 
 		let currentIndentCount = ind.toString().replace(/,/g, "").length;
-		print("=== Indent === \n" + currentIndentCount); print(firstIndentCount); print(prevIndentCount)
-		if (firstIndentCount > 0 &&  
-				currentIndentCount % firstIndentCount != 0 && (
-				currentIndentCount == prevIndentCount + 4 ||
-				currentIndentCount == prevIndentCount + 2 ||
-				currentIndentCount == prevIndentCount         )) {
-			if (currentIndentCount == prevIndentCount) return;
+		print("=== Indent === \n" + currentIndentCount); print(firstIndentCount); print(prevIndentCount);
+		if (
+			firstIndentCount > 0 && (  // there is already a first indent
+			currentIndentCount === prevIndentCount + 4 || // current indent is one indent wider than previous indent
+			currentIndentCount === prevIndentCount // current indent equals previous indent
+		)) {
+			if (currentIndentCount === prevIndentCount) return "[samedent]";
 			prevIndentCount = currentIndentCount;
-			return "[indent]" 
+			return "[indent]";
 		}
-		else if (firstIndentCount == 0) {
+		else if (firstIndentCount === 0) {
 			firstIndentCount = currentIndentCount;
 			prevIndentCount  = currentIndentCount;
 			return "[indent]" 
 		}
 		error("error: mismatched indentation!")
-	} // 2 and 4 spaces
+	} // 4 spaces
 
-Dedent 
-	= "" { return "[dedent]"; }
+Dedent 'dedent'
+	= ded1:("    "+) {
+		print("=== Dedent ===");
+		let currentIndentCount = ded1.toString().replace(/,/g, "").length;
+		if (
+			currentIndentCount < prevIndentCount && 
+			currentIndentCount == prevIndentCount - 4
+		) {
+			return "[dedent]";
+		}
+		error("error: mismatched dedentation");
+	}
+	/ ded2:"" { 
+		print("=== Dedent ===");
+		if (prevIndentCount >= 4) 
+			return "[dedent]";
+		error("error: mismatched dedentation");
+	}
 
 // == LEXER =
 // TODO: support unicode properly 
@@ -87,17 +111,17 @@ IntegerLiteral
 Comment
 	= "#" CommentCharacter* { return "comment"; }
 
-Newline 
+Newline 'newline' 
 	= "\r"? "\n" { return "\nnewline"; } 
 
-Whitespace
+Whitespace 'whitespace'
 	= ("\t"
-  / "\v"
-  / "\f"
-  / " "
-  / "\u00A0"
-  / "\uFEFF"
-  / Zs) { return "[space]"; }
+	/ "\v"
+	/ "\f"
+	/ " "
+	/ "\u00A0"
+	/ "\uFEFF"
+	/ Zs) { return "[space]"; }
 
 CommentCharacter
 	= [^\n]+
