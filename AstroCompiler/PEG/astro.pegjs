@@ -1,27 +1,24 @@
 // 25/09/17
 {
-	let firstIndentCount = 0;
 	let prevIndentCount = 0;
-    let justDedented = false;
 	function print(s) { console.log(s); }
 	function stringify(s) { return s.toString().replace(/,/g, "").trim(); }
-    function ifNotJustDedented(expected) { if(!justDedented) error(expected); justDedented = false; }
 }
 
 Start
 	= Program 
 
 Program 	
-	= ProgramExpression*
+	= ProgramExpression (Samedent ProgramExpression)*
 
 ProgramExpression
-	= SubjectDeclaration (_ Newline / ""{ ifNotJustDedented("newline expected here"); }) 
-	/ TypeDeclaration (_ Newline / ""{ ifNotJustDedented("newline expected here"); }) 
-	/ Comment (_ Newline / ""{ ifNotJustDedented("newline expected here"); }) 
-	/ EmptyLine
+	= SubjectDeclaration 
+	/ TypeDeclaration _ Newline
+	/ Comment _ Newline
+	/ EmptyLine Newline
 
 SubjectDeclaration 
-	= (Let / Var) _ Identifier _ AssignOperator _ LineOrBlockExpression
+	= (Let / Var) _ Identifier _ AssignOperator _ LineOrBlockExpression {print("**decl**")}
 
 FunctionDeclaration
 	= Fun _ Identifier _ TypeParameter _ (":" LineOrBlockExpression)?
@@ -37,65 +34,51 @@ SuperTypeDeclaration
 	= SubTypeOperator _ Identifier (_ "," _ Identifier)*
 
 LineOrBlockExpression
-	= Newline Block
+	= Block
 	/ Line
 
 Line 'line'
 	= SubjectDeclaration
 	/ Literal
 	/ Identifier
+
 Block 'block'
-	= EmptyLine* Indent SubjectDeclaration EmptyLine* Dedent
+	= (Newline EmptyLine)* Newline Indent SubjectDeclaration (Newline EmptyLine)* Newline Dedent {print("block")}
 
 EmptyLine 'emptyline'
-	= Whitespace+ Newline { return "[emptyline]\n"; }
-    / Newline { return "\nnewline"; }
+	= (Whitespace+ &Newline 
+	/ "" &Newline) { return "[emptyline]\n"; }
 _ 
 	= Whitespace*
 
 Indent 'indent'
 	= ind:("    "+) { 
 		let currentIndentCount = ind.toString().replace(/,/g, "").length;
-		print("=== Indent ===\ncurrent|first|previous\n" + currentIndentCount); print(firstIndentCount); print(prevIndentCount);
-		if (
-			firstIndentCount > 0 && (  // there is already a first indent
-			currentIndentCount === prevIndentCount + 4 || // current indent is one indent wider than previous indent
-			currentIndentCount === prevIndentCount // current indent equals previous indent
-		)) {
-			if (currentIndentCount === prevIndentCount) return "[samedent]";
+		if (currentIndentCount === prevIndentCount + 4) { // if there is already a first indent and current indent is one indent deeper than previous indent
+			print("=== Indent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
 			prevIndentCount = currentIndentCount;
 			return "[indent]";
 		}
-		else if (firstIndentCount === 0) {
-			firstIndentCount = currentIndentCount;
-			prevIndentCount  = currentIndentCount;
-			return "[indent]" 
-		}
-		error("error: mismatched indentation!")
+		error("error: expected a 4-space indentation here!")
 	} // 4 spaces
 
+Samedent 
+	= s:("    "+ / "") {
+		let currentIndentCount = s.toString().replace(/,/g, "").length;
+		if (currentIndentCount === prevIndentCount) {
+			print("=== Samedent ===");
+			return "[samedent]";
+		}
+	}
+
 Dedent 'dedent'
-	= ded1:("    "+) {
-		print("=== Dedent ===");
-		let currentIndentCount = ded1.toString().replace(/,/g, "").length;
-		if (
-			currentIndentCount < prevIndentCount && 
-			currentIndentCount == prevIndentCount - 4
-		) {
-            prevIndentCount = currentIndentCount;
-            justDedented = true;
+	= ded:("    "+ / "") {
+		let currentIndentCount = ded.toString().replace(/,/g, "").length;
+		if (currentIndentCount < prevIndentCount) {
+			print("=== Dedent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
+			prevIndentCount -= 4;
 			return "[dedent]";
 		}
-		error("error: mismatched dedentation");
-	}
-	/ ded2:"" { 
-		print("=== Dedent ===");
-		if (prevIndentCount >= 4) {
-            prevIndentCount = 0;
-            justDedented = true;
-			return "[dedent]";
-        }
-		error("error: mismatched dedentation");
 	}
 
 // == LEXER =
@@ -130,7 +113,7 @@ Whitespace 'whitespace'
 	/ Zs) { return "[space]"; }
 
 CommentCharacter
-	= [^\n]+
+	= [^\r\n]+
 
 // == KEYWORD TOKENS ==
 True   = "true"
