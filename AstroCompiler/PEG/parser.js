@@ -13,7 +13,7 @@ const parser = peg.generate(grammar);
 print("== Parser Generated Successfully! ==");
 
 // read sample code file
-const code = fs.readFileSync("./temp.ast", "utf8");
+const code = fs.readFileSync("./code.ast", "utf8");
 
 // parse sample code
 try {
