@@ -2,8 +2,10 @@
 {
 	let firstIndentCount = 0;
 	let prevIndentCount = 0;
+    let justDedented = false;
 	function print(s) { console.log(s); }
 	function stringify(s) { return s.toString().replace(/,/g, "").trim(); }
+    function ifNotJustDedented(expected) { if(!justDedented) error(expected); justDedented = false; }
 }
 
 Start
@@ -13,9 +15,9 @@ Program
 	= ProgramExpression*
 
 ProgramExpression
-	= SubjectDeclaration _ Newline
-	/ TypeDeclaration _ Newline
-	/ Comment _ Newline
+	= SubjectDeclaration (_ Newline / ""{ ifNotJustDedented("newline expected here"); }) 
+	/ TypeDeclaration (_ Newline / ""{ ifNotJustDedented("newline expected here"); }) 
+	/ Comment (_ Newline / ""{ ifNotJustDedented("newline expected here"); }) 
 	/ EmptyLine
 
 SubjectDeclaration 
@@ -42,7 +44,6 @@ Line 'line'
 	= SubjectDeclaration
 	/ Literal
 	/ Identifier
-
 Block 'block'
 	= EmptyLine* Indent SubjectDeclaration EmptyLine* Dedent
 
@@ -55,7 +56,7 @@ _
 Indent 'indent'
 	= ind:("    "+) { 
 		let currentIndentCount = ind.toString().replace(/,/g, "").length;
-		print("=== Indent === \n" + currentIndentCount); print(firstIndentCount); print(prevIndentCount);
+		print("=== Indent ===\ncurrent|first|previous\n" + currentIndentCount); print(firstIndentCount); print(prevIndentCount);
 		if (
 			firstIndentCount > 0 && (  // there is already a first indent
 			currentIndentCount === prevIndentCount + 4 || // current indent is one indent wider than previous indent
@@ -81,14 +82,19 @@ Dedent 'dedent'
 			currentIndentCount < prevIndentCount && 
 			currentIndentCount == prevIndentCount - 4
 		) {
+            prevIndentCount = currentIndentCount;
+            justDedented = true;
 			return "[dedent]";
 		}
 		error("error: mismatched dedentation");
 	}
 	/ ded2:"" { 
 		print("=== Dedent ===");
-		if (prevIndentCount >= 4) 
+		if (prevIndentCount >= 4) {
+            prevIndentCount = 0;
+            justDedented = true;
 			return "[dedent]";
+        }
 		error("error: mismatched dedentation");
 	}
 
