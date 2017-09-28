@@ -10,7 +10,7 @@ var    days    =   761324354011
     
 # TYPE DECLARATION   
 type Game(a, b) <: X, Y, Z
-type Z <: Z, X, Y: let x = 67 
+type Player <: Nomad, Veteran: let x = 67 
 type Person(name, age)
 type Human
 
@@ -33,10 +33,13 @@ let x =
 
 # COMMENTS
 # this is a comment
-let xamarin = 56 # this is a comment
+let xamarin = 56 # comment
 let tulio =
     # this is me
-    let yuno = 77
+    let yuno = 
+        # marcaroni 
+        var x = 7
+        # mooni
 # let r676_ =
 # # this is me
 #     let gtyy_ = 77
