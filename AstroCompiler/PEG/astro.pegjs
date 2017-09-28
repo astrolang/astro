@@ -1,12 +1,13 @@
 // 25/09/17
 {
-	let prevIndentCount = 0;
-	function print(s) { console.log(s); }
-	function stringify(s) { return s.toString().replace(/,/g, "").trim(); }
+    let prevIndentCount = 0;
+    function print(...s) { console.log(...s); }
+    function stringify(s) { return s.toString().replace(/,/g, "").trim(); }
+    function spread(...s) { return s; }
 }
 
 Start
-	= ProgramBody
+    = ProgramBody
 
 ProgramBody
     = ProgramStart (LineEnd ProgramPart)*
@@ -20,42 +21,49 @@ ProgramPart
 
 ProgramContent
     = SubjectDeclaration
+    / SingleLineComment
 
 XX 
     = "XX"
 
 SubjectDeclaration 
-	= Let __ SubjectName (_ "=" (_ SubjectBody)?)?
-    / Var __ SubjectName (_ "=" (_ SubjectBody)?)?
+    = Let __ SubjectName (_ "=" _ SubjectBody)?
+    / Var __ SubjectName (_ "=" _ SubjectBody)?
 
 SubjectName 
     = Identifier "`"?
 
 SubjectBody
     = SubjectInline
-    / SubjectBlock
+    / LineEnd Indent SubjectBlock
 
 SubjectInline
     = SubjectDeclaration
     / Literal
 
 SubjectBlock
-    = l:LineEnd ss:SubjectBlockStart sb:(LineEnd SubjectBlockPart)* d:&(LineEnd Dedent) { return l+","+ss+","+sb+",[dedent]"; }
+    = ss:SubjectBlockSourceStart cp:(LineEnd SubjectBlockNonSourcePart)* &(LineEnd Dedent) { return spread(ss,cp,"[dedent]"); }
+    / cs:SubjectBlockNonSourceStart cp1:(LineEnd SubjectBlockNonSourcePart)* sp:(LineEnd SubjectBlockSourcePart) cp2:(LineEnd SubjectBlockNonSourcePart)* &(LineEnd Dedent) { return spread(cs,cp1,sp,cp2,"[dedent]"); }
 
-SubjectBlockStart
-    = Indent SubjectBlockContent 
+SubjectBlockNonSourceStart 
+    = SingleLineComment
     / EmptyLine
 
-SubjectBlockPart
-    = Samedent SubjectBlockContent 
+SubjectBlockNonSourcePart 
+    = Samedent SingleLineComment 
     / EmptyLine
 
-SubjectBlockContent
+SubjectBlockSourceStart 
+    = SubjectBlockSourceContent 
+
+SubjectBlockSourcePart 
+    = Samedent SubjectBlockSourceContent 
+
+SubjectBlockSourceContent
     = SubjectDeclaration
-    / SingleLineComment
 
 FunctionDeclaration
-	= Fun __ FunctionName _ FunctionParameterSection (_ ":" XX)? 
+    = Fun __ FunctionName _ FunctionParameterSection (_ ":" XX)? 
 
 FunctionName 
     = Identifier "`"?
@@ -70,14 +78,14 @@ FunctionParameter
     = (Identifier? ".")? Identifier (_ ":" _ XX)?
 
 TypeDeclaration
-	= Type __ TypeName (_ SuperTypeDeclaration)? _ ":" _ XX
-	/ Type __ TypeName (_ TypeParameterSection)? (_ SuperTypeDeclaration)? 
+    = Type __ TypeName (_ SuperTypeDeclaration)? _ ":" _ XX
+    / Type __ TypeName (_ TypeParameterSection)? (_ SuperTypeDeclaration)? 
 
 TypeName
     = Identifier "`"?
 
 TypeParameterSection
-	= "(" (_ TypeSuperTypeInit _ ",")? _ TypeParameter (_ "," _ TypeParameter)* _ ")"
+    = "(" (_ TypeSuperTypeInit _ ",")? _ TypeParameter (_ "," _ TypeParameter)* _ ")"
  
 TypeSuperTypeInit
     = "<" _ TypeParameter (_ "," _ TypeParameter)* _ ">"
@@ -86,90 +94,100 @@ TypeParameter
     = (Identifier? ".")? Identifier "`"? (_ ":" _ XX)?
 
 SuperTypeDeclaration
-	= "<:" _ Identifier (_ "," _ Identifier)*
+    = "<:" _ Identifier (_ "," _ Identifier)*
 
 AbstDeclaration
     = Abst __ TypeName (_ SuperTypeDeclaration)? _ ":" _ XX
     / Abst __ TypeName (_ TypeParameterSection)? (_ SuperTypeDeclaration)?
 
 Literal
-	= StringLiteral
-	/ IntegerLiteral
+    = StringLiteral
+    / IntegerDecimalLiteral
+    / IntegerOctalLiteral 
  
 StringLiteral 
-	= s1:('"'[^\"]+'"') { s1 = stringify(s1); return `string:(${s1})`; }
-	/ s2:("'"[^\']+"'") { s2 = stringify(s2); return `string:(${s2})`; }
+    = s1:('"'[^\"]+'"') { s1 = stringify(s1); return `string:(${s1})`; }
+    / s2:("'"[^\']+"'") { s2 = stringify(s2); return `string:(${s2})`; }
 
-IntegerLiteral
-	= i:(" "*[0-9]+" "*) { i = stringify(i); return `integer:(${i})`; }
+IntegerDecimalLiteral
+    = i:[1-9]([0-9_]*[0-9])? { i = stringify(i); return `integer:dec(${i})`; }
+
+IntegerOctalLiteral
+    = i:"0o"[1-7]([0-7_]*[0-7])? { i = stringify(i); return `integer:oct(${i})`; }
 
 LineEnd
     = SingleLineComment? Newline
 
 SingleLineComment
-	= "#" CommentCharacter* { return "comment"; }
+    = "#" CommentCharacter* { return "[comment]"; }
 
 CommentCharacter // UNICODE?
-	= [^\r\n]+
+    = [^\r\n]+
 
 EmptyLine 'emptyline'
-	= (Whitespace+ &(Newline / EOI) 
-	/ "" &(Newline / EOI)) { return "[emptyline]\n"; }
+    = (Whitespace+ &(Newline / EOI) 
+    / "" &(Newline / EOI)) { return "[emptyline]"; }
 
-__
-    = Whitespace+
-_ 
-	= Whitespace*
+__ '__'
+    = LineContinuation
+    / Whitespace+
+
+_ '_'
+    = LineContinuation
+    / Whitespace*
+
+LineContinuation 
+    = Whitespace* "..." Whitespace* Newline Samedent
 
 Indent 'indent'
-	= i:("    "+) { 
-		let currentIndentCount = i.toString().replace(/,/g, "").length;
-		if (currentIndentCount === prevIndentCount + 4) { 
-			print("=== Indent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
-			prevIndentCount += 4;
-			return "[indent]";
-		}
-		error("error: expected a 4-space indentation here!")
-	} // 4 spaces
+    = i:("    "+) { 
+        let currentIndentCount = i.toString().replace(/,/g, "").length;
+        if (currentIndentCount === prevIndentCount + 4) { 
+            print("=== Indent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
+            prevIndentCount += 4;
+            return "[indent]";
+        }
+        error("error: expected a 4-space indentation here!")
+    } // 4 spaces 
 
-Samedent 
-	= s:("    "+ / "") &{
-		let currentIndentCount = s.toString().replace(/,/g, "").length;
-		if (currentIndentCount === prevIndentCount) {
-			print("=== Samedent ===");
-			return true;
-		}
+Samedent 'samedent'
+    = s:("    "+ / "") &{
+        let currentIndentCount = s.toString().replace(/,/g, "").length;
+        if (currentIndentCount === prevIndentCount) {
+            print("=== Samedent ===");
+            return true;
+        }
         return false;
-	}
+    }
 
 Dedent 'dedent'
-	= d:("    "+ / "") {
-		let currentIndentCount = d.toString().replace(/,/g, "").length;
-		if (currentIndentCount < prevIndentCount) {
-			print("=== Dedent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
-	        prevIndentCount -= 4;	
-			return "[dedent]";
-		}
+    = d:("    "+ / "") {
+        let currentIndentCount = d.toString().replace(/,/g, "").length;
+        if (currentIndentCount < prevIndentCount) {
+            print("=== Dedent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
+            prevIndentCount -= 4;	
+            return "[dedent]";
+        }
         error("error: expected a 4-space dedentation here!");
-	}
+    }
 
 EOI
     = !.
 
 Identifier // UNICODE?
-	= n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); return `identifier:(${n})`; }
+    = n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); return `identifier:(${n})`; }
 
 Newline 'newline' 
-	= "\r"? "\n" { return "\nnewline"; } 
+    = "\r"? "\n" { return "\nnewline"; } 
 
 Whitespace 'whitespace'
-	= ("\t"
-	/ "\v"
-	/ "\f"
-	/ " "
-	/ "\u00A0"
-	/ "\uFEFF"
-	/ Zs) { return "[space]"; }
+    = ("\t"
+    / "\v"
+    / "\f"
+    / " "
+    / "\u00A0"
+    / "\uFEFF"
+    / Zs) { return "[space]"; }
 
 // == KEYWORD TOKENS ==
 True   = "true"
