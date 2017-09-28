@@ -6,85 +6,91 @@
 }
 
 Start
-	= Program 
+	= ProgramBody
 
-Program 	
-	= ProgramExpression (Samedent ProgramExpression)*
+ProgramBody
+    = ProgramStart (LineEnd ProgramPart)*
 
-ProgramExpression
-	= SubjectDeclaration 
-	/ TypeDeclaration _ Newline
-	/ Comment _ Newline
-	/ EmptyLine Newline
+ProgramStart
+    = ProgramContent
+
+ProgramPart
+    = Samedent ProgramContent
+    / EmptyLine
+
+ProgramContent
+    = SubjectDeclaration
+
+XX 
+    = "XX"
 
 SubjectDeclaration 
-	= (Let / Var) _ Identifier _ AssignOperator _ LineOrBlockExpression {print("**decl**")}
+	= Let __ SubjectName (_ "=" (_ SubjectBody)?)?
+    / Var __ SubjectName (_ "=" (_ SubjectBody)?)?
+
+SubjectName 
+    = Identifier "`"?
+
+SubjectBody
+    = SubjectInline
+    / SubjectBlock
+
+SubjectInline
+    = SubjectDeclaration
+    / Literal
+
+SubjectBlock
+    = l:LineEnd ss:SubjectBlockStart sb:(LineEnd SubjectBlockPart)* d:&(LineEnd Dedent) { return l+","+ss+","+sb+",[dedent]"; }
+
+SubjectBlockStart
+    = Indent SubjectBlockContent 
+    / EmptyLine
+
+SubjectBlockPart
+    = Samedent SubjectBlockContent 
+    / EmptyLine
+
+SubjectBlockContent
+    = SubjectDeclaration
+    / SingleLineComment
 
 FunctionDeclaration
-	= Fun _ Identifier _ TypeParameter _ (":" LineOrBlockExpression)?
+	= Fun __ FunctionName _ FunctionParameterSection (_ ":" XX)? 
+
+FunctionName 
+    = Identifier "`"?
+
+FunctionParameterSection
+    = "(" (_ FunctionSuperTypeInit _ ",")? _ FunctionParameter (_ "," _ FunctionParameter)* _ ")"
+
+FunctionSuperTypeInit
+    = "<" _ FunctionParameter (_ "," _ FunctionParameter)* _ ">"
+
+FunctionParameter
+    = (Identifier? ".")? Identifier (_ ":" _ XX)?
 
 TypeDeclaration
-	= Type _ Identifier _ SuperTypeDeclaration? _ ":" _ LineOrBlockExpression
-	/ Type _ Identifier _ TypeParameter? _ SuperTypeDeclaration?
+	= Type __ TypeName (_ SuperTypeDeclaration)? _ ":" _ XX
+	/ Type __ TypeName (_ TypeParameterSection)? (_ SuperTypeDeclaration)? 
+
+TypeName
+    = Identifier "`"?
+
+TypeParameterSection
+	= "(" (_ TypeSuperTypeInit _ ",")? _ TypeParameter (_ "," _ TypeParameter)* _ ")"
+ 
+TypeSuperTypeInit
+    = "<" _ TypeParameter (_ "," _ TypeParameter)* _ ">"
 
 TypeParameter
-	= "(" _ Identifier (_ "," _ Identifier)* _ ")"
+    = (Identifier? ".")? Identifier "`"? (_ ":" _ XX)?
 
 SuperTypeDeclaration
-	= SubTypeOperator _ Identifier (_ "," _ Identifier)*
+	= "<:" _ Identifier (_ "," _ Identifier)*
 
-LineOrBlockExpression
-	= Block
-	/ Line
-
-Line 'line'
-	= SubjectDeclaration
-	/ Literal
-	/ Identifier
-
-Block 'block'
-	= (Newline EmptyLine)* Newline Indent SubjectDeclaration (Newline EmptyLine)* Newline Dedent {print("block")}
-
-EmptyLine 'emptyline'
-	= (Whitespace+ &Newline 
-	/ "" &Newline) { return "[emptyline]\n"; }
-_ 
-	= Whitespace*
-
-Indent 'indent'
-	= ind:("    "+) { 
-		let currentIndentCount = ind.toString().replace(/,/g, "").length;
-		if (currentIndentCount === prevIndentCount + 4) { // if there is already a first indent and current indent is one indent deeper than previous indent
-			print("=== Indent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
-			prevIndentCount = currentIndentCount;
-			return "[indent]";
-		}
-		error("error: expected a 4-space indentation here!")
-	} // 4 spaces
-
-Samedent 
-	= s:("    "+ / "") {
-		let currentIndentCount = s.toString().replace(/,/g, "").length;
-		if (currentIndentCount === prevIndentCount) {
-			print("=== Samedent ===");
-			return "[samedent]";
-		}
-	}
-
-Dedent 'dedent'
-	= ded:("    "+ / "") {
-		let currentIndentCount = ded.toString().replace(/,/g, "").length;
-		if (currentIndentCount < prevIndentCount) {
-			print("=== Dedent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
-			prevIndentCount -= 4;
-			return "[dedent]";
-		}
-	}
-
-// == LEXER =
-// TODO: support unicode properly 
-Identifier
-	= n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); return `identifier:(${n})`; }
+AbstDeclaration
+    = Abst __ TypeName (_ SuperTypeDeclaration)? _ ":" _ XX
+    / Abst __ TypeName (_ TypeParameterSection)? (_ SuperTypeDeclaration)?
 
 Literal
 	= StringLiteral
@@ -97,8 +103,61 @@ StringLiteral
 IntegerLiteral
 	= i:(" "*[0-9]+" "*) { i = stringify(i); return `integer:(${i})`; }
 
-Comment
+LineEnd
+    = SingleLineComment? Newline
+
+SingleLineComment
 	= "#" CommentCharacter* { return "comment"; }
+
+CommentCharacter // UNICODE?
+	= [^\r\n]+
+
+EmptyLine 'emptyline'
+	= (Whitespace+ &(Newline / EOI) 
+	/ "" &(Newline / EOI)) { return "[emptyline]\n"; }
+
+__
+    = Whitespace+
+_ 
+	= Whitespace*
+
+Indent 'indent'
+	= i:("    "+) { 
+		let currentIndentCount = i.toString().replace(/,/g, "").length;
+		if (currentIndentCount === prevIndentCount + 4) { 
+			print("=== Indent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
+			prevIndentCount += 4;
+			return "[indent]";
+		}
+		error("error: expected a 4-space indentation here!")
+	} // 4 spaces
+
+Samedent 
+	= s:("    "+ / "") &{
+		let currentIndentCount = s.toString().replace(/,/g, "").length;
+		if (currentIndentCount === prevIndentCount) {
+			print("=== Samedent ===");
+			return true;
+		}
+        return false;
+	}
+
+Dedent 'dedent'
+	= d:("    "+ / "") {
+		let currentIndentCount = d.toString().replace(/,/g, "").length;
+		if (currentIndentCount < prevIndentCount) {
+			print("=== Dedent ===\ncurrent:"+currentIndentCount); print("previous:"+prevIndentCount);
+	        prevIndentCount -= 4;	
+			return "[dedent]";
+		}
+        error("error: expected a 4-space dedentation here!");
+	}
+
+EOI
+    = !.
+
+Identifier // UNICODE?
+	= n:([a-zA-Z_][a-zA-Z0-9_]*) { n = stringify(n); return `identifier:(${n})`; }
 
 Newline 'newline' 
 	= "\r"? "\n" { return "\nnewline"; } 
@@ -111,9 +170,6 @@ Whitespace 'whitespace'
 	/ "\u00A0"
 	/ "\uFEFF"
 	/ Zs) { return "[space]"; }
-
-CommentCharacter
-	= [^\r\n]+
 
 // == KEYWORD TOKENS ==
 True   = "true"
