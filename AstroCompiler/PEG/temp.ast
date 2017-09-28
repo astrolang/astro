@@ -4,6 +4,10 @@ var c556ht = var yy667 = 65
 var xx =
     # this is  
     var yyy = 7
-    # the new vibe
-    let yy_0y = 9 
-var x = 7
+
+let yy_0y = 
+    let x = 6
+    # hello
+
+var x = "Ho"
+
