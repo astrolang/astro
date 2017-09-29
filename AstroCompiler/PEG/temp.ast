@@ -1,4 +1,16 @@
-var a34456_bc = 123
+type Teacher <: Human
+type Person: XX
+var a34456_bc = 123.6
+var bb = 2.337
+let z = 0.07
+let y = 0e+7
+let r = 89.8e-7
+let d = 0xFF676e-78
+let x = 0x666
+let x = 0b1100
+let y = 0b0.01
+let d = 23_890
+let y = 0o55_667 
 var c556ht = var yy667 = 65
 
 var xx =
