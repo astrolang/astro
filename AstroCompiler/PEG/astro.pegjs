@@ -10,7 +10,7 @@ Start
     = ProgramBody
 
 ProgramBody
-    = ProgramStart (LineEnd ProgramPart)*
+    = ProgramStart (_ LineEnd ProgramPart)*
 
 ProgramStart
     = ProgramContent
@@ -21,6 +21,9 @@ ProgramPart
 
 ProgramContent
     = SubjectDeclaration
+    / FunctionDeclaration
+    / TypeDeclaration
+    / AbstDeclaration
     / SingleLineComment
 
 XX 
@@ -61,6 +64,7 @@ SubjectBlockSourcePart
 
 SubjectBlockSourceContent
     = SubjectDeclaration
+    / Literal
 
 FunctionDeclaration
     = Fun __ FunctionName _ FunctionParameterSection (_ ":" XX)? 
@@ -102,18 +106,52 @@ AbstDeclaration
 
 Literal
     = StringLiteral
-    / IntegerDecimalLiteral
-    / IntegerOctalLiteral 
+    / FloatLiteral
+    / IntegerLiteral
  
 StringLiteral 
     = s1:('"'[^\"]+'"') { s1 = stringify(s1); return `string:(${s1})`; }
     / s2:("'"[^\']+"'") { s2 = stringify(s2); return `string:(${s2})`; }
 
+IntegerLiteral
+    = IntegerDecimalLiteral
+    / IntegerBinaryLiteral
+    / IntegerOctalLiteral
+    / IntegerHexLiteral
+
 IntegerDecimalLiteral
-    = i:[1-9]([0-9_]*[0-9])? { i = stringify(i); return `integer:dec(${i})`; }
+    = i:([1-9][_0-9]*) { i = stringify(i); return `integer:dec(${i})`; }
+
+IntegerBinaryLiteral
+    = i:("0b"[0-1][0-1_]*) { i = stringify(i); return `integer:bin(${i})`; }
 
 IntegerOctalLiteral
-    = i:"0o"[1-7]([0-7_]*[0-7])? { i = stringify(i); return `integer:oct(${i})`; }
+    = i:("0o"[1-7][0-7_]*) { i = stringify(i); return `integer:oct(${i})`; }
+
+IntegerHexLiteral
+    = i:("0x"[1-9A-F][0-9A-F_]*) { i = stringify(i); return `integer:hex(${i})`; }
+
+FloatLiteral
+    = FloatDecimalLiteral
+    / FloatBinaryLiteral
+    / FloatOctalLiteral
+    / FloatHexLiteral
+
+FloatDecimalLiteral
+    = f:([0-9]+"."[0-9_]+("e"[+-]?[0-9_]+)?) { f = stringify(f); return `float:dec(${f})`; }
+    / f:([0-9]+"e"[+-]?[0-9_]+) { f = stringify(f); return `float:dec(${f})`; }
+
+FloatBinaryLiteral
+    = f:("0b"[0-1]+"."[0-1_]+("e"[+-]?[0-1_]+)?) { f = stringify(f); return `float:bin(${f})`; }
+    / f:("0b"[0-1]+"e"[+-]?[0-1_]+) { f = stringify(f); return `float:bin(${f})`; }
+
+FloatOctalLiteral
+    = f:("0o"[0-7]+"."[0-7_]+("e"[+-]?[0-7_]+)?) { f = stringify(f); return `float:oct(${f})`; }
+    / f:("0o"[0-7]+"e"[+-]?[0-7_]+) { f = stringify(f); return `float:oct(${f})`; }
+
+FloatHexLiteral
+    = f:("0x"[0-9A-F]+"."[0-9A-F_]+("e"[+-]?[0-9A-F_]+)?) { f = stringify(f); return `float:hex(${f})`; }
+    / f:("0x"[0-9A-F]+"e"[+-]?[0-9A-F_]+) { f = stringify(f); return `float:hex(${f})`; }
 
 LineEnd
     = SingleLineComment? Newline
