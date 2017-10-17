@@ -574,7 +574,7 @@ NIL
     let name = dave?.name
 
     # exceptionable unwrap
-    getAccount("Default")! # if result is nil, raise NilError
+    getAccount("Default")!! # if result is nil, raise NilError
 
     # nil operators can also be put directly infront of the identifier
     getAccount!("Default")
