@@ -768,7 +768,6 @@ FUNCTION DEFINITION (2)
     arithMean(...list) # or a splatted tuple can be passed to it 
 
     # anonymous functions are nameless functions
-    # and they are excuted at the point of declaration.
     fun _(): return a + b
 
     # function assignment
