@@ -816,7 +816,6 @@ FUNCTION DEFINITION (2)
 
     printPerson(john) # [name: 'John', age: 25]
 
-
 FIRST-CLASS FUNCTIONS
     # creating new functions from existing functions
     var details = getDetails ## User
@@ -849,6 +848,14 @@ LAMBDAS
     # destructuring in lambda 
     |{name:, age:}| -> print "Hello $name"
 
+CLOSURE
+    # a closure is an inner function.
+    fun genDbConnector(host., username., password.):
+        return fun makeDbConection(): # a closure can be returned.
+            db.connect(host, username, password)
+    ..
+    var dbCallback = genDbConnector(host:'localhost', username:'nypro', password:'willdiearobot')
+
 PARTIAL APPLICATION
     # partially applied functions are function calls with one or more of it's argument not applied
     let add3 = add(3, _)
@@ -867,18 +874,15 @@ IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
         | [p, ...xs]: p ++ fn([i | i in xs where i mod p != 0])
 
     var x = (|a, b| -> a + b)(2, 3) # deprecation warning!
-    
 
-    
-CLOSURE
-    # a closure is an inner function.
-    fun genDbConnector(host., username., password.):
-        return fun makeDbConection(): # a closure can be returned.
-            db.connect(host, username, password)
-    ..
-    var dbCallback = genDbConnector(host:'localhost', username:'nypro', password:'willdiearobot')
+SELF 
+    # the first object passed to a function call can be reference using 'self'
+    ['bread', 'pepper', 'tomato', 'lettuce', 'cucumber']
+        .map('sliced ' + _)
+        .join(', ')
+        .mutate('I had a tasty lunch made with ' + self)
 
-COFUNCTIONS # NEEDS REVIEW!!!
+COFUNCTIONS # DEPRECATED
     fun remove(list, index): ##List[T], Int
         list -= list[index]
 
@@ -1471,6 +1475,12 @@ TRY, CATCH & ENSURE
 
     # error coalescing  
     let x = getValue() !! 78
+
+SYMBOL 
+    # symnols are passed around as is until they are evaluated
+    let symbol = (:2 + 3)
+    let addition = (:name + $symbol) # interpolation
+    eval addition
 
 MACROS # NEEDS REVIEW!!!
     # Astro macros are resolved at parse time.
