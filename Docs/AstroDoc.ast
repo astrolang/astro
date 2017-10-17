@@ -314,7 +314,7 @@ ARRAYS
     let y = [1, 2, 3]
     # [1 2 3]
 
-    let z = [1, 2, 3]` # transpose
+    let z = [1, 2, 3]! # transpose
     # [1]
     # [2]
     # [3]
