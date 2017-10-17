@@ -1209,9 +1209,9 @@ IDENTITY/REFERENCE EQUALITY
     let a = Person 'John Smith', 25
     let b = a
     let c = val a
-    a === b # true
-    a === c # false
-    (this === that) == (this.ref == that.ref) # true
+    a is b # true
+    a is c # false
+    (this is that) == (this.ref == that.ref) # true
 
 FUNCTION == METHODS (UFCS)
     fun show(p): ## Person
