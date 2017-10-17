@@ -859,7 +859,7 @@ CLOSURE
 
 PARTIAL APPLICATION
     # partially applied functions are function calls with one or more of it's argument not applied
-    let add3 = add(3, _)
+    let add3 = add(3, $)
 
     list.map add3
 
@@ -879,7 +879,7 @@ IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
 SELF 
     # the first object passed to a function call can be reference using 'self'
     ['bread', 'pepper', 'tomato', 'lettuce', 'cucumber']
-        .map('sliced ' ++ _)
+        .map('sliced ' ++ $)
         .join(', ')
         .mutate('I had a tasty lunch made with ' ++ self)
 
@@ -1243,8 +1243,8 @@ SUBJECT REPEAT SYNTACTIC SUGARS
     profile ..open() ..deleteMsgs() ..close()
 
     # function application piping
-    buffer ..resize(13) |> ..fill(0, _)
-    add(2, 3) |> sub(_, 5) |> div(2, _)
+    buffer ..resize(13) |> ..fill(0, $)
+    add(2, 3) |> sub($, 5) |> div(2, $)
 
     #@ infixl(5)
     fun |>(f, x): f(a)
