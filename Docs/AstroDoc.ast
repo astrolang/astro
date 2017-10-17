@@ -1479,11 +1479,26 @@ TRY, CATCH & ENSURE
 SYMBOL 
     # symnols are passed around as is until they are evaluated
     let symbol = (:2 + 3)
-    let addition = (:name + $symbol) # interpolation
+    let addition = (:name + \symbol) # interpolation with '\'
     eval addition
 
 MACROS # NEEDS REVIEW!!!
     # Astro macros are resolved at parse time.
+    # macros take asts as argument
+    
+    macro sorted(string): ## NSStr 
+        (:SortedStr('\(string.literal)'))
+    # Note: macro functions cannot use subjects from outer scope
+
+    macro typify(abstract): ## Abst
+        let els = abstract.elements 
+        let types = els.map |a| -> (:type $a)
+        (:\abstract; \types)
+    
+    # inline macro calls 
+    @typify abstract Person(var name, var age)
+    # block macro calls 
+    @loop(times:3): print 'Happy birthday to you'
 
 OTHER LITERALS 
     let fraction = 3//2 # rational numbers.
