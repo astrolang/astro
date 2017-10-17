@@ -1393,8 +1393,11 @@ GENERICS
     let identifier ## T<:Identfiable
 
     var pegasus ## U<:Horse&Bird
+    
+    # using the type of another variable
     var x = 10
-    let y ## x' # this makes y have the same type as x
+    type T = x'
+    var y ## T
 
     # unsure types 
     ## !T, !U -> T|U # T and U could be the same types
@@ -1403,15 +1406,15 @@ GENERICS
         else: return b
     
     # generics symbols
-    # $X, x', !X, X.Y, x(), Int?
+    # $X, !X, X.Y, x(), Int?, T::U&V, |T,U|::X, T(<:X,::Y)
 
-TYPE OBJECTS # @INC
+TYPE OBJECTS 
     Int <: Integer # true
 
     type Name = Str
 
     fun haveSameTypes(x, y):
-        x && y == x'
+        x && y :: x'
     ..
 
 OPERATOR OVERLOADING
@@ -1485,7 +1488,7 @@ SYMBOL
 MACROS # NEEDS REVIEW!!!
     # Astro macros are resolved at parse time.
     # macros take asts as argument
-    
+
     macro sorted(string): ## NSStr 
         (:SortedStr('\(string.literal)'))
     # Note: macro functions cannot use subjects from outer scope
