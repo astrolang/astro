@@ -13,7 +13,7 @@ contexts:
       scope: comment.line.number-sign.astro
       name: non_astro 
 
-    - match: (?<=fun |catch |ensure )[a-z_][A-Za-z0-9_!]*`? # functions
+    - match: (?<=fun |catch |ensure )[a-z_][A-Za-z0-9_!]* # functions
       scope: entity.name.function.astro
       name: functions 
 
@@ -28,7 +28,7 @@ contexts:
       scope: comment.line.number-sign.astro
       name: singleline_comments
 
-    - match: (?<=type |abst |fun )[A-Z][_A-Za-z0-9]*`? # typename_declaration
+    - match: (?<=type |abst |fun )[A-Z][_A-Za-z0-9]* # typename_declaration
       scope: support.class.astro
       name: typename_declaration
 
@@ -40,7 +40,11 @@ contexts:
       scope: constant.numeric.astro
       name: dot_members
 
-    - match: \b[0-9][A-Za-z0-9_]*((\.[0-9_]+)?e[+-]?[0-9_]+)?([A-Za-z][A-Za-z0-9]*)? # numbers
+    - match: \b0x(_?[A-Fa-f0-9])*((\.(_?[A-Fa-f0-9])+)?(p[+-]?)?[A-Fa-f0-9_]+)?('[A-Za-z][A-Za-z0-9]*)? # hex
+      scope: constant.numeric.astro
+      name: hex 
+
+    - match: \b[0-9](_?[0-9])*((\.(_?[0-9])+)?(e[+-]?)?(_?[0-9])+)?('[A-Za-z][A-Za-z0-9]*)? # numbers
       scope: constant.numeric.astro
       name: numbers 
 
@@ -52,11 +56,11 @@ contexts:
       scope: astro
       name: context_keywords
 
-    - match: \b(for|in|and|or|not|end|spill|if|where|\?|else|elif|await|return|at|delegate|yield|while|redo|use|loop|try|catch|ensure|defer|raise|continue|break|pass|export|except|import)\b # control_keywords
+    - match: \b(for|in|is|and|or|not|end|spill|if|where|\?|else|elif|await|return|at|delegate|yield|while|redo|use|loop|try|catch|ensure|defer|raise|continue|break|pass|export|except|import)\b # control_keywords
       scope: keyword.control.astro
       name: control_keywords 
 
-    - match: \b(type|fun|abst|obj|let|var|rxn|new|NaN|iso|val|ref|acq|const|\\\\|as)\b # declaration_keywords
+    - match: \b(type|fun|abst|macro|let|var|rxn|new|NaN|iso|val|ref|acq|const|\\\\|as)\b # declaration_keywords
       scope: storage.modifier.astro
       name: declaration_keywords
 
@@ -68,28 +72,19 @@ contexts:
       scope: entity.name.function.astro
       name: function_calls
 
-    - match: =|\||&|\>|\<|\!|\+|-|\*|\^|%|\?|\b(and|not|or|in|band|bor|bxor|bnot|shl|shr)\b # operators
+    - match: =|\||&|\>|\<|\!|\+|-|\*|\^|%|\?|\b(and|not|or|in|is|band|bor|bxor|bnot|shl|shr)\b # operators
       scope: keyword.operator.astro
       name: operators
-    
-    # used to counter command notation highlight in "import math [cos]" for example
-    - match: (?<=import)\s+!?[a-z/\.\:]+\s+(?=\[) # import
-      scope: astro
-      name: command_notation
 
-    - match: (?<!let |var |rxn )([^=|\:|\;|\.|,|<|>|'|\"|\*|/|\-|\\+|\^|\%|\\|\}|\{|\)|\(|\!|\&|\$|\@|\||\~|type|fun|abst|let|var|rxn|as|for|in|and|not|or|end|spill|if|where|\?|else|elif|await|return|at|yield|while|redo|with|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|obj|const|NaN|iso|val|ref|acq|const|and|or|in]|\b[a-z_][A-Za-z_0-9!]*)\s+(?=[A-Za-z_0-9]+|\"|'|\{|\[|\/)(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|except|mod)\b) # command_notation
+    - match: (?<!let |var |rxn )([^=|\:|\;|\.|,|<|>|'|\"|\*|/|\-|\\+|\^|\%|\\|\}|\{|\)|\(|\!|\&|\$|\@|\||\~|type|fun|abst|let|var|rxn|as|for|in|is|and|not|or|end|spill|if|where|\?|else|elif|await|return|at|yield|while|redo|with|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|obj|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\b[a-z_][A-Za-z_0-9!]*)\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\b) # command_notation
       scope: entity.name.function.astro
       name: command_notation
 
     - match: \" # double_quoted_string
       push: double_quoted_string
 
-    - match: \' # single_quoted_string
+    - match: (?<![_a-zA-Z0-9])\' # single_quoted_string
       push: single_quoted_string
-
-    - match: /.+/ # regex
-      scope: keyword.operator.astro
-      name: regex
 
   double_quoted_string:
     - meta_scope: string.quoted.double.astro
