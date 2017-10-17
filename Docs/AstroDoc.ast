@@ -1526,9 +1526,13 @@ BASIC ARITHMETIC OPERATIONS
 MATH EXPRESSION 
     let x = 3f + 2(6 + 1)
     let y = 3 * f + 2 * (6 + 1) # same as above
-    # invalid syntax include 
-    let t = f 3 + 56
     let u = (2 + 1)3
+
+    # gotchas  
+    let t = f(3) + 56 # f will be seen as a function call here
+    let h = 0x344f # f is not considered a variable here, but part of the hex literal
+    let x = (0x344)f # allowed
+    
 
 INTEGER BITWISE FUNCTIONS
     var x = 2 | 5 # and
