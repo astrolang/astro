@@ -323,8 +323,8 @@ ARRAYS
 
     # list unpacking 
     let b = [
-        ...(a` ++ a ) ;
-        ...(a  ++ a`)
+        unpack.[a!, a];
+        unpack.[a, a!]
     ]
     # [1 0 1 2]
     # [2 4 0 4]
