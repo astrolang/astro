@@ -1371,6 +1371,13 @@ GENERICS
 
     var list = MyList[Int, 5]()
 
+    # cascading type assertion
+    ## = T.Element(<:Equatable, ::U.Element)
+    fun anyCommonElements(lhs, rhs): ## |T, U|<:Sequence
+        for litem in lhs, ritem in rhs: 
+            return true if litem == ritem
+        return false
+
     # type reference
     ## MyList, Int -> T = T::MyList.T
     fun getItem(list, index):
