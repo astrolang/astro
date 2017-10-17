@@ -575,9 +575,6 @@ NIL
 
     # exceptionable unwrap
     getAccount("Default")!! # if result is nil, raise NilError
-
-    # nil operators can also be put directly infront of the identifier
-    getAccount!("Default")
     
     # nil coalescing 
     let name = getName() ?? "John Doe"
