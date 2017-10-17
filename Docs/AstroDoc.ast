@@ -159,7 +159,7 @@ VALUES & REFERENCES
     fun getAmount():
         return const amount # passed by reference, but it cannot be written to.
 
-    fun swap(var a, var b): ## ref, ref -> _
+    fun swap(var a, var b): ## ref, ref -> $
         a, b = b, a;
     ..
 
@@ -1172,7 +1172,7 @@ ABSTRACT TYPES AS ENUMS
         Leaf(value) ## $T -> Leaf
         Node(l, r) ## Leaf, Tree -> Node
 
-    ## Tree -> _
+    ## Tree -> $
     fun sum(t):
         | Leaf -> .value
         | Node -> sum(.l) + sum(.r)
@@ -1396,10 +1396,14 @@ GENERICS
     var y ## T
 
     # unsure types 
-    ## !T, !U -> T|U # T and U could be the same types
+    ## !T, !U -> T # T and U could be the same types
     fun max(a, b): 
         if a > b: return a 
         else: return b
+
+    ## T, $ -> $ ~ T<:Array
+    fun map(array, f): 
+        (f(i) | i in array)
     
     # generics symbols
     # $X, !X, X.Y, ~, x(), Int?, T::U&V, |T,U|::X, T(<:X,::Y)
