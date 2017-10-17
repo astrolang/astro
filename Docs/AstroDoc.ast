@@ -426,10 +426,10 @@ STRINGS
     var chars = ch.'π' # Char is 32-bit UTF8 type
 
     # proposed operations with strings.
-    var concatenate = 'ab' + 'c' # 'abc'
-    var multiply = 'ab' * 2 # 'abcabc'
-    let subtract = 'abcac' - 'ca' # 'abc'
-    let divide = 'abcdeabc' / 'de' # ['abc', 'abc']
+    var concatenate = 'ab' ++ 'c' # 'abc'
+    var multiply = 'ab' ** 2 # 'abcabc'
+    let subtract = 'abcac' -- 'ca' # 'abc'
+    let divide = 'abcdeabc' // 'de' # ['abc', 'abc']
     let escapeSequences = '\t \n \' \" \[ \q \# \\'
 
     # string continuation
@@ -878,9 +878,9 @@ IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
 SELF 
     # the first object passed to a function call can be reference using 'self'
     ['bread', 'pepper', 'tomato', 'lettuce', 'cucumber']
-        .map('sliced ' + _)
+        .map('sliced ' ++ _)
         .join(', ')
-        .mutate('I had a tasty lunch made with ' + self)
+        .mutate('I had a tasty lunch made with ' ++ self)
 
 COFUNCTIONS # DEPRECATED
     fun remove(list, index): ##List[T], Int
@@ -920,7 +920,7 @@ PATTERN MATCHING
     # match block is like switch-case statement, and it matches against the expression on the previous line.
     object
     | 0           -> spill # a keyword for moving to the next case
-    | 1||23||40   -> .name + n
+    | 1||23||40   -> .name ++ n
     | n           -> n * n
     | = getVal()? -> .value
     | [x, ...y]   -> print "list"
@@ -964,7 +964,6 @@ ASSIGNMENT DESTRUCTURING
     let a, b, c = x, y, z
     john.|name, age| = (newName, newAge)
     [john.name, peter.age] = ["Jean", "Pierre"]
-
 
     # pattern matching with iterators
     for (x, y) in dictionary:
