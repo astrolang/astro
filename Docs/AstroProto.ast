@@ -1,5 +1,198 @@
+# 17/10/17
+# Astro 0.1.10a
+# STRING OPERATIONS 
+var concatenate = 'ab' ++ 'c' # 'abc'
+var multiply = 'ab' ** 2 # 'abcabc'
+let subtract = 'abcac' -- 'ca' # 'abc'
+let divide = 'abcdeabc' / 'de' # ['abc', 'abc']
+let escapeSequences = '\t \n \' \" \[ \q \# \\'
+
+# REMOVE CERTAIN ASSIGN PATTERNS  
+let {name | age} = person 
+let [name | age] = person 
+
+# 'WHERE' SYNTAX IN TYPE ANNOTATION
+fun get(p): # P -> Int ~ P::Int 
+    p..name, ..age
+
+# TYPE SIMPLIFICATION 
+type Meter = angle'
+fun add(a, b): ## Meter, Meter -> Meter
+    a + b
+
+Array[Meter](56)
+
+# 14/10/17
+# Astro 0.1.10a
+# MACROS
+# inline macro
+@typify abstract Person(var name, var age)
+# block macro
+@loop(times:3):
+    print 'Happy birthday to you'
+# macro functions cannot use subjects from outer scope
+let name = sorted."play"
+macro sorted(string): ## NSStr 
+    (:SortedStr('$(string.literal)'))
+macro typify(abstract): ## Abst
+    let els = abstract.elements 
+    let types = els.map |a| -> (:type $a)
+    (:$abstract; $types)
+
+# SYMBOLS 
+fun exec(exp): 
+    eval exp
+
+exec (:2 + 2)
+exec (:name)  
+
+# 07/10/17
+# Astro 0.1.10a
+# SELF ARGUMENT
+(->> ['bread', 'pepper', 'tomato', 'lettuce', 'cucumber']
+    (map #(str "sliced " %) ,,,)
+    (interpose ", " ,,,)
+    (reduce str ,,,)
+    (str "I had a tasty lunch made with " ,,,))
+
+['bread', 'pepper', 'tomato', 'lettuce', 'cucumber']
+    .map('sliced ' + _)
+    .join(', ')
+    .mutate('I had a tasty lunch made with ' + self)
+    
+# 05/10/17
+# Astro 0.1.10a
+# VARIABLE PARAMETERS 
+for var i in list: print i 
+fun swap(var a, var b): 
+    a, b = b, a
+type Person(var name, var age)
+
+# 03/10/17
+# Astro 0.1.10a
+# IDENTITY COMPARISON 
+let a = 'Hello'
+let b = a
+let c = val b
+a is b # true 
+a == b # true
+a is c # false 
+a == c # true 
+
+# PARAMETER DESTRUCTURING FOR STATIC DICTIONARIES/LIST/SET/TUPLE 
+|{name:, age:}| -> print '$name $age'
+
+# KEY WITH A VALUE OF THE SAME NAME AS AN EXTERNAL VARIABLE 
+var name, age = "John", 34
+let Person = { name:, age: }
+
+
+# 02/10/17
+# Astro 0.1.10a
+# COMPREHENSIONS
+var listComprehension = list(yield x for i in [1:21] if i mod 2 != 0)
+var listComprehension = [x | x in [1:21] where x mod 2 != 0]
+let dictComprehension = {x : y | x in [1:11], y in [21:1] where even(y), x > 0}
+var setComprehension  = {i | i in random(0, 200)}
+var comprehension  = (i | i in random(0, 200))
+
+# 29/09/17
+# Astro 0.1.10a
+# FIX: HIGHLIGHT
+- non-literal numbers
+    45600f32
+- 'is' keyword 
+    a is b 
+
+# PRIVATE MODIFIERS 
+var myName' = "Adam"
+type Person(!name', !age')
+
+# TYPE OF # STALE!
+var techField = "AI"
+var name ## .techField
+
+# 22/09/17cdpeg
+# Astro 0.1.10a
+# IMPORT SYNTAX 
+import math:nypro/math {cos, sine:sin}
+
+# DYNAMIC IMPORT
+import !$userFolder/math {cos, sine:sin}
+
+fun main(): 
+    let userFolder = sys.userFolder
+
+# 21/09/17
+# Astro 0.1.10a
+# MATH EXPRESSION
+let puzzling = 3f + 2(6 + 1)
+let complex  = 1 + 3'i
+
+# NON-STANDARD NUMBER LITERAL
+let change = 10'NGN
+let pay    = 43.99'f 
+
+# 19/09/17
+# Astro 0.1.10a
+# FIX: HIGHLIGHT
+- add macro 
+    macro sort(str): ##= Str =# SortedStr(str.literal)
+
+# MACRO # STALE!
+# macro functions cannot use subjects from outer scope
+let name = sorted."play"
+macro sorted(string): ## Str 
+    SortedStr(str.literal)
+
+@typify 
+abst Person: Name, Age 
+macro typify(abstract): ## Abst
+    let els = abstract.elements 
+    let types = els.map |a| -> s.(type a)
+    types
+
+# SYMBOLS # STALE!
+fun exec(exp): 
+    exp.eval()
+
+exec s.(2 + 2)
+exec s.(name)  
+
+# GENERICS 
+## = T.Element(<:Equatable, ::U.Element)
+fun anyCommonElements(lhs, rhs): ## |T, U|<:Sequence
+    for litem in lhs, ritem in rhs: 
+        return true if litem == ritem
+    return false
+
 # 18/09/17
-# Astro 0.1.9
+# Astro 0.1.10a
+# COMPREHENSIONS # STALE!
+var listComprehension = list(yield x for i in [1:21] if i mod 2 != 0)
+var listComprehension = [x | x <- [1:21] where x mod 2 != 0]
+let dictComprehension = {x : y | x <- [1:11], y <- [21:1] where even(y), x > 0}
+var setComprehension  = {i | i <- random(0, 200)}
+
+var pythagorasList = [(x, y, z) | 
+z <- [1:21]
+y <- [1:z+1]
+x <- [1:y+1] 
+where x² * y² == z²]
+
+# BITWISE OPERATIONS
+let x = 5 | 8
+let y = 8 & 5
+let z = 2 << 1
+let a = 6 >> 1
+
+# COMMAND NOTATION EXCEPTIONS 
+# if the argument is a standard regex, list, dict or set literal.
+print([1]) 
+print({2}) 
+print(/abc/) 
+print [1] # error!
+
 # FIX: HIGHLIGHT
 - import dynamic module
     import !vector [Vec3]
