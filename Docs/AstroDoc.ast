@@ -76,7 +76,7 @@ FUNCTION DEFINITION (1)
     fun mod(a, b):
         return a % b
     
-    fun swap(!a, !b): # the bang character signifies mutability
+    fun swap(var a, var b): # the bang character signifies mutability
         a, b = b, a
 
 COMMAND NOTATION     
@@ -158,7 +158,7 @@ VALUES & REFERENCES
     fun getAmount():
         return const amount # passed by reference, but it cannot be written to.
 
-    fun swap(!a, !b): ## ref, ref -> _
+    fun swap(var a, var b): ## ref, ref -> _
         a, b = b, a;
     ..
 
@@ -180,7 +180,7 @@ ACCESS MODIFIERS
 
     var pi' =  3.14
 
-    type Person'(!name', !age')
+    type Person'(var name', var age')
 
 MULTIPLE DECLARATION # DEPRECATING
     var 
@@ -189,8 +189,8 @@ MULTIPLE DECLARATION # DEPRECATING
         year   = "2028"
     
     type 
-        Person(!name, !age)
-        Student(!courses, !class)
+        Person(var name, var age)
+        Student(var courses, var class)
 
 PROPERTIES
     # properties provide getter/setter behavior.
@@ -641,7 +641,7 @@ FOR LOOP
         j = i
     ..
 
-    for !i in [1:21]:
+    for var i in [1:21]: # mutable iterator
         i += 1
         j = i
     ..
@@ -785,7 +785,7 @@ FUNCTION DEFINITION (2)
 
     # functions that change values of arguments must be annotated with `!`.
     ## ref Person, ref Person
-    fun swap(!a, !b):
+    fun swap(var a, var b):
         a, b = b, a;
 
     swap(john, jane)
@@ -1029,7 +1029,7 @@ TYPE DEFINITION
     # a destructor can be used for cleanups
     fun Car(!) 
 
-    type Person(!name, !age) # Person is a initializer type.
+    type Person(var name, var age) # Person is a initializer type.
     # Initializer types have just main initializer and the parameters
     # of the initializer are mapped to fields.
 
