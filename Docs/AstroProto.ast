@@ -4,7 +4,7 @@
 var concatenate = 'ab' ++ 'c' # 'abc'
 var multiply = 'ab' ** 2 # 'abcabc'
 let subtract = 'abcac' -- 'ca' # 'abc'
-let divide = 'abcdeabc' / 'de' # ['abc', 'abc']
+let divide = 'abcdeabc' // 'de' # ['abc', 'abc']
 let escapeSequences = '\t \n \' \" \[ \q \# \\'
 
 # REMOVE CERTAIN ASSIGN PATTERNS  
