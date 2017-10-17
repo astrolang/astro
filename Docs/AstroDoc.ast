@@ -80,11 +80,12 @@ FUNCTION DEFINITION (1)
         a, b = b, a
 
 COMMAND NOTATION     
-    # if a function takes only one argument, the call parens can be ommitted if the argument is not preceded by a prefix operator
+    # if a function takes only one argument, the call parens can be ommitted if the argument is not preceded by a prefix operator, a list literal, a dict literal, a set literal or a regex literal
     print "Hello"
     print name 
-    print [9]
-    print {9}
+    print [9] # invalid
+    print {9} # invalid
+    print /9/ # invalid
     print 56
     print +5 # NOTE: this will evaluate as print + 5 not print(+5)  
 
