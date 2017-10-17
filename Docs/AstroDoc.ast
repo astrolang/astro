@@ -175,12 +175,12 @@ NUMBERS
 ACCESS MODIFIERS
     var money = 0 # subjects, functions, types, etc. are public by default.
 
-    fun sub`(a, b): # becomes inaccessible outside module
+    fun sub'(a, b): # becomes inaccessible outside module
         a - b
 
-    var pi` =  3.14
+    var pi' =  3.14
 
-    type Person`(!name`, !age`)
+    type Person'(!name', !age')
 
 MULTIPLE DECLARATION # DEPRECATING
     var 
@@ -779,7 +779,7 @@ FUNCTION DEFINITION (2)
     # the states local subjects marked with '`' are always preserved 
     # between function calls.
     fun callCount():
-        var count` = 0
+        var count' = 0
         print 'count = $(count += 1)'
 
     callCount() # 1
