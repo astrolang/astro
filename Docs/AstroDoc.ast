@@ -372,11 +372,8 @@ DICTIONARIES
     var user = 2x2 Dict[Str, User]()
     var scoreList = Dict[Str, Int]()
 
-    # a value name as the key can be ommitted
-    var john = {
-        name:
-        age:
-    }
+    # when a key has the sam name as the value, the value can be ommitted
+    var john = { name:, age: }
     
     # when a dictionary is not used dynamically, the compiler
     # treats it as an object and optimizes it
@@ -669,6 +666,7 @@ COMPREHENSION
     var listComprehension = [x | x in [1:21] where x mod 2 != 0]
     let dictComprehension = {x : y | x in [1:11], y in [21:1] where even(y)}
     var setComprehension  = {i | i in random(0, 200)}
+    var comprehension     = (i | i in random(0, 200))
 
     var pythagorasList = [(x, y, z) | 
     z <- [1:21]
@@ -847,6 +845,9 @@ LAMBDAS
     # you can recall an anonymous function using the fn keyword
     list.aggregate(0) |a| -> 
         1 if a == 0 else a + fn(a - 1)
+
+    # destructuring in lambda 
+    |{name:, age:}| -> print "Hello $name"
 
 PARTIAL APPLICATION
     # partially applied functions are function calls with one or more of it's argument not applied
