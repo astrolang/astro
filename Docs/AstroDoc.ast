@@ -959,10 +959,6 @@ ASSIGNMENT DESTRUCTURING
     let (name, age, _, ...rest) = tuple
     let {name, age, _, ...rest} = set
     let {name:, age:, _:, ...rest:} = dict
-    let [first|last] = list
-    let (first|last) = tuple
-    let {first|last} = dict 
-    let {first|last} = set 
     let {key:value}  = dict 
     let a, b, c = ..."abc" 
     let a, b, c = x, y, z
