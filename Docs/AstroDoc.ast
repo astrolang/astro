@@ -1491,12 +1491,12 @@ BASIC ARITHMETIC OPERATIONS
     let z = i8 √25
 
 INTEGER BITWISE FUNCTIONS
-    var x = 2 .band 5 # and
-    var y = 3 .bor 6 # or
-    var z = bnot 6  # not
-    var a = bxor 7  # exclusive or
-    var b = a .shl b # bit shift left
-    var c = b .shr a # bit shift right
+    var x = 2 | 5 # and
+    var y = 3 & 6 # or
+    var z = ~6  # not
+    var a = ^7  # exclusive or
+    var b = a << b # bit shift left
+    var c = b >> a # bit shift right
 
 UNICODE SUPPORT 
     numbers.map|x| -> x²
