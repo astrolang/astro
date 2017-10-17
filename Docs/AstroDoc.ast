@@ -1334,7 +1334,7 @@ MODULES AND IMPORTS # NEEDS REVIEW!!!
     import vector
 
 EXPORT  
-    export math except [cos, sin]
+    export math except {cos, sin}
 
 GENERICS
     # declaring a generic type T.
