@@ -1413,6 +1413,13 @@ TYPE OBJECTS
 
     type Name = Str
 
+    # distinct types vs aliases
+    type Meter = val Int 
+    Meter(5) == Int(5) # false
+
+    type Meter = ref Int 
+    Meter(5) == Int(5) # true
+
     fun haveSameTypes(x, y):
         x && y :: x'
     ..
