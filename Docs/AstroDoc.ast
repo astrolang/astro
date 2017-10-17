@@ -308,6 +308,8 @@ ARRAYS
     let subset = mat4[1:, 1:2]
 
     # vectorised operations
+    let z = 5 * subset.
+    let y = inc(subset.)
 
     # Astro's lists are by default, row-major order, but you can make it
     # column major by using the transpose function
