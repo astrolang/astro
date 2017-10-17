@@ -1347,7 +1347,7 @@ GENERICS
         return a + b
 
     # where the type of the generic symbol is hinted, '$' can be ommitted from its declaration
-    ## T, T, T -> T = T::Int 
+    ## T, T, T -> T ~ T::Int 
     fun add(a, b, c):
         var d ## T
         d = a + b + c
@@ -1368,25 +1368,25 @@ GENERICS
     # and can cause name clashes
 
     # types can have generics too
-    type MyList: ## $T, l() = l<:Int
+    type MyList: ## $T, l() ~ l<:Int
         let list = List[T](l, 0)
         let size = l
     ..
 
     # nillable type 
-    let gender  ## Str? 
+    let gender ## Str? 
 
     var list = MyList[Int, 5]()
 
     # cascading type assertion
-    ## = T.Element(<:Equatable, ::U.Element)
+    ## ~ T.Element(<:Equatable, ::U.Element)
     fun anyCommonElements(lhs, rhs): ## |T, U|<:Sequence
         for litem in lhs, ritem in rhs: 
             return true if litem == ritem
         return false
 
     # type reference
-    ## MyList, Int -> T = T::MyList.T
+    ## MyList, Int -> T ~ T::MyList.T
     fun getItem(list, index):
         list[index]
 
@@ -1406,7 +1406,7 @@ GENERICS
         else: return b
     
     # generics symbols
-    # $X, !X, X.Y, x(), Int?, T::U&V, |T,U|::X, T(<:X,::Y)
+    # $X, !X, X.Y, ~, x(), Int?, T::U&V, |T,U|::X, T(<:X,::Y)
 
 TYPE OBJECTS 
     Int <: Integer # true
