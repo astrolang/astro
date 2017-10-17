@@ -240,10 +240,10 @@ LISTS
     var names ## [Str] # specifying type of list
     
     # heterogenous list
-    var stuffs = [200USD, 'Steve', 1'f, Car('Eleanor')]
+    var stuffs = [200'USD, 'Steve', 1'f, Car('Eleanor')]
 
     # Astro uses 0-based indexing, so every list indices start at 0.
-    stuffs[0] # 200USD
+    stuffs[0] # 200'USD
 
     # the start index of a list view is inclusive but the end index non-inclusive 
     var disqualified = contestants[1:6] # 2nd index to the 5th
@@ -1471,9 +1471,8 @@ TRY, CATCH & ENSURE
 
 MACROS # NEEDS REVIEW!!!
     # Astro macros are resolved at parse time.
-    # rather than using the AST, Astro macros work on parse tree.
 
-OTHER LITERALS # @INC
+OTHER LITERALS 
     let fraction = 3//2 # rational numbers.
 
     var regex = /\d+(.\d+)?/ # regex.
@@ -1490,7 +1489,7 @@ OTHER LITERALS # @INC
 
 BASIC ARITHMETIC OPERATIONS
     let t = 2 + 2'f
-    let u = 5f * 20(5 - 6) # => 5 * f + 20 * (5 - 6)
+    let u = 5'f * 20(5 - 6) # => 5 * f + 20 * (5 - 6)
     var v = 5 / 2 # this returns an F64 even though the operands are Ints
     var w = 5 // 2 # this returns a clamped Int result of the above
     var x = 1 - 1'i # complex numbers.
