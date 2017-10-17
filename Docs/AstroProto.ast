@@ -86,7 +86,6 @@ a == c # true
 var name, age = "John", 34
 let Person = { name:, age: }
 
-
 # 02/10/17
 # Astro 0.1.10a
 # COMPREHENSIONS
@@ -94,13 +93,15 @@ var listComprehension = list(yield x for i in [1:21] if i mod 2 != 0)
 var listComprehension = [x | x in [1:21] where x mod 2 != 0]
 let dictComprehension = {x : y | x in [1:11], y in [21:1] where even(y), x > 0}
 var setComprehension  = {i | i in random(0, 200)}
-var comprehension  = (i | i in random(0, 200))
+var comprehension     = (i | i in random(0, 200))
 
 # 29/09/17
 # Astro 0.1.10a
 # FIX: HIGHLIGHT
 - non-literal numbers
     45600f32
+    23.56
+    0xF4555E
 - 'is' keyword 
     a is b 
 
