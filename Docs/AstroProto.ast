@@ -1,5 +1,68 @@
 # 17/10/17
-# Astro 0.1.10a
+# Astro 0.1.11a
+# FIX: SYNTAX HIGHLIGHT
+- remove highlight for ! and ? infront of function names
+    getAccount!(name, age)
+    getPerson! John
+
+# REMOVE SYNTAX FOR ALLOWING ! and ? directly infront a function name 
+getAccount!(name, age)
+
+# CHANGE RULE: ANONYMOUS FUNCTIONS ARE EXECUTED NOT AT THE POINT OF DECLARATION
+fun _(): return a + b
+
+# EXCEPTIONABLE UNWRAP SYNTAX
+getAccount(name, age)!! # if result is nil, raise NilError
+
+# IRRELEVANT VS PLACEHOLDER
+list.map(2 + $)
+message = 'my name is $name'
+print $ if x 
+| 15 -> x² 
+| else -> x 
+($, T -> $)
+# ---------------
+let (_, age) = person
+for _ in [1:fifty]:
+    print('Hello')
+fun _(): return a + b
+
+# VECTORIZATION
+5 * matrix.
+matrix.map(5 * $)
+for i in matrix: 5 * i 
+
+# PARTIAL APPLICATION
+matrix.map(5 * $)
+
+# UNKNOWN TYPE
+($, $T -> $)
+(!T, T -> T)
+
+# LIST UNPACKING 
+let a = [1, 2; 3, 4]
+let b = [
+    unpack.[a!, a]; 
+    unpack.[a, a!]
+]
+# 1, 3, 1, 2;
+# 2, 4, 3, 4;
+# 1, 2, 1, 3;
+# 3, 4, 2, 4;
+
+# CHANGE MATRIX TRANSPOSE OPERATOR
+let a = [1, 2; 3, 4]
+let b = a!
+
+# DISTINCT TYPE VS ALIAS TYPE 
+type Meter = val Int 
+Meter(5) == Int(5) # false
+
+type Meter = ref Int 
+Meter(5) == Int(5) # true
+
+# 17/10/17
+# Astro 0.1.10
 # STRING OPERATIONS 
 var concatenate = 'ab' ++ 'c' # 'abc'
 var multiply = 'ab' ** 2 # 'abcabc'
