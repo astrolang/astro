@@ -104,11 +104,384 @@ AbstDeclaration
     = Abst __ TypeName (_ SuperTypeDeclaration)? _ ":" _ XX
     / Abst __ TypeName (_ TypeParameterSection)? (_ SuperTypeDeclaration)?
 
+
+
+
+
+perator} Whitespace* &{Identifier}
+    / &{Operator} Whitespace+ &{Operator}
+    / &{Identifier} Whitespace+ &{Identifier}
+    / &{Identifier} Whitespace* &{Operator}
+    / Whitespace*
+
+Nextline
+    = Newline (EmptyLine Newline)*
+    
+MacroDeclaration
+    = 'macro' MacroSub
+    / 'macro' Newline Indent MacroSub (Newline Samedent MacroSub)* Dedent
+
+MacroSub
+    = Identifier '(' FunctionParam (',' FunctionParam)* ')' ':' FunctionBody
+
+FunctionBody
+    = FunctionContentInline
+    / Comment? FunctionContentBlock
+
+FunctionContentInline
+    = ExprBlock (';' ExprBlock)* Comment?
+    
+FunctionContentBlock
+    = Newline Indent (NonSource Newline Samedent)* Source (Newline Samedent FunctionCode)* Dedent
+
+FunctionCode
+    = Source
+    / NonSource
+    
+Source
+    = ExprBlock Comment?
+    
+NonSource
+    = Comment
+    
+CondExprBlock
+    = IfExprBlock
+    / WhileExprBlock
+    / TryExprBlock
+    / ForExprBlock
+
+CondExprInline
+    = IfExprInline
+    / WhileExprInline
+    / TryExprInline
+    / ForExprInline
+
+IfExprInline
+    = Expr 'if' IfHeadExpr ('else' Expr)?
+
+WhileExprInline
+    = Expr 'while' IfHeadExpr
+
+TryExprInline
+    = Expr 'try' IfHeadExpr ('catch' Expr)?
+
+ForExprInline
+    = Expr 'for' ForHeadExpr ('end' Expr)?
+
+IfExprBlock
+    = 'if' IfHeadExpr (',' 'if'? IfHeadExpr)? ':' FunctionBody (Newline Samedent ElifExpr)* (Newline Samedent ElseExpr)?
+    / 'if' IfHeadExpr ','? 'while' IfHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+    / 'if' IfHeadExpr ','? 'try' IfHeadExpr ':' FunctionBody (Newline Samedent CatchExpr)?
+    / 'if' IfHeadExpr ','? 'for' ForHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+
+WhileExprBlock
+    = 'while' IfHeadExpr (',' 'if'? IfHeadExpr)? ':' FunctionBody (Newline Samedent ElifExpr)* (Newline Samedent ElseExpr)?
+    / 'while' IfHeadExpr ','? 'while' IfHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+    / 'while' IfHeadExpr ','? 'try' IfHeadExpr ':' FunctionBody (Newline Samedent CatchExpr)?
+    / 'while' IfHeadExpr ','? 'for' ForHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+
+TryExprBlock
+    = 'try' IfHeadExpr (',' 'if'? IfHeadExpr)? ':' FunctionBody (Newline Samedent ElifExpr)* (Newline Samedent ElseExpr)?
+    / 'try' IfHeadExpr ','? 'while' IfHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+    / 'try' IfHeadExpr ','? 'try' IfHeadExpr ':' FunctionBody (Newline Samedent CatchExpr)?
+    / 'try' IfHeadExpr ','? 'for' ForHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+
+ForExprBlock
+    = 'for' IfHeadExpr (',' 'if'? IfHeadExpr)? ':' FunctionBody (Newline Samedent ElifExpr)* (Newline Samedent ElseExpr)?
+    / 'for' IfHeadExpr ','? 'while' IfHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+    / 'for' IfHeadExpr ','? 'try' IfHeadExpr ':' FunctionBody (Newline Samedent CatchExpr)?
+    / 'for' IfHeadExpr ','? 'for' ForHeadExpr ':' FunctionBody (Newline Samedent EndExpr)?
+
+RedoWhileExprBlock
+    = 'redo' ':' FunctionBody Newline Samedent 'while' IfHeadExpr (',' 'if'? IfHeadExpr)? 
+    / 'redo' ':' FunctionBody Newline Samedent 'while' IfHeadExpr ','? 'while' IfHeadExpr
+    / 'redo' ':' FunctionBody Newline Samedent 'while' IfHeadExpr ','? 'try' IfHeadExpr
+    / 'redo' ':' FunctionBody Newline Samedent 'while' IfHeadExpr ','? 'for' IfHeadExpr
+
+ElifExpr
+    = 'elif' IfHeadExpr ':' FunctionBody
+    
+ElseExpr
+    = 'else' ':' FunctionBody
+
+CatchExpr
+    = 'catch' Identifier ':' FunctionBody
+    
+EndExpr
+    = 'end' ':' FunctionBody
+
+IfHeadExpr 
+    = 'var'? AssignLhs '<-' Expr
+    / Expr
+
+ForHeadExpr
+    = 'var'? AssignLhs 'in' Expr (',' Expr)*
+
+AssignLhs
+    = (Atom '.')+ AssignIdentifier
+    / AssignIdentifier (',' AssignIdentifier)+
+    / AssignIdentifier '.' '|' AssignIdentifier (',' AssignIdentifier)* '|'
+    / '|' AssignIdentifier (',' AssignIdentifier)* '|' '.' AssignIdentifier
+    / '(' AssignIdentifier (',' AssignIdentifier)*  ')'
+    / '[' AssignIdentifier (',' AssignIdentifier)* ']'
+    / '{' AssignIdentifier (',' AssignIdentifier)* '}'
+    / '{' AssignIdentifier ':' (',' AssignIdentifier ':')* '}'
+    / AssignIdentifier
+
+AssignIdentifier
+    = Identifier
+    / '...' Identifier?
+    / '_'
+    
+DeclarationLhs
+    = '|' DeclarationIdentifier (',' DeclarationIdentifier)* '|' '.' DeclarationIdentifier
+    / '(' DeclarationIdentifier (',' DeclarationIdentifier)*  ')'
+    / '[' DeclarationIdentifier (',' DeclarationIdentifier)* ']'
+    / '{' DeclarationIdentifier (',' DeclarationIdentifier)* '}'
+    / '{' DeclarationIdentifier ':' (',' DeclarationIdentifier ':')* '}'
+    / DeclarationIdentifier
+
+DeclarationIdentifier
+    = Identifier "'"?
+    / '...' (Identifier "'"?)?
+    / '_'
+
+DoMatch
+    = Expr 'if' Expr (Newline Samedent MatchBlock)+
+    / MatchBlock (Newline Samedent MatchBlock)*
+
+MatchBlock
+    = '|' (AssignLhs/Expr) '->' FunctionBody
+    / '~' (AssignLhs/Expr) '->' FunctionBody
+    / '!' (AssignLhs/Expr) '->' FunctionBody
+
+TypeAnnotation
+    = Type (',' Type)* ('->' Type)? ('~' TypeAssert (',' TypeAssert)*)?
+
+TypeAssert
+    = Type TypeOperator Type
+    / Type '(' TypeOperator Type (',' TypeOperator Type)+ ')'
+    / Type TypeOperator '|' Type (',' Type)+ '|' (TypeOperator Type)?
+    / '|' Type (',' Type)+ '|' TypeOperator Type
+
+Type
+    = TypeIdentifier '[' Type (',' Type)* ']'
+    / TypeIdentifier ('&'/'|') Type
+    / TypeIdentifier
+    
+TypeIdentifier 
+    = ('!'/'$') Identifier 
+    / Identifier ('.' Identifier)* '?'?
+    / '_'
+
+TypeOperator
+    = '::' 
+    / ':>' 
+    / ':<'
+
+ImportSyntax
+    = 'import' (Identifier ':')? PathIdentifier ('/' PathIdentifier)* ('{' ImportSubject (',' ImportSubject)* '}')?
+
+ImportSubject
+    = Identifier (':' Identifier)?
+
+PathIdentifier
+    = Identifier
+    / '..'
+    / '.'
+
+ExprBlock
+    = CondExprBlock
+    / OpenTuple
+    / ExprInline
+    
+ExprInline
+    = CondExprInline 
+    / Expr
+
+Expr
+    = Atom (Operator Atom)+
+    / Assign
+    / Return
+    / Break
+    / Continue
+    / Spill
+    / Yield
+    / Delegate
+    / Await
+    / Raise
+    / Lambda
+    / Properties
+    / IIFE
+    / CommandNotation
+    / CascadingNotation
+    / Atom
+
+Atom
+    = Comprehension
+    / TypeValue
+    / '(' ExprBlock ')'
+    / Spread
+    / Atom Operator
+    / Operator Atom
+    / FunctionCall
+    / CascadingDot
+    / DotNotation
+    / VectorNotation
+    / IndexCall
+    / Identifier
+    / Literal
+    / 'pass'
+    / '$'
+    / '_'
+
+TypeValue
+    = '(' Type (',' Type)* '->' Type ('~' TypeAssert (',' TypeAssert)*)? ')'
+
+OpenTuple
+    = ExprInline (',' ExprInline)*
+
+Properties
+    = '{' FunctionBody '}' '->' '{' FunctionBody '}'
+
+IIFE
+    = '(' ((Identifier ':')? ExprInline (',' (Identifier ':')? ExprInline)*)? ')' '->' FunctionBody
+
+Lambda
+    = '|' LambdaParam (',' LambdaParam)* '|' '->' FunctionBody
+    = '->' FunctionBody
+
+LambdaParam
+    = Identifier ('.' Identifier?)? (':' ExprInline)?
+    / AssignLhs
+    
+Assign 
+    = AssignLhs '=' ExprInline (',' ExprInline)*
+
+Spread
+    = '...' Atom
+  
+CommandNotation
+    = Atom ExprInline
+
+FunctionCall
+    = Atom CallParens
+    
+MacroCall
+    = '@' Identifier (CallParens)?
+    / '@' Identifier (CallParens)? ':' FunctionBody
+
+CallParens 
+    = '(' ((Identifier ':')? ExprInline (',' (Identifier ':')? ExprInline)* ','?)? ')'
+  
+CascadingDot
+    = Atom '.' '|' Atom (Operator Atom)* '|' ('.' Atom)?
+    / '|' Atom (Operator Atom)* '|' '.' Atom
+    / Atom '.' '|' Atom (',' Atom)+ '|' ('.' Atom)?
+    / '|' Atom (',' Atom)+ '|' '.' Atom
+
+CascadingNotation
+    = '..' Atom
+    
+DotNotation
+    = '.' Atom
+
+VectorNotation
+    = Atom '.'
+
+IndexCall
+    = Atom '[' IndexArg (',' IndexArg)* ','? ']'
+
+IndexArg
+    = ExprInline? ':' ('!'? ExprInline)? (':' ExprInline)?
+    / '!' ExprInline? ':' ExprInline? (':' ExprInline)?
+    / ExprInline
+
+Comprehension
+    = '(' ComprehensionHeadExpr '|' ForHeadExpr (',' ForHeadExpr)* ('where' ExprInline (',' ExprInline)*)? ')' // generator
+    / '[' ComprehensionHeadExpr '|' ForHeadExpr (',' ForHeadExpr)* ('where' ExprInline (',' ExprInline)*)? ']' 
+    / '{' ComprehensionHeadExpr '|' ForHeadExpr (',' ForHeadExpr)* ('where' ExprInline (',' ExprInline)*)? '}'
+    
+ComprehensionHeadExpr
+    = ExprInline (',' ExprInline)*
+   
+Return 
+    = 'return' (ExprInline/OpenTuple)? ('at' Identifier)?
+    
+Break 
+    = 'break' (ExprInline/OpenTuple)? ('at' Identifier)?
+    
+Continue 
+    = 'continue' ('at' Identifier)?
+
+Spill 
+    = 'spill' ('at' Identifier)?
+    
+Yield 
+    = 'yield' (ExprInline/OpenTuple)
+       
+Delegate 
+    = 'delegate' ExprInline
+    
+Await 
+    = 'await' ExprInline
+
+Raise 
+    = 'raise' ExprInline 
+
 Literal
     = StringLiteral
-    / FloatLiteral
-    / IntegerLiteral
- 
+	/ FloatLiteral
+	/ IntegerLiteral
+	/ RangeLiteral
+    / ListLiteral
+    / SetLiteral
+    / DictLiteral
+    / TupleLiteral
+    / NamedTupleLiteral
+    / SymbolLiteral
+
+RangeLiteral
+    = '[' ExprInline? ':' ('!'? ExprInline)? (':' ExprInline)? ']'
+    / '[' '!' ExprInline? ':' ExprInline (':' ExprInline)? ']'
+
+ListLiteral
+    = '[' ']'
+    / '[' ExprInline (',' ExprInline)* (';' ExprInline (',' ExprInline)*)* ','? ']'
+    / '[' ListLiteral (','? ListLiteral)* ','? ']'
+    
+SetLiteral 
+    = '{' '}'
+    / '{' ExprInline (',' ExprInline)* (';' ExprInline (',' ExprInline)*)* ','? '}'
+    / '{' SetLiteral (','? SetLiteral)* ','? '}'
+    
+DictLiteral
+    = '{' ':' '}'
+    / '{' DictKey ':' (ExprInline | OpenDict) ((',' DictKey ':' ExprInline)* |  (','? DictKey ':' OpenDict)*) ','? '}'
+    / '{' DictKey ':' DictLiteral (','? DictKey ':' DictLiteral)* ','? '}'
+    / '{' DictKey ':' OpenDict (','? DictKey ':' OpenDict)* ','? '}'
+    
+OpenDict   
+    = Newline Indent DictKey ':' (OpenDict/ExprInline) (Newline Samedent DictKey ':' (OpenDict/ExprInline))*  Dedent Newline Samedent
+    
+DictKey
+    = Atom
+    / '$' Identifier
+    / '$' '(' Atom ')'
+
+TupleLiteral
+    = '(' ')'
+    / '(' ExprInline (',' ExprInline)+ ','? ')'
+    / '(' ExprInline ',' ')'
+    
+NamedTupleLiteral
+    = '(' ':' ')'
+    / '(' (Identifier ':')? ExprInline (',' (Identifier ':')? ExprInline)+ ','? ')'
+    / '(' (Identifier ':')? ExprInline ',' ')'
+
+SymbolLiteral
+    = '(' ExprBlock ')'
+
 StringLiteral 
     = s1:('"'[^\"]+'"') { s1 = stringify(s1); return `string:(${s1})`; }
     / s2:("'"[^\']+"'") { s2 = stringify(s2); return `string:(${s2})`; }
