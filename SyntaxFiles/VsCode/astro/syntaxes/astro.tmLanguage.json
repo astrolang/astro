@@ -205,7 +205,7 @@
 	    "function_calls":{
 	        "patterns": [
 	            {
-	                "match": "([A-Za-z_][_A-Za-z0-9]*[!?]?)(?=\\s*(\\[[A-Z][_A-Za-z0-9]*\\]\\s*)?(\\.\\.)?\\()",
+	                "match": "([A-Za-z_][_A-Za-z0-9]*)(?=\\s*(\\[[A-Z][_A-Za-z0-9]*\\]\\s*)?(\\.\\.)?\\()",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
@@ -213,7 +213,7 @@
 	    "command_notation":{
 	        "patterns":[
 	            {
-	                "match": "(?<!let |var |rxn )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|rxn|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|redo|with|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\\b[a-z_][A-Za-z_0-9!]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\\b)",
+	                "match": "(?<!let |var |rxn )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|rxn|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|redo|with|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\\b[a-z_][A-Za-z_0-9]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\\b)",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
