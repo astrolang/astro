@@ -9,7 +9,7 @@ Astro's core foundation is built on a rich type system and multiple dispatch but
 
 Astro has support for first-class functions, generics, object-oriented programming, data-race-free concurrency, unicode identifiers, and metaprogramming.
 
-Current Version: 0.1.9
+Current Version: 0.1.11
 
 ![alt text](https://github.com/AppCypher/Astro/blob/master/Images/AstroSyntax3.png "Astro Syntax")
 
