@@ -1119,7 +1119,7 @@ INITIALIZER TRAIN
     type TeachingStudent <: Teacher, Student:
         var schedule
 
-    fun Teacher(name, subject): new(name).super(subject)
+    fun Teacher(name, subject): new(subject).super(name)
 
     fun Student(<name>, course) # single inheritance can be shortened
 
