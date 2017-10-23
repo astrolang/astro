@@ -9,7 +9,7 @@ subjectDeclaration2 = { name, privateAccess, mutability, atom } ## AST
 
 ## FUNCTION DECLARATION ##
 functionDeclaration = { name, privateAccess, superParams, params, expressions }
-functionParam = { key, value, scopeKey, keyImportance }
+functionParam = { key, value, scopeKey, keyImportance, mutability }
 
 ## TYPE DECLARATION ##
 typeDeclaration = { name, privateAccess, superTypes, fields }
@@ -38,11 +38,13 @@ raise = { atom }
 ## EXPRESSIONS ##
 binaryExpression = { ops, atoms }
 unaryExpression = { op, atom, position }
+expression = { referenceType, atom }
+parens = { expression }
 new = { fieldNames, values }
 call = { keys, values }
+index = { keys, ranges } ## ParseTree
 dot = { name } 
 range = { start, end, step }
-atom = { reference, value }
 object = { type, keys, values } ## AST
 pointer = { value }
 pointed = { pointer }
