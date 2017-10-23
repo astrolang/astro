@@ -1,4 +1,8 @@
-# import !vec:/usr/lib/vector {Vec3}
+import !vec:/usr/lib/vector {Vec3}
+
+let age, sex', country = /hello/
+var ...fish' = "Hello"
+
 a+b
 # a+ b 
 a + b
