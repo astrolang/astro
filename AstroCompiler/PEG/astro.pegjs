@@ -1,9 +1,25 @@
 // 25/09/17
 {
     let prevIndentCount = 0;
-    function print(...s) { (s[0] instanceof Array) ? console.log(JSON.stringify(s[0],(k, v)=>v===undefined?null:v,2)) : console.log(...s);  }
+    // saves typing strokes and can print arrays
+    function print(...s) { (s[0] instanceof Array) ? console.log(JSON.stringify(s[0], null, 2)) : console.log(...s);  }
+    
+    // PEGjs returns arrays full of undefineds and empty arrays, this stringifies it and cleans up the resulting commas
     function str(s) { return s.toString().replace(/,/g, "").trim(); }
+
+    // joins two arrays with the possibiliy of the second array being undefined
     function join(a, b) { return (b !== undefined && b.length != 0) ? [a, ...b] : [a]; }
+
+    // checks if both the object and its properties are not undefined or null 
+    // PEGjs returns null for unmatched rule or terminal 
+    function undef(obj, ...prop) {
+        if (obj === null || obj === undefined) return true;
+        for (let p of prop) {
+            if (obj[p] === null || obj[p] === undefined) return true;
+            obj = obj[p];
+        }
+        return false;
+    }
 }
 
 // GUIDES: a complete block should indent itself at entry and exit with dedent newline samedent
@@ -33,8 +49,15 @@ Declaration
     / ImportDeclaration
 
 SubjectDeclaration
-    = mu:('var'/'let') _ sb:SubjectMainDeclaration {  return { ast:'subjectDeclaration', pattern:sb.pattern, mutability:(mu==='var'), atom:sb.atom }; }
-    / ('var'/'let') _ NextLine Indent SubjectMainDeclaration _ (NextLine Samedent SubjectMainDeclaration _)* Dedent 
+    = mu:('var'/'let') _ sd:SubjectMainDeclaration {  
+        return { ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), atom:sd.atom }; 
+    }
+    / mu:('var'/'let') _ NextLine Indent sd1:SubjectMainDeclaration _ sd2:(NextLine Samedent sd:SubjectMainDeclaration _ { return sd; })* Dedent {
+        let declarations = [{ ast:'subjectDeclaration', pattern:sd1.pattern, mutability:(mu==='var'), atom:sd1.atom }];
+        for (let sd of sd2) 
+            declarations.push({ ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), atom:sd.atom });
+        return declarations;
+    }
 
 SubjectMainDeclaration 
     =  lh:DeclarationLhs rh:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:lh, atom:rh }; }
@@ -79,18 +102,19 @@ DeclarationLhs
         return { ast:'pattern', type:'keyValue', names:[id1, id2] }; 
     }
     / id:DeclarationIdentifier { 
-        return { ast:'pattern', type:undefined, names:[id] }; 
+        return { ast:'pattern', type:null, names:[id] }; 
     }
 
 DeclarationIdentifier
     = id:Identifier ac:"'"? { 
-        return { ast:'subjectName', name:id, publicAccess:(ac==="'"), spread:false };
+        return { ast:'subjectName', name:id, privateAccess:(ac==="'"), spread:false };
     } 
-    / '...' id:(id:Identifier ac:"'"? { return { name:id, publicAcess:(ac==="'") }; })? {
-        return { ast:'subjectName', name:id.name, publicAccess:(id.publicAcess===undefined?false:id.publicAcess), spread:true }; 
+    / '...' id:(id:Identifier ac:"'"? { return { name:id, privateAccess:(ac==="'") }; })? {
+        return { ast:'subjectName', name:(undef(id,'name')?null:id.name), privateAccess:(undef(id,'privateAccess')?false:id.privateAccess), spread:true }; 
     } 
     / '_' { 
-        return { ast:'subjectName', name:'_', publicAccess:false, spread:false };} 
+        return { ast:'subjectName', name:'_', privateAccess:false, spread:false };
+    } 
 
 AssignLhs
     = (Atom _ '.')+ AssignIdentifier
