@@ -1,19 +1,20 @@
 // 25/09/17
 const peg = require("pegjs");
+const path = require("path");
 const fs  = require("fs");
 
 // using print function for convenience
 function print(...s) { (s[0] instanceof Array) ? console.log(JSON.stringify(s[0],(k, v)=>v===undefined?null:v,2)) : console.log(...s);  }
 
 // read astro grammar file
-const grammar = fs.readFileSync("./astro.pegjs", "utf8");
+const grammar = fs.readFileSync(path.join(__dirname, "./astro.pegjs"), "utf8");
 
 // generate paser from grammar
 const parser = peg.generate(grammar);
 print("== Parser Generated Successfully! ==");
 
 // read sample code file
-const code = fs.readFileSync("./tempshort.ast", "utf8");
+const code = fs.readFileSync(path.join(__dirname, "./tempshort.ast"), "utf8");
 
 // parse sample code
 try {
