@@ -4,7 +4,7 @@ const path = require("path");
 const fs  = require("fs");
 
 // using print function for convenience
-function print(...s) { (s[0] instanceof Array) ? console.log(JSON.stringify(s[0],(k, v)=>v===undefined?null:v,2)) : console.log(...s);  }
+function print(...s) { (s[0] instanceof Array) ? console.log(JSON.stringify(s[0],null,2)) : console.log(...s);  }
 
 // read astro grammar file
 const grammar = fs.readFileSync(path.join(__dirname, "./astro.pegjs"), "utf8");
@@ -20,7 +20,6 @@ const code = fs.readFileSync(path.join(__dirname, "./tempshort.ast"), "utf8");
 try {
   const result = parser.parse(code);
   print("== Code Parsed Successfully! ==");
-  // print(`result: { \n${result}\n}`);
   print(result);
 }
 catch (err) {
