@@ -4,16 +4,16 @@ program = { expressions }
 ## SUBJECT DECLARATION ##
 subjectDeclaration1 = { pattern, mutability, atom } ## ParseTree
 pattern = { type, names } ## ParseTree
-subjectName = { name, spread, publicAccess } ## ParseTree
-subjectDeclaration2 = { name, publicAccess, mutability, atom } ## AST
+subjectName = { name, spread, privateAccess } ## ParseTree
+subjectDeclaration2 = { name, privateAccess, mutability, atom } ## AST
 
 ## FUNCTION DECLARATION ##
-functionDeclaration = { name, publicAccess, superParams, params, expressions }
+functionDeclaration = { name, privateAccess, superParams, params, expressions }
 functionParam = { key, value, scopeKey, keyImportance }
 
 ## TYPE DECLARATION ##
-typeDeclaration = { name, publicAccess, superTypes, fields }
-abstDeclaration = { name, publicAccess, superTypes, fields }
+typeDeclaration = { name, privateAccess, superTypes, fields }
+abstDeclaration = { name, privateAccess, superTypes, fields }
 
 ## IMPORT ##
 importDeclaration = { key, path, objectNames, objectKeys, dynamism }
