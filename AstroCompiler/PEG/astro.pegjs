@@ -2,12 +2,13 @@
 {
     let prevIndentCount = 0;
     // saves typing strokes and can print arrays
-    function print(...s) { (s[0] instanceof Array) ? console.log(JSON.stringify(s[0], null, 2)) : console.log(...s);  }
+    function print(...s) { (s[0] instanceof Array || typeof s[0] === 'object' ) ? console.log(JSON.stringify(s[0], null, 2)) : console.log(...s);  }
     
     // PEGjs returns arrays full of undefineds and empty arrays, this stringifies it and cleans up the resulting commas
     function str(s) { return s.toString().replace(/,/g, "").trim(); }
 
-    // joins two arrays with the possibiliy of the second array being undefined
+    // creates a new array out of a and the elements of b
+    // where a is a scalar, b is an array and where b can be undefined
     function join(a, b) { return (b !== undefined && b.length != 0) ? [a, ...b] : [a]; }
 
     // checks if both the object and its properties are not undefined or null 
@@ -25,17 +26,17 @@
 // GUIDES: a complete block should indent itself at entry and exit with dedent newline samedent
 
 Start
-    = Program
+    = exs:Program { return { ast:'program', expressions:exs }; }
 
 Program
-    = (ProgramNonSourceCode NextLine Samedent)* ProgramSourceCode (_ NextLine Samedent (ProgramCode/EOI))* 
+    = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine Samedent (ex:ProgramCode { return ex; } / EOI))* { return join(ex1, ex2); }
 
 ProgramCode
     = ProgramSourceCode
     / ProgramNonSourceCode
 
 ProgramSourceCode
-    = ExprBlock _ SingleLineComment?
+    = ex:ExprBlock _ SingleLineComment? { return ex; }
 
 ProgramNonSourceCode
     = SingleLineComment
@@ -43,7 +44,7 @@ ProgramNonSourceCode
 Declaration 
     = SubjectDeclaration
     / FunctionDeclaration 
-    / MacroDeclaration 
+    / MacroDeclaration
     / TypeDeclaration
     / AbstDeclaration
     / ImportDeclaration
@@ -60,14 +61,14 @@ SubjectDeclaration
     }
 
 SubjectMainDeclaration 
-    =  lh:DeclarationLhs rh:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:lh, atom:rh }; }
+    =  le:DeclarationLhs re:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:le, atom:re }; }
 
 SubjectBody
     = SubjectContentInline
     / SingleLineComment? SubjectContentBlock
 
 SubjectContentInline 
-    =  ExprBlock (_ ';' _ ExprBlock)* _ SingleLineComment?
+    = ExprBlock (_ ';' _ ExprBlock)* _ SingleLineComment?
 
 SubjectContentBlock 
     = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* SubjectSourceCode (_ NextLine Samedent SubjectNonSourceCode)* Dedent
@@ -86,8 +87,8 @@ DeclarationLhs
     = id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })+ { 
         return { ast:'pattern', type:'openTuple', names:join(id1, id2) }; 
     }
-    / '(' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { 
-        return id; })*  _ ')' { return { ast:'pattern', type:'tuple', names:join(id1, id2) }; 
+    / '(' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })*  _ ')' { 
+        return { ast:'pattern', type:'tuple', names:join(id1, id2) }; 
     }
     / '[' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })* _ ']' { 
         return { ast:'pattern', type:'list', names:join(id1, id2) }; 
@@ -107,13 +108,13 @@ DeclarationLhs
 
 DeclarationIdentifier
     = id:Identifier ac:"'"? { 
-        return { ast:'subjectName', name:id, privateAccess:(ac==="'"), spread:false };
+        return { name:id, privateAccess:(ac==="'"), spread:false };
     } 
     / '...' id:(id:Identifier ac:"'"? { return { name:id, privateAccess:(ac==="'") }; })? {
-        return { ast:'subjectName', name:(undef(id,'name')?null:id.name), privateAccess:(undef(id,'privateAccess')?false:id.privateAccess), spread:true }; 
+        return { name:(undef(id,'name')?null:id.name), privateAccess:(undef(id,'privateAccess')?false:id.privateAccess), spread:true }; 
     } 
     / '_' { 
-        return { ast:'subjectName', name:'_', privateAccess:false, spread:false };
+        return { name:'_', privateAccess:false, spread:false };
     } 
 
 AssignLhs
@@ -134,14 +135,23 @@ AssignIdentifier
     / '_'
 
 FunctionDeclaration
-    = 'fun' _ FunctionMainDeclaration
-    / 'fun' _ NextLine Indent FunctionMainDeclaration _ (NextLine Samedent FunctionMainDeclaration _)* Dedent
+    = 'fun' _ fd:FunctionMainDeclaration {
+        return { ast:'functionDeclaration', name:fd.name, privateAccess:fd.privateAccess, superParams:fd.superParams, params:fd.params, expressions:fd.expressions };
+    }
+    / 'fun' _ NextLine Indent fd1:FunctionMainDeclaration _ fd2:(NextLine Samedent fd:FunctionMainDeclaration _)* Dedent {
+        let declarations = [{ ast:'functionDeclaration', name:fd1.name, privateAccess:fd1.privateAccess, superParams:fd1.superParams, params:fd1.params, expressions:fd1.expressions }];
+        for (let fd of fd2) 
+            declarations.push({ ast:'functionDeclaration', name:fd.name, privateAccess:fd.privateAccess, superParams:fd.superParams, params:fd.params, expressions:fd.expressions });
+        return declarations;
+    }
 
-FunctionMainDeclaration
-    = FunctionName _ FunctionParameterSection (_ ":" _ FunctionBody)? 
+FunctionMainDeclaration 
+    = fn:FunctionName _ fp:FunctionParameterSection fb:(_ ":" _ fb:FunctionBody { return fb; })? { 
+        return { name:fn.name, privateAccess:undef(fn,'privateAccess')?false:fn.privateAccess, superParams:fp.superParams, params:fp.params, expressions:undef(fb)?null:fb }; 
+    }
 
 FunctionName 
-    = Identifier "'"?
+    = id:Identifier ac:"'"? { return { name:id, privateAccess:(ac==="'") }; }
 
 FunctionParameterSection
     = "(" (_ FunctionSuperTypeInit _ ",")? (_ FunctionParameter (_ "," _ FunctionParameter)*)? _ ")"
@@ -436,14 +446,14 @@ SubAtomExtension
     / _ CascadingNotation
 
 SubAtom
-    = Comprehension
-    / TypeValue
-    / '(' ExprBlock ')'
-    / Identifier
-    / Literal
-    / 'pass'
-    / '$'
-    / '_'
+    = cm:Comprehension
+    / tv:TypeValue
+    / '(' ex:ExprBlock ')' { return { ast:'parens',  }; }
+    / id:Identifier { return id; }
+    / lt:Literal { return lt; }
+    / 'pass' { return { ast:'pass' }; }
+    / '$' { return { ast:'$' }; }
+    / '_' { return { ast:'_' }; }
 
 TypeValue
     = '(' _ TypeSubject (_ ',' _ TypeSubject)* _ '->' _ TypeSubject (_ '~' _ TypeAssert (_ ',' _ TypeAssert)*)? _ ')'
