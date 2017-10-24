@@ -11,6 +11,9 @@
     // where a is a scalar, b is an array and where b can be undefined
     function join(a, b) { return (b !== undefined && b.length != 0) ? [a, ...b] : [a]; }
 
+    // strips '_' in string, for numeric literals
+    function removeUnderscores(s) { return s.replace(/_/g, ''); }
+
     // checks if both the object and its properties are not undefined or null 
     // PEGjs returns null for unmatched rule or terminal 
     function undef(obj, ...prop) {
@@ -85,25 +88,25 @@ SubjectNonSourceCode
 
 DeclarationLhs
     = id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })+ { 
-        return { ast:'pattern', type:'openTuple', names:join(id1, id2) }; 
+        return { type:'openTuple', names:join(id1, id2) }; 
     }
     / '(' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })*  _ ')' { 
-        return { ast:'pattern', type:'tuple', names:join(id1, id2) }; 
+        return { type:'tuple', names:join(id1, id2) }; 
     }
     / '[' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })* _ ']' { 
-        return { ast:'pattern', type:'list', names:join(id1, id2) }; 
+        return { type:'list', names:join(id1, id2) }; 
     }
     / '{' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })* _ '}' { 
-        return { ast:'pattern', type:'set', names:join(id1, id2) }; 
+        return { type:'set', names:join(id1, id2) }; 
     }
     / '{' _ id1:DeclarationIdentifier _ ':' id2:(_ ',' _ id:DeclarationIdentifier _ ':' { return id; })* '}' { 
-        return { ast:'pattern', type:'dict', names:join(id1, id2) }; 
+        return { type:'dict', names:join(id1, id2) }; 
     }
     / '{' _ id1:DeclarationIdentifier _ ':' _ id2:DeclarationIdentifier _ '}' { 
-        return { ast:'pattern', type:'keyValue', names:[id1, id2] }; 
+        return { type:'keyValue', names:[id1, id2] }; 
     }
     / id:DeclarationIdentifier { 
-        return { ast:'pattern', type:null, names:[id] }; 
+        return { type:null, names:[id] }; 
     }
 
 DeclarationIdentifier
@@ -623,16 +626,16 @@ IntegerLiteral
     / IntegerHexLiteral
 
 IntegerDecimalLiteral 
-    = id:([1-9]('_'? [0-9])*) { return { ast:'int', value:str(id), radix:'dec' }; }
+    = id:([1-9]('_'? [0-9])*) { return { ast:'int', value:removeUnderscores(str(id)), radix:'dec' }; }
 
 IntegerBinaryLiteral
-    = ib:("0b"[0-1]('_'? [0-1])*) { return { ast:'int', value:str(ib), radix:'bin' }; }
+    = ib:("0b"[0-1]('_'? [0-1])*) { return { ast:'int', value:removeUnderscores(str(ib)), radix:'bin' }; }
 
 IntegerOctalLiteral
-    = io:("0o"[1-7]('_'? [0-7])*) { return { ast:'int', value:str(io), radix:'oct' }; }
+    = io:("0o"[1-7]('_'? [0-7])*) { return { ast:'int', value:removeUnderscores(str(io)), radix:'oct' }; }
 
 IntegerHexLiteral
-    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { ast:'int', value:str(ix), radix:'hex' }; }
+    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { ast:'int', value:removeUnderscores(str(ix)), radix:'hex' }; }
 
 FloatLiteral 'float'
     = FloatDecimalLiteral
@@ -642,19 +645,19 @@ FloatLiteral 'float'
 
 FloatDecimalLiteral
     = fd:((([0-9]('_'? [0-9])*)?"."[0-9]('_'? [0-9])*("e"[+-]?[0-9]('_'? [0-9])*)?) 
-    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { ast:'float', value:str(fd), radix:'dec' }; }
+    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { ast:'float', value:removeUnderscores(str(fd)), radix:'dec' }; }
 
 FloatBinaryLiteral
     = fb:(("0b"[0-1]('_'? [0-1])*"."[0-1]('_'? [0-1])*("e"[+-]?[0-1]('_'? [0-1])*)?)
-    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { ast:'float', value:str(fb), radix:'bin' }; }
+    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { ast:'float', value:removeUnderscores(str(fb)), radix:'bin' }; }
 
 FloatOctalLiteral 
     = fo:(("0o"[0-7]('_'? [0-7])*"."[0-7]('_'? [0-7])*("e"[+-]?[0-7]('_'? [0-7])*)?) 
-    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { ast:'float', value:str(fo), radix:'oct' }; }
+    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { ast:'float', value:removeUnderscores(str(fo)), radix:'oct' }; }
 
 FloatHexLiteral
     = fx:(("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"."[0-9A-Fa-f]('_'? [0-9A-Fa-f])*("p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)?)
-    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { ast:'float', value:str(fx), radix:'hex' }; }
+    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { ast:'float', value:removeUnderscores(str(fx)), radix:'hex' }; }
 
 BooleanLiteral 'boolean'
     = bl:('true' / 'false') { return { ast:'boolean', value:str(bl) }; }
