@@ -35,6 +35,12 @@ await = { value } ## AST-L1
 yield = { atom }
 raise = { atom }
 
+## ASSIGNMENT ##
+assign1 = { pattern, operator, atom } ## AST-L1
+pattern = { type, names } ## AST-L1
+subjectName = { name, spread, access } ## AST-L1
+assign2 = { name, atom } ## AST-L2
+
 ## EXPRESSIONS ##
 binaryExpression = { ops, atoms }
 unaryExpression = { op, atom, position }
@@ -49,11 +55,6 @@ object = { type, keys, values } ## AST-L2
 pointer = { value }
 pointed = { pointer }
 
-## ASSIGNMENT ##
-assign1 = { pattern, atom } ## AST-L1
-pattern = { type, names } ## AST-L1
-subjectName = { name, spread, access } ## AST-L1
-assign2 = { name, atom } ## AST-L2
 
 ## TYPE VALUE ##
 functionType = { paramTypes, returnTypes }
