@@ -64,14 +64,14 @@ SubjectDeclaration
     }
 
 SubjectMainDeclaration 
-    =  le:DeclarationLhs re:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:le, atom:re }; }
+    =  pt:DeclarationLhs as:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:pt, atom:as }; }
 
 SubjectBody
     = SubjectContentInline
     / SingleLineComment? SubjectContentBlock
 
 SubjectContentInline 
-    = ExprBlock (_ ';' _ ExprBlock)* _ SingleLineComment?
+    = ex1:ExprBlock ex2:(_ ',' _ ex:ExprBlock)* _ SingleLineComment? { return join(ex1, ex2); }
 
 SubjectContentBlock 
     = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* SubjectSourceCode (_ NextLine Samedent SubjectNonSourceCode)* Dedent
@@ -150,7 +150,7 @@ FunctionDeclaration
 
 FunctionMainDeclaration 
     = fn:FunctionName _ fp:FunctionParameterSection fb:(_ ":" _ fb:FunctionBody { return fb; })? { 
-        return { name:fn.name, privateAccess:undef(fn,'privateAccess')?false:fn.privateAccess, superParams:fp.superParams, params:fp.params, expressions:undef(fb)?null:fb }; 
+        return { name:fn.name, privateAccess:fn.privateAccess, superParams:fp.superParams, params:fp.params, expressions:fb }; 
     }
 
 FunctionName 
@@ -441,16 +441,16 @@ Atom
     / SubAtom
 
 SubAtomExtension
-    = IndexCall
+    = IndexBraces
     / Whitespace+ CommandNotationArg
-    / _ FunctionCall
+    / _ CallParens
     / _ CascadingDot
     / _ DotNotation
     / _ CascadingNotation
 
 SubAtom
-    = cm:Comprehension
-    / tv:TypeValue
+    = cm:Comprehension { return cm; } // INCOMPLETE 
+    / tv:TypeValue { return tv; } // INCOMPLETE 
     / '(' ex:ExprBlock ')' { return { ast:'parens',  }; }
     / id:Identifier { return id; }
     / lt:Literal { return lt; }
@@ -476,13 +476,15 @@ Lambda
 
 LambdaParam
     = Identifier ('.' Identifier?)? (_ ':' _ ExprInline)?
-    / AssignLhs
+    / pt:AssignLhs { return pt; }
     
 Assign 
-    = AssignLhs _ Operator _ '=' _ ExprInline (_ ',' _ ExprInline)*
+    = pt:AssignLhs _ op:Operator '=' _ ex1:ExprInline ex2:(_ ',' _ ex:ExprInline)* {
+        return { pattern:pt, operator:op, atom:join(ex1, ex2) };
+    }
 
 ReferenceType 
-    = 'val' / 'ref' / 'iso' / 'const'
+    = rf:('val' / 'ref' / 'iso' / 'const') { return rf; }
 
 Spread
     = '...' Atom
@@ -495,15 +497,16 @@ CommandNotationArg
     / '$'
     / '_'
 
-FunctionCall
-    = CallParens
-    
+// TODO: Not yet referenced in grammar   
 MacroCall
     = '@' Identifier (CallParens)?
     / '@' Identifier (CallParens)? _ ':' _ FunctionBody
 
 CallParens 
     = '(' ':'? ((_ Identifier ':')? _ ExprInline (_ ',' (_ Identifier ':')? _ ExprInline)* (_ ',')?)? _ ')'
+
+IndexBraces
+    = '[' _ IndexArg (_ ',' IndexArg)* (_ ',')? _ ']'
   
 CascadingDot
     = '.' '|' _ Atom (_ Operator _ Atom)+ _ '|'
@@ -517,9 +520,6 @@ DotNotation
 
 VectorNotation
     = Atom '.' !(Identifier) // NOTE: integral literal ending with a dot is taken as float
-
-IndexCall
-    = '[' _ IndexArg (_ ',' IndexArg)* (_ ',')? _ ']'
 
 IndexArg
     = ExprInline? _ ':' (_ '!'? ExprInline)? (_ ':' ExprInline)?
