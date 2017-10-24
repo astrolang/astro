@@ -2,10 +2,10 @@
 program = { expressions }
 
 ## SUBJECT DECLARATION ##
-subjectDeclaration1 = { pattern, mutability, atom } ## ParseTree
-pattern = { type, names } ## ParseTree
-subjectName = { name, spread, privateAccess } ## ParseTree
-subjectDeclaration2 = { name, privateAccess, mutability, atom } ## AST
+subjectDeclaration1 = { pattern, mutability, atom } ## AST-L1
+pattern = { type, names } ## AST-L1
+subjectName = { name, spread, privateAccess } ## AST-L1
+subjectDeclaration2 = { name, privateAccess, mutability, atom } ## AST-L2
 
 ## FUNCTION DECLARATION ##
 functionDeclaration = { name, privateAccess, superParams, params, expressions }
@@ -23,15 +23,15 @@ if = { condition, expressions, elifs, else }
 elif = { condition, expressions }
 else = { expressions } 
 loop = { expressions }
-for { initializations, expressions } ## ParseTree, L1 AST 
-try = { expressions, catch } ## ParseTree, L1 AST
-catch = { typeName, expressions } ## ParseTree, L1 AST
+for { initializations, expressions } ## AST-L1 
+try = { expressions, catch } ## AST-L1
+catch = { typeName, expressions } ## AST-L1
 return = { atom, target }
-break = { value, target } ## ParseTree, L1 AST
-continue = { target } ## ParseTree, L1 AST
-spill = { target } ## ParseTree, L1 AST
-delegate = { value } ## ParseTree, L1 AST
-await = { value } ## ParseTree, L1 AST
+break = { value, target } ## AST-L1
+continue = { target } ## AST-L1
+spill = { target } ## AST-L1
+delegate = { value } ## AST-L1
+await = { value } ## AST-L1
 yield = { atom }
 raise = { atom }
 
@@ -42,18 +42,18 @@ expression = { referenceType, atom }
 parens = { expression }
 new = { fieldNames, values }
 call = { keys, values }
-index = { keys, ranges } ## ParseTree
+index = { keys, ranges } ## AST-L1
 dot = { name } 
 range = { start, end, step }
-object = { type, keys, values } ## AST
+object = { type, keys, values } ## AST-L2
 pointer = { value }
 pointed = { pointer }
 
 ## ASSIGNMENT ##
-assign1 = { pattern, atom } ## ParseTree
-pattern = { type, names } ## ParseTree
-subjectName = { name, spread, access } ## ParseTree
-assign2 = { name, atom } ## AST
+assign1 = { pattern, atom } ## AST-L1
+pattern = { type, names } ## AST-L1
+subjectName = { name, spread, access } ## AST-L1
+assign2 = { name, atom } ## AST-L2
 
 ## TYPE VALUE ##
 functionType = { paramTypes, returnTypes }
