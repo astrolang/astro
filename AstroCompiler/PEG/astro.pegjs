@@ -35,7 +35,7 @@ Program
     = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine Samedent (ex:ProgramCode { return ex; } / EOI))* { return join(ex1, ex2); }
 
 ProgramCode
-    = ProgramSourceCode
+    = ex:ProgramSourceCode { return ex; }
     / ProgramNonSourceCode
 
 ProgramSourceCode
@@ -121,8 +121,7 @@ DeclarationIdentifier
     } 
 
 AssignLhs
-    = (Atom _ '.')+ AssignIdentifier
-    / AssignIdentifier (_ ',' _ AssignIdentifier)+
+    = AssignIdentifier (_ ',' _ AssignIdentifier)+
     / AssignIdentifier _ '.' '|' _ AssignIdentifier (_ ',' AssignIdentifier)* _ '|' (_ '.' AssignIdentifier)?
     / '|' _ AssignIdentifier (_ ',' _ AssignIdentifier)* _ '|' _ '.' AssignIdentifier
     / '(' _ AssignIdentifier (_ ',' _ AssignIdentifier)*  _ ')'
@@ -133,7 +132,9 @@ AssignLhs
     / AssignIdentifier
 
 AssignIdentifier
-    = Identifier
+    = ex:(at:Atom _ '.' { return at; })* id:Identifier { 
+        return {}; 
+    }
     / '...' Identifier?
     / '_'
 
