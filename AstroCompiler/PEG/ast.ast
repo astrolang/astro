@@ -2,44 +2,54 @@
 program = { expressions }
 
 ## SUBJECT DECLARATION ##
-subjectDeclaration1 = { pattern, mutability, atom } ## AST-L1
-pattern = { type, names } ## AST-L1
-subjectName = { name, spread, privateAccess } ## AST-L1
-subjectDeclaration2 = { name, privateAccess, mutability, atom } ## AST-L2
+subjectDeclaration1 = { ## AST-L1
+  pattern: { patternType, names:[{name, privateAccess, rest}] }, 
+  mutability, 
+  value:expression 
+}
+subjectDeclaration2 = { name, privateAccess, mutability, value:expression } ## AST-L2
 
 ## FUNCTION DECLARATION ##
-functionDeclaration = { name, privateAccess, superParams, params, expressions }
-functionParam = { key, value, scopeKey, keyImportance, mutability }
+functionDeclaration = { 
+  name, 
+  privateAccess, 
+  superParams: { mutability, rest, key, scopeKey, keyNeeded, value }
+  params: { mutability, rest, key, scopeKey, keyNeeded, value }
+  expressions 
+}
 
 ## TYPE DECLARATION ##
 typeDeclaration = { name, privateAccess, superTypes, fields }
 abstDeclaration = { name, privateAccess, superTypes, fields }
+# typeParam = { mutability, key, scopeKey, keyNeeded, privateAccess, value }
 
 ## IMPORT ##
 importDeclaration = { key, path, objectNames, objectKeys, dynamism }
 
 ## CONTROL FLOW ##
-if = { condition, expressions, elifs, else }
-elif = { condition, expressions }
-else = { expressions } 
-loop = { expressions }
-for { initializations, expressions } ## AST-L1 
-try = { expressions, catch } ## AST-L1
-catch = { typeName, expressions } ## AST-L1
-return = { atom, target }
+if = { condition, body:expressions, elifs, elseBody:expressions }
+elif = { condition, body:expressions }
+loop = { body:expressions }
+while = { condition, body:expressions }
+for = { initializations, body:expressions } ## AST-L1 
+try = { body:expressions, catch } ## AST-L1
+catch = { param, body:expressions } ## AST-L1
+return = { value:atom, target }
 break = { value, target } ## AST-L1
 continue = { target } ## AST-L1
 spill = { target } ## AST-L1
-delegate = { value } ## AST-L1
-await = { value } ## AST-L1
-yield = { atom }
-raise = { atom }
+delegate = { name } ## AST-L1
+await = { value:atom } ## AST-L1
+yield = { value:atom }
+raise = { value:atom }
 
 ## ASSIGNMENT ##
-assign1 = { pattern, operator, atom } ## AST-L1
-pattern = { type, names } ## AST-L1
-subjectName = { name, spread, access } ## AST-L1
-assign2 = { name, atom } ## AST-L2
+assign1 = { ## AST-L1
+  pattern: { patternType, names:[name:dotChain, rest] }, 
+  operator, 
+  value:expression 
+}
+assign2 = { name:dotChain, value:expression } ## AST-L2
 
 ## EXPRESSIONS ##
 binaryExpression = { ops, atoms }
@@ -49,7 +59,8 @@ parens = { expression }
 new = { fieldNames, values }
 call = { keys, values }
 index = { keys, ranges } ## AST-L1
-dot = { name } 
+dot = { name } ## AST-2
+dotChain = { atoms } ## AST-3
 range = { start, end, step }
 object = { type, keys, values } ## AST-L2
 pointer = { value }
