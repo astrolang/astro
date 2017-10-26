@@ -9,7 +9,7 @@
 
     // creates a new array out of a and the elements of b
     // where a is a scalar, b is an array and where b can be undefined
-    function join(a, b) { return (b !== undefined && b.length != 0) ? [a, ...b] : [a]; }
+    function join(a, b) { return (b !== null && b.length != 0) ? [a, ...b] : [a]; }
 
     // strips '_' in string, for numeric literals
     function removeUnderscores(s) { return s.replace(/_/g, ''); }
@@ -54,134 +54,169 @@ Declaration
 
 SubjectDeclaration
     = mu:('var'/'let') _ sd:SubjectMainDeclaration {  
-        return { ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), atom:sd.atom }; 
+        return { ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value }; 
     }
     / mu:('var'/'let') _ NextLine Indent sd1:SubjectMainDeclaration _ sd2:(NextLine Samedent sd:SubjectMainDeclaration _ { return sd; })* Dedent {
-        let declarations = [{ ast:'subjectDeclaration', pattern:sd1.pattern, mutability:(mu==='var'), atom:sd1.atom }];
+        let declarations = [{ ast:'subjectDeclaration', pattern:sd1.pattern, mutability:(mu==='var'), value:sd1.value }];
         for (let sd of sd2) 
-            declarations.push({ ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), atom:sd.atom });
+            declarations.push({ ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value });
         return declarations;
     }
 
 SubjectMainDeclaration 
-    =  pt:DeclarationLhs as:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:pt, atom:as }; }
+    =  pt:DeclarationLhs as:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:pt, value:as }; }
 
 SubjectBody
-    = SubjectContentInline
-    / SingleLineComment? SubjectContentBlock
+    = ex:SubjectContentInline { return ex; }
+    / SingleLineComment? ex:SubjectContentBlock { return ex; }
 
 SubjectContentInline 
     = ex1:ExprBlock ex2:(_ ',' _ ex:ExprBlock)* _ SingleLineComment? { return join(ex1, ex2); }
 
 SubjectContentBlock 
-    = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* SubjectSourceCode (_ NextLine Samedent SubjectNonSourceCode)* Dedent
+    = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* ex1:SubjectSourceCode ex2:(_ NextLine Samedent ex:SubjectNonSourceCode)* Dedent { return join(ex1, ex2); }
 
 SubjectCode
-    = SubjectSourceCode
+    = ex:SubjectSourceCode { return ex; }
     / SubjectNonSourceCode
 
 SubjectSourceCode
-    = ExprBlock _ SingleLineComment?
+    = ex:ExprBlock _ SingleLineComment? { return ex; }
     
 SubjectNonSourceCode
     = SingleLineComment
 
 DeclarationLhs
     = id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })+ { 
-        return { type:'openTuple', names:join(id1, id2) }; 
+        return { patternType:'openTuple', names:join(id1, id2) }; 
     }
     / '(' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })*  _ ')' { 
-        return { type:'tuple', names:join(id1, id2) }; 
+        return { patternType:'tuple', names:join(id1, id2) }; 
     }
     / '[' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })* _ ']' { 
-        return { type:'list', names:join(id1, id2) }; 
+        return { patternType:'list', names:join(id1, id2) }; 
     }
     / '{' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })* _ '}' { 
-        return { type:'set', names:join(id1, id2) }; 
+        return { patternType:'set', names:join(id1, id2) }; 
     }
     / '{' _ id1:DeclarationIdentifier _ ':' id2:(_ ',' _ id:DeclarationIdentifier _ ':' { return id; })* '}' { 
-        return { type:'dict', names:join(id1, id2) }; 
+        return { patternType:'dict', names:join(id1, id2) }; 
     }
     / '{' _ id1:DeclarationIdentifier _ ':' _ id2:DeclarationIdentifier _ '}' { 
-        return { type:'keyValue', names:[id1, id2] }; 
+        return { patternType:'keysValues', names:[id1, id2] }; 
     }
     / id:DeclarationIdentifier { 
-        return { type:null, names:[id] }; 
+        return { patternType:null, names:[id] }; 
     }
 
 DeclarationIdentifier
     = id:Identifier ac:"'"? { 
-        return { name:id, privateAccess:(ac==="'"), spread:false };
+        return { name:id, privateAccess:(ac!==null), rest:false };
     } 
-    / '...' id:(id:Identifier ac:"'"? { return { name:id, privateAccess:(ac==="'") }; })? {
-        return { name:(undef(id,'name')?null:id.name), privateAccess:(undef(id,'privateAccess')?false:id.privateAccess), spread:true }; 
+    / '...' id:(id:Identifier ac:"'"? { return { name:id, privateAccess:(ac!==null) }; })? {
+        return { name:(undef(id,'name')?null:id.name), privateAccess:(undef(id,'privateAccess')?false:id.privateAccess), rest:true }; 
     } 
     / '_' { 
-        return { name:'_', privateAccess:false, spread:false };
+        return { name:'_', privateAccess:false, rest:false };
     } 
 
 AssignLhs
-    = AssignIdentifier (_ ',' _ AssignIdentifier)+
-    / AssignIdentifier _ '.' '|' _ AssignIdentifier (_ ',' AssignIdentifier)* _ '|' (_ '.' AssignIdentifier)?
-    / '|' _ AssignIdentifier (_ ',' _ AssignIdentifier)* _ '|' _ '.' AssignIdentifier
-    / '(' _ AssignIdentifier (_ ',' _ AssignIdentifier)*  _ ')'
-    / '[' _ AssignIdentifier (_ ',' _ AssignIdentifier)* _ ']' 
-    / '{' _ AssignIdentifier (_ ',' _ AssignIdentifier)* _ '}'
-    / '{' _ AssignIdentifier _ ':' (_ ',' _ AssignIdentifier _ ':')* _ '}'
-    / '{' _ AssignIdentifier _ ':'  AssignIdentifier _ '}'
-    / AssignIdentifier
+    = id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier{ return id; })+ {
+        return { patternType:'openTuple', names:join(id1, id2) }; 
+    }
+    / id1:DotIdentifier _ '.' '|' _ id2:DotIdentifier id3:(_ ',' id:DotIdentifier { return id; })+ _ '|' id4:(_ '.' id:DotIdentifier { return id; })? {
+        return { patternType:'cascadeDot', names:[id1, id2, ...id3, id4] };
+    }
+    / '|' _ id1:DotIdentifier id2:(_ ',' _ id:DotIdentifier{ return id; })+ _ '|' _ '.' id3:DotIdentifier {
+        return { patternType:'cascadeDot', names:[null, id1, ...id2, id3] };
+    }
+    / '(' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })*  _ ')' {
+        return { patternType:'tuple', names:join(id1, id2) };
+    }
+    / '[' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })* _ ']'{
+        return { patternType:'list', names:join(id1, id2) };
+    }
+    / '{' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })* _ '}' {
+        return { patternType:'set', names:join(id1, id2) };
+    }
+    / '{' _ id1:AssignIdentifier _ ':' id2:(_ ',' _ id:AssignIdentifier _ ':' { return id; })* _ '}' {
+        return { patternType:'dict', names:join(id1, id2) };
+    }
+    / '{' _ id1:AssignIdentifier _ ':'  id2:AssignIdentifier _ '}' {
+        return { patternType:'keysValues', names:[id1, id2] };
+    }
+    / id:AssignIdentifier { 
+        return { patternType:null, names:[id] }; 
+    }
 
 AssignIdentifier
-    = ex:(at:Atom _ '.' { return at; })* id:Identifier { 
-        return {}; 
+    = id:DotIdentifier { 
+        return { name:id, rest:false };
     }
-    / '...' Identifier?
-    / '_'
+    / '...' id:Identifier? { 
+        return { name:id, rest:true };
+    }
+    / '_' { return { name:'_', rest:false }; }
+
+DotIdentifier 
+    = exs:(ex:Atom _ '.' { return ex; })* id:Identifier { 
+        let atoms = [...exs, id];
+        return { ast:'dotChain', atoms }; 
+    }
 
 FunctionDeclaration
     = 'fun' _ fd:FunctionMainDeclaration {
-        return { ast:'functionDeclaration', name:fd.name, privateAccess:fd.privateAccess, superParams:fd.superParams, params:fd.params, expressions:fd.expressions };
+        return fd;
     }
-    / 'fun' _ NextLine Indent fd1:FunctionMainDeclaration _ fd2:(NextLine Samedent fd:FunctionMainDeclaration _)* Dedent {
-        let declarations = [{ ast:'functionDeclaration', name:fd1.name, privateAccess:fd1.privateAccess, superParams:fd1.superParams, params:fd1.params, expressions:fd1.expressions }];
-        for (let fd of fd2) 
-            declarations.push({ ast:'functionDeclaration', name:fd.name, privateAccess:fd.privateAccess, superParams:fd.superParams, params:fd.params, expressions:fd.expressions });
-        return declarations;
+    / 'fun' _ NextLine Indent fd1:FunctionMainDeclaration _ fd2:(NextLine Samedent fd:FunctionMainDeclaration _ { return fd; })* Dedent {
+        return join(fd1, fd2);
     }
 
 FunctionMainDeclaration 
     = fn:FunctionName _ fp:FunctionParameterSection fb:(_ ":" _ fb:FunctionBody { return fb; })? { 
-        return { name:fn.name, privateAccess:fn.privateAccess, superParams:fp.superParams, params:fp.params, expressions:fb }; 
+        return { ast:'functionDeclaration', name:fn.name, privateAccess:fn.privateAccess, superParams:fp.superParams, params:fp.params, body:fb }; 
     }
 
 FunctionName 
-    = id:Identifier ac:"'"? { return { name:id, privateAccess:(ac==="'") }; }
+    = id:Identifier ac:"'"? { return { 
+        name:id, privateAccess:(ac!==null) }; 
+    }
 
 FunctionParameterSection
-    = "(" (_ FunctionSuperTypeInit _ ",")? (_ FunctionParameter (_ "," _ FunctionParameter)*)? _ ")"
+    = "(" fsi:(_ fi:FunctionSuperTypeInit _ ",")? fpm:(_ fp1:FunctionParameter fp2:(_ "," _ fp:FunctionParameter { return fp; })* { return join(fp1, fp2); })? _ ")" {
+        return { superParams:fsi, params:fpm };
+    }
 
 FunctionSuperTypeInit
-    = "<" _ FunctionParameter (_ "," _ FunctionParameter)* _ ">"
+    = "<" _ fp1:FunctionParameter fp2:(_ "," _ fp:FunctionParameter  { return fp; })* _ ">" { 
+        return join(fp1, fp2); 
+    }
 
 FunctionParameter
-    = ('var' _)? '...'? Identifier ("." Identifier?)? (_ ":" _ Atom)?
+    = mu:('var' _)? rs:'...'? id1:Identifier id2:("." id:Identifier?)? vl:(_ ":" _ ex:Atom)? {
+        return { mutability:(mu!==null), rest:(rs!==null), key:id1, scopeKey:id2, keyNeeded:(id2!==null), value:vl };
+    }
 
 FunctionBody
-    = FunctionContentInline
-    / SingleLineComment? FunctionContentBlock
+    = fi:FunctionContentInline { return fi; }
+    / SingleLineComment? fb:FunctionContentBlock { return fb; }
 
 FunctionContentInline
-    = ExprBlock (_ ';' _ ExprBlock)* _ SingleLineComment?
+    = ex1:ExprBlock ex2:(_ ';' _ ex:ExprBlock { return ex; })* _ SingleLineComment? {
+        return join(ex1, ex2);
+    }
     
 FunctionContentBlock
-    = NextLine Indent (_ FunctionNonSourceCode NextLine Samedent)* FunctionSourceCode (_ NextLine Samedent FunctionCode)* Dedent
+    = NextLine Indent (_ FunctionNonSourceCode NextLine Samedent)* fc1:FunctionSourceCode fc2:(_ NextLine Samedent fc:FunctionCode { return fc; })* Dedent {
+        return join(ex1, ex2);
+    }
 
 FunctionCode
-    = FunctionSourceCode
+    = ex:FunctionSourceCode { return ex; }
     / FunctionNonSourceCode
 
 FunctionSourceCode
-    = ExprBlock _ SingleLineComment?
+    = ex:ExprBlock _ SingleLineComment? { return ex; }
     
 FunctionNonSourceCode
     = SingleLineComment
@@ -194,26 +229,65 @@ MacroMainDeclaration
     = Identifier _ '(' (_ FunctionParameter (_ ',' _ FunctionParameter)*)? _ ')' _ ':' _ FunctionBody
 
 TypeDeclaration
-    = 'type' _ TypeMainDeclaration
-    / 'type' _ NextLine Indent TypeMainDeclaration _ (NextLine Samedent TypeMainDeclaration _)* Dedent
+    = 'type' _ td:TypeMainDeclaration {
+        return td;
+    }
+    / 'type' _ NextLine Indent td1:TypeMainDeclaration _ td2:(NextLine Samedent td:TypeMainDeclaration _ { return td; })* Dedent {
+        return join(td1, td2);
+    }
 
 TypeMainDeclaration
-    = TypeName (_ TypeParameterSection)? (_ SuperTypeDeclaration)? (_ ":" _ TypeBody)?
+    = nm:TypeName _ tp:TypeParameterSection spt:(_ sp:SuperTypeDeclaration { return sp; })? {
+        // Constructor Function
+        let constructorFunction = {
+            ast:'functionDeclaration', name:nm.name, privateAccess:false, superParams:tp.superParams, params:tp.params, body:null 
+        };
+
+        // Fields
+        let fields = [];
+        for (let param of tp.params) {
+            let pattern = { 
+                patternType:null, 
+                names:[{name:param.name, privateAccess:param.privateAccess, rest:false}] 
+            };
+            fields.push({ ast:'subjectDeclaration', pattern, mutability:param.mutability, value:param.value });
+        }
+
+        // Type
+        let type = {
+            ast:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields
+        };
+
+        return [type, constructorFunction];
+    }
+    / nm:TypeName spt:(_ sp:SuperTypeDeclaration { return sp; })? tb:(_ ":" _ ex:TypeBody { return ex; })? {
+        return { ast:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields:tb };
+    }
 
 TypeName
-    = Identifier "'"?
+    = id:Identifier ac:"'"? {
+        return { name:id, privateAccess:(id!==null) }
+    }
 
 TypeParameterSection
-    = "(" (_ TypeSuperTypeInit _ ",")? (_ TypeParameter (_ "," _ TypeParameter)*)? _ ")"
+    = "(" tsi:(_ tp:TypeSuperTypeInit _ ",")? tpm:(_ tp1:TypeParameter tp2:(_ "," _ tp:TypeParameter { return tp; })* { return join(tp1, tp2); })? _ ")" {
+        return { superParams:tsi, params:tpm };
+    }
  
 TypeSuperTypeInit
-    = "<" _ TypeParameter (_ "," _ TypeParameter)* _ ">"
+    = "<" _ tp1:TypeParameter tp2:(_ "," _ tp:TypeParameter { return tp; })* _ ">" {
+        return join(tp1, tp2);
+    }
 
 TypeParameter
-    = ('var' _)? '...'? Identifier ("."? Identifier)? "'"?
+    = mu:('var' _)? id1:Identifier id2:(nd:"." id:Identifier? { return id; })? ac:"'"? vl:(_ ":" _ ex:Atom { return ex; })? {
+        return { mutability:(mu!==null), key:id1, scopeKey:id2, keyNeeded:(id2!==null), value:vl, privateAccess:(ac!==null) };
+    }
 
 SuperTypeDeclaration
-    = "<:" _ Identifier (_ "," _ Identifier)*
+    = "<:" _ id1:Identifier id2:(_ "," _ id:Identifier { return id; })* {
+        return join(id1, id2);
+    }
 
 TypeBody
     = TypeContentInline
@@ -290,20 +364,22 @@ CondExprBlock
 CondExprInline
     = IfExprInline
     / WhileExprInline
-    / TryExprInline
     / ForExprInline
 
 IfExprInline
-    = Atom _ 'if' _ IfHeadExpr (_ 'else' _ Atom)?
+    = ex1:Atom _ 'if' _ hd:IfHeadExpr ex2:(_ 'else' _ ex:Atom { return ex; })? { 
+        return { ast:'if', condition:hd, body:[ex1], elifs:null, elseBody:ex2 }
+    }
 
 WhileExprInline
-    = Atom _ 'while' _ IfHeadExpr
-
-TryExprInline
-    = Atom _ 'try' _ IfHeadExpr (_ 'catch' _ Atom)?
+    = ex:Atom _ 'while' _ hd:IfHeadExpr {
+        return { ast:'while', condition:hd, body:[ex] }
+    }
 
 ForExprInline
-    = Atom _ 'for' _ ForHeadExpr (_ 'end' _ Atom)?
+    = Atom _ 'for' _ ForHeadExpr (_ 'end' _ Atom)? {
+        return { ast:'while', condition:hd, body:[ex] }
+    }
 
 IfExprBlock
     = 'if' _ IfHeadExpr (_ ',' (_ 'if')? _ IfHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent ElifExpr)* (_ NextLine Samedent ElseExpr)?
@@ -417,8 +493,8 @@ Expr
     / Lambda 
     / Properties
     / IIFE
-    / CascadingNotation 
-    / Spread
+    / CascadeNotation 
+    / Rest
     / DotNotation
     / VectorNotation
     / Atom
@@ -428,9 +504,9 @@ BinaryExtension
     / Operator UnaryExpr
 
 UnaryExpr 
-    = CascadingDot
-    / CascadingNotation
-    / Spread
+    = CascadeDot
+    / CascadeNotation
+    / Rest
     / DotNotation
     / VectorNotation
     / Operator Atom
@@ -438,16 +514,16 @@ UnaryExpr
     / Atom
 
 Atom
-    = SubAtom SubAtomExtension+
-    / SubAtom
+    = SubAtom SubAtomExtension+ 
+    / SubAtom { }
 
 SubAtomExtension
     = IndexBraces
     / Whitespace+ CommandNotationArg
     / _ CallParens
-    / _ CascadingDot
+    / _ CascadeDot
     / _ DotNotation
-    / _ CascadingNotation
+    / _ CascadeNotation
 
 SubAtom
     = cm:Comprehension { return cm; } // INCOMPLETE 
@@ -487,7 +563,7 @@ Assign
 ReferenceType 
     = rf:('val' / 'ref' / 'iso' / 'const') { return rf; }
 
-Spread
+Rest
     = '...' Atom
 
 CommandNotationArg
@@ -496,7 +572,6 @@ CommandNotationArg
     / Identifier
     / 'pass'
     / '$'
-    / '_'
 
 // TODO: Not yet referenced in grammar   
 MacroCall
@@ -509,11 +584,11 @@ CallParens
 IndexBraces
     = '[' _ IndexArg (_ ',' IndexArg)* (_ ',')? _ ']'
   
-CascadingDot
+CascadeDot
     = '.' '|' _ Atom (_ Operator _ Atom)+ _ '|'
     / '.' '|' _ Atom (_ ',' _ Atom)+ _ '|'
     
-CascadingNotation
+CascadeNotation
     = '..' ':'? Atom
     
 DotNotation
