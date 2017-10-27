@@ -1,5 +1,5 @@
 ## PROGRAM ##
-program = { expressions }
+program = { body }
 
 ## SUBJECT DECLARATION ##
 subjectDeclaration1 = { ## AST-L1
@@ -18,13 +18,29 @@ functionDeclaration = {
   expressions 
 }
 
+## MACRO ##
+macroDeclaration = { 
+  name, 
+  privateAccess, 
+  params: { mutability, rest, key, scopeKey, keyNeeded, value }
+  expressions 
+}
+
 ## TYPE DECLARATION ##
 typeDeclaration = { name, privateAccess, superTypes, fields }
-abstDeclaration = { name, privateAccess, superTypes, fields }
+
+## ABST DECLARATION ##
+abstDeclaration = { 
+  name, 
+  privateAccess, 
+  superTypes, 
+  body: subjectDeclaration1 | subTypes:{ name, privateAccess, params:[{mutability, key, scopeKey, keyNeeded, value}] },
+  constructorFunction
+}
 # typeParam = { mutability, key, scopeKey, keyNeeded, privateAccess, value }
 
 ## IMPORT ##
-importDeclaration = { key, path, objectNames, objectKeys, dynamism }
+importDeclaration = { dynamic, key, path, names:[{ actualName, scopeName }] }
 
 ## CONTROL FLOW ##
 if = { condition, body:expressions, elifs, elseBody:expressions }
@@ -63,9 +79,10 @@ dot = { name } ## AST-2
 dotChain = { atoms } ## AST-3
 range = { start, end, step }
 object = { type, keys, values } ## AST-L2
+pass = { }
+$ = { }
 pointer = { value }
 pointed = { pointer }
-
 
 ## TYPE VALUE ##
 functionType = { paramTypes, returnTypes }
