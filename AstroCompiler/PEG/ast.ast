@@ -43,13 +43,11 @@ abstDeclaration = {
 importDeclaration = { dynamic, key, path, names:[{ actualName, scopeName }] }
 
 ## CONTROL FLOW ##
-if = { condition, body:expressions, elifs, elseBody:expressions }
-elif = { condition, body:expressions }
-loop = { body:expressions }
-while = { condition, body:expressions }
-for = { initializations, body:expressions } ## AST-L1 
-try = { body:expressions, catch } ## AST-L1
-catch = { param, body:expressions } ## AST-L1
+if = { head, body:expressions, elifs:[{ head, body:expressions }], elseBody:expressions }
+loop = { body:expressions, endBody:expressions }
+while = { condition, body:expressions, endBody:expressions } ## AST-L1
+for = { head, body:expressions, endBody:expressions } ## AST-L1 
+try = { body:expressions, catchs:[{ param, body:expressions }] } ## AST-L1
 return = { value:atom, target }
 break = { value, target } ## AST-L1
 continue = { target } ## AST-L1
