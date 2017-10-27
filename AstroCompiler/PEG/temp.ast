@@ -137,3 +137,32 @@ let
 type 
     Player(name, age)
     Game'(player, board)
+
+# Test for the cause of junk in value 
+let brain = 0b1101
+
+let thor = "Chris Hemsworth"
+
+abst Name: 
+    | Name(a, b.) | Game'
+    let name = 90
+    # nothing
+    # nothing
+    | Day 
+
+# Diverse 
+let 
+    age, sex', country = /hello/
+    ...name', height', year = 5678
+
+let sassy' =
+    let brain = 0b1101
+
+
+fun name(a, b): a + b
+
+
+type Person(a, b)
+
+type Person: 
+    var name, age
