@@ -36,13 +36,13 @@ Start
     = exs:Program { return { ast:'program', body:exs }; }
 
 Program
-    = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine Samedent (ex:ProgramCode { return ex; } / EOI))* { 
+    = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine Samedent pc:(ex:ProgramCode { return ex; } / EOI) { return pc })* { 
         return removeNulls(join(ex1, ex2)); 
     }
 
 ProgramCode
     = ex:ProgramSourceCode { return ex; }
-    / ProgramNonSourceCode { return; } // returns null
+    / ProgramNonSourceCode { return } // returns null
 
 ProgramSourceCode
     = ex:ExprBlock _ SingleLineComment? { return ex; }
@@ -86,7 +86,8 @@ SubjectContentInline
 
 SubjectContentBlock 
     = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* ex1:SubjectSourceCode ex2:(_ NextLine Samedent ex:SubjectNonSourceCode)* Dedent { 
-        return removeNulls(join(ex1, ex2)); }
+        return removeNulls(join(ex1, ex2)); 
+    }
 
 SubjectCode
     = ex:SubjectSourceCode { return ex; }
@@ -210,22 +211,22 @@ FunctionParameter
     }
 
 FunctionBody
-    = fi:FunctionContentInline { return fi; }
-    / SingleLineComment? fb:FunctionContentBlock { return fb; }
+    = fi:FunctionContentInline { return fi }
+    / SingleLineComment? fb:FunctionContentBlock { return fb }
 
 FunctionContentInline
-    = ex1:ExprBlock ex2:(_ ';' _ ex:ExprBlock { return ex; })* _ SingleLineComment? {
+    = ex1:ExprBlock ex2:(_ ';' _ ex:ExprBlock { return ex })* _ SingleLineComment? {
         return join(ex1, ex2);
     }
     
 FunctionContentBlock
-    = NextLine Indent (_ FunctionNonSourceCode NextLine Samedent)* fc1:FunctionSourceCode fc2:(_ NextLine Samedent fc:FunctionCode { return fc; })* Dedent {
-        return join(ex1, ex2);
+    = NextLine Indent (_ FunctionNonSourceCode NextLine Samedent)* ex1:FunctionSourceCode ex2:(_ NextLine Samedent ex:FunctionCode { return ex; })* Dedent {
+        return removeNulls(join(ex1, ex2));
     }
 
 FunctionCode
     = ex:FunctionSourceCode { return ex; }
-    / FunctionNonSourceCode
+    / FunctionNonSourceCode { return } // returns null
 
 FunctionSourceCode
     = ex:ExprBlock _ SingleLineComment? { return ex; }
@@ -323,12 +324,12 @@ TypeContentInline
     
 TypeContentBlock
     = NextLine Indent (_ TypeNonSourceCode NextLine Samedent)* ex1:TypeSourceCode ex2:(_ NextLine Samedent ex:TypeCode {return ex; })* Dedent {
-        return join(ex1, ex2);
+        return removeNulls(join(ex1, ex2));
     }
 
 TypeCode
     = ex:TypeSourceCode { return ex; }
-    / TypeNonSourceCode
+    / TypeNonSourceCode { return }
 
 TypeSourceCode
     = ex:SubjectDeclaration _ SingleLineComment? { return ex; }
@@ -410,7 +411,7 @@ AbstContentBlock
 
 AbstCode
     = ex:AbstSourceCode  { return ex; }
-    / AbstNonSourceCode { return; } // returns null
+    / AbstNonSourceCode { return } // returns null
 
 AbstSourceCode
     = ex:SubjectDeclaration _ SingleLineComment?  { return { type:'subjectDeclaration', subject:ex }; }
@@ -424,7 +425,7 @@ AbstNonSourceCode
 
 AbstSubTypeDeclaration
     = tn:TypeName ap:AbstSubTypeParameterSection? {
-        return { name:tn.name, privateAccess:tn.privateAccess, params:ap }
+        return { name:tn.name, privateAccess:tn.privateAccess, params:ap };
     }
 
 AbstSubTypeParameterSection
@@ -448,7 +449,7 @@ ImportDeclaration
 
 ImportSubject
     = id1:Identifier id2:(_ ':' _ id:Identifier { return id })? {
-        return { actualName:id1, scopeName:id2}
+        return { actualName:id1, scopeName:id2 };
     }
 
 PathIdentifier
@@ -459,8 +460,10 @@ PathIdentifier
 CondExprBlock
     = IfExprBlock
     / WhileExprBlock
+    / LoopExprBlock
     / TryExprBlock
     / ForExprBlock
+    / RedoWhileExprBlock
     / MatchExpr
 
 CondExprInline
@@ -469,61 +472,95 @@ CondExprInline
     / ForExprInline
 
 IfExprInline
-    = ex1:Atom _ 'if' _ hd:IfHeadExpr ex2:(_ 'else' _ ex:Atom { return ex; })? { 
-        return { ast:'if', condition:hd, body:[ex1], elifs:null, elseBody:ex2 }
+    = ex1:Atom _ 'if' _ hd:IfHeadExpr ex2:(_ 'else' _ ex:Atom { return ex })? { 
+        return { ast:'if', head:hd, body:[ex1], elifs:null, elseBody:ex2 };
     }
 
 WhileExprInline
-    = ex:Atom _ 'while' _ hd:IfHeadExpr {
-        return { ast:'while', condition:hd, body:[ex] }
+    = ex1:Atom _ 'while' _ hd:IfHeadExpr ex2:(_ 'end' _ ex:Atom { return ex })? {
+        return { ast:'while', head:hd, body:[ex1], endBody:[ex2]  };
     }
 
 ForExprInline
-    = Atom _ 'for' _ ForHeadExpr (_ 'end' _ Atom)? {
-        return { ast:'while', condition:hd, body:[ex] }
+    = ex1:Atom _ 'for' _ hd:ForHeadExpr ex2:(_ 'end' _ ex:Atom { return ex })? {
+        return { ast:'for', head:hd, body:[ex1], endBody:[ex2] };
     }
 
 IfExprBlock
-    = 'if' _ IfHeadExpr (_ ',' (_ 'if')? _ IfHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent ElifExpr)* (_ NextLine Samedent ElseExpr)?
-    / 'if' _ IfHeadExpr (_ ',')? _ 'while' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
-    / 'if' _ IfHeadExpr (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)?
-    / 'if' _ IfHeadExpr (_ ',')? _ 'for' _ ForHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
+    = 'if' _ hd1:IfHeadExpr hd2:(((_ ',')? _ 'if' / _ ',') _ hd:IfHeadExpr { return hd })? _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
+        if (hd2 !== null) {
+            let inner = { ast:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
+            return { ast:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
+        }
+        return { ast:'if', head:hd1, body:fb, elifs:ef, elseBody:eb };
+    }
+    / 'if' _ hd1:IfHeadExpr hd2:(_ ',')? _ 'while' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
+        let inner = { ast:'while', head:hd2, body:fb, endBody:eb };
+        return { ast:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
+    }
+    / 'if' _ hd:IfHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
+        let inner = { ast:'loop', body:fb, endBody:eb };
+        return { ast:'if', head:hd, body:[inner], elifs:null, elseBody:null };
+    }
+    / 'if' _ IfHeadExpr (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)+ {
+    }
+    / 'if' _ IfHeadExpr (_ ',')? _ 'for' _ ForHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)? {
+        
+    }
 
 WhileExprBlock
-    = 'while' _ IfHeadExpr (_ ',' (_ 'if')? _ IfHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent ElifExpr)* (_ NextLine Samedent ElseExpr)?
-    / 'while' _ IfHeadExpr (_ ',')? _ 'while' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
-    / 'while' _ IfHeadExpr (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)?
+    = 'while' _ IfHeadExpr (_ ',')? _ 'if' _ IfHeadExpr _ ':' _ FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* es:(_ NextLine Samedent ex:ElseExpr { return ex })?
+    / 'while' _ IfHeadExpr (((_ ',')? _ 'while' / _ ',') _ IfHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
+    / 'while' _ IfHeadExpr (_ ',')? _ 'loop' _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)? 
+    / 'while' _ IfHeadExpr (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)+
     / 'while' _ IfHeadExpr (_ ',')? _ 'for' _ ForHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
 
+LoopExprBlock
+    = 'loop' (_ ',')? _ 'if' _ IfHeadExpr _ ':' _ FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* es:(_ NextLine Samedent ex:ElseExpr { return ex })?
+    / 'loop' (_ ',')? _ 'while' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
+    / 'loop' (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)?
+    / 'loop' (_ ',')? _ 'for' _ ForHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
+
 TryExprBlock
-    = 'try' _ IfHeadExpr (_ ',' (_ 'if')? _ IfHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent ElifExpr)* (_ NextLine Samedent ElseExpr)?
-    / 'try' _ IfHeadExpr (_ ',')? _ 'while' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
-    / 'try' _ IfHeadExpr (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)?
-    / 'try' _ IfHeadExpr (_ ',')? _ 'for' _ ForHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
+    = 'try' _ IfHeadExpr (_ ',' _ 'if' _ IfHeadExpr)? _ ':' _ FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* es:(_ NextLine Samedent ex:ElseExpr { return ex })? (_ NextLine Samedent CatchExpr)+
+    / 'try' _ IfHeadExpr (_ ',')? _ 'while' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)? (_ NextLine Samedent CatchExpr)+
+    / 'try' _ IfHeadExpr (_ ',')? _ 'loop' _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)? (_ NextLine Samedent CatchExpr)+
+    / 'try' _ IfHeadExpr (((_ ',')? _ 'try' / _ ',') _ IfHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)+ 
+    / 'try' _ IfHeadExpr (_ ',')? _ 'for' _ ForHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)? (_ NextLine Samedent CatchExpr)+
 
 ForExprBlock
-    = 'for' _ ForHeadExpr (_ ',' (_ 'if')? _ IfHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent ElifExpr)* (_ NextLine Samedent ElseExpr)?
+    = 'for' _ ForHeadExpr (_ ',')? _ 'if' _ IfHeadExpr _ ':' _ FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* es:(_ NextLine Samedent ex:ElseExpr { return ex })?
     / 'for' _ ForHeadExpr (_ ',')? _ 'while' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
-    / 'for' _ ForHeadExpr (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)?
-    / 'for' _ ForHeadExpr (_ ',')? _ 'for' _ ForHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
+    / 'for' _ ForHeadExpr (_ ',')? _ 'loop' _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
+    / 'for' _ ForHeadExpr (_ ',')? _ 'try' _ IfHeadExpr _ ':' _ FunctionBody (_ NextLine Samedent CatchExpr)+
+    / 'for' _ ForHeadExpr (((_ ',')? _ 'for' / _ ',') _ ForHeadExpr)? _ ':' _ FunctionBody (_ NextLine Samedent EndExpr)?
 
 RedoWhileExprBlock
-    = 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',' (_ 'if')? _ IfHeadExpr)? 
-    / 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',')? 'while' IfHeadExpr
-    / 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',')? 'try' IfHeadExpr
-    / 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',')? 'for' ForHeadExpr
+    = 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',')? _ 'if' _ IfHeadExpr
+    / 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (((_ ',')? _ 'while' / _ ',') IfHeadExpr)?
+    / 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',')? _ 'loop'
+    / 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',')? _ 'try' IfHeadExpr (_ NextLine Samedent CatchExpr)+
+    / 'redo' _ ':' _ FunctionBody _ NextLine Samedent 'while' _ IfHeadExpr (_ ',')? _ 'for' ForHeadExpr
 
 ElifExpr
-    = 'elif' _ IfHeadExpr _ ':' _ FunctionBody
+    = 'elif' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody {
+        return { head:hd, body:fb };
+    }
     
 ElseExpr
-    = 'else' _ ':' _ FunctionBody
+    = 'else' _ ':' _ fb:FunctionBody {
+        return fb;
+    }
 
 CatchExpr
-    = 'catch' _ Identifier _ ':' _ FunctionBody
+    = 'catch' _ id:Identifier _ ':' _ fb:FunctionBody {
+        return { param:id, body:fb};
+    }
     
 EndExpr
-    = 'end' _ ':' _ FunctionBody
+    = 'end' _ ':' _ fb:FunctionBody { 
+        return fb;
+    }
 
 IfHeadExpr 
     = ('var' _)? _ AssignLhs _ '<-' _ Expr
@@ -576,7 +613,7 @@ ExprInline
     / Expr
 
 Expr
-    = ReferenceType _ UnaryExpr
+    = ReferenceType _ UnaryExpr { return  }
     / Assign
     / Return
     / Break
@@ -612,7 +649,7 @@ UnaryExpr
 
 Atom
     = SubAtom SubAtomExtension+ 
-    / SubAtom { }
+    / SubAtom
 
 SubAtomExtension
     = IndexBraces
@@ -699,9 +736,11 @@ IndexArg
     / ExprInline
 
 Comprehension
-    = '(' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ')' // generator
-    / '[' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ']' 
-    / '{' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}'
+    = '(' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ')' { return 'gen' } // generator
+    / '(' _ ComprehensionHeadExpr _ ',' _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ')' { return 'tuple-gen' } // tuple
+    / '[' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ']' // list
+    / '{' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // set
+    / '{' _ ExprInline _ ':' _ ExprInline _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // dict
     
 ComprehensionHeadExpr
     = ExprInline (_ ',' _ ExprInline)*
@@ -785,13 +824,13 @@ StringLiteral
     / ("'"[^\']+"'")) { return { ast:'string', value:str(sl) }; } // '
 
 RegexLiteral
-    = rl:('/'[^/]+'/') { return { ast:'regex', value:str(rl) }; }
+    = rl:('/'[^/]+'/') { return { ast:'regex', value:str(rl) }; } // '
 
 NumericLiteral 
     = FloatLiteral
     / IntegerLiteral
 
-IntegerLiteral
+IntegerLiteral 'integer'
     = IntegerDecimalLiteral
     / IntegerBinaryLiteral
     / IntegerOctalLiteral
@@ -841,7 +880,7 @@ SingleLineCommentCharacter // UNICODE?
     = [^\r\n]+
 
 NextLine 'nextline'
-    = Newline (EmptyLine Newline)* { return; } // returns null
+    = Newline (EmptyLine Newline)*
 
 EmptyLine 'emptyLine'
     = (Whitespace+ &(Newline/EOI) 
