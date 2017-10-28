@@ -44,10 +44,11 @@ importDeclaration = { dynamic, key, path, names:[{ actualName, scopeName }] }
 
 ## CONTROL FLOW ##
 if = { head, body:expressions, elifs:[{ head, body:expressions }], elseBody:expressions }
-loop = { body:expressions, endBody:expressions }
-while = { condition, body:expressions, endBody:expressions } ## AST-L1
+while = { head, body:expressions, endBody:expressions } ## AST-L1
 for = { head, body:expressions, endBody:expressions } ## AST-L1 
-try = { body:expressions, catchs:[{ param, body:expressions }] } ## AST-L1
+loop = { body:expressions, endBody:expressions }
+try = { head, body:expressions, catchs:[{ param, body:expressions }] } ## AST-L1
+redo = { head, body:expressions, endBody:expressions }
 return = { value:atom, target }
 break = { value, target } ## AST-L1
 continue = { target } ## AST-L1
