@@ -26,6 +26,15 @@
         ["(", ")"],
         ["\"", "\""],
         ["'", "'"]
-    ]
+    ],
     // looking for auto-indent code, check for src/astroMain.ts
+
+    // prevents VSCode from folding empty lines along with indented code
+    "folding": {
+		"offSide": true,
+		"markers": {
+			"start": "^\\s*#region\\b",
+			"end": "^\\s*#endregion\\b"
+		}
+	}
 }
