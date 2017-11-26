@@ -43,7 +43,7 @@ IDENTIFIERS
     type InventoryManager(name, id)
     abst LightSource: SpotLight, Directional, Ambient
 
-    # for acronyms, only the first charcater should be upper case
+    # for acronyms, only the first character should be upper case
     type XmlParser <: Parser
 
     # names preceded by underscores are special to the compiler 
@@ -95,7 +95,7 @@ EXPRESSION-ORIENTED
     fun add(a, b):
         a + b # 'return' is not needed here. result of a + b will be returned to the caller.
     ..
-    nypro.hieght = add(aditya.height, tripleo.height)
+    nypro.height = add(aditya.height, tripleo.height)
 
     # a semi-colon at the end of a block, stops it from returning its evaluated
     # result
@@ -280,7 +280,7 @@ LISTS
 
 ARRAYS
     # List type is an subtype of Array that requires preallocating its indices
-    # Arrays do not pre-allocate and it is adviced to use Array sparinly, with care and only when 
+    # Arrays do not pre-allocate and it is adviced to use Array sparingly, with care and only when 
     # high performance matters
     let calendar = 31x12[Str][] # specifying the size of an Array
 
@@ -458,7 +458,7 @@ STRING FORMATTING
     let date               = 'date:                $:|Y-m-d H:M|(date)'
 
 MULTILINE EXPRESSIONS
-    # expressions that spread accross multiple lines must be enclosed in brackets
+    # expressions that spread across multiple lines must be enclosed in brackets
     # or used with an isolated three dots ending the previous line.
     var zero = -100 ...
     + 100
@@ -487,7 +487,7 @@ USE BLOCK:
 
 
 PASS KEYWORD
-    # pass keword can be used to signify an empty block
+    # pass keyword can be used to signify an empty block
     if name == 'Jagaban': pass
     fun div(a, b): pass 
 
@@ -740,7 +740,7 @@ FUNCTION DEFINITION (2)
     fun multiply(a, b):
         a * b
 
-    # if a function returns nothing, it can be annotated Nons 
+    # if a function returns nothing, it can be annotated None 
     fun print(point): ## -> None 
         print(point.|a, b|)
     
@@ -1622,9 +1622,9 @@ FEATURE SUMMARY
 - Simpler but flexible object-oriented model.
 - Extensive mathematical function library.
 - Built-in package manager.
-- Incremental Compilation
+- Incremental compilation
 - Unicode support including but not limited to UTF-8.
-- Compiles to webassembly with easy inter-op with Javascript.
+- Compiles to WebAssembly with easy inter-op with Javascript.
 - Free and open source.
 - Powerful type sytem with multiple dispatch, variance and generics.
 - Metaprogramming with hygenic macros and operator overloading.
