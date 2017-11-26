@@ -1698,7 +1698,7 @@ WHAT IF
 
     20.each { print "Hello" }
 
-    # no multiple declaration syntaz
+    # no multiple declaration syntax
 
     type Employee <: Person {
         var job ## Str
