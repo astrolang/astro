@@ -1,0 +1,34 @@
+{
+  "name": "Astro",
+  "version": "0.1.12",
+  "description": "Astro is a high-performance statically-typed programming language for the web (it compiles to WebAssembly), with Python-like syntax and technical-computing orientation similar to Julia.",
+  "main": "index.js",
+  "scripts": {
+    "test": "nyc --reporter=lcov --reporter=text mocha --timeout 250000 ./tests/*.js --compilers js:babel-core/register --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AppCypher/Astro.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/AppCypher/Astro/issues"
+  },
+  "homepage": "https://github.com/AppCypher/Astro#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.3",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-1": "^6.24.1",
+    "mocha": "^4.0.1",
+    "pegjs": "^0.10.0"
+  },
+  "dependencies": {
+    "cross-env": "^5.1.1",
+    "nyc": "^11.3.0",
+    "wast2wasm": "0.0.1"
+  }
+}
