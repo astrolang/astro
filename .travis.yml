@@ -1,5 +1,5 @@
 language: node_js
-    - "7"
+    - "8"
 install:
     - npm install
 cache:
