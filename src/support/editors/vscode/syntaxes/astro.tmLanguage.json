@@ -1,0 +1,320 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Astro",
+	"patterns": [
+	    {
+	        "include": "#non_astro"
+	    },
+	    {
+	        "include": "#numbers"
+	    },
+	    {
+	        "include": "#macros"
+	    },
+	    {
+	        "include": "#lambda_var"
+	    },
+	    {
+	        "include": "#parens"
+	    },
+	    {
+	        "include": "#brackets"
+	    },
+	    {
+	        "include": "#multiline_comments"
+	    },
+	    {
+	        "include": "#singleline_comments"
+	    },
+	    {
+	        "include": "#typenames"
+	    },
+	    {
+	        "include": "#dot_members"
+	    },
+	    {
+	        "include": "#keywords"
+	    },
+	    {
+	        "include": "#functions"
+	    },
+	    {
+	        "include": "#variable"
+	    },
+	    {
+	        "include": "#function_calls"
+	    },
+	    {
+	        "include": "#command_notation"
+	    },
+	    {
+	        "include": "#strings"
+	    },
+	    {
+	        "include": "#regex"
+	    },
+	    {
+	        "include": "#operators"
+	    }
+	],
+	"repository": {
+		"non_astro":{
+	        "patterns":[
+	            {
+	                "begin": "^\\s*-[^>].*",
+	                "end": "$",
+	                "name": "support.function.macro.astro"
+	            }
+	        ]
+		},
+		"functions":{
+	        "patterns": [
+	            {
+	                "match": "(?<=fun |catch |ensure )[a-z_][A-Za-z0-9_!]*",
+	                "name": "entity.name.function.astro"
+	            }
+	        ]
+		},
+	    "lambda_var":{
+	        "patterns": [
+	            {
+	                "match": "\\$\\d+",
+	                "name": "astro"
+	            }
+	        ]
+		},
+	    "macros":{
+	        "patterns":[
+
+	            {
+	                "match": "(?<!\\.|\\|)@(?:[A-Za-z][A-Za-z_0-9]*)|\\@\\(.*\\)", 
+	                "name": "support.function.macro.astro"
+	            }
+	        ]
+		},
+	    "parens":{
+	        "patterns": [
+	            {
+	                "begin": "\\(",
+	                "end": "\\)",
+	                "name": "astro",
+	                "patterns": [
+	                    {
+	                        "include": "$self"
+	                    }
+	                ]
+	            }
+	        ]
+		},
+	    "brackets":{
+	        "patterns": [
+	            {
+	                "match": "(?:\\(|\\)|\\[|\\]|,)(?!('|(?:\\.'))*\\.?')",
+	                "name": "meta.bracket.astro"
+	            }
+	        ]
+		},
+	    "multiline_comments":{
+	        "patterns": [
+	            {
+	                "begin": "#=|##=",
+	                "beginCaptures":{
+	                    "0":{ "name": "punctuation.definition.comment.begin.astro"}},
+	                "end": "=#|=##",
+	                "endCaptures":{
+	                    "0":{"name": "punctuation.definition.comment.end.astro"}},
+	                "name": "comment.block.astro",
+	                "patterns": [
+	                    {
+	                        "include": "#multiline_comments"
+	                    }
+	                ]
+	            }
+			]
+		},
+		"singleline_comments":{
+			"patterns": [
+	            {
+	                "begin": "#|##",
+	                "beginCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.comment.astro"}},
+	                "end": "$",
+	                "name": "comment.line.astro"
+	            }
+	        ]
+		},
+	    "typenames":{
+	        "patterns": [
+	            {
+	                "match": "(?<=type |abst |fun )[A-Z][_A-Za-z0-9]*",
+	                "name": "support.class.astro"
+	            },
+	            {
+	                "match": "\\b(?:[A-Z][_A-Za-z0-9]*)\\b",
+	                "name": "support.class.astro"
+	            }
+	        ]
+		},
+	    "dot_members":{
+	        "patterns": [
+	            {
+	                "match": "(?<!\\.)(?:\\.\\.?)([!?]?[A-Za-z_][A-Za-z_0-9]*[!?]?)\\b",
+	                "captures":{
+	                    "1":{
+	                        "name": "variable.language.astro"}}
+	            }
+	        ]
+		},
+	    "numbers":{
+	        "patterns": [
+	            {
+	                "match": "\\b0x(_?[A-Fa-f0-9])*((\\.(_?[A-Fa-f0-9])+)?(p[+-]?)?[A-Fa-f0-9_]+)?('[A-Za-z][A-Za-z0-9]*)?",
+	                "name": "constant.numeric.astro"
+	            },
+	            {
+	                "match": "\\b[0-9](_?[0-9])*((\\.(_?[0-9])+)?(e[+-]?)?(_?[0-9])+)?('[A-Za-z][A-Za-z0-9]*)?",
+	                "name": "constant.numeric.astro"
+	            }
+	        ]
+		},
+	    "keywords":{
+	        "patterns": [
+	            {
+	                "match": "\\b(?:true|false|nil)\\b",
+	                "name": "constant.language.astro"
+	            },
+	            {
+	                "match": "\\b(?:self|ext)\\b",
+	                "name": "astro"
+	            },
+	            {
+	                "match": "\\b(?:for|end|spill|if|where|\\?|else|elif|await|return|at|delegate|yield|while|redo|use|loop|try|catch|ensure|defer|raise|continue|break|pass|export|except|import)\\b",
+	                "name": "keyword.control.astro"
+	            },
+	            {
+	                "match": "\\b(?:type|fun|abst|macro|let|var|rxn|new|NaN|iso|val|ref|acq|const|\\\\\\\\|as)\\b",
+	                "name": "storage.modifier.astro"
+	            },
+	            {
+	                "match": "\\b(?:and|or|in|is)\\b",
+	                "name": "keyword.control.astro"
+	            }
+	        ]
+		},
+	    "function_calls":{
+	        "patterns": [
+	            {
+	                "match": "([A-Za-z_][_A-Za-z0-9]*)(?=\\s*(\\[[A-Z][_A-Za-z0-9]*\\]\\s*)?(\\.\\.)?\\()",
+	                "name": "entity.name.function.astro"
+	            }
+	        ]
+		},
+	    "command_notation":{
+	        "patterns":[
+	            {
+	                "match": "(?<!let |var |rxn )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|rxn|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|redo|with|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\\b[a-z_][A-Za-z_0-9]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\\b)",
+	                "name": "entity.name.function.astro"
+	            }
+	        ]
+		},
+	    "operators":{
+	        "patterns": [
+				{
+					"match": "=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|\\b(and|or|not|band|bor|bxor|bnot|shl|shr)\\b",
+					"name": "keyword.operator.astro"
+				}
+			]
+		},
+	    "strings":{
+	        "patterns": [
+	            {
+	                "begin": "(?<![_a-zA-Z0-9])'",
+	                "beginCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.begin.astro"}},
+	                "end": "'",
+	                "endCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.end.astro"}},
+	                "name": "string.quoted.single.astro",
+	                "patterns": [
+	                    {
+	                        "include": "#string_escaped_chars"
+	                    },
+	                    {
+	                        "include": "#string_interpolate"
+	                    },
+	                    {
+	                        "include": "#comments"
+	                    }
+	                ]
+	            },
+	            {
+	                "begin": "\"",
+	                "beginCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.begin.astro"}},
+	                "end": "\"",
+	                "endCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.end.astro"}},
+	                "name": "string.quoted.double.astro",
+	                "patterns": [
+	                    {
+	                        "include": "#string_escaped_chars"
+	                    },
+	                    {
+	                        "include": "#string_interpolate"
+	                    },
+	                    {
+	                        "include": "#comments"
+	                    }
+	                ]
+	            }
+	        ]
+		},
+	    "string_escaped_chars":{
+	        "patterns": [
+	            {
+	                "match": "\\\\(t|n|r|b|q|\"|'|\\$|\\\\)",
+	                "name": "constant.character.escape.astro"
+	            }
+	        ]
+		},
+	    "string_interpolate":{
+	        "patterns": [
+	            {
+	                "begin": "\\$(\\:.+)?\\(",
+	                "end": "\\)",
+	                "name": "constant.character.escape.astro",
+	                "patterns": [
+	                    {
+	                        "include": "$self"
+	                    }
+	                ]
+	            },
+	            {
+	                "match": "\\$[A-Za-z0-9_]+",
+	                "name": "constant.character.escape.astro"
+	            }
+	        ]
+		},
+	    "regex":{
+	        "patterns": [
+	            {
+	                "begin": "(?<=\\+|\\-|\\:|\\=|\\(|\\))\\s*\\/(?=!\\=)",
+	                "beginCaptures":{
+	                    "2":{
+	                        "name": "punctuation.definition.string.begin.astro"}},
+	                "end": "\\/",
+	                "endCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.end.astro"}},
+	                "name": "string.quoted.single.astro"
+	            }
+	        ]
+		}
+	},
+	"scopeName": "source.astro"
+}
