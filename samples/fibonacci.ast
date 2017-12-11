@@ -1,0 +1,10 @@
+# Recursive
+fun fibonacciIterative(n):
+    var x, y, z = 0, 1, 1
+    for i in 0..n:
+        x, y = y, z
+        z = x + y
+    return x
+
+# Iterative
+fun fibonacciRecursive(n) = n if n < 2 else fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2)
