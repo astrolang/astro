@@ -1,2 +1,0 @@
-let name, age, country = /hello/
-var ... = "Hello"
