@@ -1,5 +1,31 @@
 # Astro 0.1.12a
-# 05/11/17
+# 12/12/17
+# FIX: SYNTAX HIGHLIGHT
+- highlight on not
+    not
+- remove member hghlight on !
+    john.!happy
+- command notation highlight for $ in
+    print $
+- add some operators
+    ×, ÷
+- remove highlight on catch
+    catch err: print(err)
+- highlight typeof keyword
+    Int == typeof 45
+- fix transpose operator when used with set, dict, list and tuple literal
+    [1, 2, 3]' # '
+    (1, 2, 3)' # '
+    {1, 2, 3}' # '
+- remove highlight on prev cascading notation
+    for i in 0..n: print i
+- remove highlight on prev cascading notation
+    print..('hello')..('hi')
+- add more operators to command notation highlight exclusive list
+    ≥ ≤ ≠ ≈ × ± ÷
+
+# Astro 0.1.12a
+# 05/12/17
 # exceptionable unwrap
 string!.upper
 
