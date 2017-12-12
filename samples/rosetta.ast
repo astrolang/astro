@@ -64,7 +64,7 @@ let data = '''
 print solve(data.lines.map |x| => x.trim().split().map(int))
 
 # created: 07/09/17 (Astro 0.1.6)
-# edited: 
+# edited:
 # Address of a Variable
 var x = 12
 var pointer = ptr(x) # get pointer
@@ -197,7 +197,7 @@ fun main(args): ## Array[Str]
     print 'astro comes after astro       = $(a > b.lower())'
 
 # created: 23/07/17 (Astro 0.1.02)
-# edited: 12/12/17 (Astro 0.1.12a) 
+# edited: 12/12/17 (Astro 0.1.12a)
 # ABC Problem
 fun abc(s, list):
     return true if s.isEmpty
@@ -221,12 +221,12 @@ fun bottles(n):
     | _ => "$n bottles"
 
 for n in !100..1:
-    print """
+    print '''
     $(bottles n) of beer on the wall
     $(bottles n) of beer
     Take one down, pass it around
     $(bottles n-1) of beer on the wall\n
-    """
+    '''
 
 # created: 23/07/17 (Astro 0.1.01)
 # edited: 12/12/17 (Astro 0.1.12a)
@@ -238,9 +238,9 @@ fun rootMeanSq(l) = sqrt(mean(l²))
 # Caesar Cipher
 fun caesar(s, k, decode: false):
     if decode: k = 26 - k
-    join(char((ord(c) - 65 + k) % 26 + 65) | c in s.upper() where "a" ≤ c ≤ "A")
+    join(char((ord(c) - 65 + k) % 26 + 65) | c in s.upper() where 'a' ≤ c ≤ 'A')
 
-let msg = "The quick brown fox jumped over the lazy dogs"
+let msg = 'The quick brown fox jumped over the lazy dogs'
 print msg
 let enc = caesar(msg, 11)
 print(enc)
@@ -254,100 +254,9 @@ mean([1..10])
 mean([])
 
 # created: 23/07/17 (Astro 0.1.01)
-# edited: 24/08/17 (Astro 0.1.05)
-# Hello World/Text
-print "Hello world!"
-
-# created: 23/07/17 (Astro 0.1.01)
 # edited: 12/12/17 (Astro 0.1.12a)
-# 15 Puzzle Game
-type Puzzle(var items: {},  var position: -1)
-
-fun mainFrame(puz):
-    let d = puz.items
-    print '+-----+-----+-----+-----+'
-    print '|$(d[1])|$(d[2])|$(d[3])|$(d[4])|'
-    print '+-----+-----+-----+-----+'
-    print '|$(d[5])|$(d[6])|$(d[7])|$(d[8])|'
-    print '+-----+-----+-----+-----+'
-    print '|$(d[9])|$(d[10])|$(d[11])|$(d[12])|'
-    print '+-----+-----+-----+-----+'
-    print '|$(d[13])|$(d[14])|$(d[15])|$(d[16])|'
-    print '+-----+-----+-----+-----+'
-
-fun format(puz, ch):
-    let ch = ch.trim()
-    ch.size
-    | 1 => '  $ch  '
-    | 2 => '  $ch '
-    | 0 => '     '
-
-fun change(puz, to):
-    let fro = puz.position
-    for (a, b) in puz.items: if b == puz.format(str(to)):
-        to = a
-        break
-    swap puz.items.|{fro}, {to}|
-    puz.position = to
-
-fun buildBoard(puz, difficulty):
-    for i in 1..17:
-        puz.items{i} = puz.format(str(i))
-    var tmp = 0
-    for (a, b) in puz.items: if b == '  16 ':
-        puz.items{a} = '     '
-        tmp = a
-        break
-    puz.position = tmp
-    let diff = $ where difficulty
-        | 0 => 10
-        | 1 => 50
-        | _ => 100
-    for _ in 0..diff:
-        let lst  = puz.valid_moves()
-        let lst1 = []
-        for j in lst: lst1.push(int(j.trim()))
-        puz.change(lst1[random(0, size(lst1)-1)])
-
-fun validMoves(puz):
-    let pos = puz.position
-    | 6  || 7 || 10 || 11 => puz.items.|{pos - 4},{pos - 1}, {pos + 1}, {pos + 4}|
-    | 5  || 9  => puz.items.|{pos - 4}, {pos + 4}, {pos + 1}|
-    | 8  || 12 => puz.items.|{pos - 4}, {pos + 4}, {pos - 1}|
-    | 2  || 3  => puz.items.|{pos - 1}, {pos + 1}, {pos + 4}|
-    | 14 || 15 => puz.items.|{pos - 1}, {pos + 1}, {pos - 4}|
-    | 1  => puz.items.|{pos + 1}, {pos + 4}|
-    | 4  => puz.items.|{pos - 1}, {pos + 4}|
-    | 13 => puz.items.|{pos + 1}, {pos - 4}|
-    | 16 => puz.items.|{pos - 1}, {pos - 4}|
-
-fun gameOver(puz):
-    var flag = false
-    for (a, b) in puz.items:
-        if b == (' ' * 5): pass
-        else: flag = (a == int trim b)
-    flag
-
-let g = Puzzle()
-g.buildBoard(int scanln 'Enter the difficulty : 0 1 2\n2 => highest 0=> lowest\n')
-g.mainFrame()
-print 'Enter 0 to exit'
-loop:
-    print 'Hello user:\nTo change the position just enter the no. near it'
-    let lst  = g.valid_moves()
-    let lst1 = []
-    for i in lst:
-        lst1.append(int(i.trim()))
-        print '$(i.strip()) \t'
-    print()
-    let x = int(input())
-    | 0       -> break
-    ! in lst1 -> print 'Wrong move'
-    | _       -> g.change(x)
-    g.mainFrame()
-    if g.gameOver():
-        print 'You WON'
-        break
+# Hello World/Text
+print 'Hello world!'
 
 # ceated: 13/06/17 (Astro 0.1.0)
 # edited: 17/09/17 (Astro 0.1.8)
