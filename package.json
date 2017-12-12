@@ -1,5 +1,5 @@
 {
-  "name": "Astro",
+  "name": "astro",
   "version": "0.1.12",
   "description": "Astro is a high-performance statically-typed programming language for the web (it compiles to WebAssembly), with Python-like syntax and technical-computing orientation similar to Julia.",
   "main": "index.js",
