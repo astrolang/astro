@@ -1,0 +1,1 @@
+fun prod(a, start: 1) = a.foldr(×, start)

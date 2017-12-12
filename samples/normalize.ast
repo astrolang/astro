@@ -1,0 +1,1 @@
+fun norm(a) = √sum(a.²)
