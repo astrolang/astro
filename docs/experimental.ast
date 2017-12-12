@@ -83,6 +83,10 @@ let y = x' #'
 # TYPEOF FUNCTION
 x <: typeof(y)
 
+# FOR LOOP TUPLE
+for i, e in enumerate(array):
+    print('$i -- $e')
+
 # REMOVE PARAMETERIZED TRAIN INITIALIZATION
 fun Teacher(<name, age>, id) # invalid
 fun Teacher(id) = new(id).super(name, age)
@@ -110,6 +114,11 @@ a+ b # invalid
 b+
 + b # invalid
 b + # invalid
+
+# OPERATORS
+a + b
++(a, b)
+a.+(b) # invalid
 
 # Astro 0.1.12a
 # 05/12/17
@@ -175,10 +184,11 @@ arr.show => print 'Hello'
 
 # PATTERN MATCHING
 let [first, _, 45] = someArray
+object
 | Some(x, y) => x
 | 75 || 67 => y
-| .> 75 => z
-! 75 => z
+| _ > 75 => z
+! 75 => t
 
 # VECTORIZATION
 a × b.
@@ -206,6 +216,8 @@ fun foo(x) = 2 #: Int
 
 foo(Int)
 foo(F64)
+
+
 
 
 # ==========================
