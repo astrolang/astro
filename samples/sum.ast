@@ -1,1 +1,9 @@
-fun sum(a, start: 0) = a.foldr(+, start)
+# Using for loop
+fun sum1(a, start: 0):
+    var result = start
+    for i in a:
+        result += i
+    result
+
+# Using fold function
+fun sum2(a, start: 0) = a.foldr(+, start)
