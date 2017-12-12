@@ -1,41 +1,41 @@
 # created: 13/09/17 (Astro 0.1.7a)
-# edited:
+# edited: 11/12/17 (Astro 0.1.12a)
 # Accumulator Factory
-fun accumulator(sum): |n| -> sum += n
+fun accumulator(sum) = |n| => sum += n
 let f = accumulator(5)
 print f(5)   # 10
 print f(10)  # 20
 print f(2.4) # 22.4
 
 # created: 13/09/17 (Astro 0.1.7a)
-# edited:
+# edited: 11/12/17 (Astro 0.1.12a)
 # Read a File Line By Line
-try f <- open('foobar.txt'):
-    print line for line in f
+try file = open('foobar.txt'):
+    print line for line in file
 
 # created: 13/09/17 (Astro 0.1.7a)
-# edited: 11/12/17 (Astro 0.1.12)
+# edited: 11/12/17 (Astro 0.1.12a)
 # Sorting Algorithms/Merge Sort
 fun mergeSort(m):
-    return m if m.size <= 1
+    return m if m.size ≤ 1
     let middle = m.size / 2
-    let left   = merge(m[:middle])
-    let right  = merge(m[middle:]);
+    let left   = merge(m[..middle])
+    let right  = merge(m[middle..]);
 
 fun merge(left, right):
     let result = []
     while not |left or right|.isEmpty:
-        result.push(left.shift() if |left <= right|.first else right.shift())
+        result.push(left.shift() if |left ≤ right|.first else right.shift())
         result.push(left.push right)
 
-let arr = [7, 6, 5, 9, 8, 4, 3, 1, 2, 0]
-print mergeSort arr
+let array = [7, 6, 5, 9, 8, 4, 3, 1, 2, 0]
+print mergeSort(array)
 
 
 # created: 07/09/17 (Astro 0.1.6)
-# edited: 19/09/17 (Astro 0.1.8)
+# edited: 11/12/17 (Astro 0.1.12a)
 # Maximum Triangle Path Sum
-fun solve(!tri):
+fun solve(var tri):
     while tri.size > 1:
         let t0 = tri.pop()
         for (i, t) in enumerate(tri[!0]):
@@ -62,10 +62,10 @@ let data = """
   06 71 28 75 94 48 37 10 23 51 06 48 53 18 74 98 15
 27 02 92 23 08 71 76 84 15 52 92 63 81 10 44 10 69 93"""
 
-print solve data.lines.map |x| -> x.trim().split().map(int)
+print solve(data.lines.map |x| => x.trim().split().map(int))
 
 # created: 07/09/17 (Astro 0.1.6)
-# edited:
+# edited: 
 # Address of a Variable
 var x = 12
 var pointer = ptr(x) # get pointer
@@ -73,7 +73,7 @@ print pointer        # print address
 pointer.set 0xFFFE   # set the address
 
 # created: 07/09/17 (Astro 0.1.6)
-# edited:
+# edited: 11/12/17 (Astro 0.1.12a)
 # Conditional Structures
 if x == 0:
     foo()
@@ -85,23 +85,23 @@ else:
     qux()
 
 x
-| 0 -> foo()
-| 1 -> bar()
-| 2 -> baz()
-| _ -> qux()
+| 0 => foo()
+| 1 => bar()
+| 2 => baz()
+| _ => qux()
 
 
 # created: 07/09/17 (Astro 0.1.6)
-# edited: 19/09/17 (Astro 0.1.8)
+# edited: 11/12/17 (Astro 0.1.12a)
 # Apply a Callback To an Array
-var arr = [1, 2, 3, 4]
-arr.each |x| -> print "$x squared = $(x²)"
+let arr = [1, 2, 3, 4]
+arr.each |x| => print "$x squared = $(x²)"
 
 # created: 07/09/17 (Astro 0.1.6)
-# edited: 19/09/17 (Astro 0.1.8)
+# edited: 11/12/17 (Astro 0.1.12a)
 # Comma Quibbling
 fun commaQuibble(s):
-    result = ""
+    var result = ""
     for (i, c) in enumerate(s):
         if i > 0:
             result += ", " if i < s[!0] else "and "
@@ -110,7 +110,7 @@ fun commaQuibble(s):
 
 var s = [ [] ["ABC"] ["ABC", "DEF"] ["ABC", "DEF", "G", "H"] ]
 
-for i in s: print commaQuibble i
+for i in s: print commaQuibble(i)
 
 # created: 22/08/17 (Astro 0.1.05)
 # edited:
