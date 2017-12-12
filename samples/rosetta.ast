@@ -11,7 +11,7 @@ print f(2.4) # 22.4
 # edited: 11/12/17 (Astro 0.1.12a)
 # Read a File Line By Line
 try file = open('foobar.txt'):
-    print line for line in file
+    print(line) for line in file
 
 # created: 13/09/17 (Astro 0.1.7a)
 # edited: 12/12/17 (Astro 0.1.12a)
