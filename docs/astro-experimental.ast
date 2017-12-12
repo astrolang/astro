@@ -24,87 +24,172 @@
 - add more operators to command notation highlight exclusive list
     ≥ ≤ ≠ ≈ × ± ÷
 
+# EXCEPTIONABLE UNWRAP
+let name #: String?
+let otherName = name!
+john!.name
+
+# EMPTY OBJECT
+var obj = {}
+
+# MORE EXPLICIT IMPORT
+import crypto
+crypto.sha1('Baloon')
+
+import crypto { sha1 }
+sha1('Baloon')
+
+import math { ... }
+cos(45)
+
+import nmath:math { cos, sine:sin }
+
+# dynamic import not supported yet
+import math:$somePath # invalid
+
+# GENERIC TYPE SPECIALIZATION
+type Box(id)
+# types whose field types are not constrained like the example above, are treated like
+# templates in C++ or generics in Java, and they get specialized with every different
+# combination of field types
+let a = Box('05') #: Box{Str}
+let b = Box(5) #: Box{Int}
+
+fun add(a, b): #: (Box, Box)
+    |a + b|.id
+
+add(a, b) # Error, same types but incompatible specialization
+let b = a # Error, same types but incompatible specialization
+
+# TYPE ANNOTATION
+# A single character is not a valid typename, they are used as generic typenames instead
+fun add(a, b): #: (T, T) -> T ~ T<:Int
+    a + b
+
+# GENERICS VALUE CONSTRAINT
+type MyList: #: T, L[1..1_000] ~ L::Int
+    let list = List[T](L, 0)
+    let size = L
+..
+
+# REFERENCE AND VALUES
+let buyer = acq game # acq is now deep copy
+let rent = val house # val is now shallow copy
+
+# MATRIX TRANSPOSE
+let x = [1, 2, 3]' #'
+let y = x' #'
+
+# TYPEOF FUNCTION
+x <: typeof(y)
+
+# REMOVE PARAMETERIZED TRAIN INITIALIZATION
+fun Teacher(<name, age>, id) # invalid
+fun Teacher(id) = new(id).super(name, age)
+
+# SUBTYPING AND INITIALIZATION
+type Person(name, age)
+type Teacher(id) <: Person
+fun Teacher(id) = new(id).super(name, age)
+
+# ABSTRACT TYPES
+abst Color: Blue | Yellow | Green
+abst Tree(var isHex):
+    | Leaf(value)
+    | Node(l, r)
+
+# OPERATORS AND WHITESPACES
+# binary operators can either have spaces on both sides or not have spaces at all
+a+b
+a + b
+a +b # invalid
+a+ b # invalid
+
+# unary operators can not have spaces between them and their associated atom
++b
+b+
++ b # invalid
+b + # invalid
+
 # Astro 0.1.12a
 # 05/12/17
-# exceptionable unwrap
+# EXCEPTIONABLE UNWRAP
 string!.upper
 
-# boolean negation
+# BOOLEAN NEGATION
 not john.isHappy
 
-# cascading notation
-p.name, .age
+# CASCADING NOTATION
+p->name, ->age
 print..(45)..(50) # invalid
 
-# field mapping // no ns tuple
-list.(field)
+# FIELD MAPPING
+list.$field
 
-# range
+# RANGE
 for i in 0..10:
     print i
 
 var array = [1, 2, 3, 4, 5, 6, 7]
 array[0..!5]
+array[0:!5] # also valid
 
-# wall notation
+# WALL NOTATION
 print.|name, age|
 
-# nested for loop
+# NESTED CONDITIONAL STRUCTURE
 for i in 1..20: for j in !20..1:
-    print(x, y)
+    print(i)
+end: # this end associates with outer for loop
+    print(j)
+    
+[ i, j | i in 1..3; j in 1..3 where i == 3 ]
 
-# do where match
-print where x
+# DO WHERE MATCH
+print $ where x
 | 56 => 56
 
-# destructuring
+# DESTRUCTURING
 let { x, y } = object
 let [ x, y ] = array
 let ( x, y ) = tuple
 let newObj = { ...object, extra: 5 }
 
-# scoped key
-var { name } = person
-john = { name, age: 45 }
-
-# set
+# SET DATA STRUCTURE
 let y = Set(5, 2, 3, 4, 2, 5)
 
-# list comprehension
+# LIST COMPREHENSION
 (i | i in 1..30 where i > 5)
 [i | i in 1..30 where i > 5]
 {i, j | i, j in 1..30, 31..60 where i > 5}
 set(i | i in 1..30 where i > 5)
 
-# lambda
+# LAMBDA
 arr.foldr |x, y| => x + y
+arr.map |x| => x²
 arr.show => print 'Hello'
 
-# iife
+# IIFE
 () => print 'Hi'
 (a: 56, b: 40) => print a + b
 
-# pattern matching
+# PATTERN MATCHING
 let [first, _, 45] = someArray
 | Some(x, y) => x
 | 75 || 67 => y
+! 75 => z
 
-# import
-import math
-import math { cos, sine:sin }
-import nmath:math { cos, sin }
-
-# vectorization
+# VECTORIZATION
 a × b.
 
-# symbols
+# SYMBOLS
 $name
 $(p.addr)
 
-# math notation
+# MATH NOTATION
 2f * 56p
 
-# definition using `=`
+# FUNCTION/TYPE/ABST DEFINITION
 fun add(a, b) = a + b
 fun foo = bar
 type Ascii = [Byte]
@@ -114,19 +199,23 @@ type
     Person(var name, var age)
     Id(var firstname, var lastname) # invalid syntax
 
-# types as arguments
+# TYPES AS ARGUMENTS
 fun foo(x) = 1 #: F64
 fun foo(x) = 2 #: Int
 
 foo(Int)
 foo(F64)
 
+
+# ==========================
+# BEFORE MAJOR SYNTAX REFORM
+# ==========================
 # 09/11/17
 # Astro 0.1.12a
 # FIELD MAPPING
 let students = getStudentsList()
 students.:name
-students.map(s => s.name)
+students.map(|s| => s.name)
 
 # EXCEPTIONALE UNWRAP
 let string = nil #: Str?
@@ -263,7 +352,7 @@ h :: Person{Str, Int}
 b :: Person{Int, Str}
 fun foo(p) #: Person
 foo(h) :: (Person{Str, Int}) -> Str
-foo() :: (Person{Int, Str}) -> Int
+foo(b) :: (Person{Int, Str}) -> Int
 
 # WHERE GENERICS
 ## T, T -> T ~ T::Int
