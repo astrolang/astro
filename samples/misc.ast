@@ -1,0 +1,6 @@
+fun clean(input):
+    zip(input, input[1..]).filter(|(x, y)| => x != y).map(|(x, y)| => y)
+
+fun clean(input) = input.filter(|x, y| => x != y).map(|(x, y)| => y)
+
+fun clean(input) = input.filter(|x, y| => x != y).$[1]
