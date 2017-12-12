@@ -1,1 +1,1 @@
-This directory contains codes in Astro's standard library.
+This directory contains Astro's standard library.
