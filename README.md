@@ -7,6 +7,9 @@
 ![Maintained](https://img.shields.io/maintenance/yes/2017.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 #### Work in Progress :construction:
+
+![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
+
 Astro is a high-performance statically-typed programming language for the web (it compiles to WebAssembly), with Python-like syntax and technical-computing orientation similar to Julia.
 
 Astro provides a sophisticated compiler with full type inference, compile-time garbage collection, and an extensive mathematical function library.
@@ -17,4 +20,14 @@ Astro has support for first-class functions, generics, object-oriented programmi
 
 Current Version: 0.1.11
 
-![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
+### Tasks to Complete
+- [x] ~Improve project structure~
+- [x] ~Add automated unit testing and coverage reports~
+- [ ] Redesign and remove certain inconsistencies in language syntax
+- [ ] Complete parser implementation
+- [ ] Implement basic semantic analysis
+- [ ] Create ambiguity finders for inheritance, multiple dispatch, etc.
+- [ ] Implement type inference and garbage collection using program flow analysis 
+- [ ] Incorporate incremental compilation
+- [ ] Build REPL
+- [ ] Create specialized error handler
