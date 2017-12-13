@@ -37,7 +37,7 @@ print mergeSort(array)
 fun solve(var tri):
     while tri.size > 1:
         let t0 = tri.pop()
-        for (i, t) in enumerate(tri[!0]):
+        for i, t in enumerate(tri[!0]):
             tri[!0, i] = max(t0[i], t0[i+1]) + t
     tri[0, 0]
 
@@ -261,11 +261,11 @@ print 'Hello world!'
 # ceated: 13/06/17 (Astro 0.1.0)
 # edited: 17/09/17 (Astro 0.1.8)
 # 100 Doors
--- unoptimized
+# unoptimized
 var doors = falses 100
 for a in 0..101:
     for b in 101..a: doors[b] = not doors[b]
     print "Door $a is $('open.' if doors[a] else 'closed.')"
 
--- optimized
+# optimized
 for i in 0..10: print "Door $(i²) is open."
