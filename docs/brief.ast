@@ -37,9 +37,9 @@ IDENTIFIERS
     var currentYear = 2017
     fun addNumbers(a, b): a + b
 
-    # pascal case for type names
+    # pascal case for concrete and abstract type names
     type InventoryManager(name, id)
-    abst LightSource: SpotLight, Directional, Ambient
+    abst LightSource: SpotLight | Directional | Ambient
 
     # for acronyms, only the first charcater should be upper case
     type XmlParser <: Parser
