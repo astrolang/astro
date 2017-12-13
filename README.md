@@ -28,6 +28,7 @@ Current Version: 0.1.11
 - [ ] Implement basic semantic analysis
 - [ ] Create ambiguity finders for inheritance, multiple dispatch, etc.
 - [ ] Implement type inference and garbage collection using program flow analysis 
+- [ ] Add wasm code generation
 - [ ] Incorporate incremental compilation
 - [ ] Build REPL
 - [ ] Create specialized error handler
