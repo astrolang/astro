@@ -1,6 +1,7 @@
-fun clean(input):
+# Removes adjacent duplicates
+fun clean1(input):
     zip(input, input[1..]).filter(|(x, y)| => x != y).map(|(x, y)| => y)
 
-fun clean(input) = input.filter(|x, y| => x != y).map(|(x, y)| => y)
+fun clean2(input) = input.filter(|x, y| => x != y).map(|(x, y)| => y)
 
-fun clean(input) = input.filter(|x, y| => x != y).$[1]
+fun clean3(input) = input.filter(|x, y| => x != y).$[1]
