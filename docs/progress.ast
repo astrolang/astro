@@ -7,8 +7,6 @@
     john.!happy
 - command notation highlight for $ in
     print $
-- add some operators
-    ×, ÷
 - remove highlight on catch
     catch err: print(err)
 - highlight typeof keyword
@@ -23,6 +21,11 @@
     print..('hello')..('hi')
 - add more operators to command notation highlight exclusive list
     ≥ ≤ ≠ ≈ × ± ÷
+- highlight some identifier-based infix operators
+    mod
+
+# IDENTIFIER BASED OPERATORS
+in, mod
 
 # EXCEPTIONABLE UNWRAP
 let name #: String?
