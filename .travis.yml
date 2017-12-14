@@ -5,7 +5,7 @@ install:
 cache:
     directories:
         - "node_modules"
-script: npm run test
+script: npm run test:all
 before_script:
     - npm install nyc coveralls codeclimate-test-reporter -g
 after_script:
