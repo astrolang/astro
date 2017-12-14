@@ -9,6 +9,7 @@
     "test:compiler:syntax": "mocha --timeout 250000 ./tests/compiler/syntax/*.spec.js --compilers js:babel-core/register --exit",
     "test:compiler:semantics": "mocha --timeout 250000 ./tests/compiler/semantics/*.spec.js --compilers js:babel-core/register --exit",
     "test:compiler:codegen": "mocha --timeout 250000 ./tests/compiler/codegen/*.spec.js --compilers js:babel-core/register --exit",
+    "test:samples": "mocha --timeout 250000 ./tests/samples/*.spec.js --compilers js:babel-core/register --exit",
     "lint": "eslint --config .eslintrc.json ./src"
   },
   "repository": {
