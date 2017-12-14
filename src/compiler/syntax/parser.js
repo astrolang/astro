@@ -1,35 +1,50 @@
-// 25/09/17
-const peg = require("pegjs");
-const path = require("path");
-const fs  = require("fs");
+import peg from 'pegjs';
+import { print } from '../utils';
 
-// using print function for convenience
-function print(...s) { (s[0] instanceof Array || typeof s[0] === 'object' ) ? console.log(JSON.stringify(s[0], null, 2)) : console.log(...s);  }
-
-// read astro grammar file
-const grammar = fs.readFileSync(path.join(__dirname, "./astro.pegjs"), "utf8");
-
-try {
-  // generate paser from grammar
-  const parser = peg.generate(grammar);
-
-  print("== Parser Generated Successfully! ==");
-
-  // read sample code file
-  const code = fs.readFileSync(path.join(__dirname, "./tempshort.ast"), "utf8");
-
-  // parse sample code
-  try {
-    const result = parser.parse(code);
-    print("== Code Parsed Successfully! ==");
-    print(result);
+class Parser {
+  constructor(grammar) {
+    this.parser = null;
+    try {
+      this.parser = peg.generate(grammar);
+      print("== Parser Generated Successfully! ==");
+    } catch(err) {
+      print(`Error!: ${err.message}`);
+      print(err.location);
+    }
   }
-  catch (err) {
-    print(`Error!: ${err.message}`);
-    print(err.location);
+
+  /**
+   * Generates a parser object from input pegjs grammar
+   * @param {string} grammar - The language's pegjs grammar
+   * @return {object} The generated parser object
+   */
+  generate(grammar) {
+    try {
+      this.parser = peg.generate(grammar);
+      print("== Parser Generated Successfully! ==");
+      return this.parser;
+    } catch(err) {
+      print(`Error!: ${err.message}`);
+      print(err.location);
+    }
+  }
+
+  /**
+   * Parses astro code
+   * @param {string} code - Astro source code
+   * @return {object} The generated abstract syntax tree
+   */
+  parse(code) {
+    try {
+      const result = parser.parse(code);
+      print("== Code Parsed Successfully! ==");
+      return result;
+    }
+    catch (err) {
+      print(`Error!: ${err.message}`);
+      print(err.location);
+    }
   }
 }
-catch (err) {
-  print(`Error!: ${err.message}`);
-  print(err.location);
-}
+
+export default Parser;
