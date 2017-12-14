@@ -4,7 +4,11 @@
   "description": "Astro is a high-performance statically-typed programming language for the web (it compiles to WebAssembly), with Python-like syntax and technical-computing orientation similar to Julia.",
   "main": "index.js",
   "scripts": {
-    "test": "nyc --reporter=lcov --reporter=text mocha --timeout 250000 ./tests/*.js --compilers js:babel-core/register --exit",
+    "test:all": "nyc --reporter=lcov --reporter=text mocha --timeout 250000 ./tests/**/*.spec.js --compilers js:babel-core/register --exit",
+    "test:compiler": "mocha --timeout 250000 ./tests/compiler/**/*.spec.js --compilers js:babel-core/register --exit",
+    "test:compiler:syntax": "mocha --timeout 250000 ./tests/compiler/syntax/*.spec.js --compilers js:babel-core/register --exit",
+    "test:compiler:semantics": "mocha --timeout 250000 ./tests/compiler/semantics/*.spec.js --compilers js:babel-core/register --exit",
+    "test:compiler:codegen": "mocha --timeout 250000 ./tests/compiler/codegen/*.spec.js --compilers js:babel-core/register --exit",
     "lint": "eslint --config .eslintrc.json ./src"
   },
   "repository": {
