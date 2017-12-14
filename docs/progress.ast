@@ -23,6 +23,13 @@
     ≥ ≤ ≠ ≈ × ± ÷
 - highlight some identifier-based infix operators
     mod
+- fix highlight on hex, oct and bin numbers
+    0b10110001
+    0o566768
+    0x6FFF00
+    1b
+    2o
+    3x
 
 # IDENTIFIER BASED OPERATORS
 in, mod
