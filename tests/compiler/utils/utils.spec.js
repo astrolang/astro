@@ -4,7 +4,7 @@ import { print, clean } from '../../../src/compiler/utils';
 
 chai.should();
 
-describe('Compiler:Utils', () => {
+describe('COMPILER::UTILS', () => {
   it('print function should pretty print an array passed as an argument', (done) => {
     const sample = [1, 2, 3, 4, 5];
     const result = cap.captureStdout(() => {
