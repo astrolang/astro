@@ -11,7 +11,7 @@
     "test:compiler:syntax": "mocha --timeout 250000 \"./tests/compiler/syntax/*.spec.js\" --compilers js:babel-core/register --exit",
     "test:compiler:utils": "mocha --timeout 250000 \"./tests/compiler/utils/*.spec.js\" --compilers js:babel-core/register --exit",
     "test:samples": "mocha --timeout 250000 \"./tests/samples/*.spec.js\" --compilers js:babel-core/register --exit",
-    "lint": "eslint --config .eslintrc.json ./src"
+    "lint": "eslint --config .eslintrc.json ./src ./tests"
   },
   "repository": {
     "type": "git",
