@@ -52,7 +52,7 @@ class Parser {
   }
 
   /**
-   * Returns the string representation of parser object
+   * Returns the string representation of the parser object
    * @return {object} The generated parser object
    */
   toString() {
