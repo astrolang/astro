@@ -2,12 +2,16 @@ import peg from 'pegjs';
 import { print } from '../utils';
 
 class Parser {
+  /**
+   * Creates a new parser object
+   * @param {string} grammar - The language's pegjs grammar
+   */
   constructor(grammar) {
     this.parser = null;
     try {
       this.parser = peg.generate(grammar);
-      print("== Parser Generated Successfully! ==");
-    } catch(err) {
+      print('== Parser Generated Successfully! ==');
+    } catch (err) {
       print(`Error!: ${err.message}`);
       print(err.location);
     }
@@ -19,14 +23,15 @@ class Parser {
    * @return {object} The generated parser object
    */
   generate(grammar) {
+    this.parser = null;
     try {
       this.parser = peg.generate(grammar);
-      print("== Parser Generated Successfully! ==");
-      return this.parser;
-    } catch(err) {
+      print('== Parser Generated Successfully! ==');
+    } catch (err) {
       print(`Error!: ${err.message}`);
       print(err.location);
     }
+    return this.parser;
   }
 
   /**
@@ -35,15 +40,23 @@ class Parser {
    * @return {object} The generated abstract syntax tree
    */
   parse(code) {
+    let result = null;
     try {
-      const result = parser.parse(code);
-      print("== Code Parsed Successfully! ==");
-      return result;
-    }
-    catch (err) {
+      result = this.parser.parse(code);
+      print('== Code Parsed Successfully! ==');
+    } catch (err) {
       print(`Error!: ${err.message}`);
       print(err.location);
     }
+    return result;
+  }
+
+  /**
+   * Returns the string representation of parser object
+   * @return {object} The generated parser object
+   */
+  toString() {
+    return JSON.stringify(this.parser, null, 2);
   }
 }
 
