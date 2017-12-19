@@ -7,27 +7,27 @@ chai.should();
 describe('COMPILER::UTILS', () => {
   describe('print', () => {
     it('should pretty print an array passed as an argument', (done) => {
-      const sample = [1, 2, 3, 4, 5];
+      const sampleArray = [1, 2, 3, 4, 5];
       const result = cap.captureStdout(() => {
-        print(sample);
+        print(sampleArray);
       });
       result.should.equal('[\n  1,\n  2,\n  3,\n  4,\n  5\n]\n');
       done();
     });
 
     it('should pretty print an object passed as an argument', (done) => {
-      const sample = { name: 'Jane', age: 25 };
+      const sampleObject = { name: 'Jane', age: 25 };
       const result = cap.captureStdout(() => {
-        print(sample);
+        print(sampleObject);
       });
       result.should.equal('{\n  "name": "Jane",\n  "age": 25\n}\n');
       done();
     });
 
     it('should print a string passed as an argument', (done) => {
-      const sample = 'Hello world!';
+      const sampleString = 'Hello world!';
       const result = cap.captureStdout(() => {
-        print(sample);
+        print(sampleString);
       });
       result.should.equal('Hello world!\n');
       done();
@@ -44,8 +44,8 @@ describe('COMPILER::UTILS', () => {
 
   describe('clean', () => {
     it('should remove nulls and undefined values from array', (done) => {
-      const sample = [1, 2, null, 3, undefined, 4, 5];
-      const result = clean(sample);
+      const sampleArray = [1, 2, null, 3, undefined, 4, 5];
+      const result = clean(sampleArray);
       result.should.deep.equal([1, 2, 3, 4, 5]);
       done();
     });
