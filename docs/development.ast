@@ -30,6 +30,51 @@
     1b
     2o
     3x
+- field map highlight
+    list.$name
+- fix Array literal highlight
+    31x23[]
+- non-standard literal highlight
+    ns.{}
+    ns.[]
+    ns.()
+    ns.//
+    ns.''
+    ns.""
+- nil operator should have the same syntax highlight as fields
+    siblings.sister?
+    siblings.sister!
+- fix syntax highlight on /end\s*:/
+    completed:
+        print x
+    var completed = x
+- remove use syntax highlight
+    use x, y:
+
+
+# PRINT FUNCTION
+def print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)
+fun print(...args, sep: ' ', end: '\n', out: env.stdout, flush: false)
+
+# Accessing values in dictionaries
+parent{'mum', 'name'}
+parent.mum?.name
+
+# LIST SLICING
+var reversed = nums[0:5]
+var reversed = nums[0..5] # invalid
+
+# Even though nested fields can be nillable, the same
+# "?" or "!" operators shouldn't be repeated on adjacent field access
+account?.year
+account?.year!
+account?.year? # invalid
+
+# FINALLY IN LOOPS
+for i in array: if i == 5:
+    break
+completed: # Not a reserved keyword tho
+    print('no break')
 
 # IDENTIFIER BASED OPERATORS
 in, mod
@@ -150,8 +195,7 @@ for i in 0..10:
     print i
 
 var array = [1, 2, 3, 4, 5, 6, 7]
-array[0..!5]
-array[0:!5] # also valid
+array[0:!5]
 
 # WALL NOTATION
 print.|name, age|
@@ -175,12 +219,12 @@ let ( x, y ) = tuple
 let newObj = { ...object, extra: 5 }
 
 # SET DATA STRUCTURE
-let y = Set(5, 2, 3, 4, 2, 5)
+let y = set.[5, 2, 3, 4, 2, 5]
 
 # LIST COMPREHENSION
 (i | i in 1..30 where i > 5)
 [i | i in 1..30 where i > 5]
-{i, j | i, j in 1..30, 31..60 where i > 5}
+{i : j | i, j in 1..30; 31..60 where i > 5}
 set(i | i in 1..30 where i > 5)
 
 # LAMBDA
