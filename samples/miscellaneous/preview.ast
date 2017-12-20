@@ -1,4 +1,4 @@
-# UNICODE IDENTIFIERS AND OPERATORS
+# UNICODE IDENTIFIERS/OPERATORS
 fun normalize(a):
     var result = 0
     for i in a:
@@ -10,6 +10,12 @@ fun normalize(a) = √sum(map |x| => x²)
 
 # VECTORIZATION SYNTAX
 fun normalize(a) = √(a.²)
+
+# TYPE ANNOTATION
+fun anyCommonElements(l, r): #: (T, U) -> Bool where (T, U)<:Sequence
+    for a in l, b in r where a == b:
+        return true
+    false
 
 # MATCH EXPRESSION
 fun fizzbuzz(i):
@@ -28,4 +34,4 @@ fun print({name, age}) = print(name, age)
 print(ironman)
 
 # ALGEBRAIC DATA TYPES
-abst
+abst Traffic = Amber | Red | Green
