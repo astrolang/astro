@@ -53,6 +53,8 @@
 - add lambda parameter block highlight
     list.map(|x| => -x)
     list.each => print
+- highligh do, remove highlight on redo
+    do:, redo
 
 
 # PRINT FUNCTION
