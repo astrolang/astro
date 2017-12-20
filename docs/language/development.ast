@@ -50,6 +50,9 @@
     var completed = x
 - remove use syntax highlight
     use x, y:
+- add lambda parameter block highlight
+    list.map(|x| => -x)
+    list.each => print
 
 
 # PRINT FUNCTION
