@@ -1,3 +1,8 @@
+# Using normal function call syntax
+print('Hello World!')
+
+# Using normal command notation
 print 'Hello World!'
 
+# Using unified function call syntax
 'Hello World!'.print()
