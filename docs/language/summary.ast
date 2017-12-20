@@ -14,7 +14,7 @@ MULTILINE COMMENTS
 
 SUBJECT DEFINITION & ASSIGNMENT
     # In Astro, subjects are names to which values or objects are bound
-    let team = 11 # The value, "11", is bound to the subject, "team"
+    let team = 11 # The value, `11`, is bound to the subject, `team`
 
     # Initialization can be deferred to later
     let hello
@@ -24,11 +24,11 @@ SUBJECT DEFINITION & ASSIGNMENT
     let string
     print(string) # Invalid!
 
-    # The "let" keyword is used for subjects whose values cannot change
+    # The `let` keyword is used for subjects whose values cannot change
     let immutable = 10
     immutable = 50 # Invalid!
 
-    # The "var" keyword is used for subjects whose values can change
+    # The `var` keyword is used for subjects whose values can change
     let mutable = 10
     mutable = 50 # Subject value changed to 50
 
@@ -74,18 +74,18 @@ FUNCTION DEFINITION (1)
     fun add(a, b): # Parameters are immutable by default
         return a + b
 
-    fun swap(var a, var b): # "var" keyword makes a parameter mutable
+    fun swap(var a, var b): # `var` keyword makes a parameter mutable
         a, b = b, a
 
-    # The block begin punctuator, ":", can be replaced with "="
-    # "=" is generally preferable for one-line definitions
+    # The block begin punctuator, `:`, can be replaced with `=`
+    # `=` is generally preferable for one-line definitions
     fun add(a, b) = return a + b
 
     # You can annotate the argument and return types of a function
     fun modulo(a, b): #: (Int, Int) -> Int
         return a % b
 
-    # Astro is indentation-based, but for legibility reason blocks can optionally be delimited with ".."
+    # Astro is indentation-based, but for legibility reason blocks can optionally be delimited with `..`
     fun sub(a, b):
         a - b
     ..
@@ -107,7 +107,7 @@ EXPRESSION-ORIENTED
     var isNyproCrazy = (faveHobby == 'CountingBirds') # Returns true or false
 
     fun add(a, b):
-        a + b # The "return" keyword is not necessary here.
+        a + b # The `return` keyword is not necessary here.
         # The result of a + b will be returned to the caller.
 
     hieght = add(2, 3)
@@ -177,7 +177,7 @@ NUMBERS
     var index    = 5
     var axis     = -3
     let meters   = 0.25e-5
-    let salary   = 10_000'f #' "'f" marks teh number literal as float64
+    let salary   = 10_000'f #' `'f` marks teh number literal as float64
     var price    = 0x6FFF00p+12 # Hex
     var opCode   = 0b10110001 # Binary
     var interest = 0o566768 # Octal
@@ -186,7 +186,7 @@ NUMBERS
 ACCESS MODIFIERS
     var money = 0 # Subjects, functions, types, etc. are publicly accessible by default.
 
-    fun sub'(a, b): #' But they can be made private to a module with "'" modifier
+    fun sub'(a, b): #' But they can be made private to a module with `'` modifier
         a - b
 
     type Person'(var name', var age') #' Private fields
@@ -240,13 +240,13 @@ LISTS
     # Slicing a list
     var disqualified = contestants[1:6] # 2nd to the 5th index
 
-    # "!" is used to access the index backwards
+    # `!` is used to access the index backwards
     var last = contestants[!0] # last index
 
     # Using negative step to reverse index access
     var reversed = contestants[::-1]
 
-    # Reverse access can also be done using "!"
+    # Reverse access can also be done using `!`
     var reversed = contestants[!0:]
 
     # Using a constructor to create a List
@@ -273,7 +273,7 @@ ARRAYS
         [3, 4, 5, 6]
     ]
 
-    # A 2-dimensional Array can be created using horizontal concatenation with ";"
+    # A 2-dimensional Array can be created using horizontal concatenation with `;`
     let a = 2×4[
         1, 2, 7, 8;
         3, 4, 5, 6
@@ -298,7 +298,7 @@ ARRAYS
     let y = [1, 2, 3]
     # [1 2 3]
 
-    # An Array's order can be changed using the transpose operator, "'"
+    # An Array's order can be changed using the transpose operator, `'`
     let z = [1, 2, 3]' # Transposition'
     # [1]
     # [2]
@@ -323,7 +323,7 @@ OBJECTS VS DICTIONARIES
     let game = { title: 'BioShock Infinite', year: 2014 } # Property
 
     # Dictonaries are dynamic data structures and will return nil where expected key is not present
-    # Dctionaries literals are marked with "dict"
+    # Dctionaries literals are marked with `dict`
     let game = dict.{ title: 'BioShock Infinite', year: 2014 } # Dictionary
 
     let parents = {
@@ -348,7 +348,7 @@ OBJECTS VS DICTIONARIES
     # Object fields are accessed using the dot operator
     let sister = siblings.sister.name
 
-    # Dictionary values are accessed using "{}" and can return nil
+    # Dictionary values are accessed using `{}` and can return nil
     let mum = parent{'mum', 'name'}
 
     # Dictionary values can also use accessed using the dot operator,
@@ -361,7 +361,7 @@ OBJECTS VS DICTIONARIES
         age: 23
     }
 
-    # To use variables from the outer scope, the variable name needs to be escaped with "$"
+    # To use variables from the outer scope, the variable name needs to be escaped with `$`
     var professor = {
         $id1: 'Charles Xavier'
         $id2: 56
@@ -413,7 +413,7 @@ STRINGS
     # Non-standard string literals don't have escape sequences nor interpolation
     var verbatimStr = r."Use '\t' to represent tab"
 
-    # Multiline strings are enclosed in triple "'" or '"'
+    # Multiline strings are enclosed in triple `'` or `"`
     # The first and last newlines are always ignored in multiline strings
     var verbatimStr = '''
     Hello, World!
@@ -476,7 +476,7 @@ MULTILINE EXPRESSIONS
         .lower()
 
 PASS KEYWORD
-    # "pass" keyword can used to represent an empty block
+    # `pass` keyword can used to represent an empty block
     fun div(a, b): pass
 
 INDENTATION
@@ -488,7 +488,7 @@ INDENTATION
     if studio.isLive(): blockAccess() \\ else: openAccess()
 
 IF EXPRESSION
-    # Coonditional branches using "if", "elif" and "else"
+    # Coonditional branches using `if`, `elif` and `else`
     if isAdrianRich:
         spendAll('on parties')
     elif isOroboRich:
@@ -497,7 +497,7 @@ IF EXPRESSION
         cry('we are broke')
 
     # Checking for nil
-    if phoneNumber?: # The block executes if "phoneNumber" is not nil
+    if phoneNumber?: # The block executes if `phoneNumber` is not nil
         call(phoneNumber)
 
     # Checking for nil and assigning value to a subject
@@ -537,7 +537,7 @@ BOOLEAN EXPRESSIONS
     x && z == y
     x == y == z
 
-    # Logical negation with "not" keyword
+    # Logical negation with `not` keyword
     x != y
     not x.isbound
     x not in list
@@ -554,13 +554,13 @@ FOR LOOP
     for name, (kind, number) in nameList, table:
         print((name, key, value))
 
-    # By default the for loop subjects are immutable, but they can be made mutable using the "var" keyword
+    # By default the for loop subjects are immutable, but they can be made mutable using the `var` keyword
     for var i in [1:21]:
         i += 1
         j = i
     ..
 
-    # The "end" block executes when a loop completes without interruption like break, return or throw
+    # The `end` block executes when a loop completes without interruption like break, return or throw
     for line in file:
         if line.contains code:
             echo "code found!"
@@ -584,7 +584,7 @@ BREAK WITH
         ""
 
 IN
-    # "in" is a special keyword-based infix operator that checks for existence of an object
+    # `in` is a special keyword-based infix operator that checks for existence of an object
     # in a collection type
     if student.name in defaulterList:
         print '[student.name] hasn\'t paid yet. Contact parents'
@@ -598,7 +598,7 @@ IN
         sentence.replace(/dollar[s]?/, 'pounds')
 
 MOD
-    # "mod" is a keyword-based infix operator with the sme function as "%"
+    # `mod` is a keyword-based infix operator with the sme function as `%`
     fun isEven(n) = (n mod 2 == 0)
 
 CHAINED CONDITIONAL CONSTRUCTS
@@ -613,8 +613,8 @@ WHILE LOOP & LOOP
     while file.hasNext():
         print file.next()
 
-    # Unconditional loop. Synonymous to "while true"
-    loop: # Note, "loop" is not a reserved keyword
+    # Unconditional loop. Synonymous to `while true`
+    loop: # Note, `loop` is not a reserved keyword
         let input = scan '>>> '
         let tokens = lex input
         let ast = parse tokens
@@ -623,7 +623,7 @@ WHILE LOOP & LOOP
         print result
 
     # A do-while loop block is evaluated at least once
-    do: # Note, "do" is not a reserved keyword
+    do: # Note, `do` is not a reserved keyword
         print x
         x += 1
     while x < 50
@@ -636,7 +636,7 @@ WHILE LOOP & LOOP
         title = chooseTitleRandomly()
     ..
 
-    # Like for loop, "while" and "loop" can a following "end" block
+    # Like for loop, `while` and `loop` can a following `end` block
     while file.hasNext() where /\t+/ in file.next():
         break 'File contains tabs!'
     end: 'File is clean!'
@@ -670,7 +670,7 @@ FUNCTION DEFINITION (2)
     # Anonymous functions are functions without names
     fun _(): return a + b
 
-    # The state of a local subject marked with "'" always persist
+    # The state of a local subject marked with `'` always persist
     # between function calls.
     fun callCount():
         var count' = 1 #'
@@ -692,7 +692,7 @@ FUNCTION DEFINITION (2)
     ..
     login() # Using default values
 
-    # Compulsory named parameters are marked with "."
+    # Compulsory named parameters are marked with `.`
     fun signUp(username., password.):
         access Account(username, password)
     # The parameter names must be specified in the function calls
@@ -754,7 +754,7 @@ PARTIAL APPLICATION
     # Partially applied functions are function calls with one or more of it's argument not applied
     fun multiply(a, b) = a × b
 
-    # Unapplied arguments are represented with the placeholder, "$"
+    # Unapplied arguments are represented with the placeholder, `$`
     let multiply3by = multiply(3, $)
 
     # Applying missing arguments
@@ -795,7 +795,7 @@ CONTEXT LABELLING
     ..
 
 EXT KEYWORD
-    # "ext" can be used to refer to the parent scope.
+    # `ext` can be used to refer to the parent scope.
     let state = 'Idle'
 
     fun changeState(state):
