@@ -1,4 +1,3 @@
-# 29/05/17
 # Astro 0.1.12
 SINGLE-LINE COMMENTS
     # Hello, World!
@@ -43,6 +42,9 @@ IDENTIFIERS
     var my_name
     fun show99BottlesOfBeer(): pass
 
+    # Names preceded by underscores are special to the compiler
+    print _args
+
     # Naming convention
     # Camel case for variables, constants, function names and module names
     let bookTitle = "Ender's Game"
@@ -55,15 +57,6 @@ IDENTIFIERS
 
     # For acronyms, only the first charcater should be upper case
     type XmlParser <: Parser
-
-    # Names preceded by underscores are special to the compiler
-    print _args
-
-CONSTANTS
-    # let is used for subjects whose values cannot change after initial assignment
-    let b # Deferred initialization
-    b = 56
-    b = 25 # Invalid!
 
 VARIABLE/CONSTANT OBJECTS
     # Objects are variable by default but can be made immutable with the const keyword
@@ -104,11 +97,16 @@ COMMAND NOTATION
     print +5 # Invalid!
 
 EXPRESSION-ORIENTED
-    var isNyproCrazy = (faveHobby == 'CountingBirds') # Returns true or false
+    # Everything (except the import and export statements) is an expression in Astro!
+    var isNyproCrazy = (faveHobby == 'CountingBirds')
 
+    # Type definitions, function definitions, loops, etc. all return some value.
+    # In the case of a for loop, the last expression on the final iteration is returned, if there is no break.
+    let cube = for i in 1..10: i³
+
+    # The last expression of a function is always returned.
     fun add(a, b):
-        a + b # The `return` keyword is not necessary here.
-        # The result of a + b will be returned to the caller.
+        a + b # The result of a + b will be returned to the caller.
 
     hieght = add(2, 3)
 
@@ -127,10 +125,10 @@ SPECIFYING TYPES
     var number #: Int
 
     # Union types
-    var identifier #: Str|Int
+    var identifier #: Str | Int
 
     # Intersection types
-    var pegasus #: Horse&Bird
+    var pegasus #: Horse & Bird
 
 SOME BUILT-IN TYPES
     var index = UInt(2_000) # Unsigned integer type
@@ -144,29 +142,35 @@ SOME BUILT-IN TYPES
     var game = 'BioShock Infinite', 2014 # Tuple type
 
 VALUES & REFERENCES
-    # By default primitive objects (UInt, Int, F32, Bool) are passed around by value
+    # By default primitive objects (UInt, Int, Float32, Bool) are passed around by value
     # and by default complex objects (Str, user-defined types) are passed around by reference
     # however, you can change this behavior with 'ref' and 'val'.
     let string = "Gift"
     let number = 1000
-    var newString = val string # passing a complex object by value.
-    var newNumber = ref number # passing a primitive object by reference.
+
+    # Passing a complex object by value.
+    var newString = val string
+
+    # Passing a primitive object by reference.
+    var newNumber = ref number
 
     # Astro manages memory automatically using a special reference counting technique, it handles reference cycles as well
     myCompany.affiliate = ref yourCompany
     yourCompany.affiliate = ref myCompany
 
-    let developer = iso 'AppCypher' # iso is used to hold an exclusive reference to the object
+    # `iso` is used to hold an exclusive reference to the object
+    let developer = iso 'AppCypher'
     let anotherDeveloper = developer # Invalid!
 
-    # While val is a shallow copy operation, acq is a copy operation
+    # While `val` is a shallow copy operation, `acq` is a copy operation
     let rent = val house
     let buyer = acq game
 
     let player = team.player
 
+    # An immutable reference to an object can be returned from afunction using the `const` keyword.
     fun getAmount():
-        return const amount # Passed by reference, but it cannot be written to
+        return const amount
 
     # Reference type annotation
     fun swap(var a, var b): ## (ref T, ref T) -> None
@@ -177,19 +181,21 @@ NUMBERS
     var index    = 5
     var axis     = -3
     let meters   = 0.25e-5
-    let salary   = 10_000'f #' `'f` marks teh number literal as float64
-    var price    = 0x6FFF00p+12 # Hex
-    var opCode   = 0b10110001 # Binary
-    var interest = 0o566768 # Octal
+    let salary   = 10_000'f #' `'f` marks the number literal as Float64
+    var price    = 0x6FFF00p+12 # Hex literal
+    var opCode   = 0b10110001 # Binary literal
+    var interest = 0o566768 # Octal literal
     let pi       = 3.14'bf #' BigFloat
 
-ACCESS MODIFIERS
-    var money = 0 # Subjects, functions, types, etc. are publicly accessible by default.
+TYPE DEFINITION (1)
+    # A type is synonymous with struct in C. It holds the blueprint of what an object can contain.
+    type Person(name, age)
 
-    fun sub'(a, b): #' But they can be made private to a module with `'` modifier
-        a - b
+    # Objects can then be created from the blueprint.
+    var jane = Person('Jane Doe', 50)
 
-    type Person'(var name', var age') #' Private fields
+    # By default a type's fields are publicly accessible, but they can be made private to a module with ``` modifier.
+    type Person'(var name', var age') # Private fields
 
 PROPERTIES
     # Properties provide a setter/getter behavior.
@@ -209,9 +215,13 @@ TUPLES
     var name, age = 'Emeka Okorafor', 27 # Open tuple
     var game, year = ('Uncharted 4', 2016) # Closed tuple
 
-    let personTuple = 'Sam', 50
-    let name, age = personTuple # name & age = personTuple
-    let (name, age) = personTuple # name = 'Sam', age = 50
+    # Tuple unpacking
+    let person = 'Sam', 50
+    let name, age = person # name = person, age = person
+    let (name, age) = person # name = 'Sam', age = 50
+
+    let arguments = (5, 6)
+    add(...arguments)
 
     let map = () # Empty tuple
 
@@ -219,9 +229,6 @@ TUPLES
 
     # Named tuple
     let http200Status = (statusCode:200, description:'Ok')
-
-    let arguments = (5, 6)
-    add(...arguments) # Tuple unpacking
 
 LISTS
     var unorderedList = [7, 3, 8, 5, 4, 0, 9, 1, 2, 6]
@@ -266,6 +273,7 @@ ARRAYS
     # Array is a supertype of List and work a bit differently from list
     # Arrays can be used preallocate uninitialized uni/multi-dimensional buffers
     let calendar = 31x12[]
+    let calendar = 31*12[] # Alternate syntax
 
     # Because Arrays can be more efficient, they can be used to represent matrices
     let a = 2×4[
@@ -316,7 +324,7 @@ ARRAYS
     # [1 2 1 0]
     # [0 4 2 4]
 
-OBJECTS VS DICTIONARIES
+OBJECTS & DICTIONARIES
     # Objects and dictionaries are both associative data structures
 
     # Objects are static construct and can be introspected at compile-time
@@ -420,7 +428,7 @@ STRINGS
     '''
 
     # Char is 32-bit that represents a single Unicode codepoint
-    var chars = ch.'π'
+    var chars = c.'π'
 
     # String operations
     var concatenate = 'ab' ++ 'c' # 'abc'
@@ -437,14 +445,17 @@ STRING FORMATTING
     let rightPadding       = 'right padding: $:<10(string)'
     let placeholderPadding = 'placeholder padding: $:_<10(string)'
     let centering          = 'centering: $:^10(string)'
+
     # Truncation
     let truncating         = 'truncate string: $:.10(string)'
+
     # Numbers
     let integer            = 'integer: $:d(number)'
     let float              = 'float: $:f(number)'
     let truncation         = 'figure truncation: $:6.2f(number)'
     let positive           = 'positive: $:+d(number)'
     let negative           = 'negative: $:-f(number)'
+
     # Date-Time | Custom objects
     let date               = 'date: $:|Y-m-d H:M|(date)'
 
@@ -555,22 +566,27 @@ FOR LOOP
         print((name, key, value))
 
     # By default the for loop subjects are immutable, but they can be made mutable using the `var` keyword
-    for var i in [1:21]:
+    for var i in 1..21:
         i += 1
         j = i
     ..
 
     # The `end` block executes when a loop completes without interruption like break, return or throw
     for line in file:
-        if line.contains code:
-            echo "code found!"
+        if /lagbaja/ in line:
+            echo "name found!"
             break
     end:
-        echo "code not found!"
+        echo "name not found!"
 
 COMPREHENSION
+    # Comprehension is syntactic sugar for a generator that loops through an iterable
     let generator = (i | i in random(0, 200))
+
+    # Extending a compresion with `where`
     let list = [x | x in 1..21 where x mod 2 != 0]
+
+    # Set comprehension
     let set = set.[i | i in random(0, 200)]
 
     # Nested loops
@@ -608,6 +624,7 @@ CHAINED CONDITIONAL CONSTRUCTS
 
     for book in library: if book.title.contains('adventure'):
         personalLibrary.add book
+
 WHILE LOOP & LOOP
     # Conditional loop
     while file.hasNext():
@@ -1326,13 +1343,15 @@ OPERATOR OVERLOADING
     # special characters such as $=-/& etc., can be combined in deffernt ways to form new operators
     # but reserved characters like .,`@(){}[] can't
 
-TRY, CATCH & ENSURE
+TRY, EXCEPT & ENSURE
+    # Raising an exception
     if numerator && denominator == 0:
         raise DomainErr() # raising an exception.
 
+    # Handling an exception
     try:
         process bigData
-    except err: #: DataCorruptionErr
+    except err: #: IncompleteDataError
         print err.msg
     ensure:
         restore bigData
