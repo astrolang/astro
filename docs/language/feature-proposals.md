@@ -48,7 +48,7 @@ list.foldl(0) |a, b| { a + b }
 20.each { print "Hello" }
 
 type Employee <: Person {
-    var job #: Str
+    var job
 }
 
 dsl(src: 'hello', link: 'bar.io') {
