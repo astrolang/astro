@@ -1,6 +1,6 @@
 # Astro Programming Language
 ![hound](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)
-[![Build Status](https://travis-ci.org/AppCypher/Astro.svg?branch=dev)](https://travis-ci.org/AppCypher/Astro)
+[![Build Status](https://travis-ci.org/appcypher/astro.svg?branch=dev)](https://travis-ci.org/appcypher/astro)
 [![Coverage Status](https://coveralls.io/repos/github/AppCypher/Astro/badge.svg?branch=dev)](https://coveralls.io/github/AppCypher/Astro?branch=dev)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9739900850aeebc6b2d5/maintainability)](https://codeclimate.com/github/AppCypher/Astro/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/9739900850aeebc6b2d5/test_coverage)](https://codeclimate.com/github/AppCypher/Astro/test_coverage)
@@ -27,7 +27,7 @@ Current Version: 0.1.11
 - [ ] Complete parser implementation
 - [ ] Implement basic semantic analysis
 - [ ] Create ambiguity finders for inheritance, multiple dispatch, etc.
-- [ ] Implement type inference and garbage collection using program flow analysis 
+- [ ] Implement type inference and garbage collection using program flow analysis
 - [ ] Add wasm code generation
 - [ ] Incorporate incremental compilation
 - [ ] Build REPL
