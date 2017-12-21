@@ -93,3 +93,13 @@ Block macro calls
 @loop(times: 3): print 'Happy birthday to you'
 @time(minutes)
 ```
+
+### TYPE EXTENSION
+```julia
+type Programmer(newField) @extend
+```
+
+## STRUCT TYPE
+```julia
+type Programmer(name, skills) @struct
+```
