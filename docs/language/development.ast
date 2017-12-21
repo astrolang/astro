@@ -57,7 +57,8 @@
     do:, redo
 - highlight typeof
     typeof 20
-
+- highlight the following pattern as function call
+   /fun\s*\(/
 
 
 # PRINT FUNCTION
