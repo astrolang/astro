@@ -1,67 +1,67 @@
 # Astro 0.1.12a
 # 12/12/17
 # FIX: SYNTAX HIGHLIGHT
-- highlight on not
-    not
-- remove member hghlight on !
+- highlight on not*
+    not in 
+- remove member highlight on !*
     john.!happy
-- command notation highlight for $ in
-    print $
-- remove highlight on catch
+- remove highlight on catch*
     catch err: print(err)
+    except err: print(err)
 - highlight typeof keyword
     Int == typeof 45
-- fix transpose operator when used with set, dict, list and tuple literal
+- fix transpose operator when used with set, dict, list and tuple literal*
     [1, 2, 3]' # '
     (1, 2, 3)' # '
     {1, 2, 3}' # '
-- remove highlight on prev cascading notation
+    abstract'
+- remove highlight on prev cascading notation*
     for i in 0..n: print i
-- remove highlight on prev cascading notation
+- remove highlight on prev cascading notation*
     print..('hello')..('hi')
-- add more operators to command notation highlight exclusive list
+- add more operators to command notation highlight exclusive list*
     ≥ ≤ ≠ ≈ × ± ÷
-- highlight some identifier-based infix operators
+    a ÷ b 
+    a ≤ b
+- highlight some identifier-based infix operators*
     mod
-- fix highlight on hex, oct and bin numbers
+    x mod y
+- fix highlight on hex, oct and bin numbers*
     0b10110001
     0o566768
     0x6FFF00
     1b
     2o
     3x
-- field map highlight
+- field map highlight*
     list.$name
-- fix Array literal highlight
-    31x23[]
-- non-standard literal highlight
+- non-standard literal highlight*
     ns.{}
     ns.[]
     ns.()
     ns.//
     ns.''
     ns.""
-- nil operator should have the same syntax highlight as fields
-    siblings.sister?
+- nil operator should have the same syntax highlight as fields*
+    siblings.sister? 
     siblings.sister!
-- fix syntax highlight on /end\s*:/
-    completed:
-        print x
-    var completed = x
-- remove use syntax highlight
+- remove use syntax highlight*
     use x, y:
-- add lambda parameter block highlight
+- add lambda parameter block highlight*
     list.map(|x| => -x)
     list.each => print
-- highlight do, remove highlight on redo
+- highlight do, remove highlight on redo*
     do:, redo
-- highlight typeof
+- highlight typeof*
     typeof 20
 - highlight the following pattern as function call
    /fun\s*\(/
-- highlight super keyword
+- highlight super keyword*
    new(x).super(y)
    super()
+- highlight multiline strings properly
+    '''hello \n '''
+    """hello \n """
 
 
 # PRINT FUNCTION
@@ -82,10 +82,10 @@ account?.year
 account?.year!
 account?.year? # invalid
 
-# FINALLY IN LOOPS
+# END IN LOOPS
 for i in array: if i == 5:
     break
-completed: # Not a reserved keyword tho
+end: # Not a reserved keyword tho
     print('no break')
 
 # IDENTIFIER BASED OPERATORS
