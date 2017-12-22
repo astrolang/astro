@@ -1,18 +1,20 @@
 {
-    import { 
+    const path = require('path');
+    const {
         print,
         removeNulls,
         stringify,
         removeUnderscores,
-        safeAccess
-    } from '../utils';
+        join,
+        safeAccess,
+    } = require(path.join(__dirname, '../../../../src/compiler/utils')); // relative to node_modules\pegjs\lib\compiler
 
     let prevIndentCount = 0;
     let keywords = ['if', 'while', 'for', 'in', 'try', 'elif', 'else', 'end', 'except', 'ensure', 'defer'];
 }
 
 // NOTES:
-// A complete block should indent itself at entry and exit with dedent newline samedent.
+// A complete block should indent itself at entry and exit with DEDENT NEWLINE SAMEDENT.
 
 Start
     = exs:Program { return { ast:'program', body:exs } }
@@ -78,78 +80,6 @@ SubjectSourceCode
 
 SubjectNonSourceCode
     = SingleLineComment
-
-// DeclarationLhs
-//     = id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })+ {
-//         return { patternType:'openTuple', names:join(id1, id2) };
-//     }
-//     / '(' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })*  _ ')' {
-//         return { patternType:'tuple', names:join(id1, id2) };
-//     }
-//     / '[' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })* _ ']' {
-//         return { patternType:'list', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:DeclarationIdentifier id2:(_ ',' _ id:DeclarationIdentifier { return id; })* _ '}' {
-//         return { patternType:'set', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:DeclarationIdentifier _ ':' id2:(_ ',' _ id:DeclarationIdentifier _ ':' { return id; })* '}' {
-//         return { patternType:'dict', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:DeclarationIdentifier _ ':' _ id2:DeclarationIdentifier _ '}' {
-//         return { patternType:'keysValues', names:[id1, id2] };
-//     }
-//     / id:DeclarationIdentifier {
-//         return { patternType:null, names:[id] };
-//     }
-
-// DeclarationIdentifier
-//     = id:Identifier ac:"'"? {
-//         return { name:id, privateAccess:(ac!==null), rest:false };
-//     }
-//     / '...' id:(id:Identifier ac:"'"? { return { name:id, privateAccess:(ac!==null) }; })? {
-//         return { name:safeAccess(id,'name'), privateAccess:safeAccess(id,'privateAccess'), rest:true };
-//     }
-//     / '_' {
-//         return { name:'_', privateAccess:false, rest:false };
-//     }
-
-// AssignLhs
-//     = id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier{ return id; })+ {
-//         return { patternType:'openTuple', names:join(id1, id2) };
-//     }
-//     / id1:DotIdentifier _ '.' '|' _ id2:DotIdentifier id3:(_ ',' id:DotIdentifier { return id; })+ _ '|' id4:(_ '.' id:DotIdentifier { return id; })? {
-//         return { patternType:'cascadeDot', names:[id1, id2, ...id3, id4] };
-//     }
-//     / '|' _ id1:DotIdentifier id2:(_ ',' _ id:DotIdentifier{ return id; })+ _ '|' _ '.' id3:DotIdentifier {
-//         return { patternType:'cascadeDot', names:[null, id1, ...id2, id3] };
-//     }
-//     / '(' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })*  _ ')' {
-//         return { patternType:'tuple', names:join(id1, id2) };
-//     }
-//     / '[' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })* _ ']'{
-//         return { patternType:'list', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })* _ '}' {
-//         return { patternType:'set', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:AssignIdentifier _ ':' id2:(_ ',' _ id:AssignIdentifier _ ':' { return id; })* _ '}' {
-//         return { patternType:'dict', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:AssignIdentifier _ ':'  id2:AssignIdentifier _ '}' {
-//         return { patternType:'keysValues', names:[id1, id2] };
-//     }
-//     / id:AssignIdentifier {
-//         return { patternType:null, names:[id] };
-//     }
-
-// AssignIdentifier
-//     = id:DotIdentifier {
-//         return { name:id, rest:false };
-//     }
-//     / '...' id:Identifier? {
-//         return { name:id, rest:true };
-//     }
-//     / '_' { return { name:'_', rest:false }; }
 
 DotIdentifier
     = exs:(ex:Atom _ '.' { return ex; })* id:Identifier {
@@ -1149,7 +1079,7 @@ FloatBinaryLiteral
     = fb:(("0b"[0-1]('_'? [0-1])*"."[0-1]('_'? [0-1])*("e"[+-]?[0-1]('_'? [0-1])*)?)
     / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { ast:'float', value:removeUnderscores(stringify(fb)), radix:'bin' }; }
 
-FloatOctalLiteral
+FloatOctalLiteral 
     = fo:(("0o"[0-7]('_'? [0-7])*"."[0-7]('_'? [0-7])*("e"[+-]?[0-7]('_'? [0-7])*)?)
     / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { ast:'float', value:removeUnderscores(stringify(fo)), radix:'oct' }; }
 
@@ -1189,15 +1119,12 @@ Indent 'indent'
     = i:("    "+) {
         let currentIndentCount = i.toString().replace(/,/g, "").length;
         // DEBUG //
-        print('prev ' + prevIndentCount)
-        print('curr ' + currentIndentCount)
+        print('prev ' + prevIndentCount);
+        print('curr ' + currentIndentCount);
         // DEBUG //
         if (currentIndentCount === prevIndentCount + 4) {
             // DEBUG //
-            print("=== Indent === " + location().start.line)
-            // print("    current:"+currentIndentCount);
-            // print("    previous:"+prevIndentCount);
-            // print("    lineNumber:"+location().start.line);
+            print("=== Indent === " + location().start.line);
             // DEBUG //
             prevIndentCount += 4;
             return;
@@ -1208,11 +1135,6 @@ Indent 'indent'
 Samedent 'samedent'
     = s:("    "+ / "") &{
         let currentIndentCount = s.toString().replace(/,/g, "").length;
-        // DEBUG //
-        // print("=====")
-        // print(prevIndentCount)
-        // print(currentIndentCount)
-        // DEBUG //
         if (currentIndentCount === prevIndentCount) {
             // DEBUG //
             print("=== Samedent === " + location().start.line);
@@ -1227,10 +1149,7 @@ Dedent 'dedent'
         let currentIndentCount = d.toString().replace(/,/g, "").length;
         if (currentIndentCount < prevIndentCount) {
             // DEBUG //
-            print("=== Dedent === " + location().start.line)
-            // print("    current:"+currentIndentCount);
-            // print("    previous:"+prevIndentCount);
-            // print("    lineNumber:"+location().start.line);
+            print("=== Dedent === " + location().start.line);
             // DEBUG //
             prevIndentCount -= 4;
             return;
@@ -1250,10 +1169,10 @@ OperatorCharacter  // UNICODE?
 Punctuator 'punctuator'
     = pn:('.' / ',' / "'" / '"') { return stringify(pn); }
 
+// NOTE: keywords are not valid identifiers. The predicate also help ignore language keywords that appear in certain
+// positions (infix/prefix) which can easily be taken as command notation. For example, the `mod` in `a mod b`
 Identifier 'identifier' // UNICODE?
     = id:([a-zA-Z_][a-zA-Z0-9_]*) &{ return keywords.indexOf(stringify(id)) < 0; } { return stringify(id); }
-    // NOTE: keywords are not valid identifiers. The predicate also help ignore language keywords that appear in certain
-    // positions (infix/prefix) which can easily be taken as command notation. For example, the second if in `if a if b`
 
 Newline 'newline'
     = ("\r"? "\n")
