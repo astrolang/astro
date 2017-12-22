@@ -45,7 +45,7 @@ describe('COMPILER::UTILS', () => {
     });
   });
 
-  describe('clean', () => {
+  describe('removeNulls', () => {
     it('should remove nulls and undefined values from array', (done) => {
       const sampleArray = [1, 2, null, 3, undefined, 4, 5];
       const result = removeNulls(sampleArray);
