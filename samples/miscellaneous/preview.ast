@@ -13,7 +13,7 @@ fun normalize(a) = √(a.²)
 
 # TYPE ANNOTATION
 fun anyCommonElements(l, r): #: (T, U) -> Bool where (T, U)<:Sequence
-    for a in l, b in r where a == b:
+    for i in l: for j in r where a == b:
         return true
     false
 
