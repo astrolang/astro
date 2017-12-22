@@ -18,12 +18,12 @@ Astro's core foundation is built on a rich type system and multiple dispatch but
 
 Astro has support for first-class functions, generics, object-oriented programming, unicode identifiers, and metaprogramming.
 
-Current Version: 0.1.11
+Current Version: 0.1.12
 
 ### Tasks to Complete
 - [x] ~Improve project structure~
 - [x] ~Add automated unit testing and coverage reports~
-- [ ] Redesign and remove certain inconsistencies in language syntax
+- [x] Redesign and remove certain inconsistencies in language syntax
 - [ ] Complete parser implementation
 - [ ] Implement basic semantic analysis
 - [ ] Create ambiguity finders for inheritance, multiple dispatch, etc.
