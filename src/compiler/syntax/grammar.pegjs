@@ -1,38 +1,18 @@
-// 25/09/17
 {
+    import { 
+        print,
+        removeNulls,
+        stringify,
+        removeUnderscores,
+        safeAccess
+    } from '../utils';
+
     let prevIndentCount = 0;
     let keywords = ['if', 'while', 'for', 'in', 'try', 'elif', 'else', 'end', 'except', 'ensure', 'defer'];
-
-    // saves typing strokes and can print arrays
-    function print(...s) { (s[0] instanceof Array || typeof s[0] === 'object' ) ? console.log(JSON.stringify(s[0], null, 2)) : console.log(...s);  }
-
-    // PEGjs implicitly returns arrays full of null and empty arrays, this stringifies it and cleans up the resulting commas
-    function str(s) { return s.toString().replace(/,/g, "").trim(); }
-
-    // creates a new array out of a and the elements of b
-    // where a is a scalar, b is an array and where b can be undefined
-    function join(a, b) { return (b !== null && b.length != 0) ? [a, ...b] : [a]; }
-
-    // strips '_' in string, for numeric literals
-    function removeUnderscores(s) { return s.replace(/_/g, ''); }
-
-    // remove elements with null or undefined in an array
-    function removeNulls(a) { return a.filter(x => x != undefined); }
-
-    // checks if both the object and its properties are not undefined or null,
-    // if they are not, it returns the property, otherwise it returns null
-    // PEGjs returns null for unmatched rule or terminal
-    function safeAccess(obj, ...prop) {
-        if (obj === null || obj === undefined) return null;
-        for (let p of prop) {
-            if (obj[p] === null || obj[p] === undefined) return null;
-            obj = obj[p];
-        }
-        return obj;
-    }
 }
 
-// GUIDES: a complete block should indent itself at entry and exit with dedent newline samedent
+// NOTES:
+// A complete block should indent itself at entry and exit with dedent newline samedent.
 
 Start
     = exs:Program { return { ast:'program', body:exs } }
@@ -1127,11 +1107,11 @@ CommaColon
     = ',' / ';'
 
 RegexLiteral
-    = rl:('/'[^/]+'/') { return { ast:'regex', value:str(rl) }; } // '
+    = rl:('/'[^/]+'/') { return { ast:'regex', value:stringify(rl) }; } // '
 
 StringLiteral
     = sl:(('"'[^\"]+'"') // "
-    / ("'"[^\']+"'")) { return { ast:'string', value:str(sl) }; } // '
+    / ("'"[^\']+"'")) { return { ast:'string', value:stringify(sl) }; } // '
 
 NumericLiteral
     = FloatLiteral
@@ -1144,16 +1124,16 @@ IntegerLiteral 'integer'
     / IntegerHexLiteral
 
 IntegerDecimalLiteral
-    = id:([1-9]('_'? [0-9])*) { return { ast:'int', value:removeUnderscores(str(id)), radix:'dec' }; }
+    = id:([1-9]('_'? [0-9])*) { return { ast:'int', value:removeUnderscores(stringify(id)), radix:'dec' }; }
 
 IntegerBinaryLiteral
-    = ib:("0b"[0-1]('_'? [0-1])*) { return { ast:'int', value:removeUnderscores(str(ib)), radix:'bin' }; }
+    = ib:("0b"[0-1]('_'? [0-1])*) { return { ast:'int', value:removeUnderscores(stringify(ib)), radix:'bin' }; }
 
 IntegerOctalLiteral
-    = io:("0o"[1-7]('_'? [0-7])*) { return { ast:'int', value:removeUnderscores(str(io)), radix:'oct' }; }
+    = io:("0o"[1-7]('_'? [0-7])*) { return { ast:'int', value:removeUnderscores(stringify(io)), radix:'oct' }; }
 
 IntegerHexLiteral
-    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { ast:'int', value:removeUnderscores(str(ix)), radix:'hex' }; }
+    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { ast:'int', value:removeUnderscores(stringify(ix)), radix:'hex' }; }
 
 FloatLiteral 'float'
     = FloatDecimalLiteral
@@ -1163,22 +1143,22 @@ FloatLiteral 'float'
 
 FloatDecimalLiteral
     = fd:((([0-9]('_'? [0-9])*)?"."[0-9]('_'? [0-9])*("e"[+-]?[0-9]('_'? [0-9])*)?)
-    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { ast:'float', value:removeUnderscores(str(fd)), radix:'dec' }; }
+    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { ast:'float', value:removeUnderscores(stringify(fd)), radix:'dec' }; }
 
 FloatBinaryLiteral
     = fb:(("0b"[0-1]('_'? [0-1])*"."[0-1]('_'? [0-1])*("e"[+-]?[0-1]('_'? [0-1])*)?)
-    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { ast:'float', value:removeUnderscores(str(fb)), radix:'bin' }; }
+    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { ast:'float', value:removeUnderscores(stringify(fb)), radix:'bin' }; }
 
 FloatOctalLiteral
     = fo:(("0o"[0-7]('_'? [0-7])*"."[0-7]('_'? [0-7])*("e"[+-]?[0-7]('_'? [0-7])*)?)
-    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { ast:'float', value:removeUnderscores(str(fo)), radix:'oct' }; }
+    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { ast:'float', value:removeUnderscores(stringify(fo)), radix:'oct' }; }
 
 FloatHexLiteral
     = fx:(("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"."[0-9A-Fa-f]('_'? [0-9A-Fa-f])*("p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)?)
-    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { ast:'float', value:removeUnderscores(str(fx)), radix:'hex' }; }
+    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { ast:'float', value:removeUnderscores(stringify(fx)), radix:'hex' }; }
 
 BooleanLiteral 'boolean'
-    = bl:('true' / 'false') { return { ast:'boolean', value:str(bl) }; }
+    = bl:('true' / 'false') { return { ast:'boolean', value:stringify(bl) }; }
 
 SingleLineComment 'singleLineComment'
     = '#' SingleLineCommentCharacter*
@@ -1262,16 +1242,16 @@ EOI 'eoi'
     = !.
 
 Operator 'operator'
-    = op:(OperatorCharacter (OperatorCharacter)*) { return str(op); }
+    = op:(OperatorCharacter (OperatorCharacter)*) { return stringify(op); }
 
 OperatorCharacter  // UNICODE?
     = '+' / '-' / '*' / '/' / '\\' / '^' / '%' / '!' / '>' / '<' / '='
 
 Punctuator 'punctuator'
-    = pn:('.' / ',' / "'" / '"') { return str(pn); }
+    = pn:('.' / ',' / "'" / '"') { return stringify(pn); }
 
 Identifier 'identifier' // UNICODE?
-    = id:([a-zA-Z_][a-zA-Z0-9_]*) &{ return keywords.indexOf(str(id)) < 0; } { return str(id); }
+    = id:([a-zA-Z_][a-zA-Z0-9_]*) &{ return keywords.indexOf(stringify(id)) < 0; } { return stringify(id); }
     // NOTE: keywords are not valid identifiers. The predicate also help ignore language keywords that appear in certain
     // positions (infix/prefix) which can easily be taken as command notation. For example, the second if in `if a if b`
 
@@ -1302,7 +1282,7 @@ Whitespace 'whitespace'
 //     sed -e 's/\([0-9a-fA-F]\{4\}\)/\\u\1/g' |       # Adjust formatting
 //     tr -d '\n'                                      # Join lines
 //
-// ECMA-262 allows using Unicode 3.0 or later, version 8.0.0 was the latest one
+// Astro allows using Unicode 3.0 or later, version 9.0.0 was the latest one
 // at the time of writing.
 //
 // Non-BMP characters are completely ignored to avoid surrogate pair handling
