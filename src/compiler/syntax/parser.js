@@ -7,6 +7,9 @@ class Parser {
    * @param {string} grammar - The language's pegjs grammar
    */
   constructor(grammar) {
+    if (!grammar && typeof (grammar) !== 'string') {
+      throw new Error('Expected argument to be string!');
+    }
     this.parser = null;
     try {
       this.parser = peg.generate(grammar);
@@ -23,6 +26,9 @@ class Parser {
    * @return {object} The generated parser object
    */
   generate(grammar) {
+    if (!grammar && typeof (grammar) !== 'string') {
+      throw new Error('Expected argument to be string!');
+    }
     this.parser = null;
     try {
       this.parser = peg.generate(grammar);
@@ -40,6 +46,9 @@ class Parser {
    * @return {object} The generated abstract syntax tree
    */
   parse(code) {
+    if (!code && typeof (code) !== 'string') {
+      throw new Error('Expected argument to be string!');
+    }
     let result = null;
     try {
       result = this.parser.parse(code);
