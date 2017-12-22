@@ -978,7 +978,7 @@ INHERITANCE
     # Types can inherit from one or more parent types in Astro.
     type Animal
     type Bird <: Animal # Bird type inherits fields from Animal.
-    type Horse <: Animal:  # Horse type inherits fields from Animal.
+    type Horse <: Animal  # Horse type inherits fields from Animal.
 
     # Multiple inheritance is allowed as well.
     type Pegasus <: Horse, Bird:  # Pegasus inherits Horse, Bird.
