@@ -4,11 +4,12 @@ SINGLE-LINE COMMENTS
 
 MULTILINE COMMENTS
     #=
-        I’m Astro.
+        Multiline comments can span multiple lines.
+        They begin with `#=`.
         #=
-            Yay, nested comments!
+            They can be neste.
         =#
-        And I Rock.
+        And they end with `=#`.
     =#
 
 SUBJECT BINDING
@@ -47,7 +48,8 @@ IDENTIFIERS
 
     # Names preceded by underscores are special to the compiler.
     # Likewise, uppercase single letter identifier are reserved for generic type annotations.
-    print _args
+    let _song = 'Sorry' # Invalid!
+    let T = 5 # Invalid!
 
     # Naming convention.
     # Camel case for variables, constants, function names and module names.
@@ -198,9 +200,10 @@ VALUES & REFERENCES
     ..
 
 NUMBERS
-    var index    = 5
-    var axis     = -3
-    let meters   = 0.25e-5
+    # Number literals in Astro
+    var index    = 5 # Int literal.
+    var axis     = -3 # UInt literal.
+    let meters   = 0.25e-5 # Float64 literal.
     let salary   = 10_000'f #' `'f` marks the number literal as Float64.
     var price    = 0x6FFF00p+12 # Hex literal.
     var opCode   = 0b10110001 # Binary literal.
@@ -213,20 +216,26 @@ TUPLES
     var name, age = 'Emeka Okorafor', 27 # Open tuple.
     var game, year = ('Uncharted 4', 2016) # Closed tuple.
 
-    # Tuple unpacking.
+    # Tuple destructuring.
     let person = 'Sam', 50
     let name, age = person # name = person, age = person
     let (name, age) = person # name = 'Sam', age = 50
 
+    # Tuple unpacking.
     let arguments = (5, 6)
     add(...arguments)
 
-    let map = () # Empty tuple.
+    # Empty tuple.
+    let map = ()
 
-    let map = (london,) # One-element tuple. Note the trailing comma.
+    # One-element tuple. Note the trailing comma.
+    let map = (london,)
 
-    # Named tuple.
-    let http200Status = (statusCode:200, description:'Ok')
+    # Named tuple are tuples with keys.
+    let http = (statusCode: 200, description: 'Ok')
+
+    # The contents of a named tuple can be accessed using the dot notation.
+    print http.status
 
 LISTS
     var unorderedList = [7, 3, 8, 5, 4, 0, 9, 1, 2, 6]
@@ -243,13 +252,19 @@ LISTS
     stuffs[0] # 500
 
     # Slicing a list.
-    var disqualified = contestants[1:6] # 2nd to the 5th index.
+    contestants[1:6] # 2nd to the 5th index.
+    contestants[1:] # 2nd to the last index.
+    contestants[:6] # first to the 5th index.
+    contestants[:] # first to the last index.
+
+    # A slice can have a step value.
+    let odds = numbers[1:2:30] # The step value is the `2` in the middle.
 
     # `!` is used to access the index backwards.
     var last = contestants[!0] # last index.
 
     # Using negative step to reverse index access.
-    var reversed = contestants[::-1]
+    var reversed = contestants[:-1:]
 
     # Reverse access can also be done using `!`.
     var reversed = contestants[!0:]
@@ -258,7 +273,7 @@ LISTS
     let number = List[Str](4, 4, "")
 
     # Field mapping.
-    students.map |x| => x.gpa
+    students.map(|x| => x.gpa)
     students.$gpa # Same as above
 
     fun average(students) = sum(students.$gpa) / students.size
@@ -268,10 +283,11 @@ LISTS
     var multiply = [1, 2] ** 2 # [1, 2, 1, 2]
 
 ARRAYS
-    # Array is a supertype of List and work a bit differently from list.
-    # Arrays can be used preallocate uninitialized uni/multi-dimensional buffers.
-    let calendar = 31x12[]
-    let calendar = 31*12[] # Alternate syntax
+    # Array is a supertype of List and works a bit differently from List.
+    # Arrays can be used pre-allocate uninitialized uni/multi-dimensional buffers.
+    # If the type of elements is not specified, the element type will default to F64
+    let matrix = 5×5[]
+    let matrix = 5*5[] # Alternate syntax
 
     # Because Arrays can be more efficient, they can be used to represent matrices.
     let a = 2×4[
@@ -294,7 +310,7 @@ ARRAYS
         3, 7
     ]
 
-    # Multi-dimensional slicing
+    # Multi-dimensional array slicing
     let subset = mat4[1:, 1:2]
 
     # Vectorization syntax.
@@ -323,6 +339,10 @@ ARRAYS
     # [1 2 1 0]
     # [0 4 2 4]
 
+    # Indexed integral numbers clash with array literals, so defining `getIndex` on integral types is not allowed.
+    # Also when multiplying by an array literal, the literal needs to be enclosed in parens.
+    let result = 3×(4[])
+
 OBJECTS & DICTIONARIES
     # Objects and dictionaries are both associative data structures.
 
@@ -338,7 +358,10 @@ OBJECTS & DICTIONARIES
             'name': 'Esther Williams'
             'age': 42
         }
+    }
+
     # Unquoted keys are taken as strings as well.
+    let parents = {
         dad: {
             name: 'Sunday Williams'
             age: 46
@@ -358,8 +381,7 @@ OBJECTS & DICTIONARIES
     # Dictionary values are accessed using `{}` and can return nil.
     let mum = parent{'mum', 'name'}
 
-    # Dictionary values can also use accessed using the dot operator,
-    # but since dictionaries can return nil, the nil operator is needed.
+    # Dictionary values can also use accessed using the dot operator, but since dictionaries can return nil, the nil operator is needed.
     let mum = parent.mum?.name
 
     # New fields can be added to an object.
@@ -392,9 +414,15 @@ RANGE
     # Range is an iterable that allows iterating through a range of values.
     let days = 0..31 # 0 to 19
 
-    # Using range in a for loop.
+    # A range to infinity
+    let numbers = 0..
+
+    # A range can have a step value.
+    let evens = 2..2.. # The step value is the `2` in the middle.
+
+    # Using a range in a for loop.
     for i in 0..10:
-        print i
+        print(i)
 
 SPREAD OPERATOR
     # Spread takes the remaining values in a destructure.
@@ -403,10 +431,12 @@ SPREAD OPERATOR
     print(b) # (2, 3, 4)
 
     # It is also used for varargs.
-    fun rest(a, ...b):
-        print(b)
+    fun rest(a, ...b) = print(b)
 
     rest(1, 2, 3, 4) # (2, 3, 4)
+
+    # Using the spread operator with object.
+    let object = { ...object, extra: 5 }
 
 STRINGS
     let language, year = 'Astro', 2015
@@ -420,7 +450,7 @@ STRINGS
     # Non-standard string literals don't have escape sequences nor interpolation.
     var verbatimStr = r."Use '\t' to represent tab"
 
-    # Multiline strings are enclosed in triple `'` or `"`.
+    # Multiline strings are enclosed in triple `'` or `"` quotes and they ignore all escapes and interpolation
     # The first and last newlines are always ignored in multiline strings.
     var verbatimStr = '''
     Hello, World!
@@ -473,7 +503,7 @@ MULTILINE EXPRESSIONS
     sum(1, 2, 3, 4, 5, 6, 7, 8,
     9, 10, 11, 12)
 
-    # If the contents of a pair of brackets/braces are moved to a newline, it needs to be indented.
+    # If the content of a pair of brackets/braces are moved to a newline, it needs to be indented.
     playMusic(
         'Asa',
         'Jailer',
@@ -530,15 +560,19 @@ IF EXPRESSION
     if $player = getPlayer(name)?:
         print player.fitness
 
-    # Reworded if-else expression.
-    return 10 if x == y else 20
+TERNARY OPERATOR
+    # The ternary operator is a syntacttc sugar for an if-else expression.
+    let cmp = if a > b: 0 \\ else: 1
+
+    # Astro requires a parens around the condition.
+    let cmp = (a > b) ? 0 : 1
 
 NIL
     # Sometimes, it can be useful to represent an empty or a missing state.
     # This is done with nils in Astro.
     # Non-nillable subjects can give nil nor be assigned a nil value.
-    var code = '2 + 4' #: Str
-    code = nil # Invalid!
+    var password = '#5Nj%4VpA391w' #: Str
+    password = nil # Invalid!
 
     # Nillable object can be assigned nil.
     var program = 'print(\"Hello World\")' #: Str|Nil
@@ -561,10 +595,11 @@ BOOLEAN EXPRESSIONS
 
     # Logical negation with `not` keyword.
     x != y
-    not x.isbound
-    x not in list
+    not a.isEven()
+    i not in list
 
 FOR LOOP
+    # A `for` loop iterates through an iterable and binds the value to a subject.
     for i in 1..11:
         print i
 
@@ -578,19 +613,22 @@ FOR LOOP
         j = i
     ..
 
+    # A `for` loop can be extended with a `where` condiition.
+    for i in array where i == 5:
+        return i
+
     # The `end` block executes when a loop completes without interruption like break, return or throw.
-    for line in file:
-        if /lagbaja/ in line:
-            echo "name found!"
-            break
+    for line in file where /lagbaja/ in line:
+        print "name found!"
+        break
     end:
-        echo "name not found!"
+        print "name not found!"
 
 COMPREHENSION
     # Comprehension is syntactic sugar for a generator that loops through an iterable.
     let generator = (i | i in random(0, 200))
 
-    # Extending a compresion with `where`.
+    # Extending a comprehension with `where`.
     let list = [x | x in 1..21 where x mod 2 != 0]
 
     # Set comprehension.
@@ -601,10 +639,9 @@ COMPREHENSION
 
 BREAK WITH
     # Break-with breaks a loop and returns a value.
-    for name in register:
-        if name == 'Tony':
+    for name in register where name == 'Tony':
             break name
-        ""
+    end: ""
 
 IN
     # `in` is a special keyword-based infix operator that checks for existence of an object in a collection type.
@@ -762,15 +799,6 @@ FUNCTION DEFINITION (2)
     # Anonymous functions are functions without names.
     fun _(): return a + b
 
-    # The state of a local subject marked with `'` always persist between function calls.
-    fun callCount():
-        var count' = 1 #'
-        print('call count = $count')
-        count += 1
-    ..
-    callCount() # call count = 1
-    callCount() # call count = 2
-
     # Default parameter values.
     fun login(username: 'demo', password: 'demo'):
         access Account(username, password)
@@ -892,6 +920,8 @@ TYPE DEFINITION (2)
     # The special `new` function creates a new object of the particular type.
     fun Car(make, year) = new(make, year)
     let ride = Car('Camaro', 2016)
+
+    # New constructor cannot be defined outside the module its type is defined in.
 
     # A constructor that contains just a `new` function call can be shortened further.
     fun Car(maker, year)
@@ -1248,9 +1278,15 @@ POINTERS
     # Freeing memory.
     free(memory) # Compile-time error will be throws if there is a possible dangling or pointer aliasing problem.
 
+    # Pointer arithmetic is not normally supported in Astro, however a pointer to a block of memory can be incremented or decremented but with bounds checking.
+    let memory = malloc[Int](20)
+    let pointer = memory[2]
+    pointer.offset(5)
+    pointer.offset(500) # Error!
+
 RESERVED KEYWORDS
     import, export, let, var, fun, type, abst, async,
-    if, elif, else, while, for, try, except, ensure, defer,
+    if, elif, else, while, for, try, except, ensure, defer, loop, unsafe
     spill, return, raise, break, continue, yield, delegate, await,
     where, at,
     eval,
