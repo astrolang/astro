@@ -94,12 +94,19 @@ Block macro calls
 @time(minutes)
 ```
 
-### TYPE EXTENSION
+### TYPE EXTENSION PROPOSAL
 ```julia
 type Programmer(newField) @extend
 ```
 
-## STRUCT TYPE
+## STRUCT PROPOSAL
 ```julia
 type Programmer(name, skills) @struct
+```
+
+## UNSAFE BLOCK PROPOSAL
+```rust
+unsafe:
+    let pointer = ptr(object)
+    pointer.offset(-5)
 ```
