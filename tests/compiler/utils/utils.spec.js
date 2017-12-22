@@ -1,6 +1,9 @@
 import chai from 'chai';
 import cap from 'capture-console';
-import { print, clean } from '../../../src/compiler/utils';
+import {
+  print,
+  removeNulls,
+} from '../../../src/compiler/utils';
 
 chai.should();
 
@@ -45,7 +48,7 @@ describe('COMPILER::UTILS', () => {
   describe('clean', () => {
     it('should remove nulls and undefined values from array', (done) => {
       const sampleArray = [1, 2, null, 3, undefined, 4, 5];
-      const result = clean(sampleArray);
+      const result = removeNulls(sampleArray);
       result.should.deep.equal([1, 2, 3, 4, 5]);
       done();
     });
