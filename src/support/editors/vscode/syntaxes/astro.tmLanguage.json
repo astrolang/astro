@@ -12,7 +12,7 @@
 	        "include": "#macros"
 	    },
 	    {
-	        "include": "#lambda_var"
+	        "include": "#lambda"
 	    },
 	    {
 	        "include": "#parens"
@@ -30,16 +30,10 @@
 	        "include": "#typenames"
 	    },
 	    {
-	        "include": "#dot_members"
+	        "include": "#dot_notation"
 	    },
 	    {
 	        "include": "#keywords"
-	    },
-	    {
-	        "include": "#functions"
-	    },
-	    {
-	        "include": "#variable"
 	    },
 	    {
 	        "include": "#function_calls"
@@ -48,7 +42,16 @@
 	        "include": "#command_notation"
 	    },
 	    {
-	        "include": "#strings"
+	        "include": "#unquoted"
+	    },
+	    {
+	        "include": "#non-standard-literals"
+	    },
+	    {
+			"include": "#multi-line-strings"
+	    },
+	    {
+			"include": "#single-line-strings"
 	    },
 	    {
 	        "include": "#regex"
@@ -67,28 +70,39 @@
 	            }
 	        ]
 		},
-		"functions":{
+	    "numbers":{
 	        "patterns": [
 	            {
-	                "match": "(?<=fun |catch |ensure )[a-z_][A-Za-z0-9_!]*",
-	                "name": "entity.name.function.astro"
-	            }
-	        ]
-		},
-	    "lambda_var":{
-	        "patterns": [
+	                "match": "\\b0x(_?[A-Fa-f0-9])*((\\.(_?[A-Fa-f0-9])+)?(p[+-]?)?[A-Fa-f0-9_]+)?('[A-Za-z][A-Za-z0-9]*)?",
+	                "name": "constant.numeric.astro"
+	            },
 	            {
-	                "match": "\\$\\d+",
-	                "name": "astro"
+	                "match": "\\b0o(_?[0-8])*((\\.(_?[0-8])+)?(p[+-]?)?[0-8_]+)?('[A-Za-z][A-Za-z0-9]*)?",
+	                "name": "constant.numeric.astro"
+	            },
+	            {
+	                "match": "\\b0b(_?[01])*((\\.(_?[01])+)?(p[+-]?)?[01_]+)?('[A-Za-z][A-Za-z0-9]*)?",
+	                "name": "constant.numeric.astro"
+	            },
+	            {
+	                "match": "\\b[0-9](_?[0-9])*((\\.(_?[0-9])+)?(e[+-]?)?(_?[0-9])+)?('[A-Za-z][A-Za-z0-9]*)?",
+	                "name": "constant.numeric.astro"
 	            }
 	        ]
 		},
 	    "macros":{
 	        "patterns":[
-
 	            {
-	                "match": "(?<!\\.|\\|)@(?:[A-Za-z][A-Za-z_0-9]*)|\\@\\(.*\\)", 
+	                "match": "@(?:[A-Za-z][A-Za-z_0-9]*)|\\@\\(.*\\)",
 	                "name": "support.function.macro.astro"
+	            }
+	        ]
+		},
+	    "lambda":{
+	        "patterns": [
+	            {
+	                "match": "\\|.+\\|\\s*(?=\\=\\>)",
+	                "name": "entity.name.function.astro"
 	            }
 	        ]
 		},
@@ -156,25 +170,13 @@
 	            }
 	        ]
 		},
-	    "dot_members":{
+	    "dot_notation":{
 	        "patterns": [
 	            {
-	                "match": "(?<!\\.)(?:\\.\\.?)([!?]?[A-Za-z_][A-Za-z_0-9]*[!?]?)\\b",
+	                "match": "(?<!\\.)(?:\\.)(\\$?[A-Za-z_][A-Za-z_0-9]*)[!?]?\\b",
 	                "captures":{
 	                    "1":{
 	                        "name": "variable.language.astro"}}
-	            }
-	        ]
-		},
-	    "numbers":{
-	        "patterns": [
-	            {
-	                "match": "\\b0x(_?[A-Fa-f0-9])*((\\.(_?[A-Fa-f0-9])+)?(p[+-]?)?[A-Fa-f0-9_]+)?('[A-Za-z][A-Za-z0-9]*)?",
-	                "name": "constant.numeric.astro"
-	            },
-	            {
-	                "match": "\\b[0-9](_?[0-9])*((\\.(_?[0-9])+)?(e[+-]?)?(_?[0-9])+)?('[A-Za-z][A-Za-z0-9]*)?",
-	                "name": "constant.numeric.astro"
 	            }
 	        ]
 		},
@@ -189,15 +191,15 @@
 	                "name": "astro"
 	            },
 	            {
-	                "match": "\\b(?:for|end|spill|if|where|\\?|else|elif|await|return|at|delegate|yield|while|redo|use|loop|try|catch|ensure|defer|raise|continue|break|pass|export|except|import)\\b",
+	                "match": "\\b(?:for|end|spill|if|where|\\?|else|elif|await|return|at|delegate|yield|while|do|loop|try|ensure|defer|raise|continue|break|pass|export|except|import)\\b",
 	                "name": "keyword.control.astro"
 	            },
 	            {
-	                "match": "\\b(?:type|fun|abst|macro|let|var|rxn|new|NaN|iso|val|ref|acq|const|\\\\\\\\|as)\\b",
+	                "match": "\\b(?:type|fun|abst|macro|let|var|new|super|NaN|iso|val|ref|acq|const|\\\\\\\\|as)\\b",
 	                "name": "storage.modifier.astro"
 	            },
 	            {
-	                "match": "\\b(?:and|or|in|is)\\b",
+	                "match": "\\b(?:and|or|in|not|mod|is|typeof)\\b",
 	                "name": "keyword.control.astro"
 	            }
 	        ]
@@ -205,7 +207,7 @@
 	    "function_calls":{
 	        "patterns": [
 	            {
-	                "match": "([A-Za-z_][_A-Za-z0-9]*)(?=\\s*(\\[[A-Z][_A-Za-z0-9]*\\]\\s*)?(\\.\\.)?\\()",
+	                "match": "([A-Za-z_][_A-Za-z0-9]*)(?=\\s*(\\[[A-Z][_A-Za-z0-9]*\\]\\s*)?\\()",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
@@ -213,23 +215,57 @@
 	    "command_notation":{
 	        "patterns":[
 	            {
-	                "match": "(?<!let |var |rxn )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|rxn|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|redo|with|use|loop|try|catch|ensure|defer|raise|continue|break|pass|new|select|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\\b[a-z_][A-Za-z_0-9]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\\b)",
+	                "match": "(?<!let |var )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|≥|≤|≠|≈|×|±|÷|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|do|with|loop|try|ensure|defer|raise|continue|break|pass|new|super|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in|not|mod|is|typeof]|\\b[a-z_][A-Za-z_0-9]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|not|mod|is|typeof|except)\\b)",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
 		},
-	    "operators":{
-	        "patterns": [
-				{
-					"match": "=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|\\b(and|or|not|band|bor|bxor|bnot|shl|shr)\\b",
-					"name": "keyword.operator.astro"
-				}
-			]
-		},
-	    "strings":{
+		"unquoted":{
 	        "patterns": [
 	            {
-	                "begin": "(?<![_a-zA-Z0-9])'",
+	                "match": "(?<=[_a-zA-Z0-9})\\]])'",
+	                "name": "astro"
+	            }
+	        ]
+		},
+		"non-standard-literals": {
+	        "patterns": [
+	            {
+	                "match": "([_a-zA-Z0-9]+)(?=\\.['\"\\{\\[\\(/])",
+					"name": "support.function.macro.astro"
+				}
+	        ]
+		},
+	    "multi-line-strings":{
+	        "patterns": [
+	            {
+	                "begin": "'''",
+	                "beginCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.begin.astro"}},
+	                "end": "'''",
+	                "endCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.end.astro"}},
+	                "name": "string.quoted.single.astro"
+	            },
+	            {
+	                "begin": "\"\"\"",
+	                "beginCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.begin.astro"}},
+	                "end": "\"\"\"",
+	                "endCaptures":{
+	                    "0":{
+	                        "name": "punctuation.definition.string.end.astro"}},
+	                "name": "string.quoted.double.astro"
+	            }
+	        ]
+		},
+	    "single-line-strings":{
+	        "patterns": [
+	            {
+	                "begin": "'",
 	                "beginCaptures":{
 	                    "0":{
 	                        "name": "punctuation.definition.string.begin.astro"}},
@@ -244,9 +280,6 @@
 	                    },
 	                    {
 	                        "include": "#string_interpolate"
-	                    },
-	                    {
-	                        "include": "#comments"
 	                    }
 	                ]
 	            },
@@ -266,9 +299,6 @@
 	                    },
 	                    {
 	                        "include": "#string_interpolate"
-	                    },
-	                    {
-	                        "include": "#comments"
 	                    }
 	                ]
 	            }
@@ -314,6 +344,14 @@
 	                "name": "string.quoted.single.astro"
 	            }
 	        ]
+		},
+	    "operators":{
+	        "patterns": [
+				{
+					"match": "=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|≥|≤|≠|≈|×|±|÷|\\b(and|or|not)\\b",
+					"name": "keyword.operator.astro"
+				}
+			]
 		}
 	},
 	"scopeName": "source.astro"
