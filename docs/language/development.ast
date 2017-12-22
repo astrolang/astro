@@ -59,6 +59,9 @@
     typeof 20
 - highlight the following pattern as function call
    /fun\s*\(/
+- highlight super keyword
+   new(x).super(y)
+   super()
 
 
 # PRINT FUNCTION
