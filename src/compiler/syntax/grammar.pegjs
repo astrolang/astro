@@ -17,7 +17,7 @@
 // A complete block should indent itself at entry and exit with DEDENT NEWLINE SAMEDENT.
 
 Start
-    = exs:Program { return { ast:'program', body:exs } }
+    = exs:Program { return { kind:'program', body:exs } }
 
 Program
     = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine pc:(Samedent ex:ProgramCode { return ex })? { return pc })* {
@@ -45,12 +45,12 @@ Declaration
 
 SubjectDeclaration
     = mu:('var'/'let') _ sd:SubjectMainDeclaration {
-        return { ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value };
+        return { kind:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value };
     }
     / mu:('var'/'let') _ NextLine Indent sd1:SubjectMainDeclaration _ sd2:(NextLine Samedent sd:SubjectMainDeclaration _ { return sd; })* Dedent {
-        let declarations = [{ ast:'subjectDeclaration', pattern:sd1.pattern, mutability:(mu==='var'), value:sd1.value }];
+        let declarations = [{ kind:'subjectDeclaration', pattern:sd1.pattern, mutability:(mu==='var'), value:sd1.value }];
         for (let sd of sd2)
-            declarations.push({ ast:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value });
+            declarations.push({ kind:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value });
         return declarations;
     }
 
@@ -84,7 +84,7 @@ SubjectNonSourceCode
 DotIdentifier
     = exs:(ex:Atom _ '.' { return ex; })* id:Identifier {
         let atoms = [...exs, id];
-        return { ast:'dotChain', atoms };
+        return { kind:'dotChain', atoms };
     }
 
 FunctionDeclaration
@@ -97,7 +97,7 @@ FunctionDeclaration
 
 FunctionMainDeclaration
     = fn:FunctionName _ fp:FunctionParameterSection fb:(_ (':'/'=') _ fb:FunctionBody { return fb; })? {
-        return { ast:'functionDeclaration', name:fn.name, privateAccess:fn.privateAccess, superParams:fp.superParams, params:fp.params, body:fb };
+        return { kind:'functionDeclaration', name:fn.name, privateAccess:fn.privateAccess, superParams:fp.superParams, params:fp.params, body:fb };
     }
 
 FunctionName
@@ -154,7 +154,7 @@ MacroDeclaration
 
 MacroMainDeclaration
     = mn:MacroName _ '(' fpm:(_ fp1:FunctionParameter fp2:(_ ',' _ fp:FunctionParameter { return fp; })* { return join(fp1, fp2); })? _ ')' _ (':'/'=') _ fb:FunctionBody {
-        return { ast:'macroDeclaration', name:mn.name, privateAccess:mn.privateAccess, params:fpm, body:fb };
+        return { kind:'macroDeclaration', name:mn.name, privateAccess:mn.privateAccess, params:fpm, body:fb };
     }
 
 MacroName
@@ -174,7 +174,7 @@ TypeMainDeclaration
     = nm:TypeName _ tp:TypeParameterSection spt:(_ sp:SuperTypeDeclaration { return sp; })? {
         // Constructor Function
         let constructorFunction = {
-            ast:'functionDeclaration', name:nm.name, privateAccess:false, superParams:tp.superParams, params:tp.params, body:null
+            kind:'functionDeclaration', name:nm.name, privateAccess:false, superParams:tp.superParams, params:tp.params, body:null
         };
 
         // Fields
@@ -184,18 +184,18 @@ TypeMainDeclaration
                 patternType:null,
                 names:[{name:(param.scopeKey!=undefined?param.scopeKey:param.key), privateAccess:param.privateAccess, rest:false}]
             };
-            fields.push({ ast:'subjectDeclaration', pattern, mutability:param.mutability, value:param.value });
+            fields.push({ kind:'subjectDeclaration', pattern, mutability:param.mutability, value:param.value });
         }
 
         // Type
         let type = {
-            ast:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields
+            kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields
         };
 
         return [type, constructorFunction];
     }
     / nm:TypeName spt:(_ sp:SuperTypeDeclaration { return sp; })? tb:(_ (':'/'=') _ ex:TypeBody { return ex; })? {
-        return { ast:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields:tb };
+        return { kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields:tb };
     }
 
 TypeName
@@ -259,7 +259,7 @@ AbstMainDeclaration
     = nm:TypeName _ tp:TypeParameterSection spt:(_ sp:SuperTypeDeclaration { return sp; })? {
         // Constructor Function
         let constructorFunction = {
-            ast:'functionDeclaration', name:nm.name, privateAccess:false, superParams:tp.superParams, params:tp.params, body:null
+            kind:'functionDeclaration', name:nm.name, privateAccess:false, superParams:tp.superParams, params:tp.params, body:null
         };
 
         // Fields
@@ -269,18 +269,18 @@ AbstMainDeclaration
                 patternType:null,
                 names:[{name:param.name, privateAccess:param.privateAccess, rest:false}]
             };
-            fields.push({ ast:'subjectDeclaration', pattern, mutability:param.mutability, value:param.value });
+            fields.push({ kind:'subjectDeclaration', pattern, mutability:param.mutability, value:param.value });
         }
 
         // Type
         let type = {
-            ast:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, body
+            kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, body
         };
 
         return [type, constructorFunction];
     }
     / nm:TypeName spt:(_ sp:SuperTypeDeclaration { return sp; })? tb:(_ (':'/'=') _ ex:AbstBody { return ex; })? {
-        return { ast:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, body:tb };
+        return { kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, body:tb };
     }
 
 AbstBody
@@ -293,7 +293,7 @@ AbstContentInline
         let subtypes = [];
         for (let subtype of subtypes) {
             subtypes.push({
-                ast:'subtype', name:subtype.name, privateAccess:subtype.privateAccess, params:subtype.params
+                kind:'subtype', name:subtype.name, privateAccess:subtype.privateAccess, params:subtype.params
             })
         }
         return subtypes;
@@ -307,11 +307,11 @@ AbstContentBlock
 
         for (let exp of expressions) {
             if (exp.type === 'subjectDeclaration')
-                fields.push({ ast:'subjectDeclaration', pattern:exp.subject.pattern, mutability:exp.subject.mutability, value:exp.subject.value });
+                fields.push({ kind:'subjectDeclaration', pattern:exp.subject.pattern, mutability:exp.subject.mutability, value:exp.subject.value });
             else {
                 for (let subtype of exp.subtypes) {
                     subtypes.push({
-                        ast:'subtype', name:subtype.name, privateAccess:subtype.privateAccess, params:subtype.params
+                        kind:'subtype', name:subtype.name, privateAccess:subtype.privateAccess, params:subtype.params
                     })
                 }
             }
@@ -351,10 +351,10 @@ AbstSubTypeParameter
 ImportDeclaration
     = 'import' dy:(_ op:'!' { return op })? ky:(_ id:Identifier _ ':' { return id })? _ rt:'/'? pt1:PathIdentifier pt2:(_ '/' pt:PathIdentifier { return pt })* sb:(_ '{' _ sb1:ImportSubject sb2:(_ ',' _ is:ImportSubject { return is })* _ '}' { return join(sb1, sb2); })? {
         let path = "'" + (rt?rt:'') + join(pt1, pt2).join('/') + "'"; // concatenate all the path tokens
-        return { ast:'importDeclaration', dynamic:(dy!==null), key:ky, path, names:safeAccess(sb) };
+        return { kind:'importDeclaration', dynamic:(dy!==null), key:ky, path, names:safeAccess(sb) };
     }
     / 'import' dy:(_ op:'!'? { return op }) ky:(_ id:Identifier _ ':' { return id })? _ sl:StringLiteral sb:(_ '{' _ sb1:ImportSubject sb2:(_ ',' _ is:ImportSubject { return is })* _ '}' { return join(sb1, sb2); })? {
-        return { ast:'importDeclaration', dynamic:(dy!==null), key:ky, path:sl.value, names:safeAccess(sb) };
+        return { kind:'importDeclaration', dynamic:(dy!==null), key:ky, path:sl.value, names:safeAccess(sb) };
     }
 
 ImportSubject
@@ -383,146 +383,146 @@ CondExprInline
 
 IfExprInline
     = ex1:Atom _ 'if' _ hd:IfHeadExpr ex2:(_ 'else' _ ex:Atom { return ex })? {
-        return { ast:'if', head:hd, body:[ex1], elifs:null, elseBody:ex2 };
+        return { kind:'if', head:hd, body:[ex1], elifs:null, elseBody:ex2 };
     }
 
 WhileExprInline
     = ex1:Atom _ 'while' _ hd:IfHeadExpr ex2:(_ 'end' _ ex:Atom { return ex })? {
-        return { ast:'while', head:hd, body:[ex1], endBody:[ex2]  };
+        return { kind:'while', head:hd, body:[ex1], endBody:[ex2]  };
     }
 
 ForExprInline
     = ex1:Atom _ 'for' _ hd:ForHeadExpr ex2:(_ 'end' _ ex:Atom { return ex })? {
-        return { ast:'for', head:hd, body:[ex1], endBody:[ex2] };
+        return { kind:'for', head:hd, body:[ex1], endBody:[ex2] };
     }
 
 IfExprBlock
     = 'if' _ hd1:IfHeadExpr hd2:((_ ',')? _ 'if' _ hd:IfHeadExpr { return hd })? _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
         if (hd2 !== null) {
-            let inner = { ast:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-            return { ast:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
+            let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
+            return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
         }
-        return { ast:'if', head:hd1, body:fb, elifs:ef, elseBody:eb };
+        return { kind:'if', head:hd1, body:fb, elifs:ef, elseBody:eb };
     }
     / 'if' _ hd1:IfHeadExpr (_ ',')? _ 'while' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'while', head:hd2, body:fb, endBody:eb };
-        return { ast:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
+        let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
+        return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
     }
     / 'if' _ hd1:IfHeadExpr (_ ',')? _ 'for' _ hd2:ForHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'for', head:hd2, body:fb, endBody:eb };
-        return { ast:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
+        let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
+        return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
     }
     / 'if' _ hd:IfHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'loop', body:fb, endBody:eb };
-        return { ast:'if', head:hd, body:[inner], elifs:null, elseBody:null };
+        let inner = { kind:'loop', body:fb, endBody:eb };
+        return { kind:'if', head:hd, body:[inner], elifs:null, elseBody:null };
     }
     / 'if' _ hd1:IfHeadExpr (_ ',')? _ 'try' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'try', head:hd2, body:fb, catchs:ce };
-        return { ast:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
+        let inner = { kind:'try', head:hd2, body:fb, catchs:ce };
+        return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
     }
 
 WhileExprBlock
     = 'while' _ hd1:IfHeadExpr (_ ',')? _ 'if' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
-        let inner = { ast:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-        return { ast:'while', head:hd1, body:[inner], endBody:null };
+        let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
+        return { kind:'while', head:hd1, body:[inner], endBody:null };
     }
     / 'while' _ hd1:IfHeadExpr hd2:((_ ',')? _ 'while' _ hd:IfHeadExpr)? _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
         if (hd2 !== null) {
-            let inner = { ast:'while', head:hd2, body:fb, endBody:eb };
-            return { ast:'while', head:hd1, body:[inner], endBody:null };
+            let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
+            return { kind:'while', head:hd1, body:[inner], endBody:null };
         }
-        return { ast:'while', head:hd1, body:fb, endBody:eb };
+        return { kind:'while', head:hd1, body:fb, endBody:eb };
     }
     / 'while' _ hd1:IfHeadExpr (_ ',')? _ 'for' _ hd2:ForHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'for', head:hd2, body:fb, endBody:eb };
-        return { ast:'while', head:hd1, body:[inner], endBody:null };
+        let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
+        return { kind:'while', head:hd1, body:[inner], endBody:null };
     }
     / 'while' _ hd:IfHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'loop', body:fb, endBody:eb };
-        return { ast:'while', head:hd, body:[inner], endBody:null };
+        let inner = { kind:'loop', body:fb, endBody:eb };
+        return { kind:'while', head:hd, body:[inner], endBody:null };
     }
     / 'while' _ hd1:IfHeadExpr (_ ',')? _ 'try' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'try', head:hd2, body:fb, catchs:ce };
-        return { ast:'while', head:hd1, body:[inner], endBody:null };
+        let inner = { kind:'try', head:hd2, body:fb, catchs:ce };
+        return { kind:'while', head:hd1, body:[inner], endBody:null };
     }
 
 ForExprBlock
     = 'for' _ hd1:ForHeadExpr (_ ',')? _ 'if' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
-        let inner = { ast:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-        return { ast:'for', head:hd1, body:[inner], endBody:null };
+        let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
+        return { kind:'for', head:hd1, body:[inner], endBody:null };
     }
     / 'for' _ hd1:ForHeadExpr (_ ',')? _ 'while' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'while', head:hd2, body:fb, endBody:eb };
-        return { ast:'for', head:hd1, body:[inner], endBody:null };
+        let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
+        return { kind:'for', head:hd1, body:[inner], endBody:null };
     }
     / 'for' _ hd1:ForHeadExpr hd2:((_ ',')? _ 'for' _ ex:ForHeadExpr { return ex })? _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
         if (hd2 !== null) {
-            let inner = { ast:'for', head:hd2, body:fb, endBody:eb };
-            return { ast:'for', head:hd1, body:[inner], endBody:null };
+            let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
+            return { kind:'for', head:hd1, body:[inner], endBody:null };
         }
-        return { ast:'for', head:hd1, body:fb, endBody:eb };
+        return { kind:'for', head:hd1, body:fb, endBody:eb };
     }
     / 'for' _ hd:ForHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'loop', body:fb, endBody:eb };
-        return { ast:'for', head:hd, body:[inner], endBody:null };
+        let inner = { kind:'loop', body:fb, endBody:eb };
+        return { kind:'for', head:hd, body:[inner], endBody:null };
     }
     / 'for' _ hd1:ForHeadExpr (_ ',')? _ 'try' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'try', head:hd2, body:fb, catchs:ce };
-        return { ast:'for', head:hd1, body:[inner], endBody:null };
+        let inner = { kind:'try', head:hd2, body:fb, catchs:ce };
+        return { kind:'for', head:hd1, body:[inner], endBody:null };
     }
 
 LoopExprBlock
     = 'loop' (_ ',')? _ 'if' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
-        let inner = { ast:'if', head:hd, body:fb, elifs:ef, elseBody:eb };
-        return { ast:'loop', body:[inner], endBody:null };
+        let inner = { kind:'if', head:hd, body:fb, elifs:ef, elseBody:eb };
+        return { kind:'loop', body:[inner], endBody:null };
     }
     / 'loop' (_ ',')? _ 'while' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { ast:'while', head:hd, body:fb, endBody:eb };
-        return { ast:'loop', body:[inner], endBody:null };
+        let inner = { kind:'while', head:hd, body:fb, endBody:eb };
+        return { kind:'loop', body:[inner], endBody:null };
     }
     / 'loop' hd:((_ ',')? _ 'for' _ ex:ForHeadExpr { return ex })? _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
         if (hd !== null) {
-            let inner = { ast:'for', head:hd, body:fb, endBody:eb };
-            return { ast:'loop', body:[inner], endBody:null };
+            let inner = { kind:'for', head:hd, body:fb, endBody:eb };
+            return { kind:'loop', body:[inner], endBody:null };
         }
-        return { ast:'loop', body:fb, endBody:eb };
+        return { kind:'loop', body:fb, endBody:eb };
     }
     / 'loop' (_ ',')? _ 'try' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'try', head:hd, body:fb, catchs:ce };
-        return { ast:'loop', body:[inner], endBody:null };
+        let inner = { kind:'try', head:hd, body:fb, catchs:ce };
+        return { kind:'loop', body:[inner], endBody:null };
     }
 
 TryExprBlock
     = 'try' _ hd1:IfHeadExpr (_ ',')? _ 'if' _  hd2:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-        return { ast:'try', head:hd1, body:[inner], catchs:ce };
+        let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
+        return { kind:'try', head:hd1, body:[inner], catchs:ce };
     }
     / 'try' _ hd1:IfHeadExpr (_ ',')? _ 'while' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'while', head:hd2, body:fb, endBody:eb };
-        return { ast:'try', head:hd1, body:[inner], catchs:ce };
+        let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
+        return { kind:'try', head:hd1, body:[inner], catchs:ce };
     }
     / 'try' _ hd1:IfHeadExpr (_ ',')? _ 'for' _ hd2:ForHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'for', head:hd2, body:fb, endBody:eb };
-        return { ast:'try', head:hd1, body:[inner], catchs:ce };
+        let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
+        return { kind:'try', head:hd1, body:[inner], catchs:ce };
     }
     / 'try' _ hd:IfHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { ast:'loop', body:fb, endBody:eb };
-        return { ast:'try', head:hd, body:[inner], catchs:ce };
+        let inner = { kind:'loop', body:fb, endBody:eb };
+        return { kind:'try', head:hd, body:[inner], catchs:ce };
     }
     / 'try' _ hd1:IfHeadExpr hd2:((_ ',')? _ 'try' _ ex:IfHeadExpr { return ex })? _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
         if (hd2 !== null) {
-            let inner = { ast:'try', head:hd2, body:fb, catchs:null };
-            return { ast:'try', head:hd1, body:[inner], catchs:ce };
+            let inner = { kind:'try', head:hd2, body:fb, catchs:null };
+            return { kind:'try', head:hd1, body:[inner], catchs:ce };
         }
-        return { ast:'try', head:hd1, body:fb, catchs:ce };
+        return { kind:'try', head:hd1, body:fb, catchs:ce };
     }
     / 'try' _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        return { ast:'try', head:null, body:fb, catchs:ce };
+        return { kind:'try', head:null, body:fb, catchs:ce };
     }
 
 RedoWhileExprBlock
     = 'redo' _ ':' _ fb:FunctionBody _ NextLine Samedent 'while' _ hd:IfHeadExpr eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        return { ast:'redo', head:hd, body:fb, endBody:eb };
+        return { kind:'redo', head:hd, body:fb, endBody:eb };
     }
 
 ElifExpr
@@ -566,50 +566,6 @@ IfHeadExpr
 ForHeadExpr
     = mu:('var' _)? _ pt:PatternMap _ 'in' _ ex1:Expr ex2:(_ ',' _ ex:Expr { return ex })* {
     }
-
-// ForAssignLhs
-//     = id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier{ return id; })+ {
-//         return { patternType:'openTuple', names:join(id1, id2) };
-//     }
-//     / id1:DotIdentifier _ '.' '|' _ id2:DotIdentifier id3:(_ ',' id:DotIdentifier { return id; })+ _ '|' id4:(_ '.' id:DotIdentifier { return id; })? {
-//         return { patternType:'cascadeDot', names:[id1, id2, ...id3, id4] };
-//     }
-//     / '|' _ id1:DotIdentifier id2:(_ ',' _ id:DotIdentifier{ return id; })+ _ '|' _ '.' id3:DotIdentifier {
-//         return { patternType:'cascadeDot', names:[null, id1, ...id2, id3] };
-//     }
-//     / '(' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })*  _ ')' {
-//         return { patternType:'tuple', names:join(id1, id2) };
-//     }
-//     / '[' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })* _ ']'{
-//         return { patternType:'list', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:AssignIdentifier id2:(_ ',' _ id:AssignIdentifier { return id; })* _ '}' {
-//         return { patternType:'set', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:AssignIdentifier _ ':' id2:(_ ',' _ id:AssignIdentifier _ ':' { return id; })* _ '}' {
-//         return { patternType:'dict', names:join(id1, id2) };
-//     }
-//     / '{' _ id1:AssignIdentifier _ ':'  id2:AssignIdentifier _ '}' {
-//         return { patternType:'keysValues', names:[id1, id2] };
-//     }
-//     / id:AssignIdentifier {
-//         return { patternType:null, names:[id] };
-//     }
-
-// ForAssignIdentifier
-//     = id:DotIdentifier {
-//         return { name:id, rest:false };
-//     }
-//     / '...' id:Identifier? {
-//         return { name:id, rest:true };
-//     }
-//     / '_' { return { name:'_', rest:false }; }
-
-// ForDotIdentifier
-//     = exs:(ex:Atom _ '.' { return ex; })* id:Identifier {
-//         let atoms = [...exs, id];
-//         return { ast:'dotChain', atoms };
-//     }
 
 TypeAnnotation
     = TypeSubject (_ ',' _ TypeSubject)* (_ '->' _ TypeSubject)? (_ '~' _ TypeAssert (_ ',' _ TypeAssert)*)?
@@ -699,11 +655,11 @@ SubAtomExtension
 SubAtom
     = cm:Comprehension { return cm; } // INCOMPLETE
     / tv:TypeValue { return tv; } // INCOMPLETE
-    / '(' ex:ExprBlock ')' { return { ast:'parens',  }; }
+    / '(' ex:ExprBlock ')' { return { kind:'parens',  }; }
     / id:Identifier { return id; }
     / lt:LiteralInline { return lt; }
-    / 'pass' { return { ast:'pass' }; }
-    / '$' { return { ast:'$' }; }
+    / 'pass' { return { kind:'pass' }; }
+    / '$' { return { kind:'$' }; }
 
 TypeValue
     = '(' _ TypeSubject (_ ',' _ TypeSubject)* _ '->' _ TypeSubject (_ '~' _ TypeAssert (_ ',' _ TypeAssert)*)? _ ')'
@@ -799,16 +755,16 @@ Spill
     = 'spill' (_ 'at' _ Identifier)?
 
 Yield
-    = 'yield' _ ex:(ExprInline/OpenTuple) { return { ast:'yield', value:ex }; }
+    = 'yield' _ ex:(ExprInline/OpenTuple) { return { kind:'yield', value:ex }; }
 
 Delegate
-    = 'delegate' _ ex:ExprInline { return { ast:'delegate', value:ex }; }
+    = 'delegate' _ ex:ExprInline { return { kind:'delegate', value:ex }; }
 
 Await
-    = 'await' _ ex:ExprInline { return { ast:'await', value:ex }; }
+    = 'await' _ ex:ExprInline { return { kind:'await', value:ex }; }
 
 Raise
-    = 'raise' _ ex:ExprInline { return { ast:'raise', value:ex }; }
+    = 'raise' _ ex:ExprInline { return { kind:'raise', value:ex }; }
 
 // NOTE: There are three types of Pattern Matching
 // - Pattern Mapping
@@ -1037,11 +993,11 @@ CommaColon
     = ',' / ';'
 
 RegexLiteral
-    = rl:('/'[^/]+'/') { return { ast:'regex', value:stringify(rl) }; } // '
+    = rl:('/'[^/]+'/') { return { kind: 'regex', value: stringify(rl) }; } // '
 
 StringLiteral
     = sl:(('"'[^\"]+'"') // "
-    / ("'"[^\']+"'")) { return { ast:'string', value:stringify(sl) }; } // '
+    / ("'"[^\']+"'")) { return { kind: 'string', value: stringify(sl) }; } // '
 
 NumericLiteral
     = FloatLiteral
@@ -1054,16 +1010,16 @@ IntegerLiteral 'integer'
     / IntegerHexLiteral
 
 IntegerDecimalLiteral
-    = id:([1-9]('_'? [0-9])*) { return { ast:'int', value:removeUnderscores(stringify(id)), radix:'dec' }; }
+    = id:([1-9]('_'? [0-9])*) { return { kind: 'int', value: removeUnderscores(stringify(id)) }; }
 
 IntegerBinaryLiteral
-    = ib:("0b"[0-1]('_'? [0-1])*) { return { ast:'int', value:removeUnderscores(stringify(ib)), radix:'bin' }; }
+    = ib:("0b"[0-1]('_'? [0-1])*) { return { kind: 'int', value: removeUnderscores(stringify(ib)) }; }
 
 IntegerOctalLiteral
-    = io:("0o"[1-7]('_'? [0-7])*) { return { ast:'int', value:removeUnderscores(stringify(io)), radix:'oct' }; }
+    = io:("0o"[1-7]('_'? [0-7])*) { return { kind: 'int', value: removeUnderscores(stringify(io)) }; }
 
 IntegerHexLiteral
-    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { ast:'int', value:removeUnderscores(stringify(ix)), radix:'hex' }; }
+    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { kind: 'int', value: removeUnderscores(stringify(ix)) }; }
 
 FloatLiteral 'float'
     = FloatDecimalLiteral
@@ -1073,22 +1029,22 @@ FloatLiteral 'float'
 
 FloatDecimalLiteral
     = fd:((([0-9]('_'? [0-9])*)?"."[0-9]('_'? [0-9])*("e"[+-]?[0-9]('_'? [0-9])*)?)
-    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { ast:'float', value:removeUnderscores(stringify(fd)), radix:'dec' }; }
+    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { kind: 'float', value: removeUnderscores(stringify(fd)) }; }
 
 FloatBinaryLiteral
     = fb:(("0b"[0-1]('_'? [0-1])*"."[0-1]('_'? [0-1])*("e"[+-]?[0-1]('_'? [0-1])*)?)
-    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { ast:'float', value:removeUnderscores(stringify(fb)), radix:'bin' }; }
+    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { kind: 'float', value: removeUnderscores(stringify(fb)) }; }
 
 FloatOctalLiteral 
     = fo:(("0o"[0-7]('_'? [0-7])*"."[0-7]('_'? [0-7])*("e"[+-]?[0-7]('_'? [0-7])*)?)
-    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { ast:'float', value:removeUnderscores(stringify(fo)), radix:'oct' }; }
+    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { kind: 'float', value: removeUnderscores(stringify(fo)) }; }
 
 FloatHexLiteral
     = fx:(("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"."[0-9A-Fa-f]('_'? [0-9A-Fa-f])*("p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)?)
-    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { ast:'float', value:removeUnderscores(stringify(fx)), radix:'hex' }; }
+    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { kind: 'float', value: removeUnderscores(stringify(fx)) }; }
 
 BooleanLiteral 'boolean'
-    = bl:('true' / 'false') { return { ast:'boolean', value:stringify(bl) }; }
+    = bl:('true' / 'false') { return { kind: 'boolean', value: stringify(bl) }; }
 
 SingleLineComment 'singleLineComment'
     = '#' SingleLineCommentCharacter*
