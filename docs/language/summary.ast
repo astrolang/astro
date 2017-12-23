@@ -184,7 +184,7 @@ VALUES & REFERENCES
     let developer = iso 'AppCypher'
     let anotherDeveloper = developer # Invalid!
 
-    # While `val` is a shallow copy operation, `acq` is a copy operation.
+    # While `val` is a shallow copy operation, `acq` is a deep copy operation.
     let rent = val house
     let buyer = acq game
 
