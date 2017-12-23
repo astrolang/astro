@@ -524,7 +524,7 @@ CASCADING NOTATION
     james->name()->print() # Same as `james.name(); james.print()`
 
 WALL NOTATION
-    # Wall notation is a syntax sugar for shortening operands with common fields or objects
+    # Wall notation is a syntax sugar for shortening operands with common fields or objects.
     let james = person.name, person.age
     let james = person.|name, age|
 
@@ -539,9 +539,9 @@ INDENTATION
     # Astro recognizes 4-space indentations only. No tabs.
     fun removeSpaces(string):
         return s.split(/[ ]/).join()
-
-    # The '\\' punctuator can replace a physical dedent.
-    if studio.isLive(): blockAccess() \\ else: openAccess()
+    
+    fun removeSpaces(string):
+      return s.split(/[ ]/).join() # Invalid!
 
 IF EXPRESSION
     # Coonditional branches using `if`, `elif` and `else`.
@@ -566,7 +566,7 @@ IF EXPRESSION
 
 TERNARY OPERATOR
     # The ternary operator is a syntacttc sugar for an if-else expression.
-    let cmp = if a > b: 0 \\ else: 1
+    let cmp = if a > b: 0 else: 1
 
     # Astro requires parens around the condition.
     let cmp = (a > b) ? 0 : 1
