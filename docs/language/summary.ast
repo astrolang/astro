@@ -201,14 +201,14 @@ VALUES & REFERENCES
 
 NUMBERS
     # Number literals in Astro
-    var index    = 5 # Int literal.
-    var axis     = -3 # UInt literal.
-    let meters   = 0.25e-5 # Float64 literal.
-    let salary   = 10_000'f #' `'f` marks the number literal as Float64.
-    var price    = 0x6FFF00p+12 # Hex literal.
-    var opCode   = 0b10110001 # Binary literal.
+    var index = 5 # Int literal.
+    var axis = -3 # UInt literal.
+    let meters = 0.25e-5 # Float64 literal.
+    let salary = 10_000'f #' `'f` marks the number literal as Float64.'
+    var price = 0x6FFF00p+12 # Hex literal.
+    var opCode = 0b10110001 # Binary literal.
     var interest = 0o566768 # Octal literal.
-    let pi       = 3.14'bf #' BigFloat literal.
+    let pi = 3.14'bf #' BigFloat literal.
 
 TUPLES
     # Tuple is an immutable datatype whose element types and length are determined statically.
@@ -218,7 +218,7 @@ TUPLES
 
     # Tuple destructuring.
     let person = 'Sam', 50
-    let name, age = person # name = person, age = person
+    let name, age = person # name = 'Sam', age = 50
     let (name, age) = person # name = 'Sam', age = 50
 
     # Tuple unpacking.
@@ -470,23 +470,23 @@ STRINGS
 
 STRING FORMATTING
     # Padding.
-    let leftPadding        = 'left padding: $:>10(string)'
-    let rightPadding       = 'right padding: $:<10(string)'
+    let leftPadding = 'left padding: $:>10(string)'
+    let rightPadding = 'right padding: $:<10(string)'
     let placeholderPadding = 'placeholder padding: $:_<10(string)'
-    let centering          = 'centering: $:^10(string)'
+    let centering = 'centering: $:^10(string)'
 
     # Truncation.
-    let truncating         = 'truncate string: $:.10(string)'
+    let truncating = 'truncate string: $:.10(string)'
 
     # Numbers.
-    let integer            = 'integer: $:d(number)'
-    let float              = 'float: $:f(number)'
-    let truncation         = 'figure truncation: $:6.2f(number)'
-    let positive           = 'positive: $:+d(number)'
-    let negative           = 'negative: $:-f(number)'
+    let integer = 'integer: $:d(number)'
+    let float = 'float: $:f(number)'
+    let truncation = 'figure truncation: $:6.2f(number)'
+    let positive = 'positive: $:+d(number)'
+    let negative = 'negative: $:-f(number)'
 
     # Date-Time | Custom objects.
-    let date               = 'date: $:|Y-m-d H:M|(date)'
+    let date = 'date: $:|Y-m-d H:M|(date)'
 
 MULTILINE EXPRESSIONS
     # Expressions that spread accross multiple lines must be enclosed in brackets.
@@ -713,9 +713,9 @@ MATCH EXPRESSION
     | 75 || 67 => 2 # Matches if object has value `75` or value `67`
     | 75 && 67 => 3 # Matches if object has value `75` and value `67`
     | _ > 75 => 4 # Matches if `object > 75`
-    ! 75 => 5 # Matches if object has value `75`
+    ! 75 => 5 # Matches if object doesn't have value `75`
     | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
-    | n => 6 # Matches. Binds `n` to the matched object.
+    | n => 6 # Matches. Binds `n` to the object.
     | _ => 7 # Matches.
 
     # A match block can be written on a single line but it is not advised.
@@ -728,8 +728,8 @@ MATCH EXPRESSION
 
     # A match expression can also be used to match against the arguments of a function, if, for, loop or while expressions.
     fun isChosen(option):
-        | 'y' || 'Y' => return true
-        | 'n' || 'N' => return false
+        | 'y' || 'Y' => true
+        | 'n' || 'N' => false
         | _ => raise Error('Invalid choice!')
 
 ASSIGNMENT DESTRUCTURING
