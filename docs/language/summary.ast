@@ -139,7 +139,6 @@ EXPRESSION-ORIENTED
     fun setName(p, name): #: (Person, Str)
         p.name = name;
     ..
-
     let name = setName('John Smith') # Invalid! setName returns no result.
 
 SPECIFYING TYPES
@@ -492,28 +491,30 @@ STRING FORMATTING
     let date = 'date: $:|Y-m-d H:M|(date)'
 
 MULTILINE EXPRESSIONS
-    # Expressions that spread accross multiple lines must be enclosed in brackets.
-    # or the line-continuation punctuator can be used.
+    # Expressions can be continued on the next line by ending the line with a line-continuation punctuator.
     var zero = -100 ...
     + 100
 
-    # Note that subsequent lines in multiline expressions can't be indented.
-    var zero = -100 ...
-        + 100
+    # If an expression ends the line with a  comma, it is expected to continue on the next line.
+    let brother = 'James',
+    'Jackcon'
 
-    # Expressions inside a pair of brackets/braces can span multiple lines.
-    # without using the line-continuation punctuator.
-    sum(1, 2, 3, 4, 5, 6, 7, 8,
-    9, 10, 11, 12)
+    # If an expression is inside a pair of brackets, it can span multiple lines until a matching closing bracket/brace is encountered.
+    let total = (1 + 2 + 3 + 4
+    + 5 + 6 + 7)
+    
+    # However once the content of a parens are indented, a block is expected, so continuation punctuator is needed for incomplete expression.
+    let price = (
+        print('price bound to a value')
+        add(450, 600)
+    )
+    
+    let total = (
+        1 + 2 + 3 + 4 ...
+        + 5 + 6 + 7
+    )
 
-    # If the content of a pair of brackets/braces are moved to a newline, it needs to be indented.
-    playMusic(
-        'Asa',
-        'Jailer',
-        '2009'
-    ).rewind()
-
-    # Chained dot notation can be moved to subsequent lines and indented.
+    # Chained dot notation or cascading notation can written on subsequent lines but with an indentation.
     sentence
         .trim()
         .lower()
@@ -567,7 +568,7 @@ TERNARY OPERATOR
     # The ternary operator is a syntacttc sugar for an if-else expression.
     let cmp = if a > b: 0 \\ else: 1
 
-    # Astro requires a parens around the condition.
+    # Astro requires parens around the condition.
     let cmp = (a > b) ? 0 : 1
 
 NIL
