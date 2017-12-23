@@ -35,6 +35,9 @@ SUBJECT BINDING
     # The expression that comes after an assignment operator can be moved to the next line with a preceding indentation.
     var φ =
         arctan(y/x)
+    
+    # Declaring and binding multiple subjects to the same value by separating them with spaces.
+    let a b c = 50
 
 SHADOWING
     # Astro allows subjects to be rebound to a different type in the same scope
@@ -199,7 +202,7 @@ VALUES & REFERENCES
         a, b = b, a
     ..
 
-NUMBERS
+NUMBER LITERALS
     # Number literals in Astro
     var index = 5 # Int literal.
     var axis = -3 # UInt literal.
