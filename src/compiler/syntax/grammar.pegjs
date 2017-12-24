@@ -17,7 +17,7 @@
 // A complete block should indent itself at entry and exit with DEDENT NEWLINE SAMEDENT.
 
 Start
-    = exs:Program { return { kind:'program', body:exs } }
+    = exs:Program { return { kind:'program', expressions:exs } }
 
 Program
     = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine pc:(Samedent ex:ProgramCode { return ex })? { return pc })* {
@@ -116,8 +116,8 @@ FunctionSuperTypeInit
     }
 
 FunctionParameter
-    = mu:('var' _)? rs:'...'? id1:Identifier id2:(dt:"." id:Identifier? { return [id,dt]; })? vl:(_ ":" _ ex:Atom { return ex;})? {
-        return { mutability:(mu!==null), rest:(rs!==null), key:id1, scopeKey:safeAccess(id2,0), keyNeeded:(safeAccess(id2,1)==='.'), value:vl };
+    = mu:('var' _)? rs:'...'? id1:Identifier id2:(dt:"." id:Identifier? { return [id, dt]; })? vl:(_ ":" _ ex:Atom { return ex;})? {
+        return { mutability:(mu!==null), rest:(rs!==null), key:id1, scopeKey: safeAccess(id2,0), keyNeeded: (safeAccess(id2,1)==='.'), value:vl };
     }
 
 FunctionBody
@@ -702,7 +702,6 @@ CommandNotationArg
     / StringLiteral
     / id:Identifier
     / 'pass'
-    / '$'
 
 // TODO: Not yet referenced in grammar
 MacroCall
@@ -734,143 +733,36 @@ IndexArg
     / ExprInline
 
 Comprehension 'comprehension' // NOTE: there can't be tuple generator
-    = '(' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ')' { return 'gen' } // generator
-    / '[' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ']' // list
-    / '{' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // set
-    / '{' _ ExprInline _ ':' _ ExprInline _ '|' _ ForHeadExpr (_ ',' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // dict
+    = '(' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ')' { return 'gen' } // generator
+    / '[' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ']' // list
+    / '{' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // set
+    / '{' _ ExprInline _ ':' _ ExprInline _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // dict
 
 ComprehensionHeadExpr
     = ExprInline (_ ',' _ ExprInline)*
 
 Return
-    = 'return' (_ (ExprInline/OpenTuple))? (_ 'at' _ Identifier)?
+    = 'return' vl:(_ ex:(ExprInline/OpenTuple) { return ex; })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'return', value: vl, at: nm }; }
 
 Break
-    = 'break' (_ (ExprInline/OpenTuple))? (_ 'at' _ Identifier)?
+    = 'break' vl:(_ ex:(ExprInline/OpenTuple) { return ex; })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'break', value: vl, at: nm }; }
 
 Continue
-    = 'continue' (_ 'at' _ Identifier)?
+    = 'continue' nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'continue', at: nm }; }
 
 Spill
-    = 'spill' (_ 'at' _ Identifier)?
+    = 'spill' { return { kind: 'spill' }; }
 
 Yield
-    = 'yield' _ ex:(ExprInline/OpenTuple) { return { kind:'yield', value:ex }; }
+    = 'yield' vl:(_ ex:(ExprInline/OpenTuple) { return ex; })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'yield', value: vl, at: nm }; }
 
 Delegate
-    = 'delegate' _ ex:ExprInline { return { kind:'delegate', value:ex }; }
-
-Await
-    = 'await' _ ex:ExprInline { return { kind:'await', value:ex }; }
+    = 'delegate' _ ex:ExprInline { return { kind: 'delegate', value: ex }; }
 
 Raise
-    = 'raise' _ ex:ExprInline { return { kind:'raise', value:ex }; }
+    = 'raise' _ ex:ExprInline { return { kind: 'raise', value: ex }; }
 
-// NOTE: There are three types of Pattern Matching
-// - Pattern Mapping
-//      let [a, _] = array
-// - Pattern Assertion
-//      [_, 2] ~ array
-// - Pattern Matching
-//      array; | [a, 2] -> _
-PatternMap
-    = Pattern
-    / OpenTuplePattern
-    / PatternAtom
-
-PatternAssert
-    = Pattern
-    / TypePattern
-    / FromToPattern
-    / PatternAtom
-
-PatternMatch
-    = MatchSubPattern (_ 'where' _ IfHeadExpr (_ ',' _ IfHeadExpr)*)
-
-MatchSubPattern
-    = Pattern
-    / TypePattern
-    / FromToPattern
-    / OrPattern
-    / ExpressionPattern
-    / PatternAtom
-
-Pattern
-    = RangePattern
-    / ListPattern
-    / SetPattern
-    / DictPattern
-    / TuplePattern
-    / NamedTuplePattern
-
-RangePattern
-    = '[' _ PatternAtomRest _ ':' _ '!'? PatternAtomRest (_ ':' _ PatternAtomRest)? _ ']'
-    / '[' _ '!'? PatternAtomRest _ ':' _ PatternAtomRest (_ ':' _ PatternAtomRest)? _ ']'
-
-ListPattern
-    = '[' _ ']'
-    / '[' _ PatternAtomRest (_ ',' _ PatternAtomRest)* (_ ';' _ PatternAtomRest (_ ',' _ PatternAtomRest)*)* (_ ',')? _ ']'
-
-SetPattern
-    = '{' _ '}'
-    / '{' _ PatternAtomRest (_ ',' PatternAtomRest)* (_ ';' _ PatternAtomRest (_ ',' _ PatternAtomRest)*)* (_ ',')? _ '}'
-
-DictPattern
-    = '{' _ ':' _ '}'
-    / '{' _ DictKeyValue (_ ',' _ DictKeyValue)* (_ ',')? _ '}'
-
-DictKeyValue
-    = '...'? (_ PatternAtom)? _ ':' _ (PatternAtom)
-    / '...'? PatternAtom _ ':'
-    / '...'
-
-TuplePattern
-    = '(' _ ')'
-    / '(' _ PatternAtomRest (_ ',' _ PatternAtomRest)+ (_ ',')? _ ')'
-    / '(' _ PatternAtomRest _ ',' _ ')'
-
-OrPattern
-    = OpenTuplePattern
-
-OpenTuplePattern
-    = PatternAtomRest (_ ',' _ PatternAtomRest)+
-
-NamedTuplePattern
-    = '(' _ ':' _ ')'
-    / '(' _ NamedTupleKeyValue (_ ',' _ NamedTupleKeyValue)* (_ ',')? _ ')'
-
-NamedTupleKeyValue
-    = ('...' _)? (Identifier _)? ':' _ PatternAtom
-    / ('...' _)? Identifier _ ':'
-    / '...'
-
-TypePattern
-    = Identifier _ '(' _ PatternAtom (_ ',' _ PatternAtom)* (_ ',')? _ ')'
-
-FromToPattern
-    = PatternAtom _ '...' _ PatternAtom
-
-ExpressionPattern
-    = '$' '(' _ ExprInline _ ')'
-
-PatternAtomRest
-    = '...' PatternAtom?
-    / PatternAtom
-
-// NOTE: PatternAtom combines a lot of properties that are not useful for constructs, for example,
-// DeclarationLHSPattern needs access modifier, while other pattern types don't, e.g `let name'`
-// AssignLhsPattern needs atoms, while other pattern types don't, e.g `for (a + b).size`
-// PatternMap & PatternMatch need identifiers, while PatternAssert doesn't, e.g `let a`
-// PatternAssert & PatternMatch need literals, while PatternMap doesn't, e.g `2 ~ 2`
-// PatternAssert & PatternMatch need fromto, while PatternMap doesn't, e.g ``
-// PatternAssert & PatternMatch need typepattern, while PatternMap doesn't, e.g ``
-PatternAtom
-    = (Atom _ '.')* Identifier "'"?
-    / RegexLiteral
-    / StringLiteral
-    / NumericLiteral
-    / BooleanLiteral
-    / '(' _ ExprInline _ ')'
+OpenTuple
 
 LiteralInline // TODO: NSLiteral
     = StringLiteral
@@ -880,114 +772,57 @@ LiteralInline // TODO: NSLiteral
     / RangeLiteral
     / SymbolLiteral
     / ListLiteralInline
-    / SetLiteralInline
-    / DictLiteralInline
+    / ObjectLiteralInline
     / TupleLiteralInline
     / NamedTupleLiteralInline
 
 LiteralBlock // TODO: NSLiteral
     = ListLiteralBlock
-    / SetLiteralBlock
-    / DictLiteralBlock
+    / ObjectLiteralBlock
     / TupleLiteralBlock
     / NamedTupleLiteralBlock
 
 RangeLiteral
-    = '[' (_ ExprInline)? ':' (_ '!'? ExprInline)? (_ ':' _ ExprInline)? _ ']'
-    / '[' _ '!' ExprInline? _ ':' _ ExprInline (_ ':' _ ExprInline)? _ ']'
 
 SymbolLiteral
-    = '(' ':' _ ExprBlock _ ')'
-
-ListLiteral
-    = ListLiteralInline
-    / ListLiteralBlock
-
-ListLiteralInline
-    = '[' _ ']'
-    / '[' _ ExprInline (_ ',' _ ExprInline)* (_ ';' _ ExprInline (_ ',' _ ExprInline)*)* (_ ',' / _ ';' )? _ ']'
-
-ListLiteralBlock
-    = '[' _ SingleLineComment? NextLine Indent ListLiteral ((_ CommaColon)? _ ListLiteral)* ((_ CommaColon)? _
-        SingleLineComment? NextLine Samedent ListLiteral ((_ CommaColon)? _ ListLiteral)*)* (_ CommaColon)? _ Dedent NextLine Samedent ']'
-    // NOTE: the prevIndentCount decrement below is a temporary solution to an indentation bug caused by an unmatched rule, like the
-    // above, which increases indentation count with no way of decrementing it back when rule fails and goes to the next rule.
-    / ('[' { prevIndentCount -= 4; }) _ SingleLineComment? NextLine Indent ExprInline ((_ CommaColon) _ ExprInline)* ((_ CommaColon) _
-        SingleLineComment? NextLine Samedent ExprInline ((_ CommaColon) _ ExprInline)*)* (_ CommaColon)? _ Dedent NextLine Samedent ']'
-
-SetLiteral
-    = SetLiteralInline
-    / SetLiteralBlock
-
-SetLiteralInline
-    = '{' _ '}'
-    / '{' ExprInline (_ ',' ExprInline)* (_ ';' _ ExprInline (_ ',' _ ExprInline)*)* (_ ',')? _ '}'
-
-SetLiteralBlock
-    // = '{' _ SingleLineComment? NextLine (Indent { unmatchedCount += 1; } ) SetLiteral ((_ CommaColon)? _ SetLiteral)* ((_ CommaColon)? _
-    //     SingleLineComment? NextLine Samedent SetLiteral ((_ CommaColon)? _ SetLiteral)*)* (_ CommaColon)? _ Dedent NextLine Samedent '}'
-    // NOTE: the prevIndentCount decrement below is a temporary solution to an indentation bug caused by an unmatched rule, like the
-    // above, which increases indentation count with no way of decrementing it back when rule fails and goes to the next rule.
-    = '{' _ SingleLineComment? NextLine (Indent { prevIndentCount -= 4 }) ExprInline ((_ CommaColon) _ ExprInline)* ((_ CommaColon) _
-        SingleLineComment? NextLine Samedent ExprInline ((_ CommaColon) _ ExprInline)*)* (_ CommaColon)? _ Dedent NextLine Samedent ('}' { prevIndentCount += 4 })
-
-DictLiteral
-    = DictLiteralInline
-    / DictLiteralBlock
-
-DictLiteralInline
-    = '{' _ ':' _ '}'
-    / '{' _ DictKey _ ':' _ ExprInline (_ ',' _ DictKey _ ':' _ ExprInline)* (_ ',')? _ '}'
-
-DictLiteralBlock
-    = '{' _ SingleLineComment? NextLine Indent _ DictKey _ ':' _ SingleLineComment? DictLiteral ((_ ',')? _
-          SingleLineComment? NextLine Indent _ DictKey _ ':' _ SingleLineComment? DictLiteral)* (_ ',')? _ Dedent NextLine Samedent '}'
-    / '{' _ SingleLineComment? NextLine Indent _ DictKey _ ':' _ SingleLineComment? OpenDict (_
-          SingleLineComment? NextLine Indent _ DictKey _ ':' _ SingleLineComment? OpenDict)*  _ Dedent NextLine Samedent '}'
-
-OpenDict
-    = NextLine Indent DictKey _ ':' _ (OpenDict/ExprInline) (_
-      NextLine Samedent DictKey _ ':' _ (OpenDict/ExprInline))*  _ Dedent NextLine Samedent
-
-DictKey
-    = Atom
-    / '$' Identifier
-    / '$' '(' _ Atom _ ')'
 
 TupleLiteral
     = TupleLiteralInline
     / TupleLiteralBlock
 
 TupleLiteralInline
-    = '(' _ ')'
-    / '(' _ ExprInline (_ ',' _ ExprInline)+ (_ ',')? _ ')'
-    / '(' _ ExprInline _ ',' _ ')'
 
 TupleLiteralBlock
-    = '(' _ SingleLineComment? NextLine Indent TupleLiteral ((_ CommaColon)? _ TupleLiteral)* ((_ CommaColon)? _
-        SingleLineComment? NextLine Samedent TupleLiteral ((_ CommaColon)? _ TupleLiteral)*)* (_ CommaColon)? _ Dedent NextLine Samedent ')'
-    // NOTE: the prevIndentCount decrement below is a temporary solution to an indentation bug caused by an unmatched rule, like the
-    // above, which increases indentation count with no way of decrementing it back when rule fails and goes to the next rule.
-    / ('(' { prevIndentCount -= 4; }) _ SingleLineComment? NextLine Indent ExprInline ((_ CommaColon) _ ExprInline)* ((_ CommaColon) _
-        SingleLineComment? NextLine Samedent ExprInline ((_ CommaColon) _ ExprInline)*)* (_ CommaColon)? _ Dedent NextLine Samedent ')'
 
 NamedTupleLiteral
     = NamedTupleLiteralInline
     / NamedTupleLiteralBlock
 
 NamedTupleLiteralInline
-    = '(' _ ':' _ ')'
-    / '(' _ Identifier _ ':' _ ExprInline (_ ',' _ Identifier _ ':' _ ExprInline)* (_ ',')? _ ')'
 
 NamedTupleLiteralBlock
-    = '(' _ SingleLineComment? NextLine Indent _ Identifier _ ':' _ SingleLineComment? NamedTupleLiteral ((_ ',')? _
-          SingleLineComment? NextLine Indent _ Identifier _ ':' _ SingleLineComment? NamedTupleLiteral)* (_ ',')? _ Dedent NextLine Samedent ')'
-    / '(' _ SingleLineComment? NextLine Indent _ Identifier _ ':' _ SingleLineComment? OpenNamedTuple (_
-          SingleLineComment? NextLine Indent _ Identifier _ ':' _ SingleLineComment? OpenNamedTuple)*  _ Dedent NextLine Samedent ')'
 
-OpenNamedTuple
-    = NextLine Indent Identifier _ ':' _ (OpenNamedTuple/ExprInline) (_
-      NextLine Samedent Identifier _ ':' _ (OpenNamedTuple/ExprInline))*  _ Dedent NextLine Samedent
+ListLiteral
+    = ListLiteralInline
+    / ListLiteralBlock
+
+ListLiteralInline
+
+ListLiteralBlock
+
+ObjectLiteral
+    = ObjectLiteralInline
+    / ObjectLiteralBlock
+
+ObjectLiteralInline
+
+ObjectLiteralBlock
+
+DictKey
+    = Atom
+    / '$' Identifier
+    / '$' '(' _ Atom _ ')'
+
 
 CommaColon
     = ',' / ';'
@@ -1035,7 +870,7 @@ FloatBinaryLiteral
     = fb:(("0b"[0-1]('_'? [0-1])*"."[0-1]('_'? [0-1])*("e"[+-]?[0-1]('_'? [0-1])*)?)
     / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { kind: 'float', value: removeUnderscores(stringify(fb)) }; }
 
-FloatOctalLiteral 
+FloatOctalLiteral
     = fo:(("0o"[0-7]('_'? [0-7])*"."[0-7]('_'? [0-7])*("e"[+-]?[0-7]('_'? [0-7])*)?)
     / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { kind: 'float', value: removeUnderscores(stringify(fo)) }; }
 
