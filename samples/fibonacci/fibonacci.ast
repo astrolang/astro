@@ -1,10 +1,10 @@
 # Using iteration
 fun fibonacci1(n):
     var x, y, z = 0, 1, 1
-    for i in 0..n:
+    for i in ..n:
         x, y = y, z
         z = x + y
     return x
 
 # Using recursion
-fun fibonacci2(n) = n if n < 2 else fibonacci2(n - 1) + fibonacci2(n - 2)
+fun fibonacci2(n) = (n < 2) ? n : fibonacci2(n - 1) + fibonacci2(n - 2)

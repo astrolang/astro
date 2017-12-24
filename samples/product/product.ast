@@ -1,9 +1,9 @@
 # Using for loop
-fun prod1(a, start: 1):
+fun prod(a, start: 1):
     var result = start
     for i in a:
         result *= i
     result
 
 # Using fold function
-fun prod2(a, start: 1) = a.foldr(×, start)
+fun prod(a, start: 1) = a.foldr(×, start)

@@ -1,12 +1,12 @@
 # Using for loop
-fun norm1(a):
+fun norm(a):
     var result = 0
     for e in a:
         result += e²
     √(result)
 
 # Using map function
-fun norm2(a) = √sum(a.map |x| => x²)
+fun norm(a) = √sum(a.map |x| => x²)
 
 # Using vectorization
-fun norm3(a) = √sum(a.²)
+fun norm(a) = √sum(a.²)
