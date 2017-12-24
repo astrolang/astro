@@ -661,7 +661,7 @@ IN
         sentence.replace(/dollar[s]?/, 'pounds')
 
 MOD
-    # `mod` is a keyword-based infix operator with the sme function as `%`.
+    # `mod` is a keyword-based infix operator with the same function as `%`.
     fun isEven(n) = (n mod 2 == 0)
 
 CHAINED CONDITIONAL CONSTRUCTS
@@ -737,7 +737,7 @@ MATCH EXPRESSION
         | _ => raise Error('Invalid choice!')
 
 ASSIGNMENT DESTRUCTURING
-    # Instead of separately assigning an objects field to subjects, it can be done in a single expression using the destructuring syntax.
+    # Instead of separately binding subjects to objects fields, it can be done in a single expression with destructuring.
     let name = person.name
     let age = person.age
     let { name, age } = person
