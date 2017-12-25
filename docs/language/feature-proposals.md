@@ -71,13 +71,13 @@ let router = app.Router()
 Astro macros are resolved at parse time.
 Macros take asts as argument.
 ```julia
-macro sorted(string): #: RawString
+fun @sorted(string): #: RawString
     $(SortedStr('\(string.literal)'))
 ```
 
 > Note: Macro functions cannot use subjects from outer scope
 ```julia
-macro typify(abstract): #: AbstractType
+fun @typify(abstract): #: AbstractType
     let els = abstract.elements
     let types = els.map |a| => $(type \a)
     $(\abstract; \types)
