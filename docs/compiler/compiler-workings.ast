@@ -64,7 +64,7 @@ COMPILE-TIME REFRENCE COUNTING & CYCLE BREAKING
         doSomething()
         doSomethingElse()
     ###################
-    fun doo(a = ref): # function is ref_in & ref_out
+    fun doo(a): #: (ref T) function is ref_in & ref_out
         return ref a
     ..
 
@@ -82,7 +82,7 @@ COMPILE-TIME REFRENCE COUNTING & CYCLE BREAKING
         return ref bar(a)
     ..
 
-    fun bar(a): # ref T
+    fun bar(a): #: ref T
         var b = ComplexNum(1, 3)
         b.real = a
         return ref b.real
@@ -131,39 +131,36 @@ COMPILE-TIME REFRENCE COUNTING & CYCLE BREAKING
 FIELD EXTENSION
 - when a subject extends it's field, an extended type is created to accomodate the extension.
     var appy = Person 'AppCypher'
-    block:
-        appy.+address = 'North Pole'
-        .+age = 34
-        .+job = 'Programmer'
-    ..
+    () =>
+        appy.address = 'North Pole'
+        appy.job = 'Programmer'
 
 WHAT ARE FUNCTIONS AND TYPES REALLY?
 - a type is a template for creating objects.
     - each instantion of a type has a generic signature that maps to its fields.
-    type Car(make, model):
-        let make, model
+    type Car(make, model)
 
     var a = Car("Camaro", "Toyota") # a's type is Car{Str, Str}
 
 - a function is a template which has a body of operations.
     - each function call has argument and generic signatures.
-    def printDetails(a):
+    fun printDetails(a):
         a.name, a.age
     ..
     printDetails(Person("Sizwe Banzi", 45)) # printDetails here has a type printDetails{}(Person)
 
 MULTIPLE DISPATCH
 - .
-    def add a, b:
+    fun add(a, b):
         a + b
 
-    def add a = Integer, b = Integer:
+    fun add(a, b): #: Integer, Integer
         a + b
 
-    def add a = F64, b = Int:
+    fun add(a, b): #: Float64, Int
         a + b
 
-    def add a = Int, b = Integer: # ambigous
+    fun add(a, b): #: (Int, Integer) ambigous
         a + b
 
 MULTIPLE INHERITANCE
@@ -187,7 +184,7 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
         if x == y:
             a = "Hi"
         ..
-        # a's type is Str & F64
+        # a's type is Str & Float64
 - if statement with else:
     - union of types of the last assignments in both then, elif and else branches.
         a = 2
@@ -197,9 +194,9 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
             # a's type is Str
         else:
             a = 5.0
-            # a's type is F64
+            # a's type is Float64
         ..
-        # a's type is Str & F64
+        # a's type is Str & Float64
 - while statment:
     - the subject's type at the beginning of the while loop is the union of types of the last assignment before the loop and the last assignment in the loop
     - the subject's type at the after the while loop is the union of types of the last assignment before the loop and the last assignment in the loop
@@ -213,13 +210,13 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
 - return, yield, throw:
     - if an inner scope ends with any of thes, then the type of last assignment doesn't spill into enclosing scope
         a = 5.0
-        # a's type is F64
+        # a's type is Float64
         if x == y:
             a = 23
-            # a's type is F64 & Str
+            # a's type is Float64 & Str
             return a
         ..
-        # a's type is F64
+        # a's type is Float64
         a = 56
 - while statement with breaks/returns/continue/yield:
     - the subject's type at the beginning of the while loop is the union of types of the last assignment before the loop, the last assignments before a yield/break/return/continue/end-of-loop.
@@ -228,12 +225,12 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
     a = 5
     # a's type is Int
     while x == y:
-        # a's type is Int|F64
+        # a's type is Int|Float64
         a = 6.5
-        # a's type is F64
+        # a's type is Float64
         break
     ..
-     # a's type is Int & F64
+     # a's type is Int & Float64
      - next adds to the type of the beginning of the loop.
     while x == y:
         a = 5
@@ -246,10 +243,10 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
     | _ == y => a = 5
     | _ >= y => (a = "Hi"; spill)
     | _ <= y => a = 0.2
-    # a's type is Int|F64
+    # a's type is Int|Float64
 - functions:
     - the return type is the union of the last assignments before all returns and end of function.
-    fun foo:
+    fun foo():
         var a =: Car("Camaro")
         # a's type is Car
         a = 56
@@ -260,15 +257,13 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
             return a # Str
         ..
         # a's type is Int
-        return 5.5 # F64
-        # return type is Str|F64
+        return 5.5 # Float64
+        # return type is Str|Float64
     ..
 - if at any point a subject's type is a union of more than two types, any subsequent field or method access must available in all the union types.
     a = 24
     # a's type is Int
-    if x == y:
-        a = "Hi"
-    ..
+    if x == y: a = "Hi"
     # a's type is Int & Int
     a.abs # error! 'a' can be of type Str, but Str has no 'abs' method
     - the only exception to this rule is an optional type, with a '?' operator it returns nil if the type is Nil.
@@ -282,13 +277,11 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
     - also with a '!' operator it throws a NilError if the type is Nil.
         a = 24
         # a's type is Int
-        if x == y:
-            a = nil
-        ..
+        if x == y: a = nil
         # a's type is Int & Nil
         a!.abs # a.abs or throw NilError
         - Note that a '?!' operator introduces a throw into the body of the block. This should be considered in further type inference.
-            fun foo:
+            fun foo():
                 a = 24
                 # a's type is Int
                 if x == y:
@@ -303,37 +296,35 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
                 # return type Int & Nil & Str & NoReturn
             ..
 - throws, noreturn:
-    - these can gebnerate a NoReturn type used at compile time
-        fun foo:
-            a = 5; _ # NoReturn
+    - these can gebnerate a None type used at compile time
+        fun foo():
+            a = 5; # None
         ..
 - if union types are the same, they are merged
     a = 5
     # a's type is Int
-    if x == y:
-        a = "Hello"
-        # a's type is Str
+    if x == y: a = "Hello" # a's type is Str
     else:
         a = 'Hi'
         # a's type is Str
     ..
     # a's type is Str
 - type checks are safe points where types can be assumed correctly
-    # a's type is Str & F64 & Int
-    if a :: F64:
-        # a's type is F64
+    # a's type is Str & Float64 & Int
+    if a :: Float64:
+        # a's type is Float64
         doSth(a)
     elif a :: Str:
         # a's type is Str
         doSth(a)
     else:
-        # a's type is |Str & F64 & Int| - |Str & F64| = |Int|
+        # a's type is (Str & Float64 & Int) - (Str & Float64) = Int
         doSth(a)
     ..
 - Buffers:
-    var buf = Buffer [1, 5.6, "Dan"] # buf's type is [Int & F32 & F64 & Str]
+    var buf = Buffer [1, 5.6, "Dan"] # buf's type is [Int & Float64 & Str]
     buf[1]
-    # buf[1]'s type is Int & F32 & F64 & Str
+    # buf[1]'s type is Int & Float64 & Str
 - Dependency Graph
     - recursive function call is mildly acceptable.
     - recursive construction call is seriously unacceptable.
@@ -405,38 +396,11 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
 TYPE/ENUM/FUNCTION/SUBJECT DECLARATION ACCESS
 - a subject, function, or type needs to be declared before it can be accessed
 
-MUTUALLY DEPENDENT USAGE (Functions & Types)
-- the problem arises when there is a (in)directly mutually recursive construction.
-- and that can be solved using the solutions provided in SELF-REFERENCING FIELDS section.
-    type Doo(a) #: Fux?
-
-    fun Doo() # warning! potentially recursive call detected
-
-    type Fux:
-        let a = Doo?
-
-    fun Fux():
-        new(Doo()) # warning! potentially recursive call detected
-- a recursive call is detected by following every calls made in a function until it loops back to the function itself.
-    fun foo():
-        bar # warning! potentially recursive call detected
-
-    fun bar():
-        foo # warning! potentially recursive call detected
-    - detecting one recursive call means detecting other recursive calls.
-    - above if foo is detected to be recursive, bar is automatically marked as recursive.
-- irrespective of whether the recursive call is in a control structure branch or all of its branches, it's still potentially recursive.
-- this applies to constructors too.
-    fun foo():
-        if x == y:
-            bar # warning! potentially recursive call detected
-
-    fun bar():
-        if x == y:
-            bar # warning! potentially recursive call detected
-        else:
-            bar # warning! potentially recursive call detected
-    ..
-
 COMPILER-GENERATED DEFAULT CONSTRUCTOR
 - The compiler does not generate a default constructor!
+
+fun foo()
+fun bar()
+
+fun main():
+
