@@ -26,7 +26,7 @@ Program
     / ProgramNonSourceCode (NextLine (Samedent ProgramNonSourceCode)?)* { return null }
 
 ProgramCode
-    = ex:ProgramSourceCode { return ex; }
+    = ex:ProgramSourceCode { return ex }
     / ProgramNonSourceCode { return } // returns null
 
 ProgramSourceCode
@@ -733,34 +733,45 @@ IndexArg
     / ExprInline
 
 Comprehension 'comprehension' // NOTE: there can't be tuple generator
-    = '(' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ')' { return 'gen' } // generator
-    / '[' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ ']' // list
-    / '{' _ ComprehensionHeadExpr _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // set
-    / '{' _ ExprInline _ ':' _ ExprInline _ '|' _ ForHeadExpr (_ ';' _ ForHeadExpr)* (_ 'where' _ ExprInline (_ ',' _ ExprInline)*)? _ '}' // dict
+    = '(' _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where?  _ ')' {
+        let whileAst = toWhile();
+        return whileAst;
+    }
+    / '[' _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where? _ ']' {
+        let whileAst = toWhile();
+        return whileAst; 
+    }
+    / '{' _ ky:ExprInline _ ':' _ vl:ExprInline _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ fex:ForHeadExpr { return hd })* cond:Where? _ '}' {
+        let whileAst = toWhile();
+        return whileAst;
+    }
+
+Where
+    = _ 'where' _ ex:ExprInline { return ex }
 
 ComprehensionHeadExpr
-    = ExprInline (_ ',' _ ExprInline)*
+    = ex1:ExprInline exs:(_ ',' _ ex:ExprInline { return ex })* { return join(ex1, exs) }
 
 Return
-    = 'return' vl:(_ ex:(ExprInline/OpenTuple) { return ex; })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'return', value: vl, at: nm }; }
+    = 'return' vl:(_ ex:(ExprInline/OpenTuple) { return ex })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'return', value: vl, at: nm } }
 
 Break
-    = 'break' vl:(_ ex:(ExprInline/OpenTuple) { return ex; })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'break', value: vl, at: nm }; }
+    = 'break' vl:(_ ex:(ExprInline/OpenTuple) { return ex })? nm:(_ 'at' _ id:Identifier { return id })? { return { kind: 'break', value: vl, at: nm } }
 
 Continue
-    = 'continue' nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'continue', at: nm }; }
+    = 'continue' nm:(_ 'at' _ id:Identifier { return id })? { return { kind: 'continue', at: nm } }
 
 Spill
-    = 'spill' { return { kind: 'spill' }; }
+    = 'spill' { return { kind: 'spill' } }
 
 Yield
-    = 'yield' vl:(_ ex:(ExprInline/OpenTuple) { return ex; })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'yield', value: vl, at: nm }; }
+    = 'yield' vl:(_ ex:(ExprInline/OpenTuple) { return ex })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'yield', value: vl, at: nm } }
 
 Delegate
-    = 'delegate' _ ex:ExprInline { return { kind: 'delegate', value: ex }; }
+    = 'delegate' _ ex:ExprInline { return { kind: 'delegate', value: ex } }
 
 Raise
-    = 'raise' _ ex:ExprInline { return { kind: 'raise', value: ex }; }
+    = 'raise' _ ex:ExprInline { return { kind: 'raise', value: ex } }
 
 OpenTuple
 
@@ -772,13 +783,13 @@ LiteralInline // TODO: NSLiteral
     / RangeLiteral
     / SymbolLiteral
     / ListLiteralInline
-    / ObjectLiteralInline
+    / DicttLiteralInline
     / TupleLiteralInline
     / NamedTupleLiteralInline
 
 LiteralBlock // TODO: NSLiteral
     = ListLiteralBlock
-    / ObjectLiteralBlock
+    / DictLiteralBlock
     / TupleLiteralBlock
     / NamedTupleLiteralBlock
 
@@ -814,25 +825,24 @@ ObjectLiteral
     = ObjectLiteralInline
     / ObjectLiteralBlock
 
-ObjectLiteralInline
+DictLiteralInline
 
-ObjectLiteralBlock
+DictLiteralBlock
 
 DictKey
     = Atom
     / '$' Identifier
     / '$' '(' _ Atom _ ')'
 
-
 CommaColon
     = ',' / ';'
 
 RegexLiteral
-    = rl:('/'[^/]+'/') { return { kind: 'regex', value: stringify(rl) }; } // '
+    = rl:('/'[^/]+'/') { return { kind: 'regex', value: stringify(rl) } } // '
 
 StringLiteral
     = sl:(('"'[^\"]+'"') // "
-    / ("'"[^\']+"'")) { return { kind: 'string', value: stringify(sl) }; } // '
+    / ("'"[^\']+"'")) { return { kind: 'string', value: stringify(sl) } } // '
 
 NumericLiteral
     = FloatLiteral
@@ -845,16 +855,16 @@ IntegerLiteral 'integer'
     / IntegerHexLiteral
 
 IntegerDecimalLiteral
-    = id:([1-9]('_'? [0-9])*) { return { kind: 'int', value: removeUnderscores(stringify(id)) }; }
+    = id:([1-9]('_'? [0-9])*) { return { kind: 'int', value: removeUnderscores(stringify(id)) } }
 
 IntegerBinaryLiteral
-    = ib:("0b"[0-1]('_'? [0-1])*) { return { kind: 'int', value: removeUnderscores(stringify(ib)) }; }
+    = ib:("0b"[0-1]('_'? [0-1])*) { return { kind: 'int', value: removeUnderscores(stringify(ib)) } }
 
 IntegerOctalLiteral
-    = io:("0o"[1-7]('_'? [0-7])*) { return { kind: 'int', value: removeUnderscores(stringify(io)) }; }
+    = io:("0o"[1-7]('_'? [0-7])*) { return { kind: 'int', value: removeUnderscores(stringify(io)) } }
 
 IntegerHexLiteral
-    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { kind: 'int', value: removeUnderscores(stringify(ix)) }; }
+    = ix:("0x"[1-9A-Fa-f]('_'? [0-9A-Fa-g])*) { return { kind: 'int', value: removeUnderscores(stringify(ix)) } }
 
 FloatLiteral 'float'
     = FloatDecimalLiteral
@@ -864,22 +874,22 @@ FloatLiteral 'float'
 
 FloatDecimalLiteral
     = fd:((([0-9]('_'? [0-9])*)?"."[0-9]('_'? [0-9])*("e"[+-]?[0-9]('_'? [0-9])*)?)
-    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { kind: 'float', value: removeUnderscores(stringify(fd)) }; }
+    / ([0-9]('_'? [0-9])*"e"[+-]?[0-9]('_'? [0-9])*)) { return { kind: 'float', value: removeUnderscores(stringify(fd)) } }
 
 FloatBinaryLiteral
     = fb:(("0b"[0-1]('_'? [0-1])*"."[0-1]('_'? [0-1])*("e"[+-]?[0-1]('_'? [0-1])*)?)
-    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { kind: 'float', value: removeUnderscores(stringify(fb)) }; }
+    / ("0b"[0-1]('_'? [0-1])*"e"[+-]?[0-1]('_'? [0-1])*)) { return { kind: 'float', value: removeUnderscores(stringify(fb)) } }
 
 FloatOctalLiteral
     = fo:(("0o"[0-7]('_'? [0-7])*"."[0-7]('_'? [0-7])*("e"[+-]?[0-7]('_'? [0-7])*)?)
-    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { kind: 'float', value: removeUnderscores(stringify(fo)) }; }
+    / ("0o"[0-7]('_'? [0-7])*"e"[+-]?[0-7]('_'? [0-7])*)) { return { kind: 'float', value: removeUnderscores(stringify(fo)) } }
 
 FloatHexLiteral
     = fx:(("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"."[0-9A-Fa-f]('_'? [0-9A-Fa-f])*("p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)?)
-    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { kind: 'float', value: removeUnderscores(stringify(fx)) }; }
+    / ("0x"[0-9A-Fa-f]('_'? [0-9A-Fa-f])*"p"[+-]?[0-9A-Fa-f]('_'? [0-9A-Fa-f])*)) { return { kind: 'float', value: removeUnderscores(stringify(fx)) } }
 
 BooleanLiteral 'boolean'
-    = bl:('true' / 'false') { return { kind: 'boolean', value: stringify(bl) }; }
+    = bl:('true' / 'false') { return { kind: 'boolean', value: stringify(bl) } }
 
 SingleLineComment 'singleLineComment'
     = '#' SingleLineCommentCharacter*
@@ -952,18 +962,18 @@ EOI 'eoi'
     = !.
 
 Operator 'operator'
-    = op:(OperatorCharacter (OperatorCharacter)*) { return stringify(op); }
+    = op:(OperatorCharacter (OperatorCharacter)*) { return stringify(op) }
 
 OperatorCharacter  // UNICODE?
     = '+' / '-' / '*' / '/' / '\\' / '^' / '%' / '!' / '>' / '<' / '='
 
 Punctuator 'punctuator'
-    = pn:('.' / ',' / "'" / '"') { return stringify(pn); }
+    = ('.' / ',' / "'" / '"')
 
 // NOTE: keywords are not valid identifiers. The predicate also help ignore language keywords that appear in certain
 // positions (infix/prefix) which can easily be taken as command notation. For example, the `mod` in `a mod b`
 Identifier 'identifier' // UNICODE?
-    = id:([a-zA-Z_][a-zA-Z0-9_]*) &{ return keywords.indexOf(stringify(id)) < 0; } { return stringify(id); }
+    = id:([a-zA-Z_][a-zA-Z0-9_]*) &{ return keywords.indexOf(stringify(id)) < 0 } { return stringify(id) }
 
 Newline 'newline'
     = ("\r"? "\n")
