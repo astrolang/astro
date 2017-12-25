@@ -403,18 +403,14 @@ COMPILE-TIME TYPE INFERRING (Dynamic Subject Example)
         - delete identifier registered in scope.
 
 TYPE/ENUM/FUNCTION/SUBJECT DECLARATION ACCESS
-- an enum/type can access another enum/type before its declaration, but it requires function/subject to be declared before access.
-- a function can access another function before its declaration, but it requires type/enum/subject to be declared before access.
-- a subject (temporary or explicit) requires a function/enum/type/subject to be declared before it can access.
+- a subject, function, or type needs to be declared before it can be accessed
 
 MUTUALLY DEPENDENT USAGE (Functions & Types)
 - the problem arises when there is a (in)directly mutually recursive construction.
 - and that can be solved using the solutions provided in SELF-REFERENCING FIELDS section.
-    type Doo:
-        let a = Fux?
+    type Doo(a) #: Fux?
 
-    fun Doo():
-        new(Fux()) # warning! potentially recursive call detected
+    fun Doo() # warning! potentially recursive call detected
 
     type Fux:
         let a = Doo?
