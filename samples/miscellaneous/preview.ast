@@ -6,7 +6,7 @@ fun normalize(a):
     √result
 
 # LAMBDAS
-fun normalize(a) = √sum(map |x| => x²)
+fun normalize(a) = √sum(map|x| => x²)
 
 # VECTORIZATION SYNTAX
 fun normalize(a) = √(a.²)
