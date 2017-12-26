@@ -94,6 +94,14 @@ Block macro calls
 @time(minutes)
 ```
 
+Macros that take anything as last arguments
+```julia
+fun @where(cond, none): #: BinaryExpression, None
+    return $(filter|cond.lhs| => cond)
+
+array.where(x > 5)
+```
+
 ### TYPE EXTENSION PROPOSAL
 ```julia
 type Programmer(newField) @extend
