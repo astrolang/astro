@@ -35,7 +35,7 @@ SUBJECT BINDING
     # The expression that comes after an assignment operator can be moved to the next line with a preceding indentation.
     var φ =
         arctan(y/x)
-    
+
     # Declaring and binding multiple subjects to the same value by separating them with spaces.
     let a b c = 50
 
@@ -502,13 +502,13 @@ MULTILINE EXPRESSIONS
     # If an expression is inside a pair of brackets, it can span multiple lines until a matching closing bracket/brace is encountered.
     let total = (1 + 2 + 3 + 4
     + 5 + 6 + 7)
-    
+
     # However once the content of a parens are indented, a block is expected, so continuation punctuator is needed for incomplete expression.
     let price = (
         print('price bound to a value')
         add(450, 600)
     )
-    
+
     let total = (
         1 + 2 + 3 + 4 ...
         + 5 + 6 + 7
@@ -539,7 +539,7 @@ INDENTATION
     # Astro recognizes 4-space indentations only. No tabs.
     fun removeSpaces(string):
         return s.split(/[ ]/).join()
-    
+
     fun removeSpaces(string):
       return s.split(/[ ]/).join() # Invalid!
 
@@ -553,15 +553,15 @@ IF EXPRESSION
         cry('we are broke')
 
     # Checking for nil.
-    if phoneNumber?: # The block executes if `phoneNumber` is not nil.
+    if phoneNumber: # The block executes if `phoneNumber` is not nil.
         call(phoneNumber)
 
-    # Checking for nil and assigning value to a subject.
-    if stockCode = getStockCode('APPLE')?:
+    # Checking for nil and binding value to a subject.
+    if let stockCode = getStockCode('APPLE'):
         print('APPLE: $stockCode')
 
     # Reassigning a variable from external scope.
-    if $player = getPlayer(name)?:
+    if $player = getPlayer(name):
         print player.fitness
 
 TERNARY OPERATOR
@@ -696,7 +696,7 @@ WHILE LOOP & LOOP
     while x < 50
 
     # Nillable assignment in while loop.
-    while details = books{title}?:
+    while let details = books{title}:
         print details
         if details.author != 'J.K. Rowlings':
             break
