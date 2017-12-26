@@ -17,7 +17,7 @@
 // A complete block should indent itself at entry and exit with DEDENT NEWLINE SAMEDENT.
 
 Start
-    = exs:Program { return { kind:'program', expressions:exs } }
+    = exs:Program { return { kind: 'program', expressions: exs } }
 
 Program
     = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine pc:(Samedent ex:ProgramCode { return ex })? { return pc })* {
@@ -349,18 +349,7 @@ AbstSubTypeParameter
     }
 
 ImportDeclaration
-    = 'import' dy:(_ op:'!' { return op })? ky:(_ id:Identifier _ ':' { return id })? _ rt:'/'? pt1:PathIdentifier pt2:(_ '/' pt:PathIdentifier { return pt })* sb:(_ '{' _ sb1:ImportSubject sb2:(_ ',' _ is:ImportSubject { return is })* _ '}' { return join(sb1, sb2); })? {
-        let path = "'" + (rt?rt:'') + join(pt1, pt2).join('/') + "'"; // concatenate all the path tokens
-        return { kind:'importDeclaration', dynamic:(dy!==null), key:ky, path, names:safeAccess(sb) };
-    }
-    / 'import' dy:(_ op:'!'? { return op }) ky:(_ id:Identifier _ ':' { return id })? _ sl:StringLiteral sb:(_ '{' _ sb1:ImportSubject sb2:(_ ',' _ is:ImportSubject { return is })* _ '}' { return join(sb1, sb2); })? {
-        return { kind:'importDeclaration', dynamic:(dy!==null), key:ky, path:sl.value, names:safeAccess(sb) };
-    }
-
-ImportSubject
-    = id1:Identifier id2:(_ ':' _ id:Identifier { return id })? {
-        return { actualName:id1, scopeName:id2 };
-    }
+    =
 
 PathIdentifier
     = Identifier
@@ -370,308 +359,73 @@ PathIdentifier
 CondExprBlock
     = IfExprBlock
     / WhileExprBlock
+    / DoWhileExprBlock
     / ForExprBlock
     / LoopExprBlock
     / TryExprBlock
-    / RedoWhileExprBlock
-    / MatchExpr
+    / MatchExprBlock
 
 CondExprInline
     = IfExprInline
+    / DoWhileExprInline
+    / LoopExprInline
     / WhileExprInline
     / ForExprInline
+    / MatchExprInline
 
 IfExprInline
-    = ex1:Atom _ 'if' _ hd:IfHeadExpr ex2:(_ 'else' _ ex:Atom { return ex })? {
-        return { kind:'if', head:hd, body:[ex1], elifs:null, elseBody:ex2 };
-    }
+    =
 
 WhileExprInline
-    = ex1:Atom _ 'while' _ hd:IfHeadExpr ex2:(_ 'end' _ ex:Atom { return ex })? {
-        return { kind:'while', head:hd, body:[ex1], endBody:[ex2]  };
-    }
+    =
+
+DoWhileExprInline
+    =
 
 ForExprInline
-    = ex1:Atom _ 'for' _ hd:ForHeadExpr ex2:(_ 'end' _ ex:Atom { return ex })? {
-        return { kind:'for', head:hd, body:[ex1], endBody:[ex2] };
-    }
+    =
+
+MatchExprInline
+    =
 
 IfExprBlock
-    = 'if' _ hd1:IfHeadExpr hd2:((_ ',')? _ 'if' _ hd:IfHeadExpr { return hd })? _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
-        if (hd2 !== null) {
-            let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-            return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
-        }
-        return { kind:'if', head:hd1, body:fb, elifs:ef, elseBody:eb };
-    }
-    / 'if' _ hd1:IfHeadExpr (_ ',')? _ 'while' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
-        return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
-    }
-    / 'if' _ hd1:IfHeadExpr (_ ',')? _ 'for' _ hd2:ForHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
-        return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
-    }
-    / 'if' _ hd:IfHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'loop', body:fb, endBody:eb };
-        return { kind:'if', head:hd, body:[inner], elifs:null, elseBody:null };
-    }
-    / 'if' _ hd1:IfHeadExpr (_ ',')? _ 'try' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'try', head:hd2, body:fb, catchs:ce };
-        return { kind:'if', head:hd1, body:[inner], elifs:null, elseBody:null };
-    }
+    =
 
 WhileExprBlock
-    = 'while' _ hd1:IfHeadExpr (_ ',')? _ 'if' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
-        let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-        return { kind:'while', head:hd1, body:[inner], endBody:null };
-    }
-    / 'while' _ hd1:IfHeadExpr hd2:((_ ',')? _ 'while' _ hd:IfHeadExpr)? _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        if (hd2 !== null) {
-            let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
-            return { kind:'while', head:hd1, body:[inner], endBody:null };
-        }
-        return { kind:'while', head:hd1, body:fb, endBody:eb };
-    }
-    / 'while' _ hd1:IfHeadExpr (_ ',')? _ 'for' _ hd2:ForHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
-        return { kind:'while', head:hd1, body:[inner], endBody:null };
-    }
-    / 'while' _ hd:IfHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'loop', body:fb, endBody:eb };
-        return { kind:'while', head:hd, body:[inner], endBody:null };
-    }
-    / 'while' _ hd1:IfHeadExpr (_ ',')? _ 'try' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'try', head:hd2, body:fb, catchs:ce };
-        return { kind:'while', head:hd1, body:[inner], endBody:null };
-    }
+    =
+
+DoWhileExprBlock
+    =
 
 ForExprBlock
-    = 'for' _ hd1:ForHeadExpr (_ ',')? _ 'if' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
-        let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-        return { kind:'for', head:hd1, body:[inner], endBody:null };
-    }
-    / 'for' _ hd1:ForHeadExpr (_ ',')? _ 'while' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
-        return { kind:'for', head:hd1, body:[inner], endBody:null };
-    }
-    / 'for' _ hd1:ForHeadExpr hd2:((_ ',')? _ 'for' _ ex:ForHeadExpr { return ex })? _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        if (hd2 !== null) {
-            let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
-            return { kind:'for', head:hd1, body:[inner], endBody:null };
-        }
-        return { kind:'for', head:hd1, body:fb, endBody:eb };
-    }
-    / 'for' _ hd:ForHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'loop', body:fb, endBody:eb };
-        return { kind:'for', head:hd, body:[inner], endBody:null };
-    }
-    / 'for' _ hd1:ForHeadExpr (_ ',')? _ 'try' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'try', head:hd2, body:fb, catchs:ce };
-        return { kind:'for', head:hd1, body:[inner], endBody:null };
-    }
+    =
 
 LoopExprBlock
-    = 'loop' (_ ',')? _ 'if' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? {
-        let inner = { kind:'if', head:hd, body:fb, elifs:ef, elseBody:eb };
-        return { kind:'loop', body:[inner], endBody:null };
-    }
-    / 'loop' (_ ',')? _ 'while' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        let inner = { kind:'while', head:hd, body:fb, endBody:eb };
-        return { kind:'loop', body:[inner], endBody:null };
-    }
-    / 'loop' hd:((_ ',')? _ 'for' _ ex:ForHeadExpr { return ex })? _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        if (hd !== null) {
-            let inner = { kind:'for', head:hd, body:fb, endBody:eb };
-            return { kind:'loop', body:[inner], endBody:null };
-        }
-        return { kind:'loop', body:fb, endBody:eb };
-    }
-    / 'loop' (_ ',')? _ 'try' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'try', head:hd, body:fb, catchs:ce };
-        return { kind:'loop', body:[inner], endBody:null };
-    }
+    =
 
 TryExprBlock
-    = 'try' _ hd1:IfHeadExpr (_ ',')? _ 'if' _  hd2:IfHeadExpr _ ':' _ fb:FunctionBody ef:(_ NextLine Samedent ex:ElifExpr { return ex })* eb:(_ NextLine Samedent ex:ElseExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'if', head:hd2, body:fb, elifs:ef, elseBody:eb };
-        return { kind:'try', head:hd1, body:[inner], catchs:ce };
-    }
-    / 'try' _ hd1:IfHeadExpr (_ ',')? _ 'while' _ hd2:IfHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'while', head:hd2, body:fb, endBody:eb };
-        return { kind:'try', head:hd1, body:[inner], catchs:ce };
-    }
-    / 'try' _ hd1:IfHeadExpr (_ ',')? _ 'for' _ hd2:ForHeadExpr _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'for', head:hd2, body:fb, endBody:eb };
-        return { kind:'try', head:hd1, body:[inner], catchs:ce };
-    }
-    / 'try' _ hd:IfHeadExpr (_ ',')? _ 'loop' _ ':' _ fb:FunctionBody eb:(_ NextLine Samedent ex:EndExpr { return ex })? ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        let inner = { kind:'loop', body:fb, endBody:eb };
-        return { kind:'try', head:hd, body:[inner], catchs:ce };
-    }
-    / 'try' _ hd1:IfHeadExpr hd2:((_ ',')? _ 'try' _ ex:IfHeadExpr { return ex })? _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        if (hd2 !== null) {
-            let inner = { kind:'try', head:hd2, body:fb, catchs:null };
-            return { kind:'try', head:hd1, body:[inner], catchs:ce };
-        }
-        return { kind:'try', head:hd1, body:fb, catchs:ce };
-    }
-    / 'try' _ ':' _ fb:FunctionBody ce:(_ NextLine Samedent ex:CatchExpr { return ex })+ {
-        return { kind:'try', head:null, body:fb, catchs:ce };
-    }
+    =
 
-RedoWhileExprBlock
-    = 'redo' _ ':' _ fb:FunctionBody _ NextLine Samedent 'while' _ hd:IfHeadExpr eb:(_ NextLine Samedent ex:EndExpr { return ex })? {
-        return { kind:'redo', head:hd, body:fb, endBody:eb };
-    }
-
-ElifExpr
-    = 'elif' _ hd:IfHeadExpr _ ':' _ fb:FunctionBody {
-        return { head:hd, body:fb };
-    }
-
-ElseExpr
-    = 'else' _ ':' _ fb:FunctionBody {
-        return fb;
-    }
-
-EndExpr
-    = 'end' _ ':' _ fb:FunctionBody {
-        return fb;
-    }
-
-CatchExpr
-    = 'catch' _ id:Identifier _ ':' _ fb:FunctionBody {
-        return { param:id, body:fb };
-    }
-
-MatchExpr
-    = ex1:Atom _ 'when' _ ex2:Expr mt:(_ NextLine Samedent mc:MatchContent { return m })+ {
-    }
-    / ex:MatchContent mt:(_ NextLine Samedent m:MatchContent { return m })* {
-    }
-
-MatchContent
-    = '|' PatternMatch _ '->' _ FunctionBody {
-    }
-    / '!' PatternMatch _ '->' _ FunctionBody {
-    }
+MatchExprBlock
+    =
 
 IfHeadExpr
-    = mu:('var' _)? _ pt:PatternMap _ '<-' _ vl:Expr {
-        return { vl };
-    }
-    / ex:Expr { return ex }
+    =
 
 ForHeadExpr
-    = mu:('var' _)? _ pt:PatternMap _ 'in' _ ex1:Expr ex2:(_ ',' _ ex:Expr { return ex })* {
-    }
-
-TypeAnnotation
-    = TypeSubject (_ ',' _ TypeSubject)* (_ '->' _ TypeSubject)? (_ '~' _ TypeAssert (_ ',' _ TypeAssert)*)?
-
-TypeAssert
-    = TypeSubject _ TypeOperator _ TypeSubject
-    / TypeSubject _ '(' _ TypeOperator _ TypeSubject (_ ',' _ TypeOperator _ TypeSubject)+ _ ')'
-    / TypeSubject _ TypeOperator '|' _ TypeSubject (_ ',' _ TypeSubject)+ _ '|' (_ TypeOperator _ TypeSubject)?
-    / '|' _ TypeSubject (_ ',' _ TypeSubject)+ _ '|' _ TypeOperator _ TypeSubject
-
-TypeSubject
-    = TypeIdentifier '[' _ TypeSubject (_ ',' _ TypeSubject)* _ ']'
-    / TypeIdentifier '{' _ TypeSubject (_ ',' _ TypeSubject)* _ '}'
-    / TypeIdentifier (_ '&'/'|') _ TypeSubject
-    / TypeIdentifier
-
-TypeIdentifier
-    = ('!'/'$') Identifier
-    / Identifier ('.' Identifier)* '?'?
-    / '_'
-
-TypeOperator
-    = '::'
-    / ':>'
-    / ':<'
-
-ExprBlock
-    = Declaration
-    / LiteralBlock
-    / CondExprBlock
-    / AssignBlock
-    / LambdaBlock
-    / OpenTuple
-    / ExprInline
-
-ExprInline
-    = CondExprInline
-    / Expr
-
-Expr
-    = ReferenceType _ UnaryExpr
-    / AssignInline
-    / Return
-    / Break
-    / Continue
-    / Spill
-    / Yield
-    / Delegate
-    / Await
-    / Raise
-    / UnaryExpr BinaryExtension+
-    / LambdaInline
-    / Properties
-    / IIFE
-    / CascadeNotation
-    / Rest
-    / DotNotation
-    / VectorNotation
-    / Atom
-
-BinaryExtension
-    = Whitespace+ Operator Whitespace+ UnaryExpr
-    / Operator UnaryExpr
-
-UnaryExpr
-    = CascadeDot
-    / CascadeNotation
-    / Rest
-    / DotNotation
-    / VectorNotation
-    / Operator Atom
-    / Atom Operator !(Atom)  // should not match for a binary expression: a+b
-    / Atom
+    =
 
 Atom
-    = at:SubAtom SubAtomExtension+
-    / SubAtom
-
-SubAtomExtension
-    = IndexBraces
-    / Whitespace+ id:CommandNotationArg { return id }
-    / _ CallParens
-    / _ CascadeDot
-    / _ DotNotation
-    / _ CascadeNotation
-
-SubAtom
-    = cm:Comprehension { return cm; } // INCOMPLETE
-    / tv:TypeValue { return tv; } // INCOMPLETE
-    / '(' ex:ExprBlock ')' { return { kind:'parens',  }; }
-    / id:Identifier { return id; }
-    / lt:LiteralInline { return lt; }
-    / 'pass' { return { kind:'pass' }; }
-    / '$' { return { kind:'$' }; }
-
-TypeValue
-    = '(' _ TypeSubject (_ ',' _ TypeSubject)* _ '->' _ TypeSubject (_ '~' _ TypeAssert (_ ',' _ TypeAssert)*)? _ ')'
-
-OpenTuple
-    = ExprInline (_ ',' _ ExprInline)*
+    =
 
 Properties
     = '{' _ FunctionBody _ '}' _ '->' _ '{' _ FunctionBody _ '}'
 
-IIFE
-    = '(' ((_ Identifier ':')? _ ExprInline (_ ',' (_ Identifier ':')? _ ExprInline)*)? _ ')' _ '->' _ FunctionBody
+IIFEInline
+    =
+
+IIFEBlock
+    =
 
 LambdaInline
     = '|' _ LambdaParam (_ ',' _ LambdaParam)* _ '|' _ '=>' _ FunctionContentInline
@@ -682,55 +436,7 @@ LambdaBlock
     / '=>' _ FunctionContentBlock
 
 LambdaParam
-    = Identifier ('.' Identifier?)? (_ ':' _ ExprInline)?
-    / PatternMap
-
-AssignInline
-    = pt:PatternMap _ op:Operator '=' _ SubjectContentInline
-
-AssignBlock
-    = pt:PatternMap _ op:Operator '=' _ SubjectContentBlock
-
-ReferenceType
-    = rf:('val' / 'ref' / 'iso' / 'const') { return rf }
-
-Rest
-    = '...' Atom
-
-CommandNotationArg
-    = NumericLiteral
-    / StringLiteral
-    / id:Identifier
-    / 'pass'
-
-// TODO: Not yet referenced in grammar
-MacroCall
-    = '@' Identifier CallParens?
-    / '@' Identifier  CallParens? _ ':' _ FunctionBody
-
-CallParens
-    = '(' ((_ Identifier ':')? _ ExprInline (_ ',' (_ Identifier ':')? _ ExprInline)* (_ ',')?)? _ ')'
-
-IndexBraces
-    = '[' _ IndexArg (_ ',' IndexArg)* (_ ',')? _ ']'
-
-CascadeDot
-    = '.' '|' _ Atom (_ Operator _ Atom)+ _ '|'
-    / '.' '|' _ Atom (_ ',' _ Atom)+ _ '|'
-
-CascadeNotation
-    = '..' ':'? Atom
-
-DotNotation
-    = ('.' ':'?Atom)+
-
-VectorNotation
-    = Atom '.' !(Identifier) // NOTE: integral literal ending with a dot is taken as float
-
-IndexArg
-    = ExprInline? _ ':' (_ '!'? ExprInline)? (_ ':' ExprInline)?
-    / '!' ExprInline? _ ':' _ ExprInline? (_ ':' ExprInline)?
-    / ExprInline
+    =
 
 Comprehension 'comprehension' // NOTE: there can't be tuple generator
     = '(' _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where?  _ ')' {
@@ -739,7 +445,7 @@ Comprehension 'comprehension' // NOTE: there can't be tuple generator
     }
     / '[' _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where? _ ']' {
         let whileAst = toWhile();
-        return whileAst; 
+        return whileAst;
     }
     / '{' _ ky:ExprInline _ ':' _ vl:ExprInline _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ fex:ForHeadExpr { return hd })* cond:Where? _ '}' {
         let whileAst = toWhile();
