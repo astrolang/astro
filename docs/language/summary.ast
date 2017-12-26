@@ -345,16 +345,24 @@ ARRAYS
     # Also when multiplying by an array literal, the literal needs to be enclosed in parens.
     let result = 3×(4[])
 
-OBJECTS & DICTIONARIES
+DICTIONARIES & OBJECTS
     # Objects and dictionaries are both associative data structures.
 
-    # Objects are static construct and can be introspected at compile-time.
-    let game = { title: 'BioShock Infinite', year: 2014 } # Property
-
     # Dictonaries are dynamic data structures and will return nil where expected key is not present
-    # Dictionaries literals are marked with `dict`.
-    let game = dict.{ title: 'BioShock Infinite', year: 2014 } # Dictionary.
+    let game = { title: 'BioShock Infinite', year: 2014 } # Dictionary.
 
+    # Objects are static construct and can be introspected at compile-time. Object literals are marked with `obj`.
+    let game = obj.{ title: 'BioShock Infinite', year: 2014 } # Object
+
+    # Object keys must be valid identifiers.
+    let parents = obj.{
+        dad: {
+            name: 'Sunday Williams'
+            age: 46
+        }
+    }
+
+    # Dictionary keys can be any valid expression.
     let parents = {
         'mum': {
             'name': 'Esther Williams'
@@ -362,15 +370,7 @@ OBJECTS & DICTIONARIES
         }
     }
 
-    # Unquoted keys are taken as strings as well.
-    let parents = {
-        dad: {
-            name: 'Sunday Williams'
-            age: 46
-        }
-    }
-
-    # Nested object can be simplified with indentation.
+    # Nested dictionaries/objects can be simplified with indentation.
     let siblings = {
         sister:
             name: 'Shade Williams'
@@ -383,7 +383,7 @@ OBJECTS & DICTIONARIES
     # Dictionary values are accessed using `{}` and can return nil.
     let mum = parent{'mum', 'name'}
 
-    # Dictionary values can also use accessed using the dot operator, but since dictionaries can return nil, the nil operator is needed.
+    # Dictionary values can also be accessed using the dot operator, but since dictionaries can return nil, the nil operator is needed.
     let mum = parent.mum?.name
 
     # New fields can be added to an object.
@@ -392,13 +392,13 @@ OBJECTS & DICTIONARIES
         age: 23
     }
 
-    # To use variables from the outer scope, the variable name needs to be escaped with `$`.
+    # To use variables from the outer scope as a dictionary key, the variable name needs to be escaped with `$`.
     var professor = {
         $id1: 'Charles Xavier'
         $id2: 56
     }
 
-    # Empty object.
+    # Empty dictionary.
     var emptyDict = {}
 
 SET
