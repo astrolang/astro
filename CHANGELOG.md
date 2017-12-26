@@ -23,3 +23,4 @@
 * Removed dynamic import.
 * Removed static subject support in functions.
 * Made coefficient expression rules clearer.
+* Changed binding syntax in `if` and `while`.
