@@ -560,10 +560,6 @@ IF EXPRESSION
     if let stockCode = getStockCode('APPLE'):
         print('APPLE: $stockCode')
 
-    # Reassigning a variable from external scope.
-    if $player = getPlayer(name):
-        print player.fitness
-
 TERNARY OPERATOR
     # The ternary operator is a syntacttc sugar for an if-else expression.
     let cmp = if a > b: 0 else: 1
@@ -1280,7 +1276,7 @@ POINTERS
     let memory = malloc[Byte](5) # Allocates 5 bytes on the heap.
 
     # Freeing memory.
-    free(memory) # Compile-time error will be throws if there is a possible dangling or pointer aliasing problem.
+    free(memory) # Compile-time error will be thrown if there is a possible dangling or pointer aliasing problem.
 
     # Pointer arithmetic is not normally supported in Astro, however a pointer to a block of memory can be incremented or decremented but with bounds checking.
     let memory = malloc[Int](20)
