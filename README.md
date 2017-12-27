@@ -27,7 +27,7 @@ Astro started as a hobby for learning programming language design and compiler c
 Astro is designed to have no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games and other real-time software. 
 It needs to do this while being as expressive as python.
 
-In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin aupport for vectors and matrices, vectorization, unicode identifiers, etc. 
+In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors and matrices, vectorization, unicode identifiers, etc. 
 
 Astro is basically a high-level language with low-level access.
 
@@ -36,14 +36,14 @@ Compiling to LLVM IR brings with it some benefits.
 One is getting a free WebAssembly compilation step and the other is the provision of decade-worth optimization passes.
 These are indeed valuable features, but wasm is an easier target to get started with. It is portable and runs on major JavaScript VMs, which means Astro can leverage the Nodejs ecosystem instead of building its own from scratch.
 
-Astro compiler is also expected to be lightweight, fast and responsive, LLVM passes will add some major overhead to the compilation time. It is, however, important to note that compiling to LLVM will be considered in the future when the wasm backend is stable enough.
+Astro compiler is also expected to be lightweight, fast and responsive, using LLVM will add major overhead to the compilation time. LLVM will only be considered when the wasm backend is in a stable condition.
 
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
 Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting)(ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
-It's also unlike Rust memory management model as it puts lesser restrictions on how references can be moved around while still being memory safe.
+It's also unlike Rust memory management model as it puts lesser restrictions on how references are moved around while still being memory safe.
 
-Astro simply, stays out of your way, lets you write your code like you would in any other garbage-collected langauges.
+Astro simply, stays out of your way, lets you write your code like you would in any other garbage-collected languages.
 
 ### How close is Astro to being ready for production use?
 Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
@@ -69,7 +69,7 @@ Incremental compilation is a goal as well since the language requires a lot of c
 - [ ] Build REPL
 - [ ] Create specialized error handler
 
-### Technologies used
+### What are the technologies used?
 - [PEGjs](https://github.com/pegjs/pegjs) - a simple parser generator for JavaScript that produces fast parsers with excellent error reporting
 - [wast2wasm](https://www.npmjs.com/package/wast2wasm) - translates from s-expressions to the WebAssembly binary-encoding.
 
