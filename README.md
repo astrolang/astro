@@ -56,6 +56,11 @@ It will also have a set of language tools for making editor support easier.
 
 Incremental compilation is a goal as well since the language requires a lot of compile-time computations like type inference and program flow analysis.
 
+### Where can I read about the language?
+There is no proper documentation for the language yet since the main implementation is still under active development, but you can find an up-to-date summary of language features [here](docs/language/summary.ast).
+
+Gitbooks covering different aspects of the project are in works. They will be published as soon the language becomes usable.
+
 ### <a name="tasks"></a> What are the important tasks to complete?
 - [x] ~Improve project structure~
 - [x] ~Add automated unit testing and coverage reports~
@@ -124,6 +129,18 @@ Incremental compilation is a goal as well since the language requires a lot of c
 ├── src
 │   ├── compiler
 │   │   ├── README.md
+│   │   ├── codegen
+│   │   │   └── ast2wast.js
+│   │   ├── semantics
+│   │   │   └── scope.js
+│   │   ├── syntax
+│   │   │   ├── asts.js
+│   │   │   ├── grammar.pegjs
+│   │   │   └── parser.js
+│   │   ├── test.ast
+│   │   ├── test.js
+│   │   └── utils
+│   │       └── index.js
 │   ├── stdlib
 │   │   └── README.md
 │   └── support
