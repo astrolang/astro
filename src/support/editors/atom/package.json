@@ -1,0 +1,17 @@
+{
+  "name": "astro-language",
+  "version": "0.0.1",
+  "description": "Language support for Astro in Atom",
+  "engines": {
+    "atom": "*"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appcypher/astro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/appcypher/astro/issues"
+  },
+  "license": "MIT"
+}
