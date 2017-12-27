@@ -11,12 +11,12 @@ Current Version: 0.1.12
 ![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
 
 ### What is Astro?
-Astro is a multi-paradigm high-level programming language designed for high-performance numerical-computing web applications. As a result, Astro
-- is a statically-typed language that 
+Astro is a multi-paradigm high-level programming language designed for high-performance numerical-computing web applications and as a result Astro
+- is a statically-typed,
 - compiles to WebAssembly,
 - has no GC and
 - has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)) with
-- full type-inferrence
+- full type inference
 
 ### Why create yet another programming language?
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future.
