@@ -69,14 +69,14 @@ Incremental compilation is a goal as well since the language requires a lot of c
 - [ ] Build REPL
 - [ ] Create specialized error handler
 
-#### Other interesting new languages that compile to WebAssembly
-- [Forest](https://github.com/forest-lang/core) - multi-syntax functional programming language
-- [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem. 
-- [Walt](https://github.com/ballercat/walt) - an alternative syntax for WebAssembly text format. It's an experiment for using JavaScript syntax to write to as 'close to the metal' as possible.
-
 ### Technologies used
 - [PEGjs](https://github.com/pegjs/pegjs) - a simple parser generator for JavaScript that produces fast parsers with excellent error reporting
 - [wast2wasm](https://www.npmjs.com/package/wast2wasm) - translates from s-expressions to the WebAssembly binary-encoding.
+
+### Other interesting new languages that compile to WebAssembly
+- [Forest](https://github.com/forest-lang/core) - multi-syntax functional programming language
+- [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem. 
+- [Walt](https://github.com/ballercat/walt) - an alternative syntax for WebAssembly text format. It's an experiment for using JavaScript syntax to write to as 'close to the metal' as possible.
 
 ### Project folder structure
 ```
