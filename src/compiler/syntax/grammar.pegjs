@@ -136,7 +136,10 @@ IfHeadExpr
     =
 
 ForHeadExpr
-    =
+    = OpenTuple _ 'in' _ OpenTuple
+
+OpenTuple
+    = ExprOperator (_ ',' _ ExprOperator)
 
 Expr 
     = ExprInline 
@@ -298,10 +301,10 @@ PropertyBody
     / '{' _ FunctionBody _ '}'
 
 IIFEInline
-    = 
+    = '(' ')'
 
 IIFEBlock
-    = 
+    = '(' ')'
 
 LambdaInline
     = '|' IgnoreNewline _ LambdaParam (_ ',' _ LambdaParam)* _ AcknowledgeNewline '|' _ '=>' _ FunctionContentInline
@@ -362,9 +365,6 @@ Delegate
 Raise
     = 'raise' _ ex:ExprInline { return { kind: 'raise', value: ex } }
 
-OpenTuple
-    =
-
 LiteralInline // TODO: NSLiteral
     = StringLiteral
     / RegexLiteral
@@ -383,47 +383,47 @@ LiteralBlock // TODO: NSLiteral
     / NamedTupleLiteralBlock
 
 SymbolLiteral
-    =
+    = '(' ')'
 
 TupleLiteral
     = TupleLiteralInline
     / TupleLiteralBlock
 
 TupleLiteralInline
-    =
+    = '(' ')'
 
 TupleLiteralBlock
-    =
+    = '(' ')'
 
 NamedTupleLiteral
     = NamedTupleLiteralInline
     / NamedTupleLiteralBlock
 
 NamedTupleLiteralInline
-    =
+    = '(' ')'
 
 NamedTupleLiteralBlock
-    =
+    = '(' ')'
 
 ListLiteral
     = ListLiteralInline
     / ListLiteralBlock
 
 ListLiteralInline
-    =
+    = '[' ']'
 
 ListLiteralBlock
-    =
+    = '[' ']'
 
 DictLiteral
     = DictLiteralInline
     / DictLiteralBlock
 
 DictLiteralInline
-    =
+    = '{' '}'
 
 DictLiteralBlock
-    =
+    = '{' '}'
 
 DictKey
     = Atom
@@ -508,10 +508,6 @@ EmptyLine 'emptyLine'
 
 _ 'spaces'
     = LineContinuation
-    / &(Operator) Whitespace* &(Identifier)
-    / &(Operator) Whitespace+ &(Operator)
-    / &(Identifier) Whitespace+ &(Identifier)
-    / &(Identifier) Whitespace* &(Operator)
     / Whitespace*
     / NextLine &{ ignoreNewline == false }
 
