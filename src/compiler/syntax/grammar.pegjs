@@ -139,7 +139,7 @@ ForHeadExpr
     = OpenTuple _ 'in' _ OpenTuple
 
 OpenTuple
-    = ExprOperator (_ ',' _ ExprOperator)
+    = ExprOperator (_ ',' _ ExprOperator)*
 
 Expr 
     = ExprInline 
