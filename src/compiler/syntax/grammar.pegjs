@@ -1,15 +1,15 @@
 {
     const path = require('path');
-    const {
-        print,
-        removeNulls,
-        stringify,
-        removeUnderscores,
-        join,
-        safeAccess,
+    const { 
+        print, removeNulls, stringify, removeUnderscores, join, safeAccess,
     } = require(path.join(__dirname, '../../../../src/compiler/utils')); // relative to node_modules\pegjs\lib\compiler
+    
+    const {
+        toWhile,
+    } = require(path.join(__dirname, '../../../../src/compiler/syntax/asts')); // relative to node_modules\pegjs\lib\compiler
 
     let prevIndentCount = 0;
+    let ignoreNewline = false;
     let keywords = ['if', 'while', 'for', 'in', 'try', 'elif', 'else', 'end', 'except', 'ensure', 'defer'];
 }
 
@@ -17,49 +17,29 @@
 // A complete block should indent itself at entry and exit with DEDENT NEWLINE SAMEDENT.
 
 Start
-    = exs:Program { return { kind: 'program', expressions: exs } }
+    = exs:Program { return { kind: 'program', Expressions: exs } }
 
 Program
-    = (ProgramNonSourceCode NextLine Samedent)* ex1:ProgramSourceCode ex2:(_ NextLine pc:(Samedent ex:ProgramCode { return ex })? { return pc })* {
-        return removeNulls(join(ex1, ex2));
-    }
-    / ProgramNonSourceCode (NextLine (Samedent ProgramNonSourceCode)?)* { return null }
-
-ProgramCode
-    = ex:ProgramSourceCode { return ex }
-    / ProgramNonSourceCode { return } // returns null
-
-ProgramSourceCode
-    = ex:ExprBlock _ SingleLineComment? { return ex; }
-
-ProgramNonSourceCode
-    = SingleLineComment
-
+    = 
+    
 Declaration
     = SubjectDeclaration
     / FunctionDeclaration
-    / MacroDeclaration
     / TypeDeclaration
     / AbstDeclaration
     / ImportDeclaration
 
 SubjectDeclaration
     = mu:('var'/'let') _ sd:SubjectMainDeclaration {
-        return { kind:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value };
-    }
-    / mu:('var'/'let') _ NextLine Indent sd1:SubjectMainDeclaration _ sd2:(NextLine Samedent sd:SubjectMainDeclaration _ { return sd; })* Dedent {
-        let declarations = [{ kind:'subjectDeclaration', pattern:sd1.pattern, mutability:(mu==='var'), value:sd1.value }];
-        for (let sd of sd2)
-            declarations.push({ kind:'subjectDeclaration', pattern:sd.pattern, mutability:(mu==='var'), value:sd.value });
-        return declarations;
+        return { kind: 'subjectDeclaration', pattern: sd.pattern, mutability: (mu==='var'), value: sd.value };
     }
 
 SubjectMainDeclaration
-    =  pt:PatternMap as:(_ "=" _ sb:SubjectBody { return sb; })? { return { pattern:pt, value:as }; }
+    =  pt:PatternMap as:(_ "=" _ sb:SubjectBody { return sb })? { return { pattern: pt, value: as } }
 
 SubjectBody
-    = ex:SubjectContentInline { return ex; }
-    / SingleLineComment? ex:SubjectContentBlock { return ex; }
+    = ex:SubjectContentInline { return ex }
+    / SingleLineComment? ex:SubjectContentBlock { return ex }
 
 SubjectContentInline
     = ex1:ExprBlock ex2:(_ ',' _ ex:ExprBlock)* _ SingleLineComment? {
@@ -67,294 +47,37 @@ SubjectContentInline
     }
 
 SubjectContentBlock
-    = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* ex1:SubjectSourceCode ex2:(_ NextLine Samedent ex:SubjectNonSourceCode)* Dedent {
+    = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* ex1:SubjectSourceCode ex2:(_ NextLine Samedent ex: SubjectNonSourceCode)* Dedent {
         return removeNulls(join(ex1, ex2));
     }
 
 SubjectCode
-    = ex:SubjectSourceCode { return ex; }
-    / SubjectNonSourceCode { return; } // returns null
+    = ex:SubjectSourceCode { return ex }
+    / SubjectNonSourceCode { return }
 
 SubjectSourceCode
-    = ex:ExprBlock _ SingleLineComment? { return ex; }
+    = ex:ExprBlock _ SingleLineComment? { return ex }
 
 SubjectNonSourceCode
     = SingleLineComment
 
-DotIdentifier
-    = exs:(ex:Atom _ '.' { return ex; })* id:Identifier {
-        let atoms = [...exs, id];
-        return { kind:'dotChain', atoms };
-    }
-
+FunctionDeclarationPrivate
+    =
+    
 FunctionDeclaration
-    = 'fun' _ fd:FunctionMainDeclaration {
-        return fd;
-    }
-    / 'fun' _ NextLine Indent fd1:FunctionMainDeclaration _ fd2:(NextLine Samedent fd:FunctionMainDeclaration _ { return fd; })* Dedent {
-        return join(fd1, fd2);
-    }
-
-FunctionMainDeclaration
-    = fn:FunctionName _ fp:FunctionParameterSection fb:(_ (':'/'=') _ fb:FunctionBody { return fb; })? {
-        return { kind:'functionDeclaration', name:fn.name, privateAccess:fn.privateAccess, superParams:fp.superParams, params:fp.params, body:fb };
-    }
-
-FunctionName
-    = id:Identifier ac:"'"? { return {
-        name:id, privateAccess:(ac!==null) };
-    }
-
-FunctionParameterSection
-    = "(" fsi:(_ fi:FunctionSuperTypeInit _ ",")? fpm:(_ fp1:FunctionParameter fp2:(_ "," _ fp:FunctionParameter { return fp; })* { return join(fp1, fp2); })? _ ")" {
-        return { superParams:fsi, params:fpm };
-    }
-
-FunctionSuperTypeInit
-    = "<" _ fp1:FunctionParameter fp2:(_ "," _ fp:FunctionParameter  { return fp; })* _ ">" {
-        return join(fp1, fp2);
-    }
-
-FunctionParameter
-    = mu:('var' _)? rs:'...'? id1:Identifier id2:(dt:"." id:Identifier? { return [id, dt]; })? vl:(_ ":" _ ex:Atom { return ex;})? {
-        return { mutability:(mu!==null), rest:(rs!==null), key:id1, scopeKey: safeAccess(id2,0), keyNeeded: (safeAccess(id2,1)==='.'), value:vl };
-    }
-
-FunctionBody
-    = fi:FunctionContentInline { return fi }
-    / SingleLineComment? fb:FunctionContentBlock { return fb }
-
-FunctionContentInline
-    = ex1:ExprBlock ex2:(_ ';' _ ex:ExprBlock { return ex })* _ SingleLineComment? {
-        return join(ex1, ex2);
-    }
-
-FunctionContentBlock
-    = NextLine Indent (_ FunctionNonSourceCode NextLine Samedent)* ex1:FunctionSourceCode ex2:(_ NextLine Samedent ex:FunctionCode { return ex; })* Dedent {
-        return removeNulls(join(ex1, ex2));
-    }
-
-FunctionCode
-    = ex:FunctionSourceCode { return ex; }
-    / FunctionNonSourceCode { return } // returns null
-
-FunctionSourceCode
-    = ex:ExprBlock _ SingleLineComment? { return ex; }
-
-FunctionNonSourceCode
-    = SingleLineComment
-
-MacroDeclaration
-    = 'macro' _ md:MacroMainDeclaration {
-        return md;
-    }
-    / 'macro' _ NextLine Indent md1:MacroMainDeclaration _ md2:(NextLine Samedent md:MacroMainDeclaration _ { return md; })* Dedent {
-        return join(md1, md2);
-    }
-
-MacroMainDeclaration
-    = mn:MacroName _ '(' fpm:(_ fp1:FunctionParameter fp2:(_ ',' _ fp:FunctionParameter { return fp; })* { return join(fp1, fp2); })? _ ')' _ (':'/'=') _ fb:FunctionBody {
-        return { kind:'macroDeclaration', name:mn.name, privateAccess:mn.privateAccess, params:fpm, body:fb };
-    }
-
-MacroName
-    = id:Identifier ac:"'"? { return {
-        name:id, privateAccess:(ac!==null) };
-    }
+    =
 
 TypeDeclaration
-    = 'type' _ td:TypeMainDeclaration {
-        return td;
-    }
-    / 'type' _ NextLine Indent td1:TypeMainDeclaration _ td2:(NextLine Samedent td:TypeMainDeclaration _ { return td; })* Dedent {
-        return join(td1, td2);
-    }
-
-TypeMainDeclaration
-    = nm:TypeName _ tp:TypeParameterSection spt:(_ sp:SuperTypeDeclaration { return sp; })? {
-        // Constructor Function
-        let constructorFunction = {
-            kind:'functionDeclaration', name:nm.name, privateAccess:false, superParams:tp.superParams, params:tp.params, body:null
-        };
-
-        // Fields
-        let fields = [];
-        for (let param of tp.params) {
-            let pattern = {
-                patternType:null,
-                names:[{name:(param.scopeKey!=undefined?param.scopeKey:param.key), privateAccess:param.privateAccess, rest:false}]
-            };
-            fields.push({ kind:'subjectDeclaration', pattern, mutability:param.mutability, value:param.value });
-        }
-
-        // Type
-        let type = {
-            kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields
-        };
-
-        return [type, constructorFunction];
-    }
-    / nm:TypeName spt:(_ sp:SuperTypeDeclaration { return sp; })? tb:(_ (':'/'=') _ ex:TypeBody { return ex; })? {
-        return { kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, fields:tb };
-    }
-
-TypeName
-    = id:Identifier ac:"'"? {
-        return { name:id, privateAccess:(ac!==null) }
-    }
-
-TypeParameterSection
-    = "(" tsi:(_ tp:TypeSuperTypeInit _ ",")? tpm:(_ tp1:TypeParameter tp2:(_ "," _ tp:TypeParameter { return tp; })* { return join(tp1, tp2); })? _ ")" {
-        return { superParams:tsi, params:tpm };
-    }
-
-TypeSuperTypeInit
-    = "<" _ tp1:TypeParameter tp2:(_ "," _ tp:TypeParameter { return tp; })* _ ">" {
-        return join(tp1, tp2);
-    }
-
-TypeParameter
-    = mu:('var' _)? id1:Identifier id2:(dt:"." id:Identifier?  { return [id,dt]; })? ac:"'"? vl:(_ ":" _ ex:Atom { return ex; })? {
-        return { mutability:(mu!==null), key:id1, scopeKey:safeAccess(id2,0), keyNeeded:(safeAccess(id2,1)==='.'), value:vl, privateAccess:(ac!==null) };
-    }
-
-SuperTypeDeclaration
-    = "<:" _ id1:Identifier id2:(_ "," _ id:Identifier { return id; })* {
-        return join(id1, id2);
-    }
-
-TypeBody
-    = ex:TypeContentInline { return ex; }
-    / SingleLineComment? ex:TypeContentBlock { return ex; }
-
-TypeContentInline
-    = ex1:SubjectDeclaration ex2:(_ ';' _ ex:SubjectDeclaration { return ex; })* _ SingleLineComment? {
-        return join(ex1, ex2);
-    }
-
-TypeContentBlock
-    = NextLine Indent (_ TypeNonSourceCode NextLine Samedent)* ex1:TypeSourceCode ex2:(_ NextLine Samedent ex:TypeCode {return ex; })* Dedent {
-        return removeNulls(join(ex1, ex2));
-    }
-
-TypeCode
-    = ex:TypeSourceCode { return ex; }
-    / TypeNonSourceCode { return }
-
-TypeSourceCode
-    = ex:SubjectDeclaration _ SingleLineComment? { return ex; }
-
-TypeNonSourceCode
-    = SingleLineComment
+    = 
 
 AbstDeclaration
-    = 'abst' _ ad:AbstMainDeclaration {
-        return ad;
-    }
-    / 'abst' _ NextLine Indent ad1:AbstMainDeclaration _ ad2:(NextLine Samedent ad:AbstMainDeclaration _ { return ad; })* Dedent {
-        return join(ad1, ad2);
-    }
-
-AbstMainDeclaration
-    = nm:TypeName _ tp:TypeParameterSection spt:(_ sp:SuperTypeDeclaration { return sp; })? {
-        // Constructor Function
-        let constructorFunction = {
-            kind:'functionDeclaration', name:nm.name, privateAccess:false, superParams:tp.superParams, params:tp.params, body:null
-        };
-
-        // Fields
-        let fields = [];
-        for (let param of tp.params) {
-            let pattern = {
-                patternType:null,
-                names:[{name:param.name, privateAccess:param.privateAccess, rest:false}]
-            };
-            fields.push({ kind:'subjectDeclaration', pattern, mutability:param.mutability, value:param.value });
-        }
-
-        // Type
-        let type = {
-            kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, body
-        };
-
-        return [type, constructorFunction];
-    }
-    / nm:TypeName spt:(_ sp:SuperTypeDeclaration { return sp; })? tb:(_ (':'/'=') _ ex:AbstBody { return ex; })? {
-        return { kind:'typeDeclaration', name:nm.name, privateAccess:nm.privateAccess, superTypes:spt, body:tb };
-    }
-
-AbstBody
-    = ex:AbstContentInline { return ex; }
-    / SingleLineComment? ex:AbstContentBlock { return ex; }
-
-AbstContentInline
-    = ('|' _)? ex1:AbstSubTypeDeclaration ex2:(_ '|' _ ex:AbstSubTypeDeclaration { return ex })+ _ SingleLineComment? {
-        let expressions = join(ex1, ex2);
-        let subtypes = [];
-        for (let subtype of subtypes) {
-            subtypes.push({
-                kind:'subtype', name:subtype.name, privateAccess:subtype.privateAccess, params:subtype.params
-            })
-        }
-        return subtypes;
-    }
-
-AbstContentBlock
-    = NextLine Indent (_ AbstNonSourceCode NextLine Samedent)* ex1:AbstSourceCode ex2:(_ NextLine Samedent ex:AbstCode { return ex; })* Dedent {
-        let expressions = removeNulls(join(ex1, ex2)); // array of objects containing subjectDeclaration or subTypeDeclaration
-        let fields = [];
-        let subtypes = [];
-
-        for (let exp of expressions) {
-            if (exp.type === 'subjectDeclaration')
-                fields.push({ kind:'subjectDeclaration', pattern:exp.subject.pattern, mutability:exp.subject.mutability, value:exp.subject.value });
-            else {
-                for (let subtype of exp.subtypes) {
-                    subtypes.push({
-                        kind:'subtype', name:subtype.name, privateAccess:subtype.privateAccess, params:subtype.params
-                    })
-                }
-            }
-        }
-        return [...fields, ...subtypes];
-    }
-
-AbstCode
-    = ex:AbstSourceCode  { return ex; }
-    / AbstNonSourceCode { return } // returns null
-
-AbstSourceCode
-    = ex:SubjectDeclaration _ SingleLineComment?  { return { type:'subjectDeclaration', subject:ex }; }
-    / ('|' _)? ex1:AbstSubTypeDeclaration ex2:(_ '|' _ ex:AbstSubTypeDeclaration { return ex; })+ _ SingleLineComment? {
-        return { type:'subtypeDeclaration', subtypes:join(ex1, ex2) };
-    }
-    / '|' _ ex:AbstSubTypeDeclaration _ SingleLineComment? { return { type:'subtypeDeclaration', subtypes:[ex] }; }
-
-AbstNonSourceCode
-    = SingleLineComment
-
-AbstSubTypeDeclaration
-    = tn:TypeName ap:AbstSubTypeParameterSection? {
-        return { name:tn.name, privateAccess:tn.privateAccess, params:ap };
-    }
-
-AbstSubTypeParameterSection
-    = '(' _ ap1:AbstSubTypeParameter ap2:(_ ',' _ ap:AbstSubTypeParameter { return ap; })* _ ')' {
-        return join(ap1, ap2);
-    }
-
-AbstSubTypeParameter
-    = mu:('var' _)? id1:Identifier id2:(dt:"." id:Identifier? {return [id,dt]; })? vl:(_ ":" _ ex:Atom)? {
-        return { mutability:(mu!==null), key:id1, scopeKey:safeAccess(id2,0), keyNeeded:(safeAccess(id2,1)==='.'), value:vl };
-    }
+    = 
 
 ImportDeclaration
     =
-
-PathIdentifier
-    = Identifier
-    / '..'
-    / '.'
+    
+ExportDeclaration
+    =
 
 CondExprBlock
     = IfExprBlock
@@ -374,7 +97,7 @@ CondExprInline
     / MatchExprInline
 
 IfExprInline
-    =
+    = 
 
 WhileExprInline
     =
@@ -415,39 +138,199 @@ IfHeadExpr
 ForHeadExpr
     =
 
-Atom
-    =
+Expr 
+    = ExprInline 
+    / ExprBlock
+    / Declaration
 
-Properties
-    = '{' _ FunctionBody _ '}' _ '->' _ '{' _ FunctionBody _ '}'
+ExprInBlock
+    = MultipleExprInline
+    / ExprBlock
+    / SubjectDeclaration
+    / Property    
+  
+ExprBlock
+    = LiteralBlock
+    / CondExprBlock
+
+MultipleExprInline
+    = ExprInline (_ ';' _ ExprInline)*
+  
+ExprInline
+    = LiteralInline
+    / CondExprInline
+    / ExprOperator
+
+ExprOperator
+    = ExprUnaryPrefix
+    / ExprBinary
+    / ExprUnaryPostfix
+    / CommandNotation
+    / Range
+    / Atom
+
+ExprBinary 
+    = (ExprUnaryPrefix/Atom) ExprBinaryRest*
+
+ExprBinaryRest
+    = Whitespace+ Operator Whitespace+ ExprUnaryPrefix
+    / Whitespace+ Operator Whitespace+ ExprUnaryPostfix !(Atom)
+    / Whitespace+ Operator Whitespace+ Atom
+    / Operator Atom
+
+ExprUnary
+    = ExprUnaryPrefix
+    / ExprUnaryPostfix
+
+ExprUnaryPrefix
+    = Operator Atom
+
+ExprUnaryPostfix
+    = Atom Operator
+
+Atom
+    = DotNotation
+    / CascadingNotation
+    / WallNotation
+    / FunctionCall
+    / ListNotation
+    / DictNotation
+    / Comprehension
+    / BlockInParens
+    / ExprInParens
+    / Identifier
+
+BlockInParens
+    = '(' _ Nextline Indent ExprInBlock (Nextline Samedent ExprInBlock)* Dedent Nextline Samedent ')'
+
+ExprInParens
+    = '(' IgnoreNewline _ ExprInline (_ ';' _ ExprInline)* _ AcknowledgeNewline ')'
+  
+FunctionCall
+    = Identifier _ CallTuple 
+    / Identifier _ GeneratorComprehension
+
+CallTuple  
+    = '(' IgnoreNewline _ (Identifier _ ':' _)? Atom (',' _ (Identifier _ ':' _)? Atom)* (_ ',')? _ AcknowledgeNewline ')'  
+
+CommandNotation 
+    = Identifier Whitespace+ CommandNotationAtom
+  
+CommandNotationAtom 
+    = GeneratorComprehension
+    / NumericLiteral
+    / StringLiteral
+    / DotNotation
+    / CascadingNotation
+    / WallNotation
+    / CallTuple 
+
+CascadingNotation
+    = DotNotationAtom (_ '->' DotNotationAtom)+
+    / DotNotationAtom _ '->' DotNotationAtom [!?] (_ '->' DotNotationAtom)*
+
+CascadingNotationCommandNotation
+    = DotNotationAtom (_ '->' DotNotationAtom)* _ '->' CommandNotation
+    / DotNotationAtom _ '->' DotNotationAtom [!?] (_ '->' DotNotationAtom)* _ '->' CommandNotation
+
+DotNotation
+    = DotNotationAtom (_ '.' DotNotationAtom)+ _ '.' (DotNotationAtom/CommandNotation)
+    / DotNotationAtom _ '.' DotNotationAtom [!?] (_ '.' DotNotationAtom)*
+ 
+DotNotationCommandNotation
+    = DotNotationAtom (_ '.' DotNotationAtom)* _ '.' CommandNotation
+    / DotNotationAtom _ '.' DotNotationAtom [!?] (_ '.' DotNotationAtom)* _ '.' CommandNotation
+ 
+DotNotationAtom
+    = FunctionCall
+    / ListNotation
+    / DictNotation
+    / Identifier
+    / '$' Identifier
+    / '$' ListAccess
+    / '$' DictAccess
+
+WallNotation
+    = '|' IgnoreNewline _ Atom (_ ',' _ Atom _)+ _ AcknowledgeNewline '|' '.' _ Atom
+    / Atom _ '.' '|' IgnoreNewline _ Atom (_ ',' _ Atom)+ _ AcknowledgeNewline '|' '.' _ Atom?
+    / '|' IgnoreNewline _ Atom ((Operator Atom)/(Whitespace+ Operator Whitespace+ Atom))+ _ AcknowledgeNewline '|' '.' _ Atom
+    / Atom _ '.' '|' IgnoreNewline _ Atom ((Operator Atom)/(Whitespace+ Operator Whitespace+ Atom))+ _ AcknowledgeNewline '|' '.' _ Atom?
+  
+WallNotationCommandNotation
+    = '|' IgnoreNewline _ Atom (_ ',' _ Atom)+ _ AcknowledgeNewline '|' '.' CommandNotation
+    / Atom _ '.' '|' IgnoreNewline _ Atom (_ ',' _ Atom)+ _ AcknowledgeNewline '|' '.' _ CommandNotation?
+    / '|' IgnoreNewline _ Atom ((Operator Atom)/(_ Operator _ Atom))+ _ AcknowledgeNewline '|' '.' _ CommandNotation
+    / Atom _ '.' '|' IgnoreNewline _ Atom ((Operator Atom)/(_ Operator _ Atom))+ _ AcknowledgeNewline '|' '.' _ CommandNotation?
+
+WallNotationAtom
+    = FunctionCall
+    / ListNotation
+    / DictNotation
+    / Identifier
+
+ListNotation
+    = Atom _ ListAccess
+
+ListAccess
+    = '[' IgnoreNewline ListAccessArg (_ ',' _ ListAccessArg)* AcknowledgeNewline ']'
+  
+ListAccessArg
+    = ':' (Atom ':')? Atom '!'?
+    / Atom '!' ':' (Atom ':')? Atom?
+    / Atom ':' (Atom ':')? Atom '!'?
+
+DictNotation
+    = Atom _ DictAccess
+
+DictAccess
+    = '{' IgnoreNewline Atom (',' Atom)* AcknowledgeNewline '}'
+
+Range 
+    = '..' (Atom '..')? Atom '!'?
+    / Atom '!' '..' (Atom '..')? Atom? 
+    / Atom '..' (Atom '..')? Atom '!'?  
+
+Property
+    = PropertyBody _ '->' _ PropertyBody
+
+PropertyBody
+    = '{' IgnoreNewline _ MultipleExprInline _ AcknowledgeNewline '}'
+    / '{' _ FunctionBody _ '}'
 
 IIFEInline
-    =
+    = 
 
 IIFEBlock
-    =
+    = 
 
 LambdaInline
-    = '|' _ LambdaParam (_ ',' _ LambdaParam)* _ '|' _ '=>' _ FunctionContentInline
+    = '|' IgnoreNewline _ LambdaParam (_ ',' _ LambdaParam)* _ AcknowledgeNewline '|' _ '=>' _ FunctionContentInline
     / '=>' _ FunctionContentInline
 
 LambdaBlock
-    = '|' _ LambdaParam (_ ',' _ LambdaParam)* _ '|' _ '=>' _ FunctionContentBlock
+    = '|' IgnoreNewline _ LambdaParam (_ ',' _ LambdaParam)* _ AcknowledgeNewline '|' _ '=>' _ FunctionContentBlock
     / '=>' _ FunctionContentBlock
 
 LambdaParam
-    =
+    = 
 
-Comprehension 'comprehension' // NOTE: there can't be tuple generator
-    = '(' _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where?  _ ')' {
+Comprehension
+    = GeneratorComprehension
+    / ListComprehension
+    / DictComprehension
+
+GeneratorComprehension 'comprehension'
+    = '(' IgnoreNewline _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where?  _ AcknowledgeNewline ')' {
         let whileAst = toWhile();
         return whileAst;
     }
-    / '[' _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where? _ ']' {
+ListComprehension 'comprehension'
+    = '[' IgnoreNewline _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewline ']' {
         let whileAst = toWhile();
         return whileAst;
     }
-    / '{' _ ky:ExprInline _ ':' _ vl:ExprInline _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ fex:ForHeadExpr { return hd })* cond:Where? _ '}' {
+DictComprehension 'comprehension'
+    = '{' IgnoreNewline _ ky:ExprInline _ ':' _ vl:ExprInline _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ fex:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewline '}' {
         let whileAst = toWhile();
         return whileAst;
     }
@@ -480,16 +363,16 @@ Raise
     = 'raise' _ ex:ExprInline { return { kind: 'raise', value: ex } }
 
 OpenTuple
+    =
 
 LiteralInline // TODO: NSLiteral
     = StringLiteral
     / RegexLiteral
     / NumericLiteral
     / BooleanLiteral
-    / RangeLiteral
     / SymbolLiteral
     / ListLiteralInline
-    / DicttLiteralInline
+    / DictLiteralInline
     / TupleLiteralInline
     / NamedTupleLiteralInline
 
@@ -499,46 +382,52 @@ LiteralBlock // TODO: NSLiteral
     / TupleLiteralBlock
     / NamedTupleLiteralBlock
 
-RangeLiteral
-
 SymbolLiteral
+    =
 
 TupleLiteral
     = TupleLiteralInline
     / TupleLiteralBlock
 
 TupleLiteralInline
+    =
 
 TupleLiteralBlock
+    =
 
 NamedTupleLiteral
     = NamedTupleLiteralInline
     / NamedTupleLiteralBlock
 
 NamedTupleLiteralInline
+    =
 
 NamedTupleLiteralBlock
+    =
 
 ListLiteral
     = ListLiteralInline
     / ListLiteralBlock
 
 ListLiteralInline
+    =
 
 ListLiteralBlock
+    =
 
-ObjectLiteral
-    = ObjectLiteralInline
-    / ObjectLiteralBlock
+DictLiteral
+    = DictLiteralInline
+    / DictLiteralBlock
 
 DictLiteralInline
+    =
 
 DictLiteralBlock
+    =
 
 DictKey
     = Atom
     / '$' Identifier
-    / '$' '(' _ Atom _ ')'
 
 CommaColon
     = ',' / ';'
@@ -603,7 +492,13 @@ SingleLineComment 'singleLineComment'
 SingleLineCommentCharacter // UNICODE?
     = [^\r\n]+
 
-NextLine 'nextline'
+IgnoreNewline 
+    = '' { ignoreNewline = true }
+
+AcknowledgeNewline
+    = '' { ignoreNewline = false }
+
+NextLine 'nextLine'
     = (Newline EmptyLine)+
     / Newline
 
@@ -618,6 +513,7 @@ _ 'spaces'
     / &(Identifier) Whitespace+ &(Identifier)
     / &(Identifier) Whitespace* &(Operator)
     / Whitespace*
+    / NextLine &{ ignoreNewline == false }
 
 LineContinuation 'lineContinuation'
     = Whitespace* "..." Whitespace* NextLine Samedent
@@ -651,7 +547,7 @@ Samedent 'samedent'
         return false;
     }
 
-Dedent 'dedent'
+Dedent 'Dedent'
     = d:("    "+ / "") {
         let currentIndentCount = d.toString().replace(/,/g, "").length;
         if (currentIndentCount < prevIndentCount) {
@@ -661,30 +557,30 @@ Dedent 'dedent'
             prevIndentCount -= 4;
             return;
         }
-        error("error: expected a 4-space dedentation here!");
+        error("error: expected a 4-space Dedentation here!");
     }
 
 EOI 'eoi'
     = !.
 
 Operator 'operator'
-    = op:(OperatorCharacter (OperatorCharacter)*) { return stringify(op) }
+    = Operator:(OperatorCharacter (OperatorCharacter)*) { return stringify(Operator) }
 
-OperatorCharacter  // UNICODE?
+OperatorCharacter    // UNICODE?
     = '+' / '-' / '*' / '/' / '\\' / '^' / '%' / '!' / '>' / '<' / '='
 
 Punctuator 'punctuator'
     = ('.' / ',' / "'" / '"')
 
-// NOTE: keywords are not valid identifiers. The predicate also help ignore language keywords that appear in certain
+// NOTE: keywords are not valid Identifiers. The predicate also help ignore language keywords that appear in certain
 // positions (infix/prefix) which can easily be taken as command notation. For example, the `mod` in `a mod b`
-Identifier 'identifier' // UNICODE?
+Identifier 'Identifier' // UNICODE?
     = id:([a-zA-Z_][a-zA-Z0-9_]*) &{ return keywords.indexOf(stringify(id)) < 0 } { return stringify(id) }
 
-Newline 'newline'
+Newline 'Newline'
     = ("\r"? "\n")
 
-Whitespace 'whitespace'
+Whitespace 'Whitespace'
     = "\t"
     / "\v"
     / "\f"
