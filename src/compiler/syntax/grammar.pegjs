@@ -133,10 +133,27 @@ MatchExprBlock
     =
 
 IfHeadExpr
-    =
+    = 
+    / 'let' 
 
 ForHeadExpr
     = OpenTuple _ 'in' _ OpenTuple
+
+Assignment
+    = AssignmentPattern '=' OpenTuple
+    
+AssignmentPattern
+    = AssignmentAtom (',' AssignmentAtom)*
+    / '(' AssignmentAtom (',' AssignmentAtom)* ')'
+    / '[' AssignmentAtom (',' AssignmentAtom)* ']'
+    / '{' AssignmentAtom (',' AssignmentAtom)* '}'
+    
+AssignmentAtom
+    = DotNotationAtom (_ '.' DotNotationAtom)* _ '.' Identifier
+    / DotNotationAtom _ '.' DotNotationAtom [!?] (_ '.' DotNotationAtom)* _ '.' Identifier
+    / Identifier
+    / '...' Identifier
+    / '...'
 
 OpenTuple
     = ExprOperator (_ ',' _ ExprOperator)*
@@ -237,7 +254,7 @@ CascadingNotationCommandNotation
     / DotNotationAtom _ '->' DotNotationAtom [!?] (_ '->' DotNotationAtom)* _ '->' CommandNotation
 
 DotNotation
-    = DotNotationAtom (_ '.' DotNotationAtom)+ _ '.' (DotNotationAtom/CommandNotation)
+    = DotNotationAtom (_ '.' DotNotationAtom)+
     / DotNotationAtom _ '.' DotNotationAtom [!?] (_ '.' DotNotationAtom)*
  
 DotNotationCommandNotation
@@ -327,11 +344,13 @@ GeneratorComprehension 'comprehension'
         let whileAst = toWhile();
         return whileAst;
     }
+    
 ListComprehension 'comprehension'
     = '[' IgnoreNewline _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewline ']' {
         let whileAst = toWhile();
         return whileAst;
     }
+    
 DictComprehension 'comprehension'
     = '{' IgnoreNewline _ ky:ExprInline _ ':' _ vl:ExprInline _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ fex:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewline '}' {
         let whileAst = toWhile();
