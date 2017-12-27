@@ -12,7 +12,7 @@ Current Version: 0.1.12
 
 ### What is Astro?
 Astro is a multi-paradigm high-level programming language designed for high-performance numerical-computing web applications and as a result Astro
-- is a statically-typed,
+- is statically-typed,
 - compiles to WebAssembly,
 - has no GC and
 - has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)) with
@@ -25,7 +25,7 @@ While such web apps can be written in C/C++ or Rust, we believe Astro introduces
 Astro started as a hobby for learning programming language design and compiler construction but that has since changed when Astro started gathering a set of unique features that should make any level of development fun.
 
 Astro is designed to have no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games and other real-time software. 
-It needs to do this while being as expressive as python.
+It needs to do this while being as expressive as Python.
 
 In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors and matrices, vectorization, unicode identifiers, etc. 
 
