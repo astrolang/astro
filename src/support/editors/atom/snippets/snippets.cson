@@ -1,0 +1,37 @@
+'.source.astro':
+  'Function':
+    'prefix': 'fun'
+    'body': 'fun $1(params):'
+    'description': 'Defines a function with the specified parameters.'
+  'Let':
+    'prefix': 'lt'
+    'body': 'let $1 = $2'
+    'description': 'Declares a block scope local variable.'
+  'Abstract':
+    'prefix': 'abst'
+    'body': 'abst $1 = $2'
+    'description': 'Declares a global scope abstract variable.'
+  'Type':
+    'prefix': 'type'
+    'body': 'type ${1}(params):'
+    'description': 'Defines a type with the specified parameters.'
+  'Print':
+    'prefix': 'print'
+    'body': 'print("$1")'
+    'description': 'Outputs a message.'
+  'For':
+    'prefix': 'for'
+    'body': 'for $2 in $1:'
+    'description': 'Creates a loop that consists of one expression.'
+  'For Where':
+    'prefix': 'forw'
+    'body': 'for x in $1 where z:'
+    'description': 'Creates a loop that consists of one expression and a "where" clause.'
+  'Return True':
+    'prefix': 'rt'
+    'body': 'return true'
+    'description': 'Returns true.'
+  'Return False':
+    'prefix': 'rf'
+    'body': 'return false'
+    'description': 'Returns false.'
