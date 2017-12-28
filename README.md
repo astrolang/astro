@@ -24,15 +24,15 @@ While such web apps can be written in C/C++ or Rust, we believe Astro introduces
 
 Astro started as a hobby for learning programming language design and compiler construction but that has since changed when Astro started gathering a set of unique features that should make any level of development fun.
 
-Astro is designed to have no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games and other real-time software. 
+Astro is designed to have no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games and other real-time software.
 It needs to do this while being as expressive as Python.
 
-In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors and matrices, vectorization, unicode identifiers, etc. 
+In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors and matrices, vectorization, unicode identifiers, etc.
 
 Astro is basically a high-level language with low-level access.
 
 ### Why compile directly to WebAssembly? Why not LLVM?
-Compiling to LLVM IR brings with it some benefits. 
+Compiling to LLVM IR brings with it some benefits.
 One is getting a free WebAssembly compilation step and the other is the provision of decade-worth optimization passes.
 These are indeed valuable features, but wasm is an easier target to get started with. It is portable and runs on major JavaScript VMs, which means Astro can leverage the Nodejs ecosystem instead of building its own from scratch.
 
@@ -80,7 +80,7 @@ Gitbooks covering different aspects of the project are in works. They will be pu
 
 ### Other interesting new languages that compile to WebAssembly
 - [Forest](https://github.com/forest-lang/core) - multi-syntax functional programming language
-- [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem. 
+- [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem.
 - [Walt](https://github.com/ballercat/walt) - an alternative syntax for WebAssembly text format. It's an experiment for using JavaScript syntax to write to as 'close to the metal' as possible.
 
 ### Project folder structure
@@ -88,85 +88,94 @@ Gitbooks covering different aspects of the project are in works. They will be pu
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
-├── LICENSE
-├── MVP.md
-├── README.md
 ├── docs
-│   ├── README.md
-│   ├── compiler
-│   │   ├── README.md
-│   │   └── compiler-workings.ast
-│   └── language
-│       ├── README.md
-│       ├── development.ast
-│       ├── feature-proposals.md
-│       └── summary.ast
+│   ├── compiler
+│   │   ├── asts.md
+│   │   ├── compiler-workings.ast
+│   │   ├── inside-astro-compiler (gitbook)
+│   │   └── README.md
+│   ├── language
+│   │   ├── astro-language-specification (gitbook)
+│   │   ├── development.ast
+│   │   ├── feature-proposals.md
+│   │   ├── programming-in-astro (gitbook)
+│   │   ├── README.md
+│   │   └── summary.ast
+│   └── README.md
+├── LICENSE
 ├── media
-│   └── images
-│       └── astro-syntax.png
-├── package-lock.json
+│   └── images
+│       └── astro-syntax.png
+├── MVP.md
 ├── package.json
+├── package-lock.json
+├── README.md
 ├── samples
-│   ├── README.md
-│   ├── fibonacci
-│   │   └── fibonacci.ast
-│   ├── fizzbuzz
-│   │   └── fizzbuzz.ast
-│   ├── hello-world
-│   │   └── hello-world.ast
-│   ├── miscellaneous
-│   │   └── preview.ast
-│   ├── normalize
-│   │   └── normalize.ast
-│   ├── product
-│   │   └── product.ast
-│   ├── sum
-│   │   └── sum.ast
-│   ├── vectorized
-│   │   └── vectorized.ast
-│   └── wordcount
-│       └── wordcount.ast
+│   ├── fibonacci
+│   │   └── fibonacci.ast
+│   ├── fizzbuzz
+│   │   └── fizzbuzz.ast
+│   ├── hello-world
+│   │   └── hello-world.ast
+│   ├── miscellaneous
+│   │   └── preview.ast
+│   ├── normalize
+│   │   └── normalize.ast
+│   ├── product
+│   │   └── product.ast
+│   ├── README.md
+│   ├── sum
+│   │   └── sum.ast
+│   ├── vectorized
+│   │   └── vectorized.ast
+│   └── wordcount
+│       └── wordcount.ast
 ├── src
-│   ├── compiler
-│   │   ├── README.md
-│   │   ├── codegen
-│   │   │   └── ast2wast.js
-│   │   ├── semantics
-│   │   │   └── scope.js
-│   │   ├── syntax
-│   │   │   ├── asts.js
-│   │   │   ├── grammar.pegjs
-│   │   │   └── parser.js
-│   │   ├── test.ast
-│   │   ├── test.js
-│   │   └── utils
-│   │       └── index.js
-│   ├── stdlib
-│   │   └── README.md
-│   └── support
-│       ├── README.md
-│       └── editors
-│           ├── sublime-text
-│           │   └── astro.sublime-syntax
-│           └── vscode
-│               ├── CHANGELOG.md
-│               ├── README.md
-│               ├── language-configuration.json
-│               ├── package.json
-│               ├── syntaxes
-│               │   └── astro.tmLanguage.json
-│               ├── tsconfig.json
-│               └── vsc-extension-quickstart.md
+│   ├── compiler
+│   │   ├── codegen
+│   │   │   └── ast2wast.js
+│   │   ├── README.md
+│   │   ├── semantics
+│   │   │   └── scope.js
+│   │   ├── syntax
+│   │   │   ├── asts.js
+│   │   │   ├── grammar.pegjs
+│   │   │   └── parser.js
+│   │   ├── test.ast
+│   │   ├── test.js
+│   │   └── utils
+│   │       └── index.js
+│   ├── stdlib
+│   │   └── README.md
+│   └── support
+│       ├── editors
+│       │   ├── atom
+│       │   │   ├── grammars
+│       │   │   │   └── astro.cson
+│       │   │   ├── package.json
+│       │   │   ├── README.md
+│       │   │   └── snippets
+│       │   │       └── snippets.cson
+│       │   ├── sublime-text
+│       │   │   └── astro.sublime-syntax
+│       │   └── vscode
+│       │       ├── CHANGELOG.md
+│       │       ├── language-configuration.json
+│       │       ├── package.json
+│       │       ├── README.md
+│       │       ├── syntaxes
+│       │       │   └── astro.tmLanguage.json
+│       │       ├── tsconfig.json
+│       │       └── vsc-extension-quickstart.md
+│       └── README.md
 └── tests
-    ├── README.md
     ├── compiler
-    │   ├── codegen
-    │   ├── semantics
-    │   ├── syntax
-    │   │   ├── declarations.spec.js
-    │   │   └── misc.spec.js
-    │   └── utils
-    │       └── utils.spec.js
+    │   ├── syntax
+    │   │   ├── declarations.spec.js
+    │   │   └── misc.spec.js
+    │   └── utils
+    │       └── utils.spec.js
+    ├── README.md
     └── samples
         └── fibonacci.spec.js
 ```
