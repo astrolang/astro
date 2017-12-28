@@ -1,16 +1,17 @@
 {
     const path = require('path');
-    const { 
+    const {
         print, removeNulls, stringify, removeUnderscores, join, safeAccess,
     } = require(path.join(__dirname, '../../../../src/compiler/utils')); // relative to node_modules\pegjs\lib\compiler
-    
+
     const {
         toWhile,
     } = require(path.join(__dirname, '../../../../src/compiler/syntax/asts')); // relative to node_modules\pegjs\lib\compiler
 
     let prevIndentCount = 0;
     let ignoreNewline = false;
-    let keywords = ['if', 'while', 'for', 'in', 'try', 'elif', 'else', 'end', 'except', 'ensure', 'defer'];
+    let keywords = ['if', 'while', 'for', 'in', 'mod', 'try', 'elif', 'else', 'end', 'except', 'ensure', 'defer'];
+    const saveIndent = () => prevIndentCount += 4;
 }
 
 // NOTES:
@@ -19,135 +20,171 @@
 Start
     = exs:Program { return { kind: 'program', Expressions: exs } }
 
+// A hacky solution for saving indentations only when the rule completes successfully
+SaveIndent
+    = '' { saveIndent(); }
+
 Program
-    = 
-    
+    = ProgramNonSourceStart (ProgramSourceMiddle/ProgramNonSourceMiddle)*
+    / ProgramSourceStart (ProgramSourceMiddle/ProgramNonSourceMiddle)*
+    / ''
+
+ProgramNonSourceStart
+    = SingleLineComment NewlineEOI
+    / Whitespace+ Newline
+    / Newline
+
+ProgramNonSourceMiddle
+    = SingleLineComment NewlineEOI
+    / Whitespace+ Newline
+    / Newline
+
+ProgramSourceStart
+    = Expr _ SingleLineComment? NewlineEOI
+
+ProgramSourceMiddle
+    = Expr _ SingleLineComment? NewlineEOI
+
 Declaration
     = SubjectDeclaration
     / FunctionDeclaration
+    / FunctionDeclarationPrivate
     / TypeDeclaration
     / AbstDeclaration
     / ImportDeclaration
 
 SubjectDeclaration
-    = mu:('var'/'let') _ sd:SubjectMainDeclaration {
-        return { kind: 'subjectDeclaration', pattern: sd.pattern, mutability: (mu==='var'), value: sd.value };
-    }
+    = ('let'/'var') _ LhsPattern _ '=' (_ SingleLineComment)? _ SubjectBlock
+    / ('let'/'var') _ LhsPattern _ '=' _ ExprBlock
 
-SubjectMainDeclaration
-    =  pt:PatternMap as:(_ "=" _ sb:SubjectBody { return sb })? { return { pattern: pt, value: as } }
-
-SubjectBody
-    = ex:SubjectContentInline { return ex }
-    / SingleLineComment? ex:SubjectContentBlock { return ex }
-
-SubjectContentInline
-    = ex1:ExprBlock ex2:(_ ',' _ ex:ExprBlock)* _ SingleLineComment? {
-        return join(ex1, ex2);
-    }
-
-SubjectContentBlock
-    = NextLine Indent (_ SubjectNonSourceCode NextLine Samedent)* ex1:SubjectSourceCode ex2:(_ NextLine Samedent ex: SubjectNonSourceCode)* Dedent {
-        return removeNulls(join(ex1, ex2));
-    }
-
-SubjectCode
-    = ex:SubjectSourceCode { return ex }
-    / SubjectNonSourceCode { return }
-
-SubjectSourceCode
-    = ex:ExprBlock _ SingleLineComment? { return ex }
-
-SubjectNonSourceCode
-    = SingleLineComment
+SubjectBlock
+    = NextLine NonSourceStart NonSourceMiddle* SourceMiddle NonSourceMiddle* (EOI/(SaveIndent Dedent Samedent))
+    / NextLine SourceStart NonSourceMiddle* (EOI/(SaveIndent Dedent Samedent))
 
 FunctionDeclarationPrivate
-    =
-    
+    = 'fun'
+
 FunctionDeclaration
-    =
+    = 'fun'
 
 TypeDeclaration
-    = 
+    = 'type'
 
 AbstDeclaration
-    = 
+    = 'abst'
 
 ImportDeclaration
-    =
-    
+    = 'import' '{' 'xxx' '}'
+
 ExportDeclaration
-    =
+    = 'export' '{' 'xxx' '}'
 
-CondExprBlock
-    = IfExprBlock
-    / WhileExprBlock
-    / DoWhileExprBlock
-    / ForExprBlock
-    / LoopExprBlock
-    / TryExprBlock
-    / MatchExprBlock
+Property // for type fields only
+    = PropertyBody _ '->' _ PropertyBody
 
-CondExprInline
-    = IfExprInline
-    / DoWhileExprInline
-    / LoopExprInline
-    / WhileExprInline
-    / ForExprInline
-    / MatchExprInline
+PropertyBody
+    = '{' IgnoreNewlines _ ExprMultiple _ AcknowledgeNewlines '}'
+    / '{' _ Block _ '}'
 
-IfExprInline
-    = 
+IIFE
+    = '(' ')'
 
-WhileExprInline
-    =
+Lambda
+    = '|' IgnoreNewlines _ LambdaParam (_ ',' _ LambdaParam)* _ AcknowledgeNewlines '|' _ '=>' _ Block
+    / '=>' _ Block
 
-DoWhileExprInline
-    =
+LambdaParam
+    = 'xxx'
 
-ForExprInline
-    =
+CondExpr
+    = IfExpr
+    / WhileExpr
+    / DoWhileExpr
+    / ForExpr
+    / LoopExpr
+    / TryExpr
+    / MatchExpr
 
-MatchExprInline
-    =
+IfExpr
+    = 'if' _ IfHeadExpr _ ':' _ SingleLineComment? _ Block (_ ElifExpr)* (_ ElseExpr)?
+    / 'if' _ IfHeadExpr _ ':' _ ExprBlock (_ ElifExpr)* (_ ElseExpr)?
 
-IfExprBlock
-    =
+WhileExpr
+    = 'while' _ IfHeadExpr _ ':' _ SingleLineComment? _ Block (_ EndExpr)?
+    / 'while' _ IfHeadExpr _ ':' _ ExprBlock (_ EndExpr)?
 
-WhileExprBlock
-    =
+DoWhileExpr
+    = 'do' _ ':' _ SingleLineComment? _ Block  _ 'while' _ IfHeadExpr
+    / 'do' _ ':' _ ExprBlock  _ 'while' _ IfHeadExpr
 
-DoWhileExprBlock
-    =
+ForExpr
+    = 'for' _ ':' _ SingleLineComment? _ Block (_ EndExpr)?
+    / 'for' _ ':' _ ExprBlock (_ EndExpr)?
 
-ForExprBlock
-    =
+LoopExpr
+    = 'loop' _ ':' _ SingleLineComment? _ Block (_ EndExpr)?
+    / 'loop' _ ':' _ ExprBlock (_ EndExpr)?
 
-LoopExprBlock
-    =
+TryExpr
+    = 'try' _ ':' _ SingleLineComment? _ Block (_ ExceptExpr)+
+    / 'try' _ ':' _ ExprBlock (_ ExceptExpr)+
+    / 'try' _ LhsPattern _ '=' _ OpenTuple _ ':' _ SingleLineComment? _ Block (_ ExceptExpr)+
+    / 'try' _ LhsPattern _ '=' _ OpenTuple _ ':' _ ExprBlock (_ ExceptExpr)+
 
-TryExprBlock
-    =
+MatchExpr
+    = MatchHead (MatchHead)*
+    / '|' _ MatchPattern _ '=>' _ ExprOperator ('|' _ MatchPattern _ '=>' _ ExprOperator)+
 
-MatchExprBlock
-    =
+MatchHead
+    = '|' _ MatchPattern _ '=>' _ SingleLineComment? _ Block
+    / '|' _ MatchPattern _ '=>' _ ExprBlock
+
+MatchPattern
+    = 'xxx'
+
+ElifExpr
+    = 'elif' _ IfHeadExpr _ ':' _ SingleLineComment? _ Block
+    / 'elif' _ IfHeadExpr _ ':' _ ExprBlock
+
+ElseExpr
+    = 'else' _ ':' _ SingleLineComment? _ Block
+    / 'else' _ ':' _ ExprBlock
+
+EndExpr
+    = 'end' _ ':' _ SingleLineComment? _ Block
+    / 'end' _ ':' _ ExprBlock
+
+ExceptExpr
+    = 'except' _ Identifier _ ':' _ SingleLineComment? _ Block
+    / 'except' _ Identifier _ ':' _ ExprBlock
 
 IfHeadExpr
-    = 
-    / 'let' 
+    = ExprOperator
+    / ('let'/'var') _ LhsPattern _ '=' _ OpenTuple
 
 ForHeadExpr
-    = OpenTuple _ 'in' _ OpenTuple
+    = LhsPattern _ 'in' _ OpenTuple
+
+LhsPattern
+    =  LhsAtom (',' LhsAtom)*
+    / '(' LhsAtom (',' LhsAtom)* ')'
+    / '[' LhsAtom (',' LhsAtom)* ']'
+    / '{' LhsAtom (',' LhsAtom)* '}'
+
+LhsAtom
+    = Identifier
+    / '...' Identifier
+    / '...'
 
 Assignment
     = AssignmentPattern '=' OpenTuple
-    
+
 AssignmentPattern
     = AssignmentAtom (',' AssignmentAtom)*
     / '(' AssignmentAtom (',' AssignmentAtom)* ')'
     / '[' AssignmentAtom (',' AssignmentAtom)* ']'
     / '{' AssignmentAtom (',' AssignmentAtom)* '}'
-    
+
 AssignmentAtom
     = DotNotationAtom (_ '.' DotNotationAtom)* _ '.' Identifier
     / DotNotationAtom _ '.' DotNotationAtom [!?] (_ '.' DotNotationAtom)* _ '.' Identifier
@@ -158,38 +195,49 @@ AssignmentAtom
 OpenTuple
     = ExprOperator (_ ',' _ ExprOperator)*
 
-Expr 
-    = ExprInline 
-    / ExprBlock
-    / Declaration
+Block
+    = NextLine NonSourceStart NonSourceMiddle* SourceMiddle (SourceMiddle/NonSourceMiddle)* (EOI/(SaveIndent Dedent Samedent))
+    / NextLine SourceStart (SourceMiddle/NonSourceMiddle)* (EOI/(SaveIndent Dedent Samedent))
 
-ExprInBlock
-    = MultipleExprInline
-    / ExprBlock
-    / SubjectDeclaration
-    / Property    
-  
+NonSourceStart
+    = Indent SingleLineComment NewlineEOI
+    / Whitespace+ Newline
+    / '' Newline
+
+NonSourceMiddle
+    = Samedent SingleLineComment NewlineEOI
+    / Whitespace+ Newline
+    / '' Newline
+
+SourceStart
+    = Indent ExprBlock _ SingleLineComment? NewlineEOI
+
+SourceMiddle
+    = Samedent ExprBlock _ SingleLineComment? NewlineEOI
+
+Expr
+    = Declaration
+    / ExprMultiple
+
+ExprMultiple
+    = ExprBlock (_ ';' _ ExprBlock)* ';'?
+
 ExprBlock
-    = LiteralBlock
-    / CondExprBlock
-
-MultipleExprInline
-    = ExprInline (_ ';' _ ExprInline)*
-  
-ExprInline
-    = LiteralInline
-    / CondExprInline
-    / ExprOperator
+    = CondExpr
+    / SubjectDeclaration
+    / FunctionDeclaration
+    / Lambda
+    / IIFE
+    / OpenTuple
 
 ExprOperator
-    = ExprUnaryPrefix
-    / ExprBinary
+    = ExprBinary
     / ExprUnaryPostfix
-    / CommandNotation
+    / ExprUnaryPrefix
     / Range
     / Atom
 
-ExprBinary 
+ExprBinary
     = (ExprUnaryPrefix/Atom) ExprBinaryRest*
 
 ExprBinaryRest
@@ -207,132 +255,102 @@ ExprUnaryPrefix
 
 ExprUnaryPostfix
     = Atom Operator
+    / Atom _ CommandNotationPostfix
 
 Atom
-    = DotNotation
-    / CascadingNotation
-    / WallNotation
-    / FunctionCall
-    / ListNotation
-    / DictNotation
-    / Comprehension
-    / BlockInParens
-    / ExprInParens
-    / Identifier
+    = SubAtom (_ AtomPostfix)+
+    / SubAtom (_ AtomPostfix)* WallNotationEnd
+    / WallNotationStart (_ AtomPostfix)+
+    / SubAtom
+
+AtomPostfix
+    = DotNotationPostfix
+    / CascadingNotationPostfix
+    / WallNotationPostfix
+    / FunctionCallPostfix
+    / ListNotationPostfix
+    / DictNotationPostfix
+
+SubAtom
+    = Comprehension
+    / BlockInParens [?!]?
+    / ExprInParens [?!]?
+    / Identifier [?!]?
+    / Literal
 
 BlockInParens
-    = '(' _ Nextline Indent ExprInBlock (Nextline Samedent ExprInBlock)* Dedent Nextline Samedent ')'
+    = '(' _ NextLine Indent ExprMultiple (NextLine Samedent ExprMultiple)* SaveIndent Dedent NextLine Samedent ')'
 
 ExprInParens
-    = '(' IgnoreNewline _ ExprInline (_ ';' _ ExprInline)* _ AcknowledgeNewline ')'
-  
-FunctionCall
-    = Identifier _ CallTuple 
-    / Identifier _ GeneratorComprehension
+    = '(' IgnoreNewlines _ ExprBlock (_ ';' _ ExprBlock)* _ AcknowledgeNewlines ')'
 
-CallTuple  
-    = '(' IgnoreNewline _ (Identifier _ ':' _)? Atom (',' _ (Identifier _ ':' _)? Atom)* (_ ',')? _ AcknowledgeNewline ')'  
+FunctionCallPostfix
+    = CallTuple
+    / GeneratorComprehension
 
-CommandNotation 
-    = Identifier Whitespace+ CommandNotationAtom
-  
-CommandNotationAtom 
+CallTuple
+    = '(' IgnoreNewlines _ (Identifier _ ':' _)? Atom (',' _ (Identifier _ ':' _)? Atom)* (_ ',')? _ AcknowledgeNewlines ')'
+
+CommandNotationPostfix
     = GeneratorComprehension
-    / NumericLiteral
+    / CommandNotationAtom (_ AtomPostfix)+
+    / CommandNotationAtom (_ AtomPostfix)* WallNotationEnd
+    / WallNotationStart (_ AtomPostfix)+
+    / CommandNotationAtom
+
+CommandNotationAtom
+    = NumericLiteral
     / StringLiteral
-    / DotNotation
-    / CascadingNotation
-    / WallNotation
-    / CallTuple 
-
-CascadingNotation
-    = DotNotationAtom (_ '->' DotNotationAtom)+
-    / DotNotationAtom _ '->' DotNotationAtom [!?] (_ '->' DotNotationAtom)*
-
-CascadingNotationCommandNotation
-    = DotNotationAtom (_ '->' DotNotationAtom)* _ '->' CommandNotation
-    / DotNotationAtom _ '->' DotNotationAtom [!?] (_ '->' DotNotationAtom)* _ '->' CommandNotation
-
-DotNotation
-    = DotNotationAtom (_ '.' DotNotationAtom)+
-    / DotNotationAtom _ '.' DotNotationAtom [!?] (_ '.' DotNotationAtom)*
- 
-DotNotationCommandNotation
-    = DotNotationAtom (_ '.' DotNotationAtom)* _ '.' CommandNotation
-    / DotNotationAtom _ '.' DotNotationAtom [!?] (_ '.' DotNotationAtom)* _ '.' CommandNotation
- 
-DotNotationAtom
-    = FunctionCall
-    / ListNotation
-    / DictNotation
+    / SymbolLiteral
     / Identifier
-    / '$' Identifier
-    / '$' ListAccess
-    / '$' DictAccess
 
-WallNotation
-    = '|' IgnoreNewline _ Atom (_ ',' _ Atom _)+ _ AcknowledgeNewline '|' '.' _ Atom
-    / Atom _ '.' '|' IgnoreNewline _ Atom (_ ',' _ Atom)+ _ AcknowledgeNewline '|' '.' _ Atom?
-    / '|' IgnoreNewline _ Atom ((Operator Atom)/(Whitespace+ Operator Whitespace+ Atom))+ _ AcknowledgeNewline '|' '.' _ Atom
-    / Atom _ '.' '|' IgnoreNewline _ Atom ((Operator Atom)/(Whitespace+ Operator Whitespace+ Atom))+ _ AcknowledgeNewline '|' '.' _ Atom?
-  
-WallNotationCommandNotation
-    = '|' IgnoreNewline _ Atom (_ ',' _ Atom)+ _ AcknowledgeNewline '|' '.' CommandNotation
-    / Atom _ '.' '|' IgnoreNewline _ Atom (_ ',' _ Atom)+ _ AcknowledgeNewline '|' '.' _ CommandNotation?
-    / '|' IgnoreNewline _ Atom ((Operator Atom)/(_ Operator _ Atom))+ _ AcknowledgeNewline '|' '.' _ CommandNotation
-    / Atom _ '.' '|' IgnoreNewline _ Atom ((Operator Atom)/(_ Operator _ Atom))+ _ AcknowledgeNewline '|' '.' _ CommandNotation?
+WallNotationPostfix
+    = '.' WallNotationBody '.' Identifier
+
+WallNotationEnd
+    = '.' WallNotationBody
+
+WallNotationStart
+    = WallNotationBody '.' Identifier
+
+WallNotationBody
+    = '|' IgnoreNewlines _ WallNotationAtom (_ ',' _ WallNotationAtom _)+ _ AcknowledgeNewlines '|'
+    / '|' IgnoreNewlines _ Atom ((Operator WallNotationAtom)/(Whitespace+ Operator Whitespace+ WallNotationAtom))+ _ AcknowledgeNewlines '|'
 
 WallNotationAtom
-    = FunctionCall
-    / ListNotation
-    / DictNotation
-    / Identifier
+    = DotNotationAtom (_ AtomPostfix)+
+    / DotNotationAtom (_ AtomPostfix)* WallNotationEnd
+    / DotNotationAtom
 
-ListNotation
-    = Atom _ ListAccess
+CascadingNotationPostfix
+    = '->' DotNotationAtom
+    / '->' CallTuple
+    / '->' GeneratorComprehension
 
-ListAccess
-    = '[' IgnoreNewline ListAccessArg (_ ',' _ ListAccessArg)* AcknowledgeNewline ']'
-  
+DotNotationPostfix
+    = '.' DotNotationAtom
+
+DotNotationAtom
+    = Identifier
+    / '$' Identifier
+    / '$' ListNotationPostfix
+    / '$' DictNotationPostfix
+
+ListNotationPostfix
+    = '[' IgnoreNewlines ListAccessArg (_ ',' _ ListAccessArg)* AcknowledgeNewlines ']'
+
 ListAccessArg
     = ':' (Atom ':')? Atom '!'?
     / Atom '!' ':' (Atom ':')? Atom?
     / Atom ':' (Atom ':')? Atom '!'?
 
-DictNotation
-    = Atom _ DictAccess
+DictNotationPostfix
+    = '{' IgnoreNewlines Atom (',' Atom)* AcknowledgeNewlines '}'
 
-DictAccess
-    = '{' IgnoreNewline Atom (',' Atom)* AcknowledgeNewline '}'
-
-Range 
+Range
     = '..' (Atom '..')? Atom '!'?
-    / Atom '!' '..' (Atom '..')? Atom? 
-    / Atom '..' (Atom '..')? Atom '!'?  
-
-Property
-    = PropertyBody _ '->' _ PropertyBody
-
-PropertyBody
-    = '{' IgnoreNewline _ MultipleExprInline _ AcknowledgeNewline '}'
-    / '{' _ FunctionBody _ '}'
-
-IIFEInline
-    = '(' ')'
-
-IIFEBlock
-    = '(' ')'
-
-LambdaInline
-    = '|' IgnoreNewline _ LambdaParam (_ ',' _ LambdaParam)* _ AcknowledgeNewline '|' _ '=>' _ FunctionContentInline
-    / '=>' _ FunctionContentInline
-
-LambdaBlock
-    = '|' IgnoreNewline _ LambdaParam (_ ',' _ LambdaParam)* _ AcknowledgeNewline '|' _ '=>' _ FunctionContentBlock
-    / '=>' _ FunctionContentBlock
-
-LambdaParam
-    = 
+    / Atom '!' '..' (Atom '..')? Atom?
+    / Atom '..' (Atom '..')? Atom '!'?
 
 Comprehension
     = GeneratorComprehension
@@ -340,34 +358,31 @@ Comprehension
     / DictComprehension
 
 GeneratorComprehension 'comprehension'
-    = '(' IgnoreNewline _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where?  _ AcknowledgeNewline ')' {
+    = '(' IgnoreNewlines _ tp:OpenTuple _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where?  _ AcknowledgeNewlines ')' {
         let whileAst = toWhile();
         return whileAst;
     }
-    
+
 ListComprehension 'comprehension'
-    = '[' IgnoreNewline _ tp:ComprehensionHeadExpr _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewline ']' {
+    = '[' IgnoreNewlines _ tp:OpenTuple _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ hd:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewlines ']' {
         let whileAst = toWhile();
         return whileAst;
     }
-    
+
 DictComprehension 'comprehension'
-    = '{' IgnoreNewline _ ky:ExprInline _ ':' _ vl:ExprInline _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ fex:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewline '}' {
+    = '{' IgnoreNewlines _ ky:ExprOperator _ ':' _ vl:OpenTuple _ '|' _ hd1:ForHeadExpr hds:(_ ';' _ fex:ForHeadExpr { return hd })* cond:Where? _ AcknowledgeNewlines '}' {
         let whileAst = toWhile();
         return whileAst;
     }
 
 Where
-    = _ 'where' _ ex:ExprInline { return ex }
-
-ComprehensionHeadExpr
-    = ex1:ExprInline exs:(_ ',' _ ex:ExprInline { return ex })* { return join(ex1, exs) }
+    = _ 'where' _ ex:ExprOperator { return ex }
 
 Return
-    = 'return' vl:(_ ex:(ExprInline/OpenTuple) { return ex })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'return', value: vl, at: nm } }
+    = 'return' vl:(_ ex:ExprBlock { return ex })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'return', value: vl, at: nm } }
 
 Break
-    = 'break' vl:(_ ex:(ExprInline/OpenTuple) { return ex })? nm:(_ 'at' _ id:Identifier { return id })? { return { kind: 'break', value: vl, at: nm } }
+    = 'break' vl:(_ ex:ExprBlock { return ex })? nm:(_ 'at' _ id:Identifier { return id })? { return { kind: 'break', value: vl, at: nm } }
 
 Continue
     = 'continue' nm:(_ 'at' _ id:Identifier { return id })? { return { kind: 'continue', at: nm } }
@@ -376,72 +391,38 @@ Spill
     = 'spill' { return { kind: 'spill' } }
 
 Yield
-    = 'yield' vl:(_ ex:(ExprInline/OpenTuple) { return ex })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'yield', value: vl, at: nm } }
+    = 'yield' vl:(_ ex:ExprBlock { return ex })? nm:(_ 'at' _ id:Identifier { return id; })? { return { kind: 'yield', value: vl, at: nm } }
 
 Delegate
-    = 'delegate' _ ex:ExprInline { return { kind: 'delegate', value: ex } }
+    = 'delegate' _ ex:ExprBlock { return { kind: 'delegate', value: ex } }
 
 Raise
-    = 'raise' _ ex:ExprInline { return { kind: 'raise', value: ex } }
+    = 'raise' _ ex:ExprBlock { return { kind: 'raise', value: ex } }
 
-LiteralInline // TODO: NSLiteral
+Literal // TODO: NSLiteral
     = StringLiteral
     / RegexLiteral
     / NumericLiteral
     / BooleanLiteral
     / SymbolLiteral
-    / ListLiteralInline
-    / DictLiteralInline
-    / TupleLiteralInline
-    / NamedTupleLiteralInline
-
-LiteralBlock // TODO: NSLiteral
-    = ListLiteralBlock
-    / DictLiteralBlock
-    / TupleLiteralBlock
-    / NamedTupleLiteralBlock
+    / ListLiteral
+    / DictLiteral
+    / TupleLiteral
+    / NamedTupleLiteral
 
 SymbolLiteral
     = '(' ')'
 
 TupleLiteral
-    = TupleLiteralInline
-    / TupleLiteralBlock
-
-TupleLiteralInline
-    = '(' ')'
-
-TupleLiteralBlock
     = '(' ')'
 
 NamedTupleLiteral
-    = NamedTupleLiteralInline
-    / NamedTupleLiteralBlock
-
-NamedTupleLiteralInline
-    = '(' ')'
-
-NamedTupleLiteralBlock
     = '(' ')'
 
 ListLiteral
-    = ListLiteralInline
-    / ListLiteralBlock
-
-ListLiteralInline
-    = '[' ']'
-
-ListLiteralBlock
     = '[' ']'
 
 DictLiteral
-    = DictLiteralInline
-    / DictLiteralBlock
-
-DictLiteralInline
-    = '{' '}'
-
-DictLiteralBlock
     = '{' '}'
 
 DictKey
@@ -511,10 +492,10 @@ SingleLineComment 'singleLineComment'
 SingleLineCommentCharacter // UNICODE?
     = [^\r\n]+
 
-IgnoreNewline 
+IgnoreNewlines
     = '' { ignoreNewline = true }
 
-AcknowledgeNewline
+AcknowledgeNewlines
     = '' { ignoreNewline = false }
 
 NextLine 'nextLine'
@@ -522,8 +503,12 @@ NextLine 'nextLine'
     / Newline
 
 EmptyLine 'emptyLine'
-    = Whitespace+ &(Newline/EOI)
-    / '' &(Newline/EOI)
+    = Whitespace+ &(NewlineEOI)
+    / '' &(NewlineEOI)
+
+NewlineEOI 'newline_or_eoi'
+    = Newline
+    / EOI
 
 _ 'spaces'
     = LineContinuation
@@ -544,27 +529,41 @@ Indent 'indent'
             // DEBUG //
             print("=== Indent === " + location().start.line);
             // DEBUG //
-            prevIndentCount += 4;
+            // prevIndentCount += 4;
             return;
         }
-        error("error: expected a 4-space indentation here!")
+        // DEBUG //
+        print("=== Failed Indent === " + location().start.line);
+        // DEBUG //
+        error("error: expected a 4-space indentation here!: " + location().start.line)
     } // 4 spaces
 
 Samedent 'samedent'
     = s:("    "+ / "") &{
         let currentIndentCount = s.toString().replace(/,/g, "").length;
-        if (currentIndentCount === prevIndentCount) {
+        // DEBUG //
+        print('prev ' + prevIndentCount);
+        print('curr ' + currentIndentCount);
+        // DEBUG //
+        if (currentIndentCount === prevIndentCount + 4) {
             // DEBUG //
             print("=== Samedent === " + location().start.line);
             // DEBUG //
             return true;
         }
+        // DEBUG //
+        print("=== Failed Samedent === " + location().start.line);
+        // DEBUG //
         return false;
     }
 
 Dedent 'Dedent'
     = d:("    "+ / "") {
         let currentIndentCount = d.toString().replace(/,/g, "").length;
+        // DEBUG //
+        print('prev ' + prevIndentCount);
+        print('curr ' + currentIndentCount);
+        // DEBUG //
         if (currentIndentCount < prevIndentCount) {
             // DEBUG //
             print("=== Dedent === " + location().start.line);
@@ -572,17 +571,17 @@ Dedent 'Dedent'
             prevIndentCount -= 4;
             return;
         }
-        error("error: expected a 4-space Dedentation here!");
+        error("error: expected a 4-space Dedentation here!: " + location().start.line)
     }
 
 EOI 'eoi'
-    = !.
+    = '' &(!.)
 
 Operator 'operator'
     = Operator:(OperatorCharacter (OperatorCharacter)*) { return stringify(Operator) }
 
-OperatorCharacter    // UNICODE?
-    = '+' / '-' / '*' / '/' / '\\' / '^' / '%' / '!' / '>' / '<' / '='
+OperatorCharacter // UNICODE?
+    = '+' / '-' / '*' / '/' / '\\' / '^' / '%' / '!' / '>' / '<' / '=' / '÷' / '×' / '≠' / '≈' / '¹' / '²' / '³' / '√'
 
 Punctuator 'punctuator'
     = ('.' / ',' / "'" / '"')
