@@ -47,12 +47,12 @@ class Parser {
     const peek = this.peek(offset);
     if (peek.success && peek.value === test) {
       token = peek.value;
-      const output = successFunc instanceof Function ? successFunc(this.payload) : null;
+      const output = this.funcCheck(successFunc, this.payload.successFunc, token);
       if (output) this.payload.output.push(output);
       this.updatePos(offset);
       return this;
     }
-    const output = failFunc instanceof Function ? failFunc(this.payload, token) : null;
+    const output = this.funcCheck(failFunc, this.payload.failFunc, token);
     if (output) this.payload.output.push(output);
     return this;
   }
@@ -73,12 +73,12 @@ class Parser {
     }
 
     if (count > 0) {
-      const output = successFunc instanceof Function ? successFunc(this.payload, tokens) : null;
+      const output = this.funcCheck(successFunc, this.payload.successFunc, tokens);
       if (output) this.payload.output.push(output);
       return this;
     }
 
-    const output = failFunc instanceof Function ? failFunc(this.payload, tokens) : null;
+    const output = this.funcCheck(failFunc, this.payload.failFunc, tokens);
     if (output) this.payload.output.push(output);
     return this;
   }
@@ -95,7 +95,7 @@ class Parser {
       this.updatePos(offset);
     }
 
-    const output = func instanceof Function ? func(this.payload, token) : null;
+    const output = this.funcCheck(func, this.payload.successFunc, token);
     if (output) this.payload.output.append(output);
     return this;
   }
@@ -113,48 +113,58 @@ class Parser {
       peek = this.peek(offset);
     }
 
-    const output = func instanceof Function ? func(this.payload, tokens) : null;
+    const output = this.funcCheck(func, this.payload.successFunc, tokens);
     if (output) this.payload.output.append(output);
     return this;
   }
 
   eoi(successFunc, failFunc) {
     if (this.payload.curPos + 1 >= this.payload.code.length) {
-      const output = successFunc instanceof Function ? successFunc(this.payload, null) : null;
+      const output = this.funcCheck(successFunc, this.payload.successFunc);
       if (output) this.payload.output.append(output);
       return this;
     }
 
-    const output = failFunc instanceof Function ? failFunc(this.payload, null) : null;
+    const output = this.funcCheck(failFunc, this.payload.failFunc);
     if (output) this.payload.output.append(output);
     return this;
   }
 
   exec(func) {
-    const output = func(this.payload) || null;
+    const output = this.funcCheck(func);
     if (output) this.payload.output.append(output);
   }
 
   or(rule) {
     rule(this.payload);
   }
+
+  funcCheck(func, fallbackFunc, token) {
+    if (func instanceof Function) {
+      return func(this.payload, token);
+    } else if (fallbackFunc instanceof Function) {
+      return fallbackFunc(this.payload, token);
+    } return null;
+  }
 }
 
-const use = (code, curPos, startPos, output) => {
+const use = (code, successFunc, failFunc, load) => {
   const payload = {
     code,
-    curPos: curPos || -1,
-    startPos: startPos || 0,
+    successFunc,
+    failFunc,
+    curPos: load ? load.curPos : -1,
+    startPos: load ? load.startPos : 0,
     failed: false,
-    output: output || [],
+    output: load ? load.output : [],
   };
   return new Parser(payload);
 };
 
 /* eslint-disable newline-per-chained-call */
-const p = (payload, token) => { payload.output.push(token); };
+const pushOutput = (payload, token) => { payload.output.push(token); };
 
-let result = use('abbb')._('a', p)._('bb', p).opt('b', p).eoi();
+let result = use('abbb', pushOutput)._('a')._('b').opt('b').eoi();
 print(result);
 
 result = use('abbbb')._('a').more('bb').eoi();
