@@ -78,6 +78,12 @@ Gitbooks covering different aspects of the project are in works. They will be pu
 - [PEGjs](https://github.com/pegjs/pegjs) - a simple parser generator for JavaScript that produces fast parsers with excellent error reporting
 - [wast2wasm](https://www.npmjs.com/package/wast2wasm) - translates from s-expressions to the WebAssembly binary-encoding.
 
+### Want to contribute to the project?
+Please read the [code of conduct](CODE_OF_CONDUCT.md) and contribution [guidelines](CONTRIBUTING.md). We welcome your ideas and contributions.
+
+### Do you have an unanswered question?
+Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask questions, offer to help, point out bugs or suggest features.
+
 ### Other interesting new languages that compile to WebAssembly
 - [Forest](https://github.com/forest-lang/core) - multi-syntax functional programming language
 - [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem.
@@ -179,6 +185,3 @@ Gitbooks covering different aspects of the project are in works. They will be pu
     └── samples
         └── fibonacci.spec.js
 ```
-
-#### Do you have an unanswered question?
-Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask questions, offer to help, point out bugs or suggest features.
