@@ -20,8 +20,8 @@ Pull requests are the best way to propose changes to the codebase (we use [Githu
 5. Make sure your code lints.
 6. Issue that pull request!
 
-## Any contributions you make will be under the MIT Software License
-In short, when you submit code changes, your submissions are understood to be under the same [Apache v2.0 License](https://opensource.org/licenses/Apache-2.0) that covers the project. Feel free to contact the maintainers if that's a concern.
+## Any contributions you make will be under the Apache 2.0 Software License
+In short, when you submit code changes, your submissions are understood to be under the same [Apache 2.0 License](https://opensource.org/licenses/Apache-2.0) that covers the project. Feel free to contact the maintainers if that's a concern.
 
 ## Report bugs using Github's [issues](https://github.com/appcypher/astro/issues)
 We use GitHub issues to track public bugs. Report a bug by [opening a new issue](); it's that easy!
