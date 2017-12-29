@@ -1,9 +1,9 @@
-import chai from 'chai';
-import cap from 'capture-console';
-import {
+const chai = require('chai');
+const cap = require('capture-console');
+const {
   print,
   removeNulls,
-} from '../../../src/compiler/utils';
+} = require('../../../src/compiler/utils');
 
 chai.should();
 

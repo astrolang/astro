@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 // Stringifies and pretty prints all kinds of values including arrays and objects.
-export const print = (...s) => {
+const print = (...s) => {
   if (s.length === 1) {
     if (typeof (s[0]) === 'string') {
       console.log(s[0]);
@@ -18,7 +18,7 @@ export const print = (...s) => {
 // Checks if both the object and its properties are not undefined or null,
 // if they are not, it returns the property, otherwise it returns null.
 // PEGjs returns null for unmatched rule or terminal.
-export const safeAccess = (obj, ...prop) => {
+const safeAccess = (obj, ...prop) => {
   let temp = null;
   if (obj === null || obj === undefined) return null;
   // eslint-disable-next-line no-restricted-syntax
@@ -30,18 +30,28 @@ export const safeAccess = (obj, ...prop) => {
 };
 
 // Removes null or undefined values from an array.
-export const removeNulls = a => a.filter(x => x != null);
+const removeNulls = a => a.filter(x => x != null);
 
 // Strips '_' in a string.
-export const removeUnderscores = s => s.replace(/_/g, '');
+const removeUnderscores = s => s.replace(/_/g, '');
 
 // Stringifies an array and cleans up the resulting commas.
 // PEGjs tokenizer output can be an array containing tokens, nulls and empty arrays.
-export const stringify = a => a.toString().replace(/,/g, '').trim();
+const stringify = a => a.toString().replace(/,/g, '').trim();
 
 // Creates a new array from a and b, where a is a scalar and b is an array
 // and where b can be undefined.
-export const join = (a, b) => {
+const join = (a, b) => {
   if (b !== null && b.length !== 0) return [a, ...b];
   return [a];
+};
+
+
+module.exports = {
+  print,
+  safeAccess,
+  removeNulls,
+  removeUnderscores,
+  stringify,
+  join,
 };
