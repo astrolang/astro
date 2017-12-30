@@ -2,6 +2,7 @@
 // opt = ?
 // optmore = *
 // more = +
+// _('ab', '*')._('name', '+')
 const { print } = require('../utils');
 
 
