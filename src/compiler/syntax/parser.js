@@ -26,18 +26,10 @@ class Parser {
 
   failCleanup() { this.payload.output = []; }
 
-  doneCleanup() {
-    if (this.payload.done) {
-      this.payload.failed = true;
-      this.failCleanup();
-    }
-  }
-
   // If `a` is a string, it checks if appears `a` in `code` after the current position
   // and consumes it. `a` must appear after current position.
   _(test, successFunc, failFunc) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     let token = null;
     this.payload.curRule = test;
@@ -46,7 +38,7 @@ class Parser {
     if (peek.success && peek.value === test) {
       token = peek.value;
       this.updatePos(offset);
-      if (this.payload.curPos === this.payload.code.length - 1) this.payload.done = true;
+      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
       const output = this.funcCheck(successFunc, this.payload.successFunc, token);
       if (output) this.payload.output.push(output);
       return this;
@@ -62,8 +54,7 @@ class Parser {
   // If `a` is a string, it checks if a sequence `a` appears in `code` after the current position
   // and consumes it. `a` must appear at least once to pass
   more(test, successFunc, failFunc) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     const tokens = [];
     let count = 0;
@@ -73,7 +64,7 @@ class Parser {
     while (peek.success && peek.value === test) {
       tokens.push(peek.value);
       this.updatePos(offset);
-      if (this.payload.curPos === this.payload.code.length - 1) this.payload.done = true;
+      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
       count += 1;
       peek = this.peek(offset);
     }
@@ -94,8 +85,7 @@ class Parser {
   // If `a` is a string, it checks if `a` appears in `code` after the current position
   // and consumes it.It passes irrespective of `a` appearing
   opt(test, func) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     let token = null;
     this.payload.curRule = `${test}?`;
@@ -104,7 +94,7 @@ class Parser {
     if (peek.success && peek.value === test) {
       token = peek.value;
       this.updatePos(offset);
-      if (this.payload.curPos === this.payload.code.length - 1) this.payload.done = true;
+      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
     }
 
     const output = this.funcCheck(func, this.payload.successFunc, token);
@@ -115,8 +105,7 @@ class Parser {
   // If `a` is a string, it checks if a sequence `a` appears in `code` after the current position
   // and consumes it. It passes irrespective of `a` appearing
   optmore(test, func) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     const tokens = [];
     this.payload.curRule = `${test}*`;
@@ -125,7 +114,7 @@ class Parser {
     while (peek.success && peek.value === test) {
       tokens.append(peek.value);
       this.updatePos(offset);
-      if (this.payload.curPos === this.payload.code.length - 1) this.payload.done = true;
+      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
       print(this.payload.curPos); //
       peek = this.peek(offset);
     }
@@ -136,12 +125,11 @@ class Parser {
   }
 
   eoi(successFunc, failFunc) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     this.payload.curRule = 'eoi';
 
     if (this.payload.curPos + 1 >= this.payload.code.length) {
-      this.payload.done = true;
+      // this.payload.exhausted = true;
       const output = this.funcCheck(successFunc, this.payload.successFunc);
       if (output) this.payload.output.append(output);
       return this;
@@ -160,16 +148,14 @@ class Parser {
   }
 
   or() {
-    if (this.payload.done && !this.payload.failed) return this;
+    if (this.payload.done || this.payload.failed) return this;
     this.payload.failed = false;
-    this.payload.done = false;
     this.payload.curPos = this.payload.startPos - 1;
     return this;
   }
 
   sub(rule) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     const originalStartPos = this.payload.startPos;
     this.payload.startPos = this.payload.curPos;
 
@@ -179,8 +165,7 @@ class Parser {
   }
 
   not(rule, successFunc, failFunc) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     const originalStartPos = this.payload.startPos;
     const originalCurPos = this.payload.curPos;
     const originalSuccessFunc = this.payload.successFunc;
@@ -210,8 +195,7 @@ class Parser {
   }
 
   and(rule, successFunc, failFunc) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     const originalStartPos = this.payload.startPos;
     const originalCurPos = this.payload.curPos;
     const originalSuccessFunc = this.payload.successFunc;
@@ -239,8 +223,7 @@ class Parser {
   }
 
   cond(func, successFunc, failFunc) {
-    if (this.payload.failed) return this;
-    this.doneCleanup();
+    if (this.payload.done || this.payload.failed) return this;
     if (func && func instanceof Function) {
       const result = func();
       if (result) {
@@ -274,7 +257,8 @@ const use = (code, successFunc, failFunc, load) => {
     curPos: load ? load.curPos : -1,
     startPos: load ? load.startPos : 0,
     failed: false,
-    done: false,
+    undone: true,
+    exhausted: false,
     curRule: '',
     output: load ? load.output : [],
   };
@@ -286,7 +270,7 @@ const pushOutput = (payload, token) => { if (token) payload.output.push(token); 
 const printOutput = (payload) => { print(payload.output); };
 
 let result =
-    use('abab', pushOutput, printOutput)
+    use('aba', pushOutput, printOutput)
       ._('ab').sub(p => p._('a').and(x => x._('b')))._('b').or()._('ab')._('ab');
 print(result);
 
