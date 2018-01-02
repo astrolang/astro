@@ -38,7 +38,7 @@ class Parser {
     if (peek.success && peek.value === test) {
       token = peek.value;
       this.updatePos(offset);
-      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
+      if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
       const output = this.funcCheck(successFunc, this.payload.successFunc, token);
       if (output) this.payload.output.push(output);
       return this;
@@ -64,7 +64,7 @@ class Parser {
     while (peek.success && peek.value === test) {
       tokens.push(peek.value);
       this.updatePos(offset);
-      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
+      if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
       count += 1;
       peek = this.peek(offset);
     }
@@ -94,8 +94,9 @@ class Parser {
     if (peek.success && peek.value === test) {
       token = peek.value;
       this.updatePos(offset);
-      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
     }
+
+    if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
 
     const output = this.funcCheck(func, this.payload.successFunc, token);
     if (output) this.payload.output.append(output);
@@ -114,10 +115,11 @@ class Parser {
     while (peek.success && peek.value === test) {
       tokens.append(peek.value);
       this.updatePos(offset);
-      // if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
       print(this.payload.curPos); //
       peek = this.peek(offset);
     }
+
+    if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
 
     const output = this.funcCheck(func, this.payload.successFunc, tokens);
     if (output) this.payload.output.append(output);
@@ -129,7 +131,7 @@ class Parser {
     this.payload.curRule = 'eoi';
 
     if (this.payload.curPos + 1 >= this.payload.code.length) {
-      // this.payload.exhausted = true;
+      this.payload.exhausted = true;
       const output = this.funcCheck(successFunc, this.payload.successFunc);
       if (output) this.payload.output.append(output);
       return this;
@@ -148,9 +150,15 @@ class Parser {
   }
 
   or() {
-    if (this.payload.done || this.payload.failed) return this;
-    this.payload.failed = false;
-    this.payload.curPos = this.payload.startPos - 1;
+    if (this.payload.failed || !this.payload.exhausted) {
+      this.payload.failed = false;
+      this.payload.exhausted = false;
+      this.payload.curPos = this.payload.startPos - 1;
+      return this;
+    } else if (!this.payload.failed || this.payload.exhausted) {
+      this.payload.done = true;
+      return this;
+    }
     return this;
   }
 
@@ -257,7 +265,7 @@ const use = (code, successFunc, failFunc, load) => {
     curPos: load ? load.curPos : -1,
     startPos: load ? load.startPos : 0,
     failed: false,
-    undone: true,
+    done: false,
     exhausted: false,
     curRule: '',
     output: load ? load.output : [],
@@ -266,12 +274,21 @@ const use = (code, successFunc, failFunc, load) => {
 };
 
 /* eslint-disable newline-per-chained-call */
-const pushOutput = (payload, token) => { if (token) payload.output.push(token); };
+const pushOutput = (payload, token) => {
+  if (token) payload.output.push(token);
+};
 const printOutput = (payload) => { print(payload.output); };
 
-let result =
-    use('aba', pushOutput, printOutput)
-      ._('ab').sub(p => p._('a').and(x => x._('b')))._('b').or()._('ab')._('ab');
+let result;
+
+result =
+    use('abbb', pushOutput, printOutput)
+      ._('ab').sub(p => p._('a').and(x => x._('b')))._('c').or()._('ab')._('ab').or()._('a').more('b');
+print(result);
+
+result =
+  use('ab', pushOutput, printOutput)
+    ._('a')._('b').optmore('a').or()._('a')._('b');
 print(result);
 
 result =
