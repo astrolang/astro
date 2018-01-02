@@ -174,6 +174,7 @@ class Parser {
 
   not(rule, successFunc, failFunc) {
     if (this.payload.done || this.payload.failed) return this;
+    const originalExhausted = this.payload.exhausted;
     const originalStartPos = this.payload.startPos;
     const originalCurPos = this.payload.curPos;
     const originalSuccessFunc = this.payload.successFunc;
@@ -185,6 +186,7 @@ class Parser {
     const result = rule(this);
     result.payload.done = false;
     result.payload.failed = !result.payload.failed;
+    result.payload.exhausted = originalExhausted;
     result.payload.startPos = originalStartPos;
     result.payload.curPos = originalCurPos;
     result.payload.successFunc = originalSuccessFunc;
@@ -204,6 +206,7 @@ class Parser {
 
   and(rule, successFunc, failFunc) {
     if (this.payload.done || this.payload.failed) return this;
+    const originalExhausted = this.payload.exhausted;
     const originalStartPos = this.payload.startPos;
     const originalCurPos = this.payload.curPos;
     const originalSuccessFunc = this.payload.successFunc;
@@ -214,6 +217,7 @@ class Parser {
 
     const result = rule(this);
     result.payload.done = false;
+    result.payload.exhausted = originalExhausted;
     result.payload.startPos = originalStartPos;
     result.payload.curPos = originalCurPos;
     result.payload.successFunc = originalSuccessFunc;
