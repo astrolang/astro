@@ -25,10 +25,18 @@ class Parser {
   stepBack(offset) { this.payload.curPos -= offset; }
 
   failCleanup() { this.payload.output = []; }
+  
+  _(test, sigil, successFunc, failFunc) {
+    if (sigil == null) { return this.one(test, successFunc, failFunc); }
+    else if (sigil === '+') { return this.more(test, successFunc, failFunc); }
+    else if (sigil === '?') { return this.opt(test, successFunc, failFunc); }
+    else if (sigil === '*') { return this.optmore(test, successFunc, failFunc); }
+    else { throw Error('ParseError: incorrect sigil passed to \'_\' function'); }
+  }
 
   // If `a` is a string, it checks if appears `a` in `code` after the current position
   // and consumes it. `a` must appear after current position.
-  _(test, successFunc, failFunc) {
+  one(test, successFunc, failFunc) {
     if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     let token = null;
@@ -249,7 +257,7 @@ class Parser {
       }
       return this;
     }
-    throw Error('expect a function that returns a boolean');
+    throw Error('ParseError: expect a function that returns a boolean');
   }
 
   funcCheck(func, fallbackFunc, token) {
@@ -287,17 +295,17 @@ let result;
 
 result =
     use('abbb', pushOutput, printOutput)
-      ._('ab').sub(p => p._('a').and(x => x._('b')))._('c').or()._('ab')._('ab').or()._('a').more('b');
+      .one('ab').sub(p => p.one('a').and(x => x.one('b'))).one('c').or().one('ab').one('ab').or().one('a').more('b');
 print(result);
 
 result =
   use('ab', pushOutput, printOutput)
-    ._('a')._('b').optmore('a').or()._('a')._('b');
+    .one('a').one('b').optmore('a').or().one('a').one('b');
 print(result);
 
 result =
   use('abbbb', pushOutput)
-    ._('a')._('bb')._('bb');
+    .one('a').one('bb').one('bb');
 print(result);
 
 module.exports = { Parser, use };
