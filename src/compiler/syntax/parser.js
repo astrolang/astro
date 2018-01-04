@@ -25,13 +25,13 @@ class Parser {
   stepBack(offset) { this.payload.curPos -= offset; }
 
   failCleanup() { this.payload.output = []; }
-  
+
   _(test, sigil, successFunc, failFunc) {
-    if (sigil == null) { return this.one(test, successFunc, failFunc); }
-    else if (sigil === '+') { return this.more(test, successFunc, failFunc); }
-    else if (sigil === '?') { return this.opt(test, successFunc, failFunc); }
-    else if (sigil === '*') { return this.optmore(test, successFunc, failFunc); }
-    else { throw Error('ParseError: incorrect sigil passed to \'_\' function'); }
+    if (sigil == null) return this.one(test, successFunc, failFunc);
+    else if (sigil === '+') return this.more(test, successFunc, failFunc);
+    else if (sigil === '?') return this.opt(test, successFunc, failFunc);
+    else if (sigil === '*') return this.optmore(test, successFunc, failFunc);
+    throw Error('ParseError: incorrect sigil passed to \'_\' function');
   }
 
   // If `a` is a string, it checks if appears `a` in `code` after the current position
@@ -119,13 +119,21 @@ class Parser {
     const tokens = [];
     this.payload.curRule = `${test}*`;
 
-    let peek = this.peek(offset);
-    while (peek.success && peek.value === test) {
-      tokens.append(peek.value);
-      this.updatePos(offset);
-      print(this.payload.curPos); //
-      peek = this.peek(offset);
-    }
+    if (test instanceof Function) {
+      let { payload } = test(this);
+      while (!payload.failed && payload.exhausted) {
+        tokens.push(payload.output);
+        // eslint-disable-next-line prefer-destructuring
+        payload = test(this).payload;
+      }
+    } else if (typeof (test) === 'string') {
+      let peek = this.peek(offset);
+      while (peek.success && peek.value === test) {
+        tokens.push(peek.value);
+        this.updatePos(offset);
+        peek = this.peek(offset);
+      }
+    } else throw Error('ParseError: expected first argument,`test`, to be string or Function');
 
     if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
 
@@ -163,7 +171,7 @@ class Parser {
       this.payload.exhausted = false;
       this.payload.curPos = this.payload.startPos - 1;
       return this;
-    } else if (!this.payload.failed || this.payload.exhausted) {
+    } else if (!this.payload.failed && this.payload.exhausted) {
       this.payload.done = true;
       return this;
     }
@@ -285,6 +293,8 @@ const use = (code, successFunc, failFunc, load) => {
   return new Parser(payload);
 };
 
+const _ = (test, sigil, successFunc, failFunc) => s => s._(test, sigil, successFunc, failFunc);
+
 /* eslint-disable newline-per-chained-call */
 const pushOutput = (payload, token) => {
   if (token) payload.output.push(token);
@@ -295,7 +305,7 @@ let result;
 
 result =
     use('abbb', pushOutput, printOutput)
-      .one('ab').sub(p => p.one('a').and(x => x.one('b'))).one('c').or().one('ab').one('ab').or().one('a').more('b');
+      .one('ab').sub(p => p.one('a').and(x => x.one('b'))).one('c').or().one('ab').one('ab').or().one('a').optmore(_('b'));
 print(result);
 
 result =
@@ -308,4 +318,4 @@ result =
     .one('a').one('bb').one('bb');
 print(result);
 
-module.exports = { Parser, use };
+module.exports = { Parser, use, _ };
