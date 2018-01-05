@@ -474,3 +474,50 @@
     # Therefore, typeof b[x] == (Int|[Int]), and that will also become the type of c.
 
 
+# IMPLEMENTING GENERATORS
+# The generator function stores its local variable values in linear memory when unwinding and loads them back when called again.
+fun foo():
+    this()
+    yield
+    that()
+    yield
+    
+# This would be equivalent to the following code if Astro had a jump control primitive that jumps forward to a label
+fun foo():
+    let cont! = 0
+    jump cont:
+        @(0):
+            this()
+            cont += 1
+            return
+        @(1):
+            that()
+            cont = 0
+            return
+
+# This can be done using blocks and br_table in WebAssembly.
+function $foo
+    block 
+        block
+            # jump forward using `cont` value
+            get_global $cont
+            br_table 0 1 0
+        end #1
+        # increment `cont` by 1 
+        i32.const 1
+        get_global $cont
+        132.add 
+        set_global $cont
+
+        call $this
+        return
+    end #0
+    # set `cont` to 0
+    i32.const 0
+    set_global $cont
+    
+    call $that
+    return
+
+
+(br_table (i32.const 0) $0 (i32.const 2) $1 (i32.const 1337) $default (; index value ;))
