@@ -1,8 +1,20 @@
+# Astro 0.1.13a
+# 06/01/18
+# FIX: SYNTAX HIGHLIGHT
+- remove highlight on delegate
+    delegate
+
+- highlight `async` and `unsafe` keywords
+    async, unsafe
+
+- highlight `yield from` keywords
+    yield from
+
 # Astro 0.1.12a
 # 12/12/17
 # FIX: SYNTAX HIGHLIGHT
 - highlight on not*
-    not in 
+    not in
 - remove member highlight on !*
     john.!happy
 - remove highlight on catch*
@@ -21,7 +33,7 @@
     print..('hello')..('hi')
 - add more operators to command notation highlight exclusive list*
     ≥ ≤ ≠ ≈ × ± ÷
-    a ÷ b 
+    a ÷ b
     a ≤ b
 - highlight some identifier-based infix operators*
     mod
@@ -43,7 +55,7 @@
     ns.''
     ns.""
 - nil operator should have the same syntax highlight as fields*
-    siblings.sister? 
+    siblings.sister?
     siblings.sister!
 - remove use syntax highlight*
     use x, y:
