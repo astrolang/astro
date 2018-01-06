@@ -860,6 +860,9 @@ LAMBDAS
     # An anonymous function or lambda can be recursively called within its body using the fun keyword.
     list.aggregate(0) |a| => (a == 0) ? 1 : (a + fun(a - 1))
 
+    # When binding a subject to a parameterless lambda, `= =>` can be shrunk into just `=>`.
+    let someFunction => echo 'Hello, world!'
+
 CLOSURE
     # A closure is a function defined within another function.
     fun genDbConnector(host., username., password.):
