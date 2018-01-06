@@ -118,3 +118,8 @@ unsafe:
     let pointer = ptr(object)
     pointer.offset(-5)
 ```
+
+## DYNAMIC IMPORT
+```nim
+let { pi } = import(someModule) #: Inferred as dynamic
+```
