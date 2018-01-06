@@ -1087,7 +1087,7 @@ MODULES & IMPORT
     let quat = mat2quat([1, 2; 3, 4])
 
     # Importing all exported members of a module.
-    import math { ... }
+    import math {...}
 
     # Importing multiple modules
     import csv, dataframes
@@ -1100,6 +1100,9 @@ MODULES & IMPORT
     import fastmath:nypro/fast-math { cosine:cos, sine:sin, π:pi }
     let b = fastmath.tan(45)
     let d = cosine(30)
+
+    # Importing all except some members.
+    import math {...} except { sin, cos }
 
     # Aggregate module
     # A single module can be split between different files by numbering them.
@@ -1118,6 +1121,9 @@ EXPORT
     import random { randoms }
     fun randomString() = randoms(10).map str
     export randomString
+
+    # Exporting all except some members.
+    export {...} except { sin, cos }
 
 PRIVATE ACCESS MODIFIER
     # The private access punctuator, `'`, is used in areas where the export keyword can't cover
