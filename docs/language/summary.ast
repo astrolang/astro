@@ -908,7 +908,7 @@ COROUTINES & GENERATORS
     count.next() # 2
 
     # `delegate` redirects a coroutine through another coroutine.
-    delegate coroutine
+    yield from coroutine
 
 TYPE DEFINITION (2)
     # Defining a type.
@@ -1293,7 +1293,7 @@ POINTERS
 RESERVED KEYWORDS
     import, export, let, var, fun, type, abst, async,
     if, elif, else, while, for, try, except, ensure, defer, loop, unsafe
-    spill, return, raise, break, continue, yield, delegate, await,
+    spill, return, raise, break, continue, yield, await,
     where, at,
     eval,
     is, not, in, as, mod, typeof,
