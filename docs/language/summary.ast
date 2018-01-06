@@ -712,7 +712,6 @@ MATCH EXPRESSION
     | Some(x, y) => 1 # Matches if object is of `Some` type and binds `x` and `y` to Some's fields.
     | 75 | 67 => 2 # Matches if object has value `75` or value `67`
     | 75 & 67 => 3 # Matches if object has value `75` and value `67`
-    | _ > 75 => 4 # Matches if `object > 75`
     ! 75 => 5 # Matches if object doesn't have value `75`
     | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
     | n => 6 # Matches. Binds `n` to the object.
