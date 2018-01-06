@@ -590,7 +590,7 @@ NIL
 BOOLEAN EXPRESSIONS
     # If x equals y and also greater than z.
     x == y and y == z
-    x && z == y
+    x & z == y
     x == y == z
 
     # Logical negation with `not` keyword.
@@ -710,8 +710,8 @@ MATCH EXPRESSION
     object
     | Some($x, $y) => 0 # Matches if object is of `Some` type with values of subject `x` and `y` declared in the outer scope.
     | Some(x, y) => 1 # Matches if object is of `Some` type and binds `x` and `y` to Some's fields.
-    | 75 || 67 => 2 # Matches if object has value `75` or value `67`
-    | 75 && 67 => 3 # Matches if object has value `75` and value `67`
+    | 75 | 67 => 2 # Matches if object has value `75` or value `67`
+    | 75 & 67 => 3 # Matches if object has value `75` and value `67`
     | _ > 75 => 4 # Matches if `object > 75`
     ! 75 => 5 # Matches if object doesn't have value `75`
     | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
@@ -728,8 +728,8 @@ MATCH EXPRESSION
 
     # A match expression can also be used to match against the arguments of a function, if, for, loop or while expressions.
     fun isChosen(option):
-        | 'y' || 'Y' => true
-        | 'n' || 'N' => false
+        | 'y' | 'Y' => true
+        | 'n' | 'N' => false
         | _ => raise Error('Invalid choice!')
 
 ASSIGNMENT DESTRUCTURING
@@ -1181,7 +1181,7 @@ OPERATOR OVERLOADING & CUSTOM OPERATOR
 
 TRY, EXCEPT & ENSURE
     # Raising an exception with the `raise` keyword.
-    if numerator && denominator == 0:
+    if numerator & denominator == 0:
         raise DomainError()
 
     # Handling an exception
