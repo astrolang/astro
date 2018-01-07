@@ -94,7 +94,7 @@ Block macro calls
 @time(minutes)
 ```
 
-Macros that take anything as last arguments
+Macros can be called like regular functions.
 ```julia
 fun @where(cond, none): #: BinaryExpression, None
     return $(filter|cond.lhs| => cond)
@@ -122,4 +122,16 @@ unsafe:
 ## DYNAMIC IMPORT
 ```nim
 let { pi } = import(someModule) #: Inferred as dynamic
+```
+
+## STATIC LOCAL SUBJECTS
+Local subjects that persist between function calls are marked with an `!`.
+```nim
+fun countCalls():
+    var count! = 0
+    print count += 1
+
+countCalls() # 1
+countCalls() # 2
+countCalls() # 3
 ```
