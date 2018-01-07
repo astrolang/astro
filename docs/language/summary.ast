@@ -239,6 +239,12 @@ TUPLES
     # The contents of a named tuple can be accessed using the dot notation.
     print http.status
 
+    # Tuple indexing.
+    let book = ('Harry Potter', 'J.K. Rowling', 1995)
+    let title = book.1 # Harry Potter
+    let author = book.2 # J.K. Rowling
+    let year = book.3 # 1995
+
 LISTS
     var unorderedList = [7, 3, 8, 5, 4, 0, 9, 1, 2, 6]
 
