@@ -7,7 +7,7 @@ class Parser {
     this.failFunc = failFunc;
     this.doFunc = doFunc;
     this.lastPos = -1;
-    this.lastRule = '';
+    this.rules = [];
     this.testToken = null;
     this.matchedToken = null;
     this.startPos = 0;
@@ -58,11 +58,14 @@ class Parser {
   one(test, successFunc, failFunc, doFunc) {
     const { done, failed } = this;
     if (done || failed) return this;
-
-    this.lastRule = `'${test}'`; // Set `lastRule` to current rule.
-
     if (test instanceof Func) { // If test is of Func type.
-      return test.func(this, successFunc, failFunc, doFunc); // Call the function.
+      const { rules } = this; // Grab existing rules fist.
+      this.rules = []; // Then erase before passing to function.
+      let result = test.func(this, successFunc, failFunc, doFunc); // Call the function.
+      // Join the sub rules and add to existing rules.
+      rules.push(`(${result.rules.join(' ')})`);
+      result.rules = rules;
+      return result;
     } else if (typeof (test) === 'string') { // If test is a string.
       this.testToken = test; // Set current test token.
       if (this.eatToken(test)) { // Token matches.
@@ -71,13 +74,13 @@ class Parser {
         this.matchedToken = null; // Set current matched token to null.
         this.failed = true; // Parser failed.
       }
-      // Call necessary functions. Relies on result of previous token match.
+      // Call necessary functions. Fucntion to call depends on whether rule failed or not.
       this.callFunctions(this, successFunc, failFunc, doFunc);
-    } else {
-      throw TypeError('Expected type of first argument to be String|Function!')
+      // Add current rule to rules. 
+      this.rules.push(`'${test}'`);
+      return this;
     }
-
-    return this;
+    throw TypeError('Expected type of first argument to be String|Function!');
   }
 
   // Where `test` is a function, `test` is called.
@@ -87,7 +90,7 @@ class Parser {
     if (done || failed) return this;
 
     let matchCount = 0;
-    while (!one(test, successFunc, failFunc, doFunc).failed) {
+    while (!one(tmatchCountssFunc, failFunc, doFunc).failed) {
 
     }
 
@@ -126,17 +129,13 @@ const show = (s) => {
   print(s.testToken);
   return s.testToken;
 };
-const showRule = (s) => {
-  print(`>>> ${s.lastRule}`);
-  return s.testToken;
-};
 const cleanUp = (s) => {
   s.successOutput = [];
   print(s.testToken);
   return s.testToken;
 };
 
-const result = use('hellobabebadoo', null, null, showRule).one(one('hello').one('babe').one('badoo').one('x'));
+const result = use('hellobabebadoo', null, null, show).one(one('hello').one('babe')).one('badoo');
 // const result = use('helloÙ').eatToken('hello');
 // const result = use('helloÙ').eatToken('helloÙ');
 print(result);
