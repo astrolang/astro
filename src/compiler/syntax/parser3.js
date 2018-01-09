@@ -6,26 +6,28 @@ class Parser {
     this.successFunc = successFunc;
     this.failFunc = failFunc;
     this.doFunc = doFunc;
-    this.lastPos = -1;
     this.rules = [];
     this.testToken = null;
     this.matchedToken = null;
+    this.successOutput = [];
+    this.failedOutput = [];
+    this.doOutput = [];
+    // Important states
+    this.lastPos = -1;
     this.startPos = 0;
     this.failed = false;
     this.done = false;
     this.exhausted = false;
-    this.successOutput = [];
-    this.failedOutput = [];
-    this.doOutput = [];
   }
 
-  // Starting from `this.lastPos + 1`, matches `token` against subsequent chars in `this.string`.
+  // Starting from `this.lastPos + 1`, matches `token` against subsequent chars in input string.
   eatToken(token) {
     const count = token.length;
     const { string, lastPos } = this;
-    // Check if `token` equals content in string starting from `lastPos + 1`.
+    // Check if `token` equals content in input string starting from `lastPos + 1`.
     if (string.slice(lastPos + 1, lastPos + count + 1) === token) {
       this.lastPos = lastPos + count; // Update last position.
+      if (this.lastPos === string.length - 1) this.exhausted = true; // Check if the end of input string has been reached.
       return true;
     }
     return false;
@@ -59,12 +61,13 @@ class Parser {
     const { done, failed } = this;
     if (done || failed) return this;
     if (test instanceof Func) { // If test is of Func type.
-      const { rules } = this; // Grab existing rules fist.
-      this.rules = []; // Then erase before passing to function.
-      let result = test.func(this, successFunc, failFunc, doFunc); // Call the function.
-      // Join the sub rules and add to existing rules.
-      rules.push(`(${result.rules.join(' ')})`);
-      result.rules = rules;
+      const { rules, startPos, lastPos } = this; // Grab existing rules, startPos and lastPos.
+      this.rules = []; // Then erase rules before passing to function.
+      this.startPos = lastPos; // Make current token position the starting point of subrule.
+      let result = test.func(this, successFunc, failFunc, doFunc); // Call the function with modified this.
+      rules.push(`(${result.rules.join(' ')})`); // Join the subset rules and add to existing rules.
+      result.rules = rules; // Now pass the new modified rules back.
+      result.startPos = startPos; // And set the start position to original start position.
       return result;
     } else if (typeof (test) === 'string') { // If test is a string.
       this.testToken = test; // Set current test token.
@@ -74,13 +77,26 @@ class Parser {
         this.matchedToken = null; // Set current matched token to null.
         this.failed = true; // Parser failed.
       }
-      // Call necessary functions. Fucntion to call depends on whether rule failed or not.
+      this.rules.push(`'${test}'`); // Add current rule to rules. 
+      // Lastly, call necessary functions. Function to call depends on whether rule failed or not.
       this.callFunctions(this, successFunc, failFunc, doFunc);
-      // Add current rule to rules. 
-      this.rules.push(`'${test}'`);
       return this;
     }
     throw TypeError('Expected type of first argument to be String|Function!');
+  }
+  
+  or() {
+    const { done, failed, exhausted } = this;
+    if (failed || !exhausted) { // If previous rules failed or input string not exhausted.
+      // Reset failed and exhausted in preparation for next rulez.
+      this.failed = false;
+      this.exhausted = false;
+      // Revert last position also.
+      this.lastPos = this.startPos - 1;
+    } else if (!failed && exhausted) { // 
+      this.done = true;
+    }
+    return this;
   }
 
   // Where `test` is a function, `test` is called.
@@ -129,13 +145,13 @@ const show = (s) => {
   print(s.testToken);
   return s.testToken;
 };
-const cleanUp = (s) => {
+const cleanSuccessUp = (s) => {
   s.successOutput = [];
   print(s.testToken);
   return s.testToken;
 };
 
-const result = use('hellobabebadoo', null, null, show).one(one('hello').one('babe')).one('badoo');
+const result = use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
 // const result = use('helloÙ').eatToken('hello');
 // const result = use('helloÙ').eatToken('helloÙ');
 print(result);
