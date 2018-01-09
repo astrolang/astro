@@ -9,6 +9,7 @@
     } = require(path.join(__dirname, '../../../../src/compiler/syntax/asts')); // relative to node_modules\pegjs\lib\compiler
 
     let prevIndentCount = 0;
+    let tempIndentCount = 0;
     let ignoreNewline = false;
     let keywords = ['if', 'while', 'for', 'in', 'mod', 'try', 'elif', 'else', 'end', 'except', 'ensure', 'defer'];
     const saveIndent = () => prevIndentCount += 4;
@@ -524,12 +525,14 @@ Indent 'indent'
         // DEBUG //
         print('prev ' + prevIndentCount);
         print('curr ' + currentIndentCount);
+        print('temp ' + tempIndentCount);
         // DEBUG //
         if (currentIndentCount === prevIndentCount + 4) {
             // DEBUG //
             print("=== Indent === " + location().start.line);
             // DEBUG //
             // prevIndentCount += 4;
+            tempIndentCount = prevIndentCount + 4;
             return;
         }
         // DEBUG //
@@ -544,8 +547,9 @@ Samedent 'samedent'
         // DEBUG //
         print('prev ' + prevIndentCount);
         print('curr ' + currentIndentCount);
+        print('temp ' + tempIndentCount);
         // DEBUG //
-        if (currentIndentCount === prevIndentCount + 4) {
+        if (currentIndentCount === tempIndentCount) {
             // DEBUG //
             print("=== Samedent === " + location().start.line);
             // DEBUG //
@@ -563,6 +567,7 @@ Dedent 'Dedent'
         // DEBUG //
         print('prev ' + prevIndentCount);
         print('curr ' + currentIndentCount);
+        print('temp ' + tempIndentCount);
         // DEBUG //
         if (currentIndentCount < prevIndentCount) {
             // DEBUG //

@@ -29,8 +29,8 @@ class Parser {
   _(test, sigil, successFunc, failFunc) {
     if (sigil == null) return this.one(test, successFunc, failFunc);
     else if (sigil === '+') return this.more(test, successFunc, failFunc);
-    else if (sigil === '?') return this.opt(test, successFunc, failFunc);
-    else if (sigil === '*') return this.optmore(test, successFunc, failFunc);
+    else if (sigil === '?') return this.opt(test, successFunc);
+    else if (sigil === '*') return this.optmore(test, successFunc);
     throw Error('ParseError: incorrect sigil passed to \'_\' function');
   }
 
@@ -40,11 +40,13 @@ class Parser {
     if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     let token = null;
+    this.payload.tokens = null;
     this.payload.curRule = test;
 
     const peek = this.peek(offset);
     if (peek.success && peek.value === test) {
       token = peek.value;
+      this.payload.tokens = token;
       this.updatePos(offset);
       if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
       const output = this.funcCheck(successFunc, this.payload.successFunc, token);
@@ -65,6 +67,7 @@ class Parser {
     if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     const tokens = [];
+    this.payload.tokens = null;
     let count = 0;
     this.payload.curRule = `${test}+`;
 
@@ -78,6 +81,7 @@ class Parser {
     }
 
     if (count > 0) {
+      this.payload.tokens = tokens;
       const output = this.funcCheck(successFunc, this.payload.successFunc, tokens);
       if (output) this.payload.output.push(output);
       return this;
@@ -91,11 +95,12 @@ class Parser {
   }
 
   // If `a` is a string, it checks if `a` appears in `code` after the current position
-  // and consumes it.It passes irrespective of `a` appearing
+  // and consumes it. It passes irrespective of `a` appearing
   opt(test, func) {
     if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     let token = null;
+    this.payload.tokens = null;
     this.payload.curRule = `${test}?`;
 
     const peek = this.peek(offset);
@@ -105,7 +110,8 @@ class Parser {
     }
 
     if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
-
+    
+    this.payload.tokens = token;
     const output = this.funcCheck(func, this.payload.successFunc, token);
     if (output) this.payload.output.append(output);
     return this;
@@ -117,12 +123,17 @@ class Parser {
     if (this.payload.done || this.payload.failed) return this;
     const offset = test.length;
     const tokens = [];
+    this.payload.tokens = null;
     this.payload.curRule = `${test}*`;
+    
+    print(this.payload)
 
     if (test instanceof Function) {
+      let oldPos = this.payload.curPos;
       let { payload } = test(this);
-      while (!payload.failed && payload.exhausted) {
-        tokens.push(payload.output);
+      while (payload.curPos > oldPos) {
+        tokens.push(payload.tokens);
+        oldPos = payload.curPos;
         // eslint-disable-next-line prefer-destructuring
         payload = test(this).payload;
       }
@@ -137,6 +148,8 @@ class Parser {
 
     if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
 
+    
+    this.payload.tokens = tokens;
     const output = this.funcCheck(func, this.payload.successFunc, tokens);
     if (output) this.payload.output.append(output);
     return this;
@@ -287,6 +300,7 @@ const use = (code, successFunc, failFunc, load) => {
     failed: false,
     done: false,
     exhausted: false,
+    tokens: [],
     curRule: '',
     output: load ? load.output : [],
   };
@@ -305,17 +319,17 @@ let result;
 
 result =
     use('abbb', pushOutput, printOutput)
-      .one('ab').sub(p => p.one('a').and(x => x.one('b'))).one('c').or().one('ab').one('ab').or().one('a').optmore(_('b'));
+      .one('ab').sub(p => p.one('a').and(_('b'))).one('c').or().one('ab').optmore(_('b')).or()._('a').optmore(_('b'));
 print(result);
 
-result =
-  use('ab', pushOutput, printOutput)
-    .one('a').one('b').optmore('a').or().one('a').one('b');
-print(result);
+// result =
+//   use('ab', pushOutput, printOutput)
+//     .one('a').one('b').optmore('a').or().one('a').one('b');
+// print(result);
 
-result =
-  use('abbbb', pushOutput)
-    .one('a').one('bb').one('bb');
-print(result);
+// result =
+//   use('abbbb', pushOutput)
+//     .one('a').one('bb').one('bb');
+// print(result);
 
 module.exports = { Parser, use, _ };
