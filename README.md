@@ -35,8 +35,7 @@ Astro is basically a high-level language with low-level access.
 Compiling to LLVM IR brings with it some benefits.
 One is getting a free WebAssembly compilation step and the other is the provision of decade-worth optimization passes.
 These are indeed valuable features, but wasm is an easier target to get started with. It is portable and runs on major JavaScript VMs, which means Astro can leverage the Nodejs ecosystem instead of building its own from scratch.
-
-Astro compiler is also expected to be lightweight, fast and responsive, using LLVM will add major overhead to the compilation time. LLVM will only be considered when the wasm backend is in a stable condition.
+However, LLVM is on Astro's radar.
 
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
