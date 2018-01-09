@@ -110,7 +110,7 @@ class Parser {
     }
 
     if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
-    
+
     this.payload.tokens = token;
     const output = this.funcCheck(func, this.payload.successFunc, token);
     if (output) this.payload.output.append(output);
@@ -125,9 +125,7 @@ class Parser {
     const tokens = [];
     this.payload.tokens = null;
     this.payload.curRule = `${test}*`;
-    
-    print(this.payload)
-
+    print(this.payload);
     if (test instanceof Function) {
       let oldPos = this.payload.curPos;
       let { payload } = test(this);
@@ -148,7 +146,7 @@ class Parser {
 
     if (this.payload.curPos === this.payload.code.length - 1) this.payload.exhausted = true;
 
-    
+
     this.payload.tokens = tokens;
     const output = this.funcCheck(func, this.payload.successFunc, tokens);
     if (output) this.payload.output.append(output);
@@ -315,9 +313,7 @@ const pushOutput = (payload, token) => {
 };
 const printOutput = (payload) => { print(payload.output); };
 
-let result;
-
-result =
+const result =
     use('abbb', pushOutput, printOutput)
       .one('ab').sub(p => p.one('a').and(_('b'))).one('c').or().one('ab').optmore(_('b')).or()._('a').optmore(_('b'));
 print(result);
