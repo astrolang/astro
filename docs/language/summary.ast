@@ -112,14 +112,14 @@ TYPE DEFINITION (1)
 PROPERTIES
     # Properties provide a setter/getter behavior.
     # The first brace pair represents the setter, and the second braces pair, the getter.
-    var age  = {age + 5} -> {age - 5}
+    var age  = {age + 5} => {age - 5}
 
     # The last expression in the setter braces becomes the property's value.
     # The last expression in the getter braces is the property's returned value.
-    var name = {name} -> {name + "Smith"}
+    var name = {name} => {name + "Smith"}
 
     # Empty braces means the setter/getter is inaccessible.
-    var date = {date} -> {}
+    var date = {date} => {}
 
 EXPRESSION-ORIENTED
     # Everything (except the import and export statements) is an expression in Astro!
