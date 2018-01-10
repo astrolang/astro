@@ -121,9 +121,31 @@ class Parser {
     const { done, failed } = this;
     if (done || failed) return this;
 
-    //
-    const { rules } = this;
-    this.rules = [];
+    if (test instanceof Func) { // If test is of Func type.
+      const { rules, startPos, lastPos } = this; // Grab existing rules, startPos and lastPos.
+      this.rules = []; // Then erase rules before passing to function.
+      this.startPos = lastPos; // Make current token position the starting point of subrule.
+      // Call the function with modified this.
+      const result = test.func(this, successFunc, failFunc, doFunc);
+      rules.push(`(${result.rules.join(' ')})`); // Join the subset rules and add to existing rules.
+      result.rules = rules; // Now pass the new modified rules back.
+      result.startPos = startPos; // And set the start position to original start position.
+      return result;
+    } else if (typeof (test) === 'string') { // If test is a string.
+      this.testToken = test; // Set current test token.
+      if (this.eatToken(test)) { // Token matches.
+        this.matchedToken = test; // Set current matched token to `test`.
+      } else { // Token doesn't match.
+        this.matchedToken = null; // Set current matched token to null.
+        this.failed = true; // Parser failed.
+      }
+      this.rules.push(`'${test}'`); // Add current rule to rules.
+      // Lastly, call necessary functions. Function to call depends on whether rule failed or not.
+      this.callFunctions(this, successFunc, failFunc, doFunc);
+      return this;
+    } else {
+      throw TypeError('Expected type of first argument to be String|Function!');
+    }
 
     let matchCount = 0;
     while (!this.one(test, successFunc, failFunc, doFunc).failed) {
@@ -133,16 +155,13 @@ class Parser {
     if (matchCount > 0) { // If there is at least one token match.
       this.matchedToken = test; // Set current matched token to `test`.
       this.failed = false; // Parsing didn't fail.
-      // There will be a final failed match adding a null in failedOutput. Remove that.
-      this.failedOutput.pop();
+      // // There will be a final failed match, the result will be in failedOutput and doOutput. Remove that.
+      // this.failedOutput.pop();
+      // this.doOutput.pop();
     } else {
       this.matchedToken = null; // Set current matched token to null.
       this.failed = true; // Parsing failed.
     }
-
-    //
-    rules.push(`${this.rules[0]}+`);
-    this.rules = rules;
 
     return this;
   }
@@ -156,12 +175,15 @@ const use = (string, successFunc, failFunc, doFunc) =>
 const one = (test, successFunc, failFunc, doFunc) =>
   new Func(s => s.one(test, successFunc, failFunc, doFunc));
 
+// Create ...
 const many = (test, successFunc, failFunc, doFunc) =>
   new Func(s => s.many(test, successFunc, failFunc, doFunc));
 
+// Create ...
 const opt = (test, successFunc, failFunc, doFunc) =>
   new Func(s => s.opt(test, successFunc, failFunc, doFunc));
 
+// Create ...
 const optmany = (test, successFunc, failFunc, doFunc) =>
   new Func(s => s.optmany(test, successFunc, failFunc, doFunc));
 
@@ -188,7 +210,7 @@ const cleanSuccessUp = (s) => {
 
 /* eslint-disable newline-per-chained-call, max-len */
 const result =
-  use('hellohellohelloboom', show, null, show).one('hello').many('hello').many(one('boom'));
+  use('hellohellohelloboommaboom', show, show, show).one('hello').many('hello').many(one('boom').one('ma')).or().one('hellohellohelloboommaboom');
 
 // use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
 // const result = use('helloÙ').eatToken('hello');
