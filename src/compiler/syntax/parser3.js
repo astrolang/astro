@@ -1,5 +1,18 @@
 const { print } = require('../utils');
 
+class Func {
+  constructor(func) {
+    this.func = func;
+  }
+
+  one(test, successFunc, failFunc, doFunc) {
+    const { func } = this;
+    // Chain new function with existing function.
+    this.func = s => func(s).one(test, successFunc, failFunc, doFunc);
+    return this;
+  }
+}
+
 class Parser {
   constructor(string, successFunc, failFunc, doFunc) {
     this.string = string;
@@ -27,7 +40,8 @@ class Parser {
     // Check if `token` equals content in input string starting from `lastPos + 1`.
     if (string.slice(lastPos + 1, lastPos + count + 1) === token) {
       this.lastPos = lastPos + count; // Update last position.
-      if (this.lastPos === string.length - 1) this.exhausted = true; // Check if the end of input string has been reached.
+      // Check if the end of input string has been reached.
+      if (this.lastPos === string.length - 1) this.exhausted = true;
       return true;
     }
     return false;
@@ -64,7 +78,8 @@ class Parser {
       const { rules, startPos, lastPos } = this; // Grab existing rules, startPos and lastPos.
       this.rules = []; // Then erase rules before passing to function.
       this.startPos = lastPos; // Make current token position the starting point of subrule.
-      let result = test.func(this, successFunc, failFunc, doFunc); // Call the function with modified this.
+      // Call the function with modified this.
+      const result = test.func(this, successFunc, failFunc, doFunc);
       rules.push(`(${result.rules.join(' ')})`); // Join the subset rules and add to existing rules.
       result.rules = rules; // Now pass the new modified rules back.
       result.startPos = startPos; // And set the start position to original start position.
@@ -77,52 +92,56 @@ class Parser {
         this.matchedToken = null; // Set current matched token to null.
         this.failed = true; // Parser failed.
       }
-      this.rules.push(`'${test}'`); // Add current rule to rules. 
+      this.rules.push(`'${test}'`); // Add current rule to rules.
       // Lastly, call necessary functions. Function to call depends on whether rule failed or not.
       this.callFunctions(this, successFunc, failFunc, doFunc);
       return this;
     }
     throw TypeError('Expected type of first argument to be String|Function!');
   }
-  
+
   or() {
-    const { done, failed, exhausted } = this;
+    const { failed, exhausted } = this;
     if (failed || !exhausted) { // If previous rules failed or input string not exhausted.
       // Reset failed and exhausted in preparation for next rulez.
       this.failed = false;
       this.exhausted = false;
       // Revert last position also.
       this.lastPos = this.startPos - 1;
-    } else if (!failed && exhausted) { // 
+    } else if (!failed && exhausted) { //
       this.done = true;
     }
+    this.rules.push('|'); // Add current rule to rules.
     return this;
   }
 
   // Where `test` is a function, `test` is called.
   // Where `test` is a string, `test` is matched against `this.string` starting from `lastPos + 1`.
   many(test, successFunc, failFunc, doFunc) {
-    const { done, failed, one } = this;
+    const { done, failed  } = this;
     if (done || failed) return this;
 
-    let matchCount = 0;
-    while (!one(tmatchCountssFunc, failFunc, doFunc).failed) {
+    //
+    const { rules } = this;
+    this.rules = [];
 
+    let matchCount = 0;
+    while (!this.one(test, successFunc, failFunc, doFunc).failed) {
+      matchCount += 1;
     }
 
-    return this;
-  }
-}
+    if (matchCount > 0) {
+      this.matchedToken = test; // Set current matched token to `test`.
+      this.failed = false; // Parsing didn't fail.
+    } else {
+      this.matchedToken = null; // Set current matched token to null.
+      this.failed = true; // Parsing failed.
+    }
 
-class Func {
-  constructor(func) {
-    this.func = func;
-  }
+    //
+    rules.push(`${this.rules[0]}+`);
+    this.rules = rules;
 
-  one(test, successFunc, failFunc, doFunc) {
-    const { func } = this;
-    // Chain new function with existing function.
-    this.func = s => func(s).one(test, successFunc, failFunc, doFunc);
     return this;
   }
 }
@@ -138,9 +157,10 @@ const one = (test, successFunc, failFunc, doFunc) =>
 module.exports = {
   use,
   one,
-}
+};
 
 // TEST
+/* eslint-disable no-param-reassign */
 const show = (s) => {
   print(s.testToken);
   return s.testToken;
@@ -151,7 +171,13 @@ const cleanSuccessUp = (s) => {
   return s.testToken;
 };
 
-const result = use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
+/* eslint-disable newline-per-chained-call */
+const result =
+  use('hellohello', show, show, show).many('hello', null, null, cleanSuccessUp);
+
+// use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe'))
+// .one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
 // const result = use('helloÙ').eatToken('hello');
 // const result = use('helloÙ').eatToken('helloÙ');
 print(result);
+print(result.rules.join(' '));
