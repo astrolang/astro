@@ -118,7 +118,7 @@ class Parser {
   // Where `test` is a function, `test` is called.
   // Where `test` is a string, `test` is matched against `this.string` starting from `lastPos + 1`.
   many(test, successFunc, failFunc, doFunc) {
-    const { done, failed  } = this;
+    const { done, failed } = this;
     if (done || failed) return this;
 
     //
@@ -130,9 +130,11 @@ class Parser {
       matchCount += 1;
     }
 
-    if (matchCount > 0) {
+    if (matchCount > 0) { // If there is at least one token match.
       this.matchedToken = test; // Set current matched token to `test`.
       this.failed = false; // Parsing didn't fail.
+      // There will be a final failed match adding a null in failedOutput. Remove that.
+      this.failedOutput.pop();
     } else {
       this.matchedToken = null; // Set current matched token to null.
       this.failed = true; // Parsing failed.
@@ -154,9 +156,21 @@ const use = (string, successFunc, failFunc, doFunc) =>
 const one = (test, successFunc, failFunc, doFunc) =>
   new Func(s => s.one(test, successFunc, failFunc, doFunc));
 
+const many = (test, successFunc, failFunc, doFunc) =>
+  new Func(s => s.many(test, successFunc, failFunc, doFunc));
+
+const opt = (test, successFunc, failFunc, doFunc) =>
+  new Func(s => s.opt(test, successFunc, failFunc, doFunc));
+
+const optmany = (test, successFunc, failFunc, doFunc) =>
+  new Func(s => s.optmany(test, successFunc, failFunc, doFunc));
+
 module.exports = {
   use,
   one,
+  many,
+  opt,
+  optmany,
 };
 
 // TEST
@@ -165,19 +179,20 @@ const show = (s) => {
   print(s.testToken);
   return s.testToken;
 };
+
 const cleanSuccessUp = (s) => {
   s.successOutput = [];
   print(s.testToken);
   return s.testToken;
 };
 
-/* eslint-disable newline-per-chained-call */
+/* eslint-disable newline-per-chained-call, max-len */
 const result =
-  use('hellohello', show, show, show).many('hello', null, null, cleanSuccessUp);
+  use('hellohellohelloboom', show, null, show).one('hello').many('hello').many(one('boom'));
 
-// use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe'))
-// .one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
+// use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
 // const result = use('helloÙ').eatToken('hello');
 // const result = use('helloÙ').eatToken('helloÙ');
+
 print(result);
 print(result.rules.join(' '));
