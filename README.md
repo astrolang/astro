@@ -13,21 +13,21 @@ Current Version: 0.1.12
 ### What is Astro?
 Astro is a fullstack interactive programming language designed for high-performance numerical-computing applications. 
 
-Astro is
-- statically-typed,
-- that compiles to native code and WebAssembly,
-- has no GC and
-- has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)) with
-- full type inference
+Astro is a
+- statically-typed language that
+- compiles to native code and WebAssembly,
+- has no GC,
+- has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)), and
+- provides full type inference
 
 ### Why create yet another programming language?
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing such apps for web and/or desktop easier and less frustrating.
 
-Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games, physical simulations and other real-time software. This also make it suitable for embedded software developemnt even though it's not a goal.
+Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games, physical simulations and other real-time software. This also makes it suitable for embedded software developemnt even though it's not a goal.
 
-In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors and matrices, vectorization, unicode identifiers, etc.
+In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors, matrices, vectorization, unicode identifiers, etc.
 
-In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type-inference, structural-typing and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
+In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, structural typing and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
 
 #### Python
 ```python
@@ -56,7 +56,7 @@ Neither.
 Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting)(ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
 It's also unlike Rust memory management model as it puts lesser restrictions on how references are moved around while still being memory safe.
 
-Astro simply, stays out of your way, lets you write your code like you would in any other garbage-collected languages.
+Astro simply, stays out of your way, lets you write your code like you would in any other garbage-collected language.
 
 ### How close is Astro to being ready for production use?
 Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
