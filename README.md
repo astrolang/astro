@@ -21,7 +21,7 @@ Astro is a
 - provides full type inference
 
 ### Why create yet another programming language?
-SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing such apps for web and/or desktop easier and less frustrating.
+SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing high-performance apps for web and/or desktop seamless, easier and less frustrating.
 
 Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games, physical simulations and other real-time software. This also makes it suitable for embedded software developemnt even though it's not a goal.
 
