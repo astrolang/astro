@@ -103,7 +103,7 @@ COMMAND NOTATION
     print +5 # Invalid!
 
 TYPE DEFINITION (1)
-    # A type is synonymous with struct in C. It holds the blueprint of what an object can contain.
+    # A type is synonymous with `struct` in C. It holds the blueprint of what an object can contain.
     type Person(name, age)
 
     # Objects can then be created from the blueprint.
