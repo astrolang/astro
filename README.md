@@ -11,31 +11,45 @@ Current Version: 0.1.12
 ![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
 
 ### What is Astro?
-Astro is a multi-paradigm high-level programming language designed for high-performance numerical-computing web applications and as a result Astro
-- is statically-typed,
-- compiles to WebAssembly,
+Astro is a fullstack interactive programming language designed for high-performance numerical-computing applications. 
+
+Astro is
+- statically-typed,
+- that compiles to native code and WebAssembly,
 - has no GC and
 - has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)) with
 - full type inference
 
 ### Why create yet another programming language?
-SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future.
-While such web apps can be written in C/C++ or Rust, we believe Astro introduces some useful features that can make creation of those apps easier, quicker and less buggy.
+SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing such apps for web and/or desktop easier and less frustrating.
 
-Astro started as a hobby for learning programming language design and compiler construction but that has since changed when Astro started gathering a set of unique features that should make any level of development fun.
-
-Astro is designed to have no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games and other real-time software.
-It needs to do this while being as expressive as Python.
+Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games, physical simulations and other real-time software. This also make it suitable for embedded software developemnt even though it's not a goal.
 
 In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors and matrices, vectorization, unicode identifiers, etc.
 
-Astro is basically a high-level language with low-level access.
+In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type-inference, structural-typing and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
 
-### Why compile directly to WebAssembly? Why not LLVM?
-Compiling to LLVM IR brings with it some benefits.
-One is getting a free WebAssembly compilation step and the other is the provision of decade-worth optimization passes.
-These are indeed valuable features, but wasm is an easier target to get started with. It is portable and runs on major JavaScript VMs, which means Astro can leverage the Nodejs ecosystem instead of building its own from scratch.
-However, LLVM is on Astro's radar.
+#### Python
+```python
+def times(a, b):
+    sum = a
+    for i in range(b):
+        sum += sum
+    return sum
+```
+#### Astro
+```pony
+fun times(a, b):
+    var sum = a
+    for i in 0..b:
+        sum += sum
+    return sum
+```
+
+### Why not just use exactly Python syntax or try to be compatible with Python?
+Python is a really dynamic programming language and there have been several attempts in the past to compile it AOT to native code. I don't want to reinvent the wheel since there are lessons to learn from old wheels. Python cannot be fully-inferred at compile-time without performance trade-offs.
+
+More importantly Astro introduces some concepts that Python doesn't have and probably never will.
 
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
