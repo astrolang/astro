@@ -88,7 +88,6 @@ Gitbooks covering different aspects of the project are in works. They will be pu
 - [ ] Create specialized error handler
 
 ### What are the technologies used?
-- [PEGjs](https://github.com/pegjs/pegjs) - a simple parser generator for JavaScript that produces fast parsers with excellent error reporting
 - [wast2wasm](https://www.npmjs.com/package/wast2wasm) - translates from s-expressions to the WebAssembly binary-encoding.
 
 ### Want to contribute to the project?
