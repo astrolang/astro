@@ -1,4 +1,4 @@
-# Astro 0.1.12
+# Astro 0.1.13a
 SINGLE-LINE COMMENTS
     # Hello, World!
 
@@ -1332,8 +1332,3 @@ PREDEFINED TYPE HIERARCHY
             NamedTuple
             Dict
             Generator
-
-TYPE ASSERTION
-    add(3, 4) :: (Int, Int) -> Int
-    type Car(make, year) :: Type{Car}
-    Car('', '') :: Car{Str, Str}
