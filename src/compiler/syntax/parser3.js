@@ -26,6 +26,7 @@ class Parser {
     this.successFunc = successFunc;
     this.failFunc = failFunc;
     this.doFunc = doFunc;
+    this.unexhaustedFuncs = {};
     this.rules = [];
     this.testToken = null;
     this.matchedToken = null;
@@ -68,12 +69,16 @@ class Parser {
       if (failFunc) output = failFunc(this);
       else if (this.failFunc) output = this.failFunc(this);
       this.failedOutput.push(output);
+      print('>>> failed ' + this.testToken)
     }
     let output = null;
     // Calling `doFunc` or `this.doFunc` if they exist.
     if (doFunc) output = doFunc(this);
     else if (this.doFunc) output = this.doFunc(this);
     this.doOutput.push(output);
+    // If input string has not been exhausted, store up the functions.
+    // They will be called if an `or` method is encountered next.
+    this.unexhaustedFuncs = { successFunc, failFunc, doFunc };
   }
 
   // Where `test` is a Func, `test` function is called.
@@ -141,8 +146,11 @@ class Parser {
     const { failed, exhausted } = this;
     if (failed || !exhausted) { // If previous rules failed or input string not exhausted.
       // // Set failed to true for callFunctions.
-      // this.failed = true;
-      // this.callFunctions();
+      this.failed = true;
+      this.successOutput.pop();
+      this.doOutput.pop();
+      const { successFunc, failFunc, doFunc } = this.unexhaustedFuncs;
+      this.callFunctions(successFunc, failFunc, doFunc);
       // Reset failed and exhausted in preparation for next rule.
       this.failed = false;
       this.exhausted = false;
@@ -252,7 +260,7 @@ const result =
 //  use('helloboomx', show, null, show).one(one('hella').or().one('hello').one('bmx')).or().one('helloboomx'); 
 //  use('helloboomx', show, show, show).one(one('hella').or().one('helloboomx')); 
 //  use(code, show, show, show).one('hello').one('hello').one('hello').one(one('boom').or().one('boom').one('ma', signal, signal)).or().one('hellohellohelloboommaboom');
-  use('hellohellohelloboommaboom', idShow('succ'), idShow('fail'), idShow('do')).one('hello').many('hello').many(one('boom').or().one('boom').one('ma')).or().one('hellohellohelloboommaboom');
+  use('hellohellohelloboommaboom', idShow('succ'), idShow('fail'), idShow('do')).one('hello').many('hello').many(one('boom').or().one('boom').one('m')).or().one('hellohellohelloboommaboom');
 
 // use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
 // const result = use('helloÙ').eatToken('hello');
