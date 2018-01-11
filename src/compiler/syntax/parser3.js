@@ -145,12 +145,13 @@ class Parser {
   or() {
     const { failed, exhausted } = this;
     if (failed || !exhausted) { // If previous rules failed or input string not exhausted.
-      // // Set failed to true for callFunctions.
-      this.failed = true;
-      this.successOutput.pop();
-      this.doOutput.pop();
-      const { successFunc, failFunc, doFunc } = this.unexhaustedFuncs;
-      this.callFunctions(successFunc, failFunc, doFunc);
+      if (!exhausted) {
+        this.failed = true; // Set failed to true for callFunctions.
+        this.successOutput.pop();
+        this.doOutput.pop();
+        const { successFunc, failFunc, doFunc } = this.unexhaustedFuncs;
+        this.callFunctions(successFunc, failFunc, doFunc);
+      }
       // Reset failed and exhausted in preparation for next rule.
       this.failed = false;
       this.exhausted = false;
@@ -159,8 +160,22 @@ class Parser {
     } else if (!failed && exhausted) { // If input string has been exhausted and nothing failed, we are good.
       this.done = true;
     }
-    this.rules.push('|'); // Add current '|' to rules.
-    return this;
+    this.rules.push('|'); // Add '|' to rules.
+   return this;
+  }
+  
+  func(successFunc, failFunc, doFunc) {
+    const { failed, exhausted } = this;
+    if (!exhausted) { // If previous rules input string not exhausted.
+      this.failed = true;
+      const lastSuccessOutput = this.successOutput.pop();
+      const lastDoOutput = this.doOutput.pop();
+      this.callFunctions(successFunc, failFunc, doFunc);
+      this.failed = false;
+      this.successOutput.push(lastSuccessOutput);
+      this.doOutput.push(lastDoOutput);
+    } 
+    this.callFunctions(successFunc, failFunc, doFunc);
   }
 
   // Where `test` is a Func, `test` function is called.
@@ -257,12 +272,12 @@ const cleanSuccessUp = (s) => {
 
 /* eslint-disable newline-per-chained-call, max-len */
 const result =
+  use('hellohellohelloboommaboom', idShow('succ'), idShow('fail'), idShow('do')).one('hello').many('hello').many(one('boom').or().one('boom').one('ma')).or().one('hellohellohelloboommaboom');
+
 //  use('helloboomx', show, null, show).one(one('hella').or().one('hello').one('bmx')).or().one('helloboomx'); 
 //  use('helloboomx', show, show, show).one(one('hella').or().one('helloboomx')); 
 //  use(code, show, show, show).one('hello').one('hello').one('hello').one(one('boom').or().one('boom').one('ma', signal, signal)).or().one('hellohellohelloboommaboom');
-  use('hellohellohelloboommaboom', idShow('succ'), idShow('fail'), idShow('do')).one('hello').many('hello').many(one('boom').or().one('boom').one('m')).or().one('hellohellohelloboommaboom');
-
-// use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
+//  use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
 // const result = use('helloÙ').eatToken('hello');
 // const result = use('helloÙ').eatToken('helloÙ');
 
