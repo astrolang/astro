@@ -9,6 +9,9 @@
 	        "include": "#numbers"
 	    },
 	    {
+	        "include": "#regex"
+	    },
+	    {
 	        "include": "#macros"
 	    },
 	    {
@@ -54,9 +57,6 @@
 			"include": "#single-line-strings"
 	    },
 	    {
-	        "include": "#regex"
-	    },
-	    {
 	        "include": "#operators"
 	    }
 	],
@@ -87,6 +87,14 @@
 	            {
 	                "match": "\\b[0-9](_?[0-9])*((\\.(_?[0-9])+)?(e[+-]?)?(_?[0-9])+)?('[A-Za-z][A-Za-z0-9]*)?",
 	                "name": "constant.numeric.astro"
+	            }
+	        ]
+		},
+	    "regex":{
+	        "patterns": [
+	            {
+	                "match": "(?<=\\(|\\[|\\{|=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|≥|≤|≠|≈|×|±|÷|\\sand|\\sor|\\sin|\\snot|\\smod|\\sis|\\stypeof)\\s*/.+/",
+	                "name": "string.quoted.single.astro"
 	            }
 	        ]
 		},
@@ -330,25 +338,10 @@
 	            }
 	        ]
 		},
-	    "regex":{
-	        "patterns": [
-	            {
-	                "begin": "(?<=\\+|\\-|\\:|\\=|\\(|\\))\\s*\\/(?=!\\=)",
-	                "beginCaptures":{
-	                    "2":{
-	                        "name": "punctuation.definition.string.begin.astro"}},
-	                "end": "\\/",
-	                "endCaptures":{
-	                    "0":{
-	                        "name": "punctuation.definition.string.end.astro"}},
-	                "name": "string.quoted.single.astro"
-	            }
-	        ]
-		},
 	    "operators":{
 	        "patterns": [
 				{
-					"match": "=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|≥|≤|≠|≈|×|±|÷|\\b(and|or|not)\\b",
+					"match": "=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|≥|≤|≠|≈|×|±|÷|\\b(and|or|in|not|mod|is|typeof)\\b",
 					"name": "keyword.operator.astro"
 				}
 			]

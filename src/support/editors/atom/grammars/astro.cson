@@ -91,6 +91,13 @@ repository:
 				name: "constant.numeric.astro"
 			}
 		]
+	regex:
+		patterns: [
+			{
+				match: "(?<=\\(|\\[|\\{|=|\\||\\&|\\>|\\<|!|\\+|-|\\*|\\/|\\^|%|\\?|≥|≤|≠|≈|×|±|÷|\\sand|\\sor|\\sin|\\snot|\\smod|\\sis|\\stypeof)\\s*/.+/"
+				name: "string.quoted.single.astro"
+			}
+		]
 	macros:
 		patterns: [
 			{
@@ -314,20 +321,6 @@ repository:
 			{
 				match: "\\$[A-Za-z0-9_]+"
 				name: "constant.character.escape.astro"
-			}
-		]
-	regex:
-		patterns: [
-			{
-				begin: "(?<=\\+|\\-|\\:|\\=|\\(|\\))\\s*\\/(?=!\\=)"
-				beginCaptures:
-					"2":
-						name: "punctuation.definition.string.begin.astro"
-				end: "\\/"
-				endCaptures:
-					"0":
-						name: "punctuation.definition.string.end.astro"
-				name: "string.quoted.single.astro"
 			}
 		]
 	operators:
