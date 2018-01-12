@@ -31,7 +31,7 @@ let year = book.3 # 1995
     / name /
     name = 5 ...
     / age / day
-    name = 5 + / age /
+    name = 5 ++ / age / -- name
     band/sss/
     and /sgsgsg/
 
