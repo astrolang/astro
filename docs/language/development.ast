@@ -20,7 +20,7 @@ let year = book.3 # 1995
 
 - highlight regex literals
     name / age / day
-    name = / age /
+    name = /age/
     name(/ age /)
     name[/ age /]
     name{/ age /}
@@ -32,6 +32,8 @@ let year = book.3 # 1995
     name = 5 ...
     / age / day
     name = 5 + / age /
+    band/sss/
+    and /sgsgsg/
 
 # Astro 0.1.12a
 # 12/12/17
