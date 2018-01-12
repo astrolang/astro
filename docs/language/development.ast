@@ -20,20 +20,20 @@ let year = book.3 # 1995
 
 - highlight regex literals
     name / age / day
-    name = /age/
-    name(/ age /)
-    name[/ age /]
-    name{/ age /}
+    name = /regex/
+    name(/ regex /)
+    name[/ regex /]
+    name{/ regex /}
     name(age, / age /)
-    name =
-    / name /
+    name = 
+    / regex /
     name = ...
-    / name /
+    / regex /
     name = 5 ...
     / age / day
-    name = 5 ++ / age / -- name
+    name = 5 ++ / regex / -- name
     band/sss/
-    and /sgsgsg/
+    and /regex/
 
 # Astro 0.1.12a
 # 12/12/17
