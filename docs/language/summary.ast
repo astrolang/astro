@@ -256,29 +256,29 @@ LISTS
     # Heterogenous list.
     var stuffs = [500, 'Steve', 1.0]
 
-    # Astro uses 0-based indexing. Every list indices start at 0.
-    stuffs[0] # 500
+    # Astro uses 1-based indexing. Every list indices start at index 1.
+    stuffs[1] # 500
 
     # Slicing a list.
-    contestants[1:6] # 2nd to the 5th index.
-    contestants[1:] # 2nd to the last index.
-    contestants[:6] # first to the 5th index.
+    contestants[2:6] # 2nd to the 6th index.
+    contestants[2:] # 2nd to the last index.
+    contestants[:6] # first to the 6th index.
     contestants[:] # first to the last index.
 
     # A slice can have a step value.
     let odds = numbers[1:2:30] # The step value is the `2` in the middle.
 
     # `!` is used to access the index backwards.
-    var last = contestants[!0] # last index.
+    var last = contestants[!1] # last index.
 
     # Using negative step to reverse index access.
     var reversed = contestants[:-1:]
 
     # Reverse access can also be done using `!`.
-    var reversed = contestants[!0:]
+    var reversed = contestants[!1:]
 
     # Using a constructor to create a List.
-    let number = List[Str](4, 4, "")
+    let number = List(4, 4, '')
 
     # Field mapping.
     students.map(|x| => x.gpa)
@@ -420,7 +420,7 @@ SET
 
 RANGE
     # Range is an iterable that allows iterating through a range of values.
-    let days = 0..31 # 0 to 19
+    let days = 1..30 # 1 to 30
 
     # A range from 0 to infinity.
     let numbers = 0..
@@ -429,7 +429,7 @@ RANGE
     let evens = 2..2.. # The step value is the `2` in the middle.
 
     # Using a range in a for loop.
-    for i in 0..10:
+    for i in 1..10:
         print(i)
 
 SPREAD OPERATOR
