@@ -18,6 +18,21 @@ let year = book.3 # 1995
 - highlight `yield from` keywords
     yield from
 
+- highlight regex literals
+    name / age / day
+    name = / age /
+    name(/ age /)
+    name[/ age /]
+    name{/ age /}
+    name(age, / age /)
+    name =
+    / name /
+    name = ...
+    / name /
+    name = 5 ...
+    / age / day
+    name = 5 + / age /
+
 # Astro 0.1.12a
 # 12/12/17
 # FIX: SYNTAX HIGHLIGHT
