@@ -1,3 +1,4 @@
+
 # Astro Programming Language
 ![hound](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)
 [![Build Status](https://travis-ci.org/appcypher/astro.svg?branch=dev)](https://travis-ci.org/appcypher/astro)
@@ -17,13 +18,14 @@ Astro is a
 - statically-typed language that
 - compiles to native code and WebAssembly,
 - has no GC,
-- has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)), and
-- provides full type inference
+- has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)),
+- provides full type inference, and
+- features a data-race/deadlock-free concurrency model.
 
 ### Why create yet another programming language?
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing high-performance apps for web and/or desktop seamless, easier and less frustrating.
 
-Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science))(GC) as it is expected to be fast enough to develop games, physical simulations and other real-time software. This also makes it suitable for embedded software development even though it's not a goal.
+Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, physical simulations and other real-time software. This also makes it suitable for embedded software development even though it's not a goal.
 
 In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors, matrices, vectorization, unicode identifiers, etc.
 
@@ -32,19 +34,24 @@ In order to match up with the expressiveness and productivity of dynamic program
 #### Python
 ```python
 def times(a, b):
-    sum = a
-    for i in range(b):
-        sum += sum
-    return sum
+    sum = a
+    for i in range(b):
+        sum += sum
+    return sum
 ```
 #### Astro
 ```kotlin
 fun times(a, b):
-    var sum = a
-    for i in 1..b:
-        sum += sum
-    return sum
+    var sum = a
+    for i in 1..b:
+        sum += sum
+    return sum
 ```
+
+Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets.
+
+Astro has builtin facilities for writing concurrent programs, in form of fibers, [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based light-weight threads, and channels, with the guarantee that the programs you write won't have data races or deadlocks.
+
 
 ### Why not just use exactly Python syntax or try to be compatible with Python?
 Python is a really dynamic programming language and there have been several attempts in the past to compile it AOT to native code. I don't want to reinvent the wheel since there are lessons to learn from old wheels. Python cannot be fully-inferred at compile-time without performance trade-offs.
@@ -111,93 +118,93 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 ├── MVP.md
 ├── README.md
 ├── docs
-│   ├── README.md
-│   ├── compiler
-│   │   ├── README.md
-│   │   ├── asts.md
-│   │   └── compiler-notes.ast
-│   └── language
-│       ├── README.md
-│       ├── development.ast
-│       ├── feature-proposals.md
-│       └── summary.ast
+│   ├── README.md
+│   ├── compiler
+│   │   ├── README.md
+│   │   ├── asts.md
+│   │   └── compiler-notes.ast
+│   └── language
+│       ├── README.md
+│       ├── development.ast
+│       ├── feature-proposals.md
+│       └── summary.ast
 ├── media
-│   └── images
-│       └── astro-syntax.png
+│   └── images
+│       └── astro-syntax.png
 ├── package-lock.json
 ├── package.json
 ├── samples
-│   ├── README.md
-│   ├── fibonacci
-│   │   └── fibonacci.ast
-│   ├── fizzbuzz
-│   │   └── fizzbuzz.ast
-│   ├── hello-world
-│   │   └── hello-world.ast
-│   ├── miscellaneous
-│   │   └── preview.ast
-│   ├── normalize
-│   │   └── normalize.ast
-│   ├── product
-│   │   └── product.ast
-│   ├── sum
-│   │   └── sum.ast
-│   ├── vectorized
-│   │   └── vectorized.ast
-│   └── wordcount
-│       └── wordcount.ast
+│   ├── README.md
+│   ├── fibonacci
+│   │   └── fibonacci.ast
+│   ├── fizzbuzz
+│   │   └── fizzbuzz.ast
+│   ├── hello-world
+│   │   └── hello-world.ast
+│   ├── miscellaneous
+│   │   └── preview.ast
+│   ├── normalize
+│   │   └── normalize.ast
+│   ├── product
+│   │   └── product.ast
+│   ├── sum
+│   │   └── sum.ast
+│   ├── vectorized
+│   │   └── vectorized.ast
+│   └── wordcount
+│       └── wordcount.ast
 ├── src
-│   ├── compiler
-│   │   ├── README.md
-│   │   ├── codegen
-│   │   │   ├── ast2llvm.js
-│   │   │   └── ast2wast.js
-│   │   ├── semantics
-│   │   │   └── scope.js
-│   │   ├── syntax
-│   │   │   ├── asts.js
-│   │   │   ├── grammar.pegjs
-│   │   │   ├── parser-builder.ast
-│   │   │   ├── parser-builder.js
-│   │   │   ├── parser.js
-│   │   │   ├── parser2.js
-│   │   │   ├── parser3.js
-│   │   │   └── text
-│   │   └── utils
-│   │       └── index.js
-│   ├── stdlib
-│   │   └── README.md
-│   └── support
-│       ├── README.md
-│       └── editors
-│           ├── atom
-│           │   ├── README.md
-│           │   ├── grammars
-│           │   │   └── astro.cson
-│           │   ├── package.json
-│           │   └── snippets
-│           │       └── snippets.cson
-│           ├── sublime-text
-│           │   └── astro.sublime-syntax
-│           └── vscode
-│               ├── CHANGELOG.md
-│               ├── README.md
-│               ├── language-configuration.json
-│               ├── package.json
-│               ├── syntaxes
-│               │   └── astro.tmLanguage.json
-│               ├── tsconfig.json
-│               └── vsc-extension-quickstart.md
+│   ├── compiler
+│   │   ├── README.md
+│   │   ├── codegen
+│   │   │   ├── ast2llvm.js
+│   │   │   └── ast2wast.js
+│   │   ├── semantics
+│   │   │   └── scope.js
+│   │   ├── syntax
+│   │   │   ├── asts.js
+│   │   │   ├── grammar.pegjs
+│   │   │   ├── parser-builder.ast
+│   │   │   ├── parser-builder.js
+│   │   │   ├── parser.js
+│   │   │   ├── parser2.js
+│   │   │   ├── parser3.js
+│   │   │   └── text
+│   │   └── utils
+│   │       └── index.js
+│   ├── stdlib
+│   │   └── README.md
+│   └── support
+│       ├── README.md
+│       └── editors
+│           ├── atom
+│           │   ├── README.md
+│           │   ├── grammars
+│           │   │   └── astro.cson
+│           │   ├── package.json
+│           │   └── snippets
+│           │       └── snippets.cson
+│           ├── sublime-text
+│           │   └── astro.sublime-syntax
+│           └── vscode
+│               ├── CHANGELOG.md
+│               ├── README.md
+│               ├── language-configuration.json
+│               ├── package.json
+│               ├── syntaxes
+│               │   └── astro.tmLanguage.json
+│               ├── tsconfig.json
+│               └── vsc-extension-quickstart.md
 └── tests
     ├── README.md
     ├── compiler
-    │   ├── codegen
-    │   ├── semantics
-    │   ├── syntax
-    │   │   ├── declarations.spec.js
-    │   │   └── misc.spec.js
-    │   └── utils
-    │       └── utils.spec.js
+    │   ├── codegen
+    │   ├── semantics
+    │   ├── syntax
+    │   │   ├── declarations.spec.js
+    │   │   └── misc.spec.js
+    │   └── utils
+    │       └── utils.spec.js
     └── samples
         └── fibonacci.spec.js
 ```
