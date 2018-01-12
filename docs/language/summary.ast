@@ -620,7 +620,7 @@ FOR LOOP
         print '$kind: $number'
 
     # By default the for loop subjects are immutable, but they can be made mutable using the `var` keyword.
-    for var i in 1..21:
+    for var i in 1..20:
         i += 1
         j = i
     ..
@@ -720,8 +720,10 @@ MATCH EXPRESSION
     # Match expression is like a chain of if-elif-else expressions.
     # If a match pattern fails, it goes to the next pattern.
     object
-    | Some($x, $y) => 0 # Matches if object is of `Some` type with values of subject `x` and `y` declared in the outer scope.
-    | Some(x, y) => 1 # Matches if object is of `Some` type and binds `x` and `y` to Some's fields.
+    | Some{x, y} => 0 # Matches if object is of `Some` type.
+    | Some{x: 2, y: 3} => 0 # Matches if object is of `Some` type.
+    | [1, 2, ...s] => 0 # Matches if object is a collection type that has values `1`, and `2` at beginning of list.
+    | $x => 1 # Matches if object equals an outer `x` subject.
     | 75 | 67 => 2 # Matches if object has value `75` or value `67`
     | 75 & 67 => 3 # Matches if object has value `75` and value `67`
     ! 75 => 5 # Matches if object doesn't have value `75`
@@ -1220,7 +1222,7 @@ SYMBOL
     let symbol = $(2 + 3)
 
     # A symbol can be interpolated with another symbol using '\'.
-    let addition = $(let five = + \symbol)
+    let addition = $(let five = \symbol)
 
     # A symbol can be evaluated with the 'eval' keyword.
     eval addition
