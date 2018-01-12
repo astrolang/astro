@@ -422,7 +422,7 @@ RANGE
     # Range is an iterable that allows iterating through a range of values.
     let days = 0..31 # 0 to 19
 
-    # A range to infinity
+    # A range from 0 to infinity.
     let numbers = 0..
 
     # A range can have a step value.
@@ -464,7 +464,7 @@ STRINGS
     Hello, World!
     '''
 
-    # Char is 32-bit that represents a single Unicode codepoint.
+    # Char is 32-bit datatype that represents a single Unicode codepoint.
     var chars = c.'π'
 
     # String operations.
@@ -501,7 +501,7 @@ MULTILINE EXPRESSIONS
     var zero = -100 ...
     + 100
 
-    # If an expression ends the line with a  comma, it is expected to continue on the next line.
+    # If an expression ends the line with a comma, it is expected to continue on the next line.
     let brother = 'James',
     'Jackcon'
 
@@ -520,7 +520,7 @@ MULTILINE EXPRESSIONS
         + 5 + 6 + 7
     )
 
-    # Chained dot notation or cascading notation can written on subsequent lines but with an indentation.
+    # Chained dot notation or cascading notation can be written on subsequent lines but with an indentation.
     sentence
         .trim()
         .lower()
@@ -528,9 +528,12 @@ MULTILINE EXPRESSIONS
 CASCADING NOTATION
     # Cascading notation (using '->') is a variation of dot notation that associates with the initial object instead of on the returned object
     james->name()->print() # Same as `james.name(); james.print()`
+    
+    # It also works with call tuple.
+    print->('hello')->('world') # Same as `print('hello'); print('world')`
 
 WALL NOTATION
-    # Wall notation is a syntax sugar for shortening operands with common fields or objects.
+    # Wall notation is a syntax for shortening operands with common fields or objects.
     let james = person.name, person.age
     let james = person.|name, age|
 
@@ -567,7 +570,7 @@ IF EXPRESSION
         print('APPLE: $stockCode')
 
 TERNARY OPERATOR
-    # The ternary operator is a syntacttc sugar for an if-else expression.
+    # The ternary operator is a syntactic sugar for an if-else expression.
     let cmp = if a > b: 0 else: 1
 
     # Astro requires parens around the condition.
@@ -575,7 +578,7 @@ TERNARY OPERATOR
 
 NIL
     # Sometimes, it can be useful to represent an empty or a missing state.
-    # This is done with nils in Astro.
+    # This can be achieved with nils in Astro.
     # Non-nillable subjects can give nil nor be assigned a nil value.
     var password = '#5Nj%4VpA391w' #: Str
     password = nil # Invalid!
@@ -590,19 +593,22 @@ NIL
     # Exceptionable unwrap.
     getAccount("Default")! # If result is nil, NilError is raised.
 
-    # Nil coalescing
+    # Nil coalescing.
     let name = getName() ?? "John Doe"
 
-BOOLEAN EXPRESSIONS
-    # If x equals y and also greater than z.
-    x == y and y == z
-    x & z == y
-    x == y == z
-
-    # Logical negation with `not` keyword.
-    x != y
-    not a.isEven()
-    i not in list
+BOOLEAN OPERATORS
+    # `and`, `or`, `not` operators
+    x == y and x == z
+    not (x == y)
+    name not in list
+    
+    # In `Astro`, `|` and `&` are used in different way. To simplify boolean expressions.
+    x == y and x == z # Can be rewritten as.
+    x == y & z # Same as above.
+    
+    # Astro also allows math-like boolean operator chaining.
+    a == b and b == c # Can be rewritten as.
+    a == b == c # Same as above.
 
 FOR LOOP
     # A `for` loop iterates through an iterable and binds the value to a subject.
@@ -623,7 +629,7 @@ FOR LOOP
     for i in array where i == 5:
         return i
 
-    # The `end` block executes when a loop completes without interruption like break, return or throw.
+    # The `end` block executes when a loop completes without interruption from `break`, `return` or `throw`.
     for line in file where /lagbaja/ in line:
         print "name found!"
         break
@@ -631,7 +637,7 @@ FOR LOOP
         print "name not found!"
 
 COMPREHENSION
-    # Comprehension is syntactic sugar for a generator that loops through an iterable.
+    # Comprehensions are syntactic sugar for iterator generators.
     let generator = (i | i in random(0, 200))
 
     # Extending a comprehension with `where`.
@@ -646,11 +652,11 @@ COMPREHENSION
 BREAK WITH
     # Break-with breaks a loop and returns a value.
     for name in register where name == 'Tony':
-            break name
+        break name
     end: ""
 
 IN
-    # `in` is a special keyword-based infix operator that checks for existence of an object in a collection type.
+    # `in` is a special keyword-based infix operator that checks for the existence of an object in a collection type.
     if student.name in defaulterList:
         print '[student.name] hasn\'t paid yet. Contact parents'
 
@@ -663,7 +669,7 @@ IN
         sentence.replace(/dollar[s]?/, 'pounds')
 
 MOD
-    # `mod` is a keyword-based infix operator with the same function as `%`.
+    # `mod` is a keyword-based infix operator alias of `%` operator.
     fun isEven(n) = (n mod 2 == 0)
 
 CHAINED CONDITIONAL CONSTRUCTS
@@ -705,14 +711,14 @@ WHILE LOOP & LOOP
         title = chooseTitleRandomly()
     ..
 
-    # Like for loop, `while` and `loop` can a following `end` block.
+    # Like `for` loops, `while` and `loop` can have a closing `end` block.
     while file.hasNext() where /\t+/ in file.next():
         break 'File contains tabs!'
     end: 'File is clean!'
 
 MATCH EXPRESSION
-    # Match expression is like a chain of if-elif-else expressions that matches against the expression before it.
-    # If a match condution is false, it goes to the next condition.
+    # Match expression is like a chain of if-elif-else expressions.
+    # If a match pattern fails, it goes to the next pattern.
     object
     | Some($x, $y) => 0 # Matches if object is of `Some` type with values of subject `x` and `y` declared in the outer scope.
     | Some(x, y) => 1 # Matches if object is of `Some` type and binds `x` and `y` to Some's fields.
@@ -844,7 +850,7 @@ FUNCTION DEFINITION (2)
     500.print()
 
 LAMBDAS
-    # Functions are first-class objects and can be passed around like regular objects.
+    # Functions are first-class objects and can be passed around just like regular objects.
     let scoresExtraMarks = scores.map(fun _(score): score + 5)
     scores.each(print)
 
@@ -857,16 +863,16 @@ LAMBDAS
     fixtureList.filter(|game| => not game.isCancelled) # Lambda.
 
     # When a function call takes a single function argument, the lambda can be written after the call parens.
-    list.foldl(0) |x, y| => x + y
+    list.foldl(0)|x, y| => x + y
 
     # The call parens can be ommitted if all the function takes is a function argument.
-    list.each |x| => print(x)
+    list.each|x| => print(x)
 
     # Recursive lambda.
-    # An anonymous function or lambda can be recursively called within its body using the fun keyword.
-    list.aggregate(0) |a| => (a == 0) ? 1 : (a + fun(a - 1))
+    # An anonymous function or lambda can be recursively called within its body using the `fun` keyword.
+    list.aggregate(0)|a| => (a == 0) ? 1 : (a + fun(a - 1))
 
-    # When binding a subject to a parameterless lambda, `= =>` can be shrunk into just `=>`.
+    # When binding a subject to a parameterless lambda, `= =>` can be shrunk into `=>`.
     let someFunction => echo 'Hello, world!'
 
 CLOSURE
@@ -877,7 +883,7 @@ CLOSURE
     ..
 
 PARTIAL APPLICATION
-    # Partially applied functions are function calls with one or more of it's argument not applied.
+    # Partially applied functions are function calls with one or more of their argument not applied.
     fun multiply(a, b) = a × b
 
     # Unapplied arguments are represented with the placeholder, `$`.
@@ -903,7 +909,7 @@ IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
 
 COROUTINES & GENERATORS
     # A coroutine is a type of function that can pause and resume its execution.
-    # `yield` marks execution pause and resumption point.
+    # `yield` marks an execution pause and resumption point.
     fun count(num):
         for x in ..num: yield x
 
@@ -915,7 +921,7 @@ COROUTINES & GENERATORS
     count.next() # 1
     count.next() # 2
 
-    # `delegate` redirects a coroutine through another coroutine.
+    # `yield from` redirects a coroutine through another coroutine.
     yield from coroutine
 
 TYPE DEFINITION (2)
@@ -929,7 +935,7 @@ TYPE DEFINITION (2)
     fun Car(make, year) = new(make, year)
     let ride = Car('Camaro', 2016)
 
-    # New constructor cannot be defined outside the module its type is defined in.
+    # New constructor cannot be defined outside the module the type is defined in.
 
     # A constructor that contains just a `new` function call can be shortened further.
     fun Car(maker, year)
@@ -953,7 +959,7 @@ GENERICS
     var sum = add[Int](2, 4)
     var sum = add(2, 4) # Type argument inferred
 
-    # Getting more expressive generic type annotation with `where` and type relation opeartors (`::`, `<:`, `>:`)
+    # Getting more expressive generic type annotation with `where` and type relation operators (`::`, `<:`, `>:`)
     fun anyCommonElements(l, r): #: (T, U) -> Bool where (T, U)<:Sequence
         for x in l: for y in r where x == y:
             return true
@@ -964,11 +970,11 @@ GENERICS
     fun getItem(list, index):
         list[index]
 
-    # Nillable type annotation
+    # Nillable type annotation.
     let language #: Str|Nil
     let language #: Str?
 
-    # List type annotation
+    # List type annotation.
     let languages #: List[Str]
     let languages #: [Str]
 
@@ -979,8 +985,8 @@ GENERICS
 
 TYPE CONVERSION
     # In Astro, the lowercase version of type names are usually meant for conversion operations.
-    var three = int(3.14159265358) # Converts to Int
-    var five = str(5) # Converts to Str
+    var three = int(3.14159265358) # Converts `3.14159265358` to an Int
+    var five = str(5) # Converts `5` to a Str
 
 INHERITANCE
     # Types can inherit from one or more parent types in Astro.
@@ -992,8 +998,8 @@ INHERITANCE
     type Pegasus <: Horse, Bird:  # Pegasus inherits Horse, Bird.
 
 MULTIPLE DISPATCH
-    # Astro uses a covariant multiple dispatch system.
-    # The most specific function is always called based on the number and types of the arguments.
+    # Astro uses a covariant multiple dispatch to resolve function calls.
+    # The most specific function is always called based on the number and types of arguments passed.
     fun foo(a, b) = print('generic') #: (Int32, Real)
     fun foo(a, b) = print('specific') #: (Int32, Int32)
 
@@ -1007,8 +1013,8 @@ MULTIPLE DISPATCH
     foo(4, 5) as (_, super) # generic
 
 METHOD RESOLUTION AMBIGUITIES
-    # There are some ambiguities that can arise with multiple inheritance and multiple dispatch.
-    # Ambiguity error occurs when a type inherits from types that have different specific implementations of function.
+    # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
+    # Ambiguity error is thrown when a type inherits from types that have different specific implementations of function.
     fun sound(bird) = print('chirp!') #: Bird
     fun sound(horse) = print('neigh!') #: Horse
     type Pegasus <: Horse, Bird # Error!
@@ -1016,7 +1022,7 @@ METHOD RESOLUTION AMBIGUITIES
     # To resolve this issue, the `sound` function need to be overloaded for `Pegasus` type.
     fun sound(pegasus) = print('neigh! chirp!') #: Pegasus
 
-    # Ambiguity error can also occur when the arrangement of type paramters causes multiple dispatch ambiguity.
+    # Ambiguity error is also thrown when the arrangement of type paramters causes multiple dispatch ambiguity.
     fun foo(a, b) = print('fizz') #: (Int32, Real)
     fun foo(a, b) = print('buzz') #: (Real, Int32)
     foo(1, 2) # Error!
@@ -1025,13 +1031,13 @@ METHOD RESOLUTION AMBIGUITIES
     fun foo(a, b) = print('fizz') #: (Int32, Int32)
 
 CONSTRUCTOR TRAIN
-    # Astro follows the principle that each type should be responsible for the initialisation of the fields it introduces to an inheritance tree.
+    # Astro follows the principle where each type is responsible for the initialisation of fields it introduces to the type hierarchy.
     # Constructor train is Astro's way of ensuring declared and inherited fields of a particular type are initialized on object creation.
     type Person(name)
     type Teacher(subject) <: Person
     type Student(course) <: Person
 
-    # The initialization of inherited field is delegated to the parent's constructor, `super`.
+    # The initialization of inherited fields should be delegated to the parent's constructor, `super`.
     fun Teacher(name, subject) = new(subject).super(name)
 
     # In the case of multiple inheritance, the individual parent constructors are called and chained to the `new` function.
@@ -1078,7 +1084,7 @@ TYPE ALIASES
     fun add(a, b) = a + b #: (Number, Number) -> Number
 
 REFERENCE EQUALITY
-    # `is` operator can be used check if two operands refer to the same object internally.
+    # `is` operator can be used check if two operands refer to the same object representation.
     let a = 'Hi'
     let b = 'Hey'
     let c = a
@@ -1134,7 +1140,7 @@ EXPORT
     export {...} except { sin, cos }
 
 PRIVATE ACCESS MODIFIER
-    # The private access punctuator, `'`, is used in areas where the export keyword can't cover
+    # The private access punctuator, `'`, is used on members that the export keyword cannot cover
     # When a function name is exported, every overload of the function is exported. That can be undesirable sometimes.
     # `'` can be used to mark the overloads we don't want to export
     fun add(a, b) = a + b
@@ -1184,13 +1190,13 @@ OPERATOR OVERLOADING & CUSTOM OPERATOR
         return temp
 
     # Special operators like [] and {} can be overloaded using their alternative identifier names.
-    fun getIndex(sequence, index): #: (Sequence, Signed)
+    fun getIndex(sequence, index): #: (Sequence, Signed) -> T
         return sequence.items[index]
 
 TRY, EXCEPT & ENSURE
     # Raising an exception with the `raise` keyword.
     if numerator & denominator == 0:
-        raise DomainError()
+        raise DomainError('division by zero!')
 
     # Handling an exception
     # Ensure block is optional, but when it is present, it is always run.
@@ -1237,13 +1243,13 @@ NON-STANDARD LITERAL
     let people = merge.(name: 'Steve', age: 15, name: 'John', age: 24)
 
 COEFFICIENT EXPRESSION
-    # Coefficient expression allows an identifier after a numeric literal to be taken as multiplication.
+    # Coefficient expression as the name implies allows coefficients to be taken as multiplication.
     let x = 3 * f + 2 * (6 + 1)
     let x = (3)f + 2(6 + 1)
     let x = 3f + 2(6 + 1)
 
     # Because of this syntactic sugar, Numeric types cannot be made callable.
-    fun call(i, ...args) = i + sum(args) #: Int # Invalid!
+    fun call(i, ...args) = i + sum(args) #: (Int, [Int]) -> Int # Invalid!
 
     # Note: In the case of hex literal, coefficient expressions are not permitted.
     let h = 0x344f # f is not considered a variable here, but part of the hex literal.
@@ -1280,19 +1286,19 @@ POINTERS
     let num = 55
     let pointer = ptr(num)
 
-    # Setting value of pointed location.
+    # Changing value of pointed address.
     pointer.value = 57
 
-    # Change pointer address # Problematic!
-    pointer.addr = 0xFFFE
+    # Changing pointer address is not permitted.
+    pointer.addr = 0xFFFE # Invalid!
 
     # Allocating memory on the heap.
     let memory = malloc[Byte](5) # Allocates 5 bytes on the heap.
 
     # Freeing memory.
-    free(memory) # Compile-time error will be thrown if there is a possible dangling or pointer aliasing problem.
+    free(memory) # Compile-time error will be thrown if there is a possible dangling pointer.
 
-    # Pointer arithmetic is not normally supported in Astro, however a pointer to a block of memory can be incremented or decremented but with bounds checking.
+    # Pointer arithmetic is only allowed on pointers that point to a block of memory and such operations are always bounds-checked.
     let memory = malloc[Int](20)
     let pointer = memory[2]
     pointer.offset(5)
