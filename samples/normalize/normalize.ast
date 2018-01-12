@@ -1,8 +1,8 @@
 # Using for loop
 fun norm(a):
     var result = 0
-    for e in a:
-        result += e²
+    for i in a:
+        result += i²
     √(result)
 
 # Using map function
