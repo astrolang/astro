@@ -11,7 +11,7 @@ class Func {
     this.func = s => func(s).one(test, successFunc, failFunc, doFunc);
     return this;
   }
-  
+
   or() {
     const { func } = this;
     // Chain new function with existing function.
@@ -69,7 +69,6 @@ class Parser {
       if (failFunc) output = failFunc(this);
       else if (this.failFunc) output = this.failFunc(this);
       this.failedOutput.push(output);
-      print('>>> failed ' + this.testToken)
     }
     let output = null;
     // Calling `doFunc` or `this.doFunc` if they exist.
@@ -89,16 +88,17 @@ class Parser {
     if (test instanceof Func) { // If `test` is a Func, i.e. a subrule.
       // Grab existing rules, exhausted, positions and outputs.
       const {
-        rules, 
-        startPos, 
-        lastPos, 
-        successOutput, 
-        failedOutput, 
+        rules,
+        startPos,
+        lastPos,
+        successOutput,
+        failedOutput,
         doOutput,
         exhausted,
-      } = this; 
+      } = this;
       this.rules = []; // Then erase rules before passing to function.
-      // Make current token position the starting point of subrule, so that if the subrule has alternative rules
+      // Make current token position the starting point of subrule,
+      // so that if the subrule has alternative rules
       // and if one fails, matching is restartad from that point.
       this.startPos = lastPos;
       // Give outputs in `this` clones so operations on them don't affect original outputs.
@@ -109,14 +109,14 @@ class Parser {
       const result = test.func(this, successFunc, failFunc, doFunc);
       rules.push(`(${result.rules.join(' ')})`); // Join the subset rules and add to existing rules.
       result.rules = rules; // Now pass the new modified rules back.
-      print('... ' + this.startPos);
       result.startPos = startPos; // And set the start position to original start position.
       // Ensure last position is reverted if subrule fails.
-      // For example, if subrule, `one('ab').one('cd')`, fails at `one('cd')`, but last position is not reverted.
+      // For example, if subrule, `one('ab').one('cd')`, fails at `one('cd')`,
+      // but last position is not reverted.
       // `one('ab')` will remain consumed even though the subrule failed.
       if (result.failed) {
         result.lastPos = lastPos;
-        // Also the outputs need to be reverted. 
+        // Also the outputs need to be reverted.
         this.successOutput = successOutput;
         this.failedOutput = failedOutput;
         this.doOutput = doOutput;
@@ -157,15 +157,16 @@ class Parser {
       this.exhausted = false;
       // Revert last position also.
       this.lastPos = this.startPos;
-    } else if (!failed && exhausted) { // If input string has been exhausted and nothing failed, we are good.
+    // If input string has been exhausted and nothing failed, we are good.
+    } else if (!failed && exhausted) {
       this.done = true;
     }
     this.rules.push('|'); // Add '|' to rules.
-   return this;
+    return this;
   }
-  
+
   func(successFunc, failFunc, doFunc) {
-    const { failed, exhausted } = this;
+    const { exhausted } = this;
     if (!exhausted) { // If previous rules input string not exhausted.
       this.failed = true;
       const lastSuccessOutput = this.successOutput.pop();
@@ -174,14 +175,14 @@ class Parser {
       this.failed = false;
       this.successOutput.push(lastSuccessOutput);
       this.doOutput.push(lastDoOutput);
-    } 
+    }
     this.callFunctions(successFunc, failFunc, doFunc);
   }
 
   // Where `test` is a Func, `test` function is called.
   // Where `test` is a string, `test` is matched against `this.string` starting from `lastPos + 1`.
   many(test, successFunc, failFunc, doFunc) {
-    const { done, failed  } = this;
+    const { done, failed } = this;
     if (done || failed) return this;
 
     // Keep existing rule list.
@@ -196,7 +197,8 @@ class Parser {
     if (matchCount > 0) {
       this.matchedToken = test; // Set current matched token to `test`.
       this.failed = false; // Parsing didn't fail.
-      // There will be a final failed match, the result will be in failedOutput and doOutput. Remove that.
+      // There will be a final failed match, the result will be in failedOutput and doOutput.
+      // Remove that.
       this.failedOutput.pop();
       this.doOutput.pop();
     } else {
@@ -241,17 +243,15 @@ module.exports = {
 };
 
 // TEST
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign, no-unused-vars */
 const show = (s) => {
-  print(s.testToken + " " + s.lastPos);
+  print(`${s.testToken} ${s.lastPos}`);
   return s.testToken;
 };
 
-const idShow = (m) => {
-  return (s) => {
-    print(m + ": " + s.testToken + " " + s.lastPos);
-    return s.testToken;
-  }
+const idShow = m => (s) => {
+  print(`${m}: ${s.testToken} ${s.lastPos}`);
+  return s.testToken;
 };
 
 const showRule = (s) => {
@@ -261,12 +261,12 @@ const showRule = (s) => {
 
 const signal = (s) => {
   print("I'm here");
-  return s.testToken
+  return s.testToken;
 };
 
 const cleanSuccessUp = (s) => {
   s.successOutput = [];
-  print(s.testToken + " " + s.lastPos);
+  print(`${s.testToken} ${s.lastPos}`);
   return s.testToken;
 };
 
@@ -274,8 +274,8 @@ const cleanSuccessUp = (s) => {
 const result =
   use('hellohellohelloboommaboom', idShow('succ'), idShow('fail'), idShow('do')).one('hello').many('hello').many(one('boom').or().one('boom').one('ma')).or().one('hellohellohelloboommaboom');
 
-//  use('helloboomx', show, null, show).one(one('hella').or().one('hello').one('bmx')).or().one('helloboomx'); 
-//  use('helloboomx', show, show, show).one(one('hella').or().one('helloboomx')); 
+//  use('helloboomx', show, null, show).one(one('hella').or().one('hello').one('bmx')).or().one('helloboomx');
+//  use('helloboomx', show, show, show).one(one('hella').or().one('helloboomx'));
 //  use(code, show, show, show).one('hello').one('hello').one('hello').one(one('boom').or().one('boom').one('ma', signal, signal)).or().one('hellohellohelloboommaboom');
 //  use('hellobabebadoo', show, show, show).one(one('hello', null, null, cleanSuccessUp).one('babe')).one('badoo').one('yes').or().one('hellobabebado').or().one('hellobabe').one('badoo');
 // const result = use('helloÙ').eatToken('hello');
