@@ -11,7 +11,7 @@ Current Version: 0.1.12
 ![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
 
 ### What is Astro?
-Astro is a fullstack interactive programming language designed for high-performance numerical-computing applications. 
+Astro is a fullstack interactive programming language designed for high-performance numerical-computing applications.
 
 Astro is a
 - statically-typed language that
@@ -41,7 +41,7 @@ def times(a, b):
 ```kotlin
 fun times(a, b):
     var sum = a
-    for i in 0..b:
+    for i in 1..b:
         sum += sum
     return sum
 ```
