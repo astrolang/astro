@@ -135,3 +135,16 @@ countCalls() # 1
 countCalls() # 2
 countCalls() # 3
 ```
+
+## FIBERS (Incomplete)
+Fibers are lightweight CSP-style concurrent primitive.
+```nim
+fun main():
+    producer()
+
+fib producer():
+    consumer() << 3
+
+fib consumer():
+    >> print()
+```
