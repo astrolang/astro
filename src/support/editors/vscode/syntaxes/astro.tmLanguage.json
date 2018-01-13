@@ -169,7 +169,7 @@
 	    "typenames":{
 	        "patterns": [
 	            {
-	                "match": "(?<=type |abst |fun )[A-Z][_A-Za-z0-9]*",
+	                "match": "(?<=type |abst )[A-Z][_A-Za-z0-9]*",
 	                "name": "support.class.astro"
 	            },
 	            {
@@ -199,11 +199,11 @@
 	                "name": "astro"
 	            },
 	            {
-	                "match": "\\b(?:for|end|spill|if|where|\\?|else|elif|await|return|at|delegate|yield|while|do|loop|try|ensure|defer|raise|continue|break|pass|export|except|import)\\b",
+	                "match": "\\b(?:for|end|spill|if|where|\\?|else|elif|unsafe|async|await|return|at|yield|from|while|do|loop|try|ensure|defer|raise|continue|break|pass|export|except|import)\\b",
 	                "name": "keyword.control.astro"
 	            },
 	            {
-	                "match": "\\b(?:type|fun|abst|macro|let|var|new|super|NaN|iso|val|ref|acq|const|\\\\\\\\|as)\\b",
+	                "match": "\\b(?:type|fun|fib|abst|macro|let|var|new|super|NaN|iso|val|ref|acq|const|\\\\\\\\|as)\\b",
 	                "name": "storage.modifier.astro"
 	            },
 	            {
@@ -223,7 +223,7 @@
 	    "command_notation":{
 	        "patterns":[
 	            {
-	                "match": "(?<!let |var )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|≥|≤|≠|≈|×|±|÷|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|abst|let|var|as|for|end|spill|if|where|\\?|else|elif|await|return|at|yield|while|do|with|loop|try|ensure|defer|raise|continue|break|pass|new|super|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in|not|mod|is|typeof]|\\b[a-z_][A-Za-z_0-9]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|not|mod|is|typeof|except)\\b)",
+	                "match": "(?<!let |var )([^\\=|\\:|\\;|\\.|\\<|\\>|'|\"|\\*|\\/|\\-|\\+|\\^|\\%|≥|≤|≠|≈|×|±|÷|\\\\|\\}|\\{|\\)|\\(|\\!|\\&|\\$|\\@|\\||\\~|type|fun|fib|abst|let|var|as|for|end|spill|if|where|\\?|else|elif|unsafe|async|await|return|at|yield|from|while|do|with|loop|try|ensure|defer|raise|continue|break|pass|new|super|export|except|import|src|no|abst|const|NaN|iso|val|ref|acq|const|and|or|in|not|mod|is|typeof]|\\b[a-z_][A-Za-z_0-9]*)\\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|not|mod|is|typeof|except)\\b)",
 	                "name": "entity.name.function.astro"
 	            }
 	        ]
