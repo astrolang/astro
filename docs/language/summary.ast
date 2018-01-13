@@ -720,8 +720,8 @@ MATCH EXPRESSION
     # Match expression is like a chain of if-elif-else expressions.
     # If a match pattern fails, it goes to the next pattern.
     object
-    | Some{x, y} => 0 # Matches if object is of `Some` type.
-    | Some{x: 2, y: 3} => 0 # Matches if object is of `Some` type.
+    | Some(x, y) => 0 # Matches if object is of `Some` type.
+    | Some(x: 2, y: 3) => 0 # Matches if object is of `Some` type.
     | [1, 2, ...s] => 0 # Matches if object is a collection type that has values `1`, and `2` at beginning of list.
     | $x => 1 # Matches if object equals an outer `x` subject.
     | 75 | 67 => 2 # Matches if object has value `75` or value `67`
