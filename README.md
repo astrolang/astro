@@ -8,7 +8,7 @@
 ![Maintained](https://img.shields.io/maintenance/yes/2018.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 #### Work in Progress :construction:
-Current Version: 0.1.12
+Current Version: 0.1.13
 ![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
 
 ### What is Astro?

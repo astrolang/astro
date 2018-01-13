@@ -1,4 +1,4 @@
-# Astro 0.1.13a
+# Astro 0.1.13
 SINGLE-LINE COMMENTS
     # Hello, World!
 
@@ -528,7 +528,7 @@ MULTILINE EXPRESSIONS
 CASCADING NOTATION
     # Cascading notation (using '->') is a variation of dot notation that associates with the initial object instead of on the returned object
     james->name()->print() # Same as `james.name(); james.print()`
-    
+
     # It also works with call tuple.
     print->('hello')->('world') # Same as `print('hello'); print('world')`
 
@@ -601,11 +601,11 @@ BOOLEAN OPERATORS
     x == y and x == z
     not (x == y)
     name not in list
-    
+
     # In `Astro`, `|` and `&` are used in different way. To simplify boolean expressions.
     x == y and x == z # Can be rewritten as.
     x == y & z # Same as above.
-    
+
     # Astro also allows math-like boolean operator chaining.
     a == b and b == c # Can be rewritten as.
     a == b == c # Same as above.
