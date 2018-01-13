@@ -20,7 +20,7 @@ Astro is a
 - has no GC,
 - has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)),
 - provides full type inference, and
-- features a data-race/deadlock-free concurrency model.
+- features first-class data-race and deadlock-free concurrency model.
 
 ### Why create yet another programming language?
 The language creator had a set of requirements (listed above) not met by any single language. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
