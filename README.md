@@ -12,7 +12,7 @@ Current Version: 0.1.13
 ![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
 
 ### What is Astro?
-Astro is a fullstack interactive programming language designed for high-performance numerical-computing applications.
+Astro is a fullstack multi-paradigm programming language designed for high-performance numerical-computing applications.
 
 Astro is a
 - statically-typed language that
