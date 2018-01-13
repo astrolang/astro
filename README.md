@@ -56,7 +56,7 @@ Astro has builtin facilities for writing concurrent programs, in form of fibers,
 
 
 ### Why not just use exactly Python syntax or try to be compatible with Python?
-Python is a really dynamic programming language and there have been several attempts in the past to compile it AOT to native code. I don't want to reinvent the wheel since there are lessons to learn from old wheels. Python cannot be fully-inferred at compile-time without performance trade-offs.
+Python is a really dynamic programming language and there have been several attempts in the past to compile it AOT to native code. We don't want to reinvent the wheel since there are lessons to learn from old wheels. Python cannot be fully-inferred at compile-time without performance trade-offs.
 
 More importantly Astro introduces some concepts that Python doesn't have and probably never will.
 
