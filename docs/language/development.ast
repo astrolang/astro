@@ -25,7 +25,7 @@ let year = book.3 # 1995
     name[/ regex /]
     name{/ regex /}
     name(age, / age /)
-    name = 
+    name =
     / regex /
     name = ...
     / regex /
@@ -34,6 +34,9 @@ let year = book.3 # 1995
     name = 5 ++ / regex / -- name
     band/sss/
     and /regex/
+    
+- highlight `fib` keywords
+    fib foo(): print 'hello'
 
 # Astro 0.1.12a
 # 12/12/17
