@@ -97,7 +97,7 @@ Gitbooks covering different aspects of the project are in works. They will be pu
 - [ ] Create specialized error handler
 
 ### What are the technologies used?
-- [wast2wasm](https://www.npmjs.com/package/wast2wasm) - a tool for translating WebAssembly s-expressions to its binary-encoded version.
+- [wast2wasm](https://www.npmjs.com/package/wast2wasm) - a tool for translating WebAssembly s-expression format to its binary-encoded format.
 
 ### Want to contribute to the project?
 Please read the [code of conduct](CODE_OF_CONDUCT.md) and contribution [guidelines](CONTRIBUTING.md). We welcome your ideas and contributions.
