@@ -140,7 +140,7 @@ countCalls() # 3
 Fibers are lightweight CSP-style concurrent primitive.
 ```nim
 fun main():
-    producer()
+    await producer()
 
 fib producer():
     consumer() << 3
