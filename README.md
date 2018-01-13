@@ -62,7 +62,7 @@ More importantly Astro introduces some concepts that Python doesn't have and pro
 
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
-Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting)(ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
+Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting) (ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
 It's also unlike Rust memory management model as it puts lesser restrictions on how references are moved around while still being memory safe.
 
 Astro simply, stays out of your way, lets you write your code like you would in any other garbage-collected language.
@@ -97,7 +97,7 @@ Gitbooks covering different aspects of the project are in works. They will be pu
 - [ ] Create specialized error handler
 
 ### What are the technologies used?
-- [wast2wasm](https://www.npmjs.com/package/wast2wasm) - translates from s-expressions to the WebAssembly binary-encoding.
+- [wast2wasm](https://www.npmjs.com/package/wast2wasm) - a tool for translating WebAssembly s-expressions to its binary-encoded version.
 
 ### Want to contribute to the project?
 Please read the [code of conduct](CODE_OF_CONDUCT.md) and contribution [guidelines](CONTRIBUTING.md). We welcome your ideas and contributions.
@@ -106,9 +106,9 @@ Please read the [code of conduct](CODE_OF_CONDUCT.md) and contribution [guidelin
 Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask questions, offer to help, point out bugs or suggest features.
 
 ### Other interesting new languages that compile to WebAssembly
-- [Forest](https://github.com/forest-lang/core) - multi-syntax functional programming language
+- [Forest](https://github.com/forest-lang/core) - a multi-syntax functional programming language.
 - [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem.
-- [Walt](https://github.com/ballercat/walt) - an alternative syntax for WebAssembly text format. It's an experiment for using JavaScript syntax to write to as 'close to the metal' as possible.
+- [WAlt](https://github.com/ballercat/walt) - an alternative syntax for WebAssembly text format. It's an experiment for using JavaScript syntax to write to as 'close to the metal' as possible.
 
 ### Project folder structure
 ```
