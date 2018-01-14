@@ -17,7 +17,7 @@ contexts:
       scope: string.quoted.single.astro
       name: regex 
 
-    - match: (@[A-Za-z][_A-Za-z0-9]+) # macros
+    - match: (@[A-Za-z]([_A-Za-z0-9]*[A-Za-z0-9]+)?) # macros
       scope: support.function.macro.astro
       name: macros 
 
@@ -88,7 +88,7 @@ contexts:
       scope: entity.name.function.astro
       name: command_notation
 
-    - match: ([_a-zA-Z0-9]+)(?=\.['\"\{\[\(/]) # non_standard_literal
+    - match: ([a-zA-Z]([_A-Za-z0-9]*[A-Za-z0-9]+)?)(?=\.['\"\{\[\(/]) # non_standard_literal
       scope: support.function.macro.astro
       name: non_standard_literal
 

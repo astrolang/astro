@@ -101,7 +101,7 @@
 	    "macros":{
 	        "patterns":[
 	            {
-	                "match": "@(?:[A-Za-z][A-Za-z_0-9]*)|\\@\\(.*\\)",
+	                "match": "@(?:[A-Za-z]([_A-Za-z0-9]*[A-Za-z0-9]+)?)|\\@\\(.*\\)",
 	                "name": "support.function.macro.astro"
 	            }
 	        ]
@@ -239,7 +239,7 @@
 		"non-standard-literals": {
 	        "patterns": [
 	            {
-	                "match": "([_a-zA-Z0-9]+)(?=\\.['\"\\{\\[\\(/])",
+	                "match": "([a-zA-Z]([_A-Za-z0-9]*[A-Za-z0-9]+)?)(?=\\.['\"\\{\\[\\(/])",
 					"name": "support.function.macro.astro"
 				}
 	        ]
