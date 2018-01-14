@@ -909,7 +909,7 @@ IMMEDIATELY INVOKED FUNCTION EXPRESSION (IIFE)
     # An IIFE with no argument.
     () => print('Hello world!')
 
-COROUTINES & GENERATORS
+COROUTINES
     # A coroutine is a type of function that can pause and resume its execution.
     # `yield` marks an execution pause and resumption point.
     fun count(num):
@@ -1339,4 +1339,4 @@ PREDEFINED TYPE HIERARCHY
             Tuple
             NamedTuple
             Dict
-            Generator
+            Coroutine
