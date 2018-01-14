@@ -32,11 +32,11 @@ contexts:
       scope: comment.line.number-sign.astro
       name: singleline_comments
 
-    - match: \b([A-Z][_A-Za-z0-9]*)\b # typenames
+    - match: \b([A-Z]([_A-Za-z0-9]*[A-Za-z0-9]+)?) # typenames
       scope: support.class.astro
       name: typenames
 
-    - match: (?<=\=\>|[^\.]\.)(\$?[A-Za-z_][A-Za-z_0-9]*[!?]?)\b # dot_notation
+    - match: (?<=\=\>|[^\.]\.)(\$?[A-Za-z_]([_A-Za-z0-9]*[A-Za-z0-9]+)?[!?]?)\b # dot_notation
       scope: constant.numeric.astro
       name: dot_notation
 
@@ -76,7 +76,7 @@ contexts:
       scope: markup.bold.astro
       name: brackets
 
-    - match: ([A-Za-z_][_A-Za-z0-9]*)(?=\s*(\[[A-Z][_A-Za-z0-9]*\]\s*)?\() # function_calls 
+    - match: ([A-Za-z_]([_A-Za-z0-9]*[A-Za-z0-9]+)?)(?=\s*(\[[A-Z]([_A-Za-z0-9]*[A-Za-z0-9]+)?\]\s*)?\() # function_calls 
       scope: entity.name.function.astro
       name: function_calls
 
@@ -84,7 +84,7 @@ contexts:
       scope: keyword.operator.astro
       name: operators
 
-    - match: (?<!let |var )([^=|\:|\;|\.|,|<|>|'|\"|\*|/|\-|\\+|\^|\%|≥|≤|≠|≈|×|±|÷|\\|\}|\{|\)|\(|\!|\&|\$|\@|\||\~|type|fun|fib|abst|let|var|rxn|as|for|in|is|and|not|or|end|spill|if|where|\?|else|elif|unsafe|async|await|return|at|yield|from|while|do|with|use|loop|try|ensure|defer|raise|continue|break|pass|new|super|export|except|import|src|no|abst|obj|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\b[a-z_][A-Za-z_0-9]*)\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\b) # command_notation
+    - match: (?<!let |var )([^=|\:|\;|\.|,|<|>|'|\"|\*|/|\-|\\+|\^|\%|≥|≤|≠|≈|×|±|÷|\\|\}|\{|\)|\(|\!|\&|\$|\@|\||\~|type|fun|fib|abst|let|var|rxn|as|for|in|is|and|not|or|end|spill|if|where|\?|else|elif|unsafe|async|await|return|at|yield|from|while|do|with|use|loop|try|ensure|defer|raise|continue|break|pass|new|super|export|except|import|src|no|abst|obj|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\b[a-z_]([_A-Za-z0-9]*[A-Za-z0-9]+)?)\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\b) # command_notation
       scope: entity.name.function.astro
       name: command_notation
 
