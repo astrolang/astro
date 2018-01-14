@@ -137,14 +137,13 @@ countCalls() # 3
 ```
 
 ## FIBERS (Incomplete)
-Fibers are lightweight CSP-style concurrent primitive.
+Fibers are lightweight CSP-style threading model.
+Modelling fibers around coroutine.
 ```nim
 fun main():
-    await producer()
+    var p = await producer() #: Channel[Int]
+    print p.next()
 
-fib producer():
-    consumer() << 3
-
-fib consumer():
-    >> print()
+fub producer():
+    yield 56
 ```
