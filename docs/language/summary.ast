@@ -109,19 +109,22 @@ TYPE DEFINITION (1)
     type Person(name, age)
 
     # Objects can then be created from the blueprint.
-    var jane = Person('Jane Doe', 50)
+    var jane = Person('Jane Doe', 30)
 
 PROPERTIES
-    # Properties provide a setter/getter behavior.
-    # The first brace pair represents the setter, and the second braces pair, the getter.
-    var age  = {age + 5} => {age - 5}
+    # Property functions provide a setter/getter behavior and they can only take one argument.
+    fun age(a) = set (a.age + 5) get (a.age - 5)
 
-    # The last expression in the setter braces becomes the property's value.
-    # The last expression in the getter braces is the property's returned value.
-    var name = {name} => {name + "Smith"}
+    # A field can be bound to a property function by binding it o `_`.
+    let jane = { name: 'Jane', age: _ }
+    print jane.age
 
-    # Empty braces means the setter/getter is inaccessible.
-    var date = {date} => {}
+    # The last expression in the setter parens becomes the property's value.
+    # The last expression in the getter parens is the property's returned value.
+    fun name(a) = set (a.name) get (a.name + "Smith")
+
+    # Empty parens means the setter/getter is inaccessible.
+    var date(a) = set (a.date + 5) get ()
 
 EXPRESSION-ORIENTED
     # Everything (except the import and export statements) is an expression in Astro!
@@ -1316,6 +1319,7 @@ RESERVED KEYWORDS
     eval,
     is, not, in, as, mod, typeof,
     new, super,
+    set, get,
 
 PREDEFINED TYPE HIERARCHY
     Type
