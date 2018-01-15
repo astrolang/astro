@@ -473,8 +473,8 @@ STRINGS
     var chars = c.'π'
 
     # String operations.
-    var concatenate = 'ab' ++ 'c' # 'abc'
-    var multiply = 'ab' ** 2 # 'abcabc'
+    var concatenate = 'ab' + 'c' # 'abc'
+    var multiply = 'ab' * 2 # 'abcabc'
     let escapeSequences = '\t \n \' \" \q \\'
 
     # String continuation.
