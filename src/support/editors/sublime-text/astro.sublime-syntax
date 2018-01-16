@@ -68,7 +68,7 @@ contexts:
       scope: keyword.control.astro
       name: control_keywords 
 
-    - match: \b(type|fun|abst|macro|let|var|new|super|NaN|iso|val|ref|acq|const|\\\\|as)\b # declaration_keywords
+    - match: \b(type|fun|abst|macro|let|var|del|set|get|new|super|NaN|iso|val|ref|acq|const|\\\\|as)\b # declaration_keywords
       scope: storage.modifier.astro
       name: declaration_keywords
 
@@ -84,7 +84,7 @@ contexts:
       scope: keyword.operator.astro
       name: operators
 
-    - match: (?<!let |var )([^=|\:|\;|\.|,|<|>|'|\"|\*|/|\-|\\+|\^|\%|≥|≤|≠|≈|×|±|÷|\\|\}|\{|\)|\(|\!|\&|\$|\@|\||\~|type|fun|abst|let|var|rxn|as|for|in|is|and|not|or|end|spill|if|where|\?|else|elif|unsafe|async|await|return|at|yield|from|while|do|with|use|loop|try|ensure|defer|raise|continue|break|pass|new|super|export|except|import|src|no|abst|obj|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\b[a-z_]([_A-Za-z0-9]*[A-Za-z0-9]+)?)\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\b) # command_notation
+    - match: (?<!let |var| |del )([^=|\:|\;|\.|,|<|>|'|\"|\*|/|\-|\\+|\^|\%|≥|≤|≠|≈|×|±|÷|\\|\}|\{|\)|\(|\!|\&|\$|\@|\||\~|type|fun|abst|let|var|del|set|get|as|for|in|is|and|not|or|end|spill|if|where|\?|else|elif|unsafe|async|await|return|at|yield|from|while|do|with|use|loop|try|ensure|defer|raise|continue|break|pass|new|super|export|except|import|src|no|abst|obj|const|NaN|iso|val|ref|acq|const|and|or|in|is]|\b[a-z_]([_A-Za-z0-9]*[A-Za-z0-9]+)?)\s+(?=[A-Za-z_0-9]+|\"|')(?!(no|if|else|for|end|while|and|or|as|where|iso|val|ref|acq|in|is|except|mod)\b) # command_notation
       scope: entity.name.function.astro
       name: command_notation
 
