@@ -942,9 +942,9 @@ TYPE DEFINITION (2)
     fun Car(make, year) = new(make, year)
     let ride = Car('Camaro', 2016)
 
-    # New constructor cannot be defined outside the module the type is defined in.
+    # Constructors containing `new` keyword cannot be defined outside the module the original type is defined in.
 
-    # A constructor that contains just a `new` function call can be shortened further.
+    # A constructor that contains just a `new` function call can be shortened like this.
     fun Car(maker, year)
 
     # Constructor types are a syntax sugar for merging type and corresponding constructor definitions together.
