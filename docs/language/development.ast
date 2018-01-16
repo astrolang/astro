@@ -1,3 +1,72 @@
+# Astro 0.1.14a
+# 16/01/18
+# REDESIGNING DELEGATED PROPERTIES
+# Delegated properties are subjects whose assignment and value retireval is delegated to
+# some functions.
+type Person(var name: '', var age: del(age, age))
+fun age(x, v) = x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
+fun age(x) = x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
+john.age = 56
+john.age
+
+# The `del`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
+type Person(var name: '', var age: del)
+
+# CHANGE OCCURENCES OF SIZE TO LEN
+
+# CHANGING CASCADING NOTATION
+john~name, ~age
+print~('hello')~('world')
+
+# REMOVE NON-STANDARD NUMERIC LITERAL, USE PROPERTIES INSTEAD
+2344'f32 #'
+2344.f32
+
+# Astro 0.1.14a
+# 15/01/18
+# IMPROVING CASCADING NOTATION, REMOVING WALL NOTATION
+print_.('hello')_.('world')
+play_.[5], _.[10]
+game_.start()_.stop()
+print
+    _.('hello')
+    _.('world')
+
+# Changing properties syntax. STALE
+# Properties are no longer bound to subjects
+fun age(a) = set (a.age + 5) get (a.age - 5)
+
+# FIX: SYNTAX HIGHLIGHT
+- highlight del kewyord •
+    del name = 50
+
+- remove highlight on nonstandard numeric literals
+    2344'f32 #'
+    2344.f32
+
+- fix regex highlight (/[^/]+/)
+    let x = /\d/ + re.'\[a-z]' + /\d/
+
+- highlight dot natation member call and function call.
+    john~name, ~age
+    print~('hello')~('world')
+
+- remove highlight on `set` and `get`.
+    fun age(a) = set (a.age + 5) get (a.age - 5)
+
+- fix multible binding highlight
+    let a b c = 45
+
+- highlight cascading function call
+    print_.('hello')_.('world')
+
+- fix names highlight. No trailing underscore.
+    Foo_.name
+    Foo_.name_
+
+- remove `fib` highlight
+    fib foo(): pass
+
 # Astro 0.1.13a
 # 07/01/18
 # Tuple Indexing
@@ -34,9 +103,10 @@ let year = book.3 # 1995
     name = 5 ++ / regex / -- name
     band/sss/
     and /regex/
-    
+
 - highlight `fib` keywords
     fib foo(): print 'hello'
+
 
 # Astro 0.1.12a
 # 12/12/17
