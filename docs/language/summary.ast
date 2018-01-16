@@ -1241,7 +1241,7 @@ REGEX
     numberPattern in 'π = 3.14159265' # true
 
     # Regex operations.
-    var = /\d/ ++ re.'\[a-z]' ++ /\d/ # Concatenation
+    var = /\d/ + re.'\[a-z]' + /\d/ # Concatenation
 
 NON-STANDARD LITERAL
     # Non-standard literals allow users to use existing literals to define new literals.
