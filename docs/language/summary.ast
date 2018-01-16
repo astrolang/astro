@@ -210,11 +210,11 @@ NUMBER LITERALS
     var index = 5 # Int literal.
     var axis = -3 # UInt literal.
     let meters = 0.25e-5 # Float64 literal.
-    let salary = 10_000'f #' `'f` marks the number literal as Float64.'
     var price = 0x6FFF00p+12 # Hex literal.
     var opCode = 0b10110001 # Binary literal.
     var interest = 0o566768 # Octal literal.
-    let pi = 3.14'bf #' BigFloat literal.
+    let salary = 10_000.f64 # a Float64 number.
+    let pi = 3.14.bf # BigFloat number.
 
 TUPLES
     # Tuple is an immutable datatype whose element types and length are determined statically.
@@ -1245,12 +1245,15 @@ REGEX
 
 NON-STANDARD LITERAL
     # Non-standard literals allow users to use existing literals to define new literals.
-    var price = 35'USD #'
     var soup = utf32.'😋🍜'
     var numbers = sorted.[2, 4, 3, 5, 1]
     var books = sorted.{ "Harry Potter": "J.K. Rowling", "Ender's Game": "Orsen Scott" }
     let arguments = set.(2, 4, 5, 4)
     let people = merge.(name: 'Steve', age: 15, name: 'John', age: 24)
+
+    # There is no non-standard numeric literals, but property notation are used instead.
+    var price = 35.f64
+    var timeTaken = 160.seconds
 
 COEFFICIENT EXPRESSION
     # Coefficient expression as the name implies allows coefficients to be taken as multiplication.
