@@ -103,10 +103,6 @@ COMMAND NOTATION
     print /9/ # Invalid!
     print +5 # Invalid!
 
-    # The call parens of a zero-argument function can be ommitted when called using a dot notation style.
-    len(string)
-    string.len
-
 TYPE DEFINITION (1)
     # A type is synonymous with `struct` in C. It holds the blueprint of what an object can contain.
     type Person(name, age)
@@ -289,7 +285,7 @@ LISTS
     students.map(|x| => x.gpa)
     students.$gpa # Same as above
 
-    fun average(students) = sum(students.$gpa) / students.size
+    fun average(students) = sum(students.$gpa) / students.len
 
     # List operations.
     var concatenate = [1, 2] ++ [3, 4] # [1, 2, 3, 4]
