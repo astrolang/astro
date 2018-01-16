@@ -47,7 +47,6 @@ SHADOWING
 IDENTIFIERS
     # Name of subjects must always start with a character and can be followed with characters,
     # digits or underscore.
-    # Unlike other languages, however, names cannot start or end with an underscore.
     var my_name
     fun doNothing(): pass
 
