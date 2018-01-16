@@ -110,20 +110,17 @@ TYPE DEFINITION (1)
     # Objects can then be created from the blueprint.
     var jane = Person('Jane Doe', 30)
 
-PROPERTIES
-    # Property functions provide a setter/getter behavior and they can only take one argument.
-    fun age(a) = set (a.age + 5) get (a.age - 5)
+DELEGATED PROPERTIES
+    # Delegated properties are subjects whose assignment and value retireval is delegated to
+    # some functions.
+    type Person(var name: '', var age: del(age, age))
+    fun age(x, v) = x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
+    fun age(x) = x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
+    john.age = 56
+    john.age
 
-    # A field can be bound to a property function by binding it o `_`.
-    let jane = { name: 'Jane', age: _ }
-    print jane.age
-
-    # The last expression in the setter parens becomes the property's value.
-    # The last expression in the getter parens is the property's returned value.
-    fun name(a) = set (a.name) get (a.name + "Smith")
-
-    # Empty parens means the setter/getter is inaccessible.
-    var date(a) = set (a.date + 5) get ()
+    # The `del`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
+    type Person(var name: '', var age: del)
 
 EXPRESSION-ORIENTED
     # Everything (except the import and export statements) is an expression in Astro!
@@ -1318,7 +1315,7 @@ POINTERS
     pointer.offset(500) # Error!
 
 RESERVED KEYWORDS
-    import, export, let, var, fun, type, abst, async,
+    import, export, let, var, del, fun, type, abst, async,
     if, elif, else, while, for, try, except, ensure, defer, loop, unsafe
     spill, return, raise, break, continue, yield, await,
     where, at,
