@@ -548,14 +548,6 @@ CASCADING NOTATION
     let fullname = james.firstname + james.middlename + james.surname
     let fullname = james~firstname + ~middlename + ~surname
 
-WALL NOTATION
-    # Wall notation is a syntax for shortening operands with common fields or objects.
-    let james = person.name, person.age
-    let james = person.|name, age|
-
-    let fullname = james.firstname.lower() ++ james.surname.lower()
-    let fullname = james.|firstname ++ surname|.lower()
-
 PASS KEYWORD
     # `pass` keyword can used to represent an empty block.
     fun div(a, b): pass
