@@ -73,7 +73,7 @@ contexts:
       name: declaration_keywords
 
     - match: \[|\]|\(|\)|\{|\} # brackets 
-      scope: markup.bold.astro
+      scope: astro
       name: brackets
 
     - match: ([A-Za-z_]([_A-Za-z0-9]*[A-Za-z0-9]+)?)(?=\s*(\[[A-Z]([_A-Za-z0-9]*[A-Za-z0-9]+)?\]\s*)?\() # function_calls 
