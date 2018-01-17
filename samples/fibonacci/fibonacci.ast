@@ -1,7 +1,7 @@
 # Using iteration
 fun fibonacci1(n):
     var x, y, z = 0, 1, 1
-    for i in ..n:
+    for i in 1..n:
         x, y = y, z
         z = x + y
     return x
