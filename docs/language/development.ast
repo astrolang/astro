@@ -14,7 +14,7 @@ type Person(var name: '', var age: del)
 
 # CHANGE OCCURENCES OF SIZE TO LEN
 
-# CHANGING CASCADING NOTATION
+# CHANGING CASCADING NOTATION, REMOVING WALL NOTATION
 john~name, ~age
 print~('hello')~('world')
 
@@ -37,7 +37,19 @@ print
 fun age(a) = set (a.age + 5) get (a.age - 5)
 
 # FIX: SYNTAX HIGHLIGHT
-- highlight del kewyord •
+- highlight imported filename
+    import foo/my-new-project
+
+- change name pattern, can have trailing underscores
+    x._name_ | _name_() | @_name_
+    x.name_ | name_() | @name_
+    x._name | _name() | @_name
+    x.name | name() | @name
+
+- highlight `extend` kewyord
+    extend MyType
+
+- highlight `del` kewyord •
     del name = 50
 
 - remove highlight on nonstandard numeric literals
