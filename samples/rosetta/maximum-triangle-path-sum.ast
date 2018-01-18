@@ -1,4 +1,5 @@
-fun solve(var tri):
+fun solve(tri):
+    var tri = tri
     while tri.len > 1:
         let t0 = tri.pop()
         for i, t in enumerate(tri[!1]):
@@ -26,4 +27,4 @@ let data = """
 27 02 92 23 08 71 76 84 15 52 92 63 81 10 44 10 69 93
 """
 
-print solve data.lines.map|x| => x.trim().split().map(int)
+print solve data.lines.map|x| => x.split().map(int)
