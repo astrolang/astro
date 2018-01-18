@@ -20,7 +20,7 @@ Astro is a
 - has no GC,
 - has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)),
 - provides full type inference, and
-- has first-class support for data-race and deadlock-free concurrency.
+- has first-class support for data-race-free concurrency.
 
 ### Why create yet another programming language?
 The language creator had a set of requirements (listed above) not met by any single language. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
@@ -52,7 +52,7 @@ fun times(a, b):
 
 Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets.
 
-Astro has builtin facilities for writing concurrent programs, in the form of fibers, a [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races or deadlocks.
+Astro has builtin facilities for writing concurrent programs, in the form of fibers, a [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
 
 
 ### Why not just use exactly Python syntax or try to be compatible with Python?
