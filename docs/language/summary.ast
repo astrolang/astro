@@ -122,6 +122,12 @@ DELEGATED PROPERTIES
     # The `del`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
     type Person(var name: '', var age: del)
 
+    # A function with `@property` macro can be called like a property.
+    fun f64(i): @property
+        return float64(i)
+
+    f64(5) == 5.f64
+
 EXPRESSION-ORIENTED
     # Everything (except the import and export statements) is an expression in Astro!
     var isNyproCrazy = (faveHobby == 'CountingBirds')
@@ -994,6 +1000,21 @@ TYPE CONVERSION
     # In Astro, the lowercase version of type names are usually meant for conversion operations.
     var three = int(3.14159265358) # Converts `3.14159265358` to an Int
     var five = str(5) # Converts `5` to a Str
+
+TYPE EXTENSION
+    # `extend` keyword is used to extend a existing type with more properties or fields.
+    extend Int:
+        let str = del(str)
+
+    print 5.str
+
+    # If you extend an existing type with new fields, you may also need to provide a constructor.
+    extend Names: var middlename
+
+    fun Names(firstname, surname, middlename):
+        names = Names(firstname, surname)
+        names.middlename = middlename
+        names
 
 TYPE EXTENSION
     # `extend` keyword is used to extend a existing type with more properties or fields.
