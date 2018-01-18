@@ -46,7 +46,7 @@ fun age(a) = set (a.age + 5) get (a.age - 5)
     x._name | _name() | @_name
     x.name | name() | @name
 
-- highlight `extend` kewyord
+- removw hifhlight on `extend` kewyord
     extend MyType
 
 - highlight `del` kewyord •
