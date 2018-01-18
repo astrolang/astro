@@ -1016,22 +1016,6 @@ TYPE EXTENSION
         names.middlename = middlename
         names
 
-TYPE EXTENSION
-    # `extend` keyword is used to extend a existing type with more properties or fields.
-    extend Int:
-        let str = del(str)
-
-    print 5.str
-
-    # If you extend an existing type with new fields, you may also need to provide a constructor.
-    extend Names: var middlename
-
-    fun Names(firstname, surname, middlename):
-        names = Names(firstname, surname)
-        names.middlename = middlename
-        names
-
-
 INHERITANCE
     # Types can inherit from one or more parent types in Astro.
     type Animal
