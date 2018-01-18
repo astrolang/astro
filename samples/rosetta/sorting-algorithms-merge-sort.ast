@@ -6,7 +6,7 @@ fun mergeSort(m):
 
 fun merge(left, right):
     let result = []
-    while not (left.empty or right.empty):
+    while not (left.isEmpty or right.isEmpty):
         if left[1] <= right[1]:
             result ++ left.shift()
         else:
