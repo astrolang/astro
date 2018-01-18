@@ -1,0 +1,7 @@
+let myQueue = Queue[Str]()
+myQueue.push 'foo'
+myQueue.push 'bar'
+myQueue.push 'baz'
+print myQueue.pop() # 'foo'
+print myQueue.pop() # 'bar'
+print myQueue.pop() # 'baz'

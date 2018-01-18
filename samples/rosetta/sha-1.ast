@@ -1,0 +1,3 @@
+import crypto { sha1 }
+let hash = sha1.hexdigest('Ars longa, vita brevis')
+print hash

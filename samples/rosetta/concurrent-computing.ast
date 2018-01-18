@@ -1,0 +1,5 @@
+let words = ["Enjoy", "Rosetta", "Code"]
+for word in words:
+    await (word) =>
+        time.sleep(random())
+        print(word)

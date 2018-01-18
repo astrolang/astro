@@ -1,0 +1,18 @@
+fun mergeSort(m):
+    if m.len <= 1: return m
+    let middle = m.len / 2
+    let left = merge(m[:middle])
+    let right = merge(m[middle:]);
+
+fun merge(left, right):
+    let result = []
+    while not (left.empty or right.empty):
+        if left[1] <= right[1]:
+            result ++ left.shift()
+        else:
+            result ++ right.shift()
+    result ++ left ++ right
+
+let arr = [7, 6, 5, 9, 8, 4, 3, 1, 2, 0]
+print mergeSort arr
+

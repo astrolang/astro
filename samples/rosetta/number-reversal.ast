@@ -1,0 +1,10 @@
+print '# Number reversal game'
+var data, trials = list('123456789'), 0
+while data == sorted(data):
+    random.shuffle data
+while data != sorted(data):
+	trials += 1
+	flip = int input '#$trials: LIST: $(join data) Flip how many?: '
+	data[:flip] = data[!flip:]
+
+print '\nYou took $trials attempts to put digits in order!'
