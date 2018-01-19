@@ -14,7 +14,7 @@ fun mainFrame(puz):
         ~('+-----+-----+-----+-----+')
 
 fun format(puz, ch):
-    ch.trim().size
+    ch.trim().len
     | 1 => '  $ch  '
     | 2 => '  $ch '
     | 0 => '     '
@@ -45,7 +45,7 @@ fun buildBoard(puz, difficulty):
         let lst1 = []
         for j in lst:
             lst1.append(j.trim().int())
-        puz.change(lst1[random(1, lst1.size - 1)])
+        puz.change(lst1[random(1, lst1.len - 1)])
 
 fun validMoves(puz):
     let pos = puz.position

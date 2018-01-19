@@ -1,8 +1,8 @@
 fun mergeSort(m):
     if m.len <= 1: return m
-    let middle = m.len / 2
+    let middle = floor m.len / 2
     let left = merge(m[:middle])
-    let right = merge(m[middle:]);
+    let right = merge(m[middle-1:]);
 
 fun merge(left, right):
     let result = []
