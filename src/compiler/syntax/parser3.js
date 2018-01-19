@@ -165,20 +165,6 @@ class Parser {
     return this;
   }
 
-  func(successFunc, failFunc, doFunc) {
-    const { exhausted } = this;
-    if (!exhausted) { // If previous rules input string not exhausted.
-      this.failed = true;
-      const lastSuccessOutput = this.successOutput.pop();
-      const lastDoOutput = this.doOutput.pop();
-      this.callFunctions(successFunc, failFunc, doFunc);
-      this.failed = false;
-      this.successOutput.push(lastSuccessOutput);
-      this.doOutput.push(lastDoOutput);
-    }
-    this.callFunctions(successFunc, failFunc, doFunc);
-  }
-
   // Where `test` is a Func, `test` function is called.
   // Where `test` is a string, `test` is matched against `this.string` starting from `lastPos + 1`.
   many(test, successFunc, failFunc, doFunc) {
@@ -259,9 +245,8 @@ const showRule = (s) => {
   return s.testToken;
 };
 
-const signal = (s) => {
-  print("I'm here");
-  return s.testToken;
+const signal = msg => (s) => {
+  print(msg);
 };
 
 const cleanSuccessUp = (s) => {
@@ -272,7 +257,9 @@ const cleanSuccessUp = (s) => {
 
 /* eslint-disable newline-per-chained-call, max-len */
 const result =
-  use('hellohellohelloboommaboom', idShow('succ'), idShow('fail'), idShow('do')).one('hello').many('hello').many(one('boom').or().one('boom').one('ma')).or().one('hellohellohelloboommaboom');
+  use('hellohellohelloboommaboom', idShow('succ'), idShow('fail'), idShow('do')).one('hello')
+    .many('hello').many(one('boom')).or()
+    .one('hellohellohelloboommaboom');
 
 //  use('helloboomx', show, null, show).one(one('hella').or().one('hello').one('bmx')).or().one('helloboomx');
 //  use('helloboomx', show, show, show).one(one('hella').or().one('helloboomx'));
