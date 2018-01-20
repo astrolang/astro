@@ -1,12 +1,17 @@
+const { print } = require('../utils');
+
 /**
  * This compiler uses a recursive descent parser with no lexing phase.
  * There is no lexing phase because the language is whitespace sensitive.
  */
 class Parser {
   constructor(code) {
-    // State
     this.code = code;
+    // Parser
     this.lastPosition = -1;
+    // Information
+    this.column = 0;
+    this.line = 1;
     // Characters
     this.digits = '0123456789';
     this.digitsBin = '01';
@@ -15,58 +20,88 @@ class Parser {
     this.alphabets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; // Unicode?
     this.spaces = ' \t'; // Unicode?
     this.operators = '+-*/\\^%!><=÷×≠≈¹²³√'; // Unicode?
+    this.identifierBegin = `${this.alphabets}_`;
     this.identifierMid = `${this.alphabets}${this.digits}_`;
+  }
+  
+  incrementLineCount() {
+    this.line += 1;
+    this.column = 0; // Reset column number.
   }
 
   eatToken(length) {
-    const { lastPosition, code } = this;
-    if (lastPosition + length < code.length) {
-      const oldPosition = lastPosition;
+    if (this.lastPosition + length < thiscode.length) {
+      const oldPosition = this.lastPosition;
       this.lastPosition += length;
-      return code.slice(oldPosition, lastPosition + 1);
+      return code.slice(oldPosition, this.lastPosition + 1);
     }
     return null;
   }
 
   eatChar() {
-    const { lastPosition, code } = this;
-    if (lastPosition + 1 < code.length) {
-      this.lastPosition += 1;
-      return code.charAt(this.lastPosition);
-    }
-    return null;
+    // I use peek-before-consume strategy, so I don't need to do checks here
+    // because its already done in `peek`.
+    this.lastPosition += 1;
+    this.column += 1;
+    return this.code.charAt(this.lastPosition);
   }
 
   peekChar() {
-    const { lastPosition, code } = this;
-    if (lastPosition + 1 < code.length) {
-      return code.charAt(this.lastPosition);
+    if (this.lastPosition + 1 < this.code.length) {
+      return this.code.charAt(this.lastPosition + 1);
     }
     return null;
   }
 
   stepBack(length) { this.lastPosition -= length || 1; }
 
-  // [a-zA-Z][a-zA-Z_0-9]+
+  // [a-zA-Z][a-zA-Z_0-9]*
   parseIdentifier() {
-    const { peekChar } = this;
-    // Normal identifier.
     let token = [];
-    if (alphabets.indexOf(peekChar()) > -1) {
-      token.push();
-    } else throw Error('ParseError: Expected an identifier!');
-    // Operator identifier.
+    if (this.identifierBegin.indexOf(this.peekChar()) > -1) {
+      token.push(this.eatChar());
+      while (this.identifierMid.indexOf(this.peekChar()) > -1) {
+        token.push(this.eatChar());
+      }
+      return { success: true, data: token.join('') };
+    }
+    return { success: false, data: null };
+  }
+  
+  parseExpression() {
+    if (this.parseInteger().success) {}
+  }
+    
+  // [ \t]
+  parseWhitespaces() {
+    let count = 0;
+    while (this.spaces.indexOf(this.peekChar()) > -1) {
+      this.eatChar();
+      count += 1;
+    }
+    if (count < 1) {
+      return { success: false, data: null };
+    }
+    return { success: true, data: null };
   }
 
-  parseSpaces() {
-  }
-
+  // [0-9]+
   parseInteger() {
+    let token = [];
+    while (this.digits.indexOf(this.peekChar()) > -1) {
+      token.push(this.eatChar());
+    }
+    if (token.length < 1) {
+        return { success: false, data: null };
+    }
+    return { success: true, data: token.join('') };
+  }
+  
+  // ('let'/'var') identifier '=' expression
+  parseSubjectDeclaration() {
+    
   }
 
 }
-
-const p = Parser('name').parseIdentifier();
-
 
 module.exports = Parser;
