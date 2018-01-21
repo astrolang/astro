@@ -31,16 +31,6 @@ class Parser {
     this.column = 0; // Reset column number.
   }
 
-  // // Consume the next `length` chars.
-  // eatToken(length) {
-  //   if (this.lastPosition + length < this.code.length) {
-  //     const oldPosition = this.lastPosition;
-  //     this.lastPosition += length;
-  //     return this.code.slice(oldPosition, this.lastPosition + 1);
-  //   }
-  //   return null;
-  // }
-
   // Consume next char.
   eatChar() {
     // I use peek-before-consume strategy, so I don't need to do checks here
@@ -68,10 +58,10 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    // Parse and consume the first character. [a-zA-Z]
+    // Consume the first character. [a-zA-Z]
     if (this.identifierBegin.indexOf(this.peekChar()) > -1) {
       token.push(this.eatChar());
-      // Parse and consume remaining part of identifier. [a-zA-Z_0-9]*
+      // Consume remaining part of identifier. [a-zA-Z_0-9]*
       while (this.identifierMid.indexOf(this.peekChar()) > -1) {
         token.push(this.eatChar());
       }
@@ -94,7 +84,7 @@ class Parser {
 
   // Parse input string.
   parseToken(str) {
-    // Keeping original state.
+    // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
@@ -104,8 +94,12 @@ class Parser {
       // Update lastPosition
       this.lastPosition += str.length;
 
-      // Update
-      return { success: true, data: str };
+      // parseData
+      const parseData = { success: true, data: str };
+
+      // Update lastParseData
+      this.lastParseData = parseData;
+      return parseData;
     }
 
     // Parsing failed, so revert state.
@@ -116,24 +110,47 @@ class Parser {
     return { success: false, data: null };
   }
 
-  //
+  // Integer | Identifier
   parseExpression() {
     if (this.parseInteger().success) {
+      return this.lastParseData;
     } else if (this.parseIdentifier().success) {
-    }
+      return this.lastParseData;
+    } 
+    return { success: false, data: null };
   }
 
-  // [ \t]
+  // [ \t]+
   parseWhitespaces() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+    
     let count = 0;
+    
+    // Consume spaces. [ \t]+
     while (this.spaces.indexOf(this.peekChar()) > -1) {
       this.eatChar();
       count += 1;
     }
-    if (count < 1) {
-      return { success: false, data: null };
+    
+    // Check if it was able to consume at least one whitespace.
+    if (count > 0) {
+      // parseData
+      const parseData = { success: true, data: null };
+
+      // Update lastParseData
+      this.lastParseData = parseData;
+      return parseData;
     }
-    return { success: true, data: null };
+    
+    // Parsing failed, so revert state.
+    this.lastPosition = lastPosition;
+    this.column = column;
+    this.line = line;
+    
+    return { success: false, data: null };
   }
 
   // [0-9]+
@@ -145,11 +162,12 @@ class Parser {
 
     const token = [];
 
-    // Parse and consume digits. [0-9]+
+    // Consume digits. [0-9]+
     while (this.digits.indexOf(this.peekChar()) > -1) {
       token.push(this.eatChar());
     }
 
+    // Check if it was able to consume at least a digit.
     if (token.length > 0) {
       // parseData
       const parseData = { success: true, data: token.join('') };
@@ -168,7 +186,9 @@ class Parser {
   }
 
   // ('let'/'var') identifier '=' expression
-  parseSubjectDeclaration() {}
+  parseSubjectDeclaration() {
+    let mutability = this.parseToken('let');
+  }
 }
 
 module.exports = Parser;
