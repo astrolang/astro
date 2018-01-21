@@ -51,17 +51,17 @@ class Parser {
     }
     return null;
   }
-  
+
   // Try if a parse function will parse successfully.
   tryTo(parseFunction) {
     // Keeping original state.
     const {
-      lastPosition, column, line, lastParseData
+      lastPosition, column, line, lastParseData,
     } = this;
-    
+
     // parseData.
-    const parseData = parser.parseFunction();
-    
+    const parseData = parseFunction();
+
     // Revert state, lastParseData included.
     this.lastPosition = lastPosition;
     this.lastParseData = lastParseData;
@@ -77,7 +77,7 @@ class Parser {
     const {
       lastPosition, column, line,
     } = this;
-    
+
     const token = [];
     let parseData = { success: false, data: null };
 
@@ -111,7 +111,7 @@ class Parser {
     const {
       lastPosition, column, line,
     } = this;
-    
+
     let parseData = { success: false, data: null };
 
     // Check if input string matches the subsequent chars in code.
@@ -177,29 +177,29 @@ class Parser {
     this.line = line;
 
     return parseData;
-  } 
-  
-  // whitespaces+ | whitespaces* !(identifier)
+  }
+
+  // whitespaces+ | !(identifier)
   parsePossibleSpaces() {
     // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
-    
+
     let parseData = { success: false, data: null };
-    
+
     (() => {
-      // [1]. whitespaces+ &(identifier)
-      if (this.parseWhitespaces().success) {
-          this.tryTo(this.parseIdentifier)
+      //
+      if (!this.parseWhitespaces().success) {
+        if (this.tryTo(this.parseIdentifier)) return;
       }
-      
+
       // Update parseData.
-      parseData = { success: true, data: [mutability, identifier, expression] };
+      parseData = { success: true, data: null };
 
       // Update lastParseData.
       this.lastParseData = parseData;
-      return parseData; 
+      return parseData;
     })();
 
     // Parsing failed, so revert state.
@@ -261,33 +261,33 @@ class Parser {
       mutability = this.lastParseData.data;
 
       // Consume whitespaces.
-      if (!this.parseWhitespaces().success) return;
-      
+      if (!this.parsePossibleSpaces().success) return;
+
       // Consume identifier.
       if (!this.parseIdentifier().success) return;
       identifier = this.lastParseData.data;
-      
+
       // Consume whitespaces.
-      if (!this.parseWhitespaces().success) return;
-      
+      if (!this.parsePossibleSpaces().success) return;
+
       // Consume '='.
       if (!this.parseToken('=').success) return;
-      
+
       // Consume whitespaces.
-      if (!this.parseWhitespaces().success) return;
-      
+      if (!this.parsePossibleSpaces().success) return;
+
       // Consume integer.
       if (!this.parseExpression().success) return;
       expression = this.lastParseData.data;
-      
+
       // Update parseData.
       parseData = { success: true, data: [mutability, identifier, expression] };
 
       // Update lastParseData.
       this.lastParseData = parseData;
-      return parseData; 
+      return parseData;
     })();
-    
+
     // Check if above parsing is successful.
     if (parseData.success) return parseData;
 
@@ -298,14 +298,14 @@ class Parser {
 
     return parseData;
   }
-  
+
   // ('fun') _ identifier _ '(' _ ')' _ '=' _ expression
   parseFunctionDeclaration() {
     // Keeping original state.
     const {
       lastPosition, column, line,
     } = this;
-    
+
     let identifier;
     let expression;
     let parseData = { success: false, data: null };
@@ -316,38 +316,35 @@ class Parser {
 
       // Consume whitespaces.
       if (!this.parsePossibleSpaces().success) return;
-      
+
       // Consume identifier.
       if (!this.parseIdentifier().success) return;
       identifier = this.lastParseData.data;
-      
-      // Consume whitespaces.
-      if (!this.parseWhitespaces().success) return;
-      
+
       // Consume whitespaces.
       if (!this.parsePossibleSpaces().success) return;
-      
+
       // Consume whitespaces.
       if (!this.parseWhitespaces().success) return;
-      
+
       // Consume '='.
       if (!this.parseToken('=').success) return;
-      
+
       // Consume whitespaces.
       if (!this.parseWhitespaces().success) return;
-      
+
       // Consume integer.
       if (!this.parseExpression().success) return;
-      integer = this.lastParseData.data;
-      
+      expression = this.lastParseData.data;
+
       // Update parseData.
-      parseData = { success: true, data: [mutability, identifier, integer] };
+      parseData = { success: true, data: [mutability, identifier, expression] };
 
       // Update lastParseData.
       this.lastParseData = parseData;
-      return parseData; 
+      return parseData;
     })();
-    
+
     // Check if above parsing is successful.
     if (parseData.success) return parseData;
 
