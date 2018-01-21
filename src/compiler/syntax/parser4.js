@@ -1,8 +1,11 @@
 const { print } = require('../utils');
 
 /**
- * This compiler uses a recursive descent parser with no lexing phase.
- * There is no lexing phase because the language is whitespace sensitive.
+ * Notes on parser.
+ * - This compiler uses a recursive descent parser with no lexing phase.
+ * - There is no lexing phase because the language is whitespace sensitive.
+ * - Each parse function reverts its state when its unable to parse successfully.
+ * - Inner IIFEs are used to return to function scope if parsing fails.
  */
 class Parser {
   constructor(code) {
@@ -47,6 +50,17 @@ class Parser {
       return this.code.charAt(this.lastPosition + 1);
     }
     return null;
+  }
+
+  // TO BE REMOVED
+  // Check if input string comes next in code.
+  peekToken(str) {
+    // Check if input string matches the subsequent chars in code.
+    if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + str.length + 1)) {
+      // parseData
+      return { success: true, data: str };
+    }
+    return { success: false, data: null };
   }
 
   // [a-zA-Z][a-zA-Z_0-9]*
@@ -116,7 +130,7 @@ class Parser {
       return this.lastParseData;
     } else if (this.parseIdentifier().success) {
       return this.lastParseData;
-    } 
+    }
     return { success: false, data: null };
   }
 
@@ -126,15 +140,15 @@ class Parser {
     const {
       lastPosition, column, line,
     } = this;
-    
+
     let count = 0;
-    
+
     // Consume spaces. [ \t]+
     while (this.spaces.indexOf(this.peekChar()) > -1) {
       this.eatChar();
       count += 1;
     }
-    
+
     // Check if it was able to consume at least one whitespace.
     if (count > 0) {
       // parseData
@@ -144,12 +158,12 @@ class Parser {
       this.lastParseData = parseData;
       return parseData;
     }
-    
+
     // Parsing failed, so revert state.
     this.lastPosition = lastPosition;
     this.column = column;
     this.line = line;
-    
+
     return { success: false, data: null };
   }
 
@@ -187,7 +201,28 @@ class Parser {
 
   // ('let'/'var') identifier '=' expression
   parseSubjectDeclaration() {
-    let mutability = this.parseToken('let');
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let mutability;
+
+    // IIFE
+    (() => {
+      // Consume ('let'/'var')
+      if (this.parseToken('let').success || this.parseToken('var').success) return;
+
+      // Consume 
+      if (!this.parseWhitespaces.success) return;
+    })
+
+    // Parsing failed, so revert state.
+    this.lastPosition = lastPosition;
+    this.column = column;
+    this.line = line;
+
+    return { success: false, data: null };
   }
 }
 
