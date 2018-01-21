@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const { print } = require('../utils');
 
 /**
@@ -90,7 +91,7 @@ class Parser {
       }
 
       // Update parseData.
-      const parseData = { success: true, data: token.join('') };
+      parseData = { success: true, data: token.join('') };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -120,7 +121,7 @@ class Parser {
       this.lastPosition += str.length;
 
       // Update parseData.
-      const parseData = { success: true, data: str };
+      parseData = { success: true, data: str };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -164,7 +165,7 @@ class Parser {
     // Check if it was able to consume at least one whitespace.
     if (count > 0) {
       // Update parseData.
-      const parseData = { success: true, data: null };
+      parseData = { success: true, data: null };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -189,11 +190,9 @@ class Parser {
     let parseData = { success: false, data: null };
 
     (() => {
-      //
       if (!this.parseWhitespaces().success) {
         if (this.tryTo(this.parseIdentifier)) return;
       }
-
       // Update parseData.
       parseData = { success: true, data: null };
 
@@ -260,20 +259,22 @@ class Parser {
       if (!this.parseToken('let').success && !this.parseToken('var').success) return;
       mutability = this.lastParseData.data;
 
-      // Consume whitespaces.
+      // Consume possiblespaces.
       if (!this.parsePossibleSpaces().success) return;
+      print('kaxxoom!')
 
       // Consume identifier.
       if (!this.parseIdentifier().success) return;
       identifier = this.lastParseData.data;
+      print('kaboom!')
 
-      // Consume whitespaces.
+      // Consume possiblespaces.
       if (!this.parsePossibleSpaces().success) return;
 
       // Consume '='.
       if (!this.parseToken('=').success) return;
 
-      // Consume whitespaces.
+      // Consume possiblespaces.
       if (!this.parsePossibleSpaces().success) return;
 
       // Consume integer.
@@ -338,7 +339,7 @@ class Parser {
       expression = this.lastParseData.data;
 
       // Update parseData.
-      parseData = { success: true, data: [mutability, identifier, expression] };
+      parseData = { success: true, data: [identifier, expression] };
 
       // Update lastParseData.
       this.lastParseData = parseData;
