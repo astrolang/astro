@@ -24,4 +24,4 @@ print(new Parser('let name = 678').parseSubjectDeclaration());
 print(new Parser('var _n77m_m = age').parseSubjectDeclaration());
 print(new Parser('var 4 = age').parseSubjectDeclaration()); // fail
 print(new Parser('mut x = age').parseSubjectDeclaration()); // fail
-print(new Parser('mut x = $$$').parseSubjectDeclaration()); // fail
+print(new Parser('let x = $$$').parseSubjectDeclaration()); // fail
