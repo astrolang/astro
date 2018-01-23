@@ -3,7 +3,7 @@ fun normalize(a):
     var result = 0
     for i in a:
         result += i²
-    √result
+    √(result)
 
 # LAMBDAS
 fun normalize(a) = √sum(map|x| => x²)
@@ -12,8 +12,8 @@ fun normalize(a) = √sum(map|x| => x²)
 fun normalize(a) = √(a.²)
 
 # TYPE ANNOTATION
-fun anyCommonElements(l, r): #: (T, U) -> Bool where (T, U)<:Sequence
-    for i in l: for j in r where a == b:
+fun anyCommonElements(l, r): #: T, U -> Bool where (T, U)<:Sequence
+    for a in l: for b in r where a == b:
         return true
     false
 
@@ -23,7 +23,7 @@ fun fizzbuzz(i):
     | 0, 0 => 'fizzbuzz'
     | 0, _ => 'fizz'
     | _, 0 => 'buzz'
-    | _, _ => str i
+    | _, _ => str(i)
 
 # CONSTRUCTOR TYPES
 type Person(name, age)
