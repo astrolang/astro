@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 const { print } = require('../utils');
 
 /**
@@ -6,7 +5,7 @@ const { print } = require('../utils');
  * - This compiler uses a recursive descent parser with no lexing phase.
  * - There is no lexing phase because the language is whitespace sensitive.
  * - Each parse function reverts its state when its unable to parse successfully.
- * - Inner IIFEs are used to return to function scope if parsing fails.
+ * - Inner IIFEs are used to make handling parsing failure within a parse function clear and understandable.
  */
 class Parser {
   constructor(code) {
@@ -53,21 +52,38 @@ class Parser {
     return null;
   }
 
-  // Try if a parse function will parse successfully.
-  tryTo(parseFunction) {
+  // Reset properties.
+  reset(lastPosition, lastParseData, column, line) {
+    this.lastPosition = lastPosition;
+    this.lastParseData = lastParseData || this.lastParseData;
+    this.column = column;
+    this.line = line;
+  }
+
+  // Try if a set of parse functions will parse successfully.
+  tryTo(...parseFunctions) {
     // Keeping original state.
     const {
       lastPosition, column, line, lastParseData,
     } = this;
 
-    // parseData.
-    const parseData = parseFunction();
+    let index = 0;
+    let parseData = { success: false, data: null };
+
+    // Run each parsefunction one after the other.
+    while (index < parseFunctions.length && this[`${parseFunctions[index]}`].success) {
+      index += 1;
+    }
+
+    // Check if all parseFunctions parsed successfully.
+    if (index === parseFunctions.length) {
+      // Update parseData.
+      parseData = { success: true, data: null };
+      return parseData;
+    }
 
     // Revert state, lastParseData included.
-    this.lastPosition = lastPosition;
-    this.lastParseData = lastParseData;
-    this.column = column;
-    this.line = line;
+    this.reset(lastPosition, lastParseData, column, line);
 
     return parseData;
   }
@@ -99,29 +115,30 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.lastPosition = lastPosition;
-    this.column = column;
-    this.line = line;
+    this.reset(lastPosition, null, column, line);
 
     return parseData;
   }
 
-  // Parse input string.
-  parseToken(str) {
-    // Keep original state.
+  // [+-*/\\^%!><=÷×≠≈¹²³√]+
+  parseOperator() {
+    // Keeping original state.
     const {
       lastPosition, column, line,
     } = this;
 
+    const token = [];
     let parseData = { success: false, data: null };
 
-    // Check if input string matches the subsequent chars in code.
-    if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + str.length + 1)) {
-      // Update lastPosition.
-      this.lastPosition += str.length;
+    // Consume operator chars. [+-*/\\^%!><=÷×≠≈¹²³√]+
+    while (this.operators.indexOf(this.peekChar()) > -1) {
+      token.push(this.eatChar());
+    }
 
+    // Check if it was able to consume at least an operator.
+    if (token.length > 0) {
       // Update parseData.
-      parseData = { success: true, data: str };
+      parseData = { success: true, data: token.join('') };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -129,85 +146,11 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.lastPosition = lastPosition;
-    this.column = column;
-    this.line = line;
+    this.reset(lastPosition, null, column, line);
 
     return parseData;
   }
 
-  // Integer | Identifier
-  parseExpression() {
-    if (this.parseInteger().success) {
-      return this.lastParseData;
-    } else if (this.parseIdentifier().success) {
-      return this.lastParseData;
-    }
-    return { success: false, data: null };
-  }
-
-  // [ \t]+
-  parseWhitespaces() {
-    // Keep original state.
-    const {
-      lastPosition, column, line,
-    } = this;
-
-    let count = 0;
-    let parseData = { success: false, data: null };
-
-    // Consume spaces. [ \t]+
-    while (this.spaces.indexOf(this.peekChar()) > -1) {
-      this.eatChar();
-      count += 1;
-    }
-
-    // Check if it was able to consume at least one whitespace.
-    if (count > 0) {
-      // Update parseData.
-      parseData = { success: true, data: null };
-
-      // Update lastParseData.
-      this.lastParseData = parseData;
-      return parseData;
-    }
-
-    // Parsing failed, so revert state.
-    this.lastPosition = lastPosition;
-    this.column = column;
-    this.line = line;
-
-    return parseData;
-  }
-
-  // whitespaces+ | !(identifier)
-  parsePossibleSpaces() {
-    // Keep original state.
-    const {
-      lastPosition, column, line,
-    } = this;
-
-    let parseData = { success: false, data: null };
-
-    (() => {
-      if (!this.parseWhitespaces().success) {
-        if (this.tryTo(this.parseIdentifier)) return;
-      }
-      // Update parseData.
-      parseData = { success: true, data: null };
-
-      // Update lastParseData.
-      this.lastParseData = parseData;
-      return parseData;
-    })();
-
-    // Parsing failed, so revert state.
-    this.lastPosition = lastPosition;
-    this.column = column;
-    this.line = line;
-
-    return parseData;
-  }
 
   // [0-9]+
   parseInteger() {
@@ -235,14 +178,146 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.lastPosition = lastPosition;
-    this.column = column;
-    this.line = line;
+    this.reset(lastPosition, null, column, line);
 
     return parseData;
   }
 
-  // ('let'/'var') _ identifier _ '=' _ expression
+  // Parse input string.
+  parseToken(str) {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let parseData = { success: false, data: null };
+
+    // Check if input string matches the subsequent chars in code.
+    if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + str.length + 1)) {
+      // Update lastPosition.
+      this.lastPosition += str.length;
+
+      // Update parseData.
+      parseData = { success: true, data: str };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, column, line);
+
+    return parseData;
+  }
+
+  // Integer | Identifier
+  parseExpression() {
+    if (this.parseInteger().success) {
+      return this.lastParseData;
+    } else if (this.parseIdentifier().success) {
+      return this.lastParseData;
+    }
+    return { success: false, data: null };
+  }
+
+  // [ \t]+
+  parseSpaces() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let count = 0;
+    let parseData = { success: false, data: null };
+
+    // Consume spaces. [ \t]+
+    while (this.spaces.indexOf(this.peekChar()) > -1) {
+      this.eatChar();
+      count += 1;
+    }
+
+    // Check if it was able to consume at least one whitespace.
+    if (count > 0) {
+      // Update parseData.
+      parseData = { success: true, data: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, column, line);
+
+    return parseData;
+  }
+
+  // whitespaces+ | "" !(identifier)
+  parseSpacesIdentifier() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let parseData = { success: false, data: null };
+
+    (() => {
+      // Checking if unable to parse next chars as whitespaces.
+      if (!this.parseSpaces().success) {
+        // In such case, the next set of chars must not be identifier.
+        if (this.tryTo('parseIdentifier').success) return null;
+      }
+      // Update parseData.
+      parseData = { success: true, data: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, column, line);
+
+    return parseData;
+  }
+
+  // whitespaces+ | "" !(operator)
+  parseSpacesOperator() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let parseData = { success: false, data: null };
+
+    (() => {
+      // Checking if unable to parse next chars as whitespaces.
+      if (!this.parseSpaces().success) {
+        // In such case, the next set of chars must not be operator.
+        if (this.tryTo('parseOperator').success) return null;
+      }
+      // Update parseData.
+      parseData = { success: true, data: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, column, line);
+
+    return parseData;
+  }
+
+  // ('let'/'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
   parseSubjectDeclaration() {
     // Keeping original state.
     const {
@@ -256,30 +331,58 @@ class Parser {
 
     (() => {
       // Consume ('let'/'var').
-      if (!this.parseToken('let').success && !this.parseToken('var').success) return;
+      if (!this.parseToken('let').success && !this.parseToken('var').success) return null;
       mutability = this.lastParseData.data;
 
-      // Consume possiblespaces.
-      if (!this.parsePossibleSpaces().success) return;
-      print('kaxxoom!')
+      // Consume _.
+      if (!this.parseSpaces().success) return null;
 
       // Consume identifier.
-      if (!this.parseIdentifier().success) return;
+      if (!this.parseIdentifier().success) return null;
       identifier = this.lastParseData.data;
-      print('kaboom!')
 
-      // Consume possiblespaces.
-      if (!this.parsePossibleSpaces().success) return;
+      // Alternate parsing. _ '=' _ expression | '=' !(operator) expression
+      let alternativeTaken = false;
 
-      // Consume '='.
-      if (!this.parseToken('=').success) return;
+      // [1]. _ '=' _ expression
+      (() => {
+        // Consume _.
+        if (!this.parseSpaces().success) return;
 
-      // Consume possiblespaces.
-      if (!this.parsePossibleSpaces().success) return;
+        // Consume '='.
+        if (!this.parseToken('=').success) return;
 
-      // Consume integer.
-      if (!this.parseExpression().success) return;
-      expression = this.lastParseData.data;
+        // Consume _.
+        if (!this.parseSpaces().success) return;
+
+        // Consume expression.
+        if (!this.parseExpression().success) return;
+        expression = this.lastParseData.data;
+
+        // This alternative was parsed successfully.
+        alternativeTaken = true;
+      })();
+
+      // [2]. '=' !(operator) expression
+      if (!alternativeTaken) {
+        (() => {
+          // Consume '='.
+          if (!this.parseToken('=').success) return;
+
+          // Make sure next token isn't an operator.
+          if (this.tryTo('parseOperator').success) return;
+
+          // Consume expression.
+          if (!this.parseExpression().success) return;
+          expression = this.lastParseData.data;
+
+          // This alternative was parsed successfully.
+          alternativeTaken = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeTaken) return null;
 
       // Update parseData.
       parseData = { success: true, data: [mutability, identifier, expression] };
@@ -293,14 +396,12 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.lastPosition = lastPosition;
-    this.column = column;
-    this.line = line;
+    this.reset(lastPosition, null, column, line);
 
     return parseData;
   }
 
-  // ('fun') _ identifier _ '(' _ ')' _ '=' _ expression
+  // ('fun') _ identifier _? '(' _? ')' (_ '=' _ expression | '=' !(operator) expression)
   parseFunctionDeclaration() {
     // Keeping original state.
     const {
@@ -313,30 +414,69 @@ class Parser {
 
     (() => {
       // Consume ('fun').
-      if (!this.parseToken('fun').success) return;
+      if (!this.parseToken('fun').success) return null;
 
-      // Consume whitespaces.
-      if (!this.parsePossibleSpaces().success) return;
+      // Consume _.
+      if (!this.parseSpaces().success) return null;
 
       // Consume identifier.
-      if (!this.parseIdentifier().success) return;
+      if (!this.parseIdentifier().success) return null;
       identifier = this.lastParseData.data;
+      
+      // Consume _?.
+      this.parseSpaces();
+      
+      // Consume '('.
+      if (!this.parseToken('(').success && !this.parseToken('var').success) return null;
+      
+      // Consume _?.
+      this.parseSpaces();
+      
+      // Consume ')'.
+      if (!this.parseToken(')').success && !this.parseToken('var').success) return null;
 
-      // Consume whitespaces.
-      if (!this.parsePossibleSpaces().success) return;
+      // Alternate parsing. _ '=' _ expression | '=' !(operator) expression
+      let alternativeTaken = false;
 
-      // Consume whitespaces.
-      if (!this.parseWhitespaces().success) return;
+      // [1]. _ '=' _ expression
+      (() => {
+        // Consume _.
+        if (!this.parseSpaces().success) return;
 
-      // Consume '='.
-      if (!this.parseToken('=').success) return;
+        // Consume '='.
+        if (!this.parseToken('=').success) return;
 
-      // Consume whitespaces.
-      if (!this.parseWhitespaces().success) return;
+        // Consume _.
+        if (!this.parseSpaces().success) return;
 
-      // Consume integer.
-      if (!this.parseExpression().success) return;
-      expression = this.lastParseData.data;
+        // Consume expression.
+        if (!this.parseExpression().success) return;
+        expression = this.lastParseData.data;
+
+        // This alternative was parsed successfully.
+        alternativeTaken = true;
+      })();
+
+      // [2]. '=' !(operator) expression
+      if (!alternativeTaken) {
+        (() => {
+          // Consume '='.
+          if (!this.parseToken('=').success) return;
+
+          // Make sure next token isn't an operator.
+          if (this.tryTo('parseOperator').success) return;
+
+          // Consume expression.
+          if (!this.parseExpression().success) return;
+          expression = this.lastParseData.data;
+
+          // This alternative was parsed successfully.
+          alternativeTaken = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeTaken) return null;
 
       // Update parseData.
       parseData = { success: true, data: [identifier, expression] };
@@ -350,9 +490,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.lastPosition = lastPosition;
-    this.column = column;
-    this.line = line;
+    this.reset(lastPosition, null, column, line);
 
     return parseData;
   }
