@@ -5,7 +5,8 @@ const { print } = require('../utils');
  * - This compiler uses a recursive descent parser with no lexing phase.
  * - There is no lexing phase because the language is whitespace sensitive.
  * - Each parse function reverts its state when its unable to parse successfully.
- * - Inner IIFEs are used to make handling parsing failure within a parse function clear and understandable.
+ * - Inner IIFEs are used to make handling parsing failure within a parse function
+ * clear and understandable.
  */
 class Parser {
   constructor(code) {
@@ -88,7 +89,36 @@ class Parser {
     return parseData;
   }
 
-  // [a-zA-Z][a-zA-Z_0-9]*
+
+  // Parse input string.
+  parseToken(str) {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let parseData = { success: false, data: null };
+
+    // Check if input string matches the subsequent chars in code.
+    if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + str.length + 1)) {
+      // Update lastPosition.
+      this.lastPosition += str.length;
+
+      // Update parseData.
+      parseData = { success: true, data: str };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, column, line);
+
+    return parseData;
+  }
+
+  // identifier= = [a-zA-Z][a-zA-Z_0-9]*
   parseIdentifier() {
     // Keeping original state.
     const {
@@ -120,7 +150,7 @@ class Parser {
     return parseData;
   }
 
-  // [+-*/\\^%!><=÷×≠≈¹²³√]+
+  // operator = [+-*/\\^%!><=÷×≠≈¹²³√]+
   parseOperator() {
     // Keeping original state.
     const {
@@ -152,7 +182,7 @@ class Parser {
   }
 
 
-  // [0-9]+
+  // integer = [0-9]+
   parseInteger() {
     // Keeping original state.
     const {
@@ -183,35 +213,7 @@ class Parser {
     return parseData;
   }
 
-  // Parse input string.
-  parseToken(str) {
-    // Keep original state.
-    const {
-      lastPosition, column, line,
-    } = this;
-
-    let parseData = { success: false, data: null };
-
-    // Check if input string matches the subsequent chars in code.
-    if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + str.length + 1)) {
-      // Update lastPosition.
-      this.lastPosition += str.length;
-
-      // Update parseData.
-      parseData = { success: true, data: str };
-
-      // Update lastParseData.
-      this.lastParseData = parseData;
-      return parseData;
-    }
-
-    // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
-
-    return parseData;
-  }
-
-  // Integer | Identifier
+  // expression = integer | identifier
   parseExpression() {
     if (this.parseInteger().success) {
       return this.lastParseData;
@@ -221,7 +223,7 @@ class Parser {
     return { success: false, data: null };
   }
 
-  // [ \t]+
+  // spaces = [ \t]+
   parseSpaces() {
     // Keep original state.
     const {
@@ -253,71 +255,8 @@ class Parser {
     return parseData;
   }
 
-  // whitespaces+ | "" !(identifier)
-  parseSpacesIdentifier() {
-    // Keep original state.
-    const {
-      lastPosition, column, line,
-    } = this;
-
-    let parseData = { success: false, data: null };
-
-    (() => {
-      // Checking if unable to parse next chars as whitespaces.
-      if (!this.parseSpaces().success) {
-        // In such case, the next set of chars must not be identifier.
-        if (this.tryTo('parseIdentifier').success) return null;
-      }
-      // Update parseData.
-      parseData = { success: true, data: null };
-
-      // Update lastParseData.
-      this.lastParseData = parseData;
-      return parseData;
-    })();
-
-    // Check if above parsing is successful.
-    if (parseData.success) return parseData;
-
-    // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
-
-    return parseData;
-  }
-
-  // whitespaces+ | "" !(operator)
-  parseSpacesOperator() {
-    // Keep original state.
-    const {
-      lastPosition, column, line,
-    } = this;
-
-    let parseData = { success: false, data: null };
-
-    (() => {
-      // Checking if unable to parse next chars as whitespaces.
-      if (!this.parseSpaces().success) {
-        // In such case, the next set of chars must not be operator.
-        if (this.tryTo('parseOperator').success) return null;
-      }
-      // Update parseData.
-      parseData = { success: true, data: null };
-
-      // Update lastParseData.
-      this.lastParseData = parseData;
-      return parseData;
-    })();
-
-    // Check if above parsing is successful.
-    if (parseData.success) return parseData;
-
-    // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
-
-    return parseData;
-  }
-
-  // ('let'/'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
+  // subjectdeclaration =
+  //   | ('let'/'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
   parseSubjectDeclaration() {
     // Keeping original state.
     const {
@@ -342,7 +281,7 @@ class Parser {
       identifier = this.lastParseData.data;
 
       // Alternate parsing. _ '=' _ expression | '=' !(operator) expression
-      let alternativeTaken = false;
+      let alternativeParseSuccessful = false;
 
       // [1]. _ '=' _ expression
       (() => {
@@ -360,11 +299,11 @@ class Parser {
         expression = this.lastParseData.data;
 
         // This alternative was parsed successfully.
-        alternativeTaken = true;
+        alternativeParseSuccessful = true;
       })();
 
       // [2]. '=' !(operator) expression
-      if (!alternativeTaken) {
+      if (!alternativeParseSuccessful) {
         (() => {
           // Consume '='.
           if (!this.parseToken('=').success) return;
@@ -377,12 +316,12 @@ class Parser {
           expression = this.lastParseData.data;
 
           // This alternative was parsed successfully.
-          alternativeTaken = true;
+          alternativeParseSuccessful = true;
         })();
       }
 
       // Check if any of the alternatives was parsed successfully
-      if (!alternativeTaken) return null;
+      if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
       parseData = { success: true, data: [mutability, identifier, expression] };
@@ -401,7 +340,8 @@ class Parser {
     return parseData;
   }
 
-  // ('fun') _ identifier _? '(' _? ')' (_ '=' _ expression | '=' !(operator) expression)
+  // functiondeclaration =
+  //   | 'fun' _ identifier _? '(' _? ')' (_ '=' _ expression | '=' !(operator) expression)
   parseFunctionDeclaration() {
     // Keeping original state.
     const {
@@ -422,21 +362,21 @@ class Parser {
       // Consume identifier.
       if (!this.parseIdentifier().success) return null;
       identifier = this.lastParseData.data;
-      
+
       // Consume _?.
       this.parseSpaces();
-      
+
       // Consume '('.
       if (!this.parseToken('(').success && !this.parseToken('var').success) return null;
-      
+
       // Consume _?.
       this.parseSpaces();
-      
+
       // Consume ')'.
       if (!this.parseToken(')').success && !this.parseToken('var').success) return null;
 
       // Alternate parsing. _ '=' _ expression | '=' !(operator) expression
-      let alternativeTaken = false;
+      let alternativeParseSuccessful = false;
 
       // [1]. _ '=' _ expression
       (() => {
@@ -454,11 +394,11 @@ class Parser {
         expression = this.lastParseData.data;
 
         // This alternative was parsed successfully.
-        alternativeTaken = true;
+        alternativeParseSuccessful = true;
       })();
 
       // [2]. '=' !(operator) expression
-      if (!alternativeTaken) {
+      if (!alternativeParseSuccessful) {
         (() => {
           // Consume '='.
           if (!this.parseToken('=').success) return;
@@ -471,12 +411,12 @@ class Parser {
           expression = this.lastParseData.data;
 
           // This alternative was parsed successfully.
-          alternativeTaken = true;
+          alternativeParseSuccessful = true;
         })();
       }
 
       // Check if any of the alternatives was parsed successfully
-      if (!alternativeTaken) return null;
+      if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
       parseData = { success: true, data: [identifier, expression] };
