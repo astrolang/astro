@@ -27,11 +27,11 @@ The language creator had a set of requirements (listed above) not met by any sin
 
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing high-performance apps for web and/or desktop seamless, easier and less frustrating.
 
-Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, physical simulations and other real-time software. This also makes it suitable for embedded software development even though it's not a goal.
+Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, scientific simulations and other real-time software. This also makes it suitable for embedded software development even though it's not a goal.
 
 In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors, matrices, vectorization, unicode identifiers, etc.
 
-In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, structural typing and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
+In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
 
 #### Python
 ```python
@@ -76,12 +76,10 @@ For now, Astro can only compile its source code to ast format. It is not ready f
 Astro is meant for interactive high-productivity usage therefore a visual REPL, for visualizing and introspecting different kinds of data, is planned.
 It will also have a set of language tools for making editor support easier.
 
-Incremental compilation is a goal as well since the language requires a lot of compile-time computations like type inference and program flow analysis.
+Incremental compilation is a goal as well since the language requires a lot of complex compile-time computations like control flow analysis and escape analysis.
 
 ### Where can I read about the language?
 There is no proper documentation for the language yet since the main implementation is still under active development, but you can find an up-to-date summary of language features [here](docs/language/summary.ast).
-
-Gitbooks covering different aspects of the project are in works. They will be published as soon the language becomes usable.
 
 ### <a name="tasks"></a> What are the important tasks to complete?
 - [x] ~Improve project structure~
