@@ -181,7 +181,6 @@ class Parser {
     return parseData;
   }
 
-
   // integer = [0-9]+
   parseInteger() {
     // Keeping original state.
@@ -283,6 +282,9 @@ class Parser {
       // Alternate parsing. _ '=' _ expression | '=' !(operator) expression
       let alternativeParseSuccessful = false;
 
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
       // [1]. _ '=' _ expression
       (() => {
         // Consume _.
@@ -304,6 +306,9 @@ class Parser {
 
       // [2]. '=' !(operator) expression
       if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.column, state.line);
+
         (() => {
           // Consume '='.
           if (!this.parseToken('=').success) return;
@@ -367,16 +372,19 @@ class Parser {
       this.parseSpaces();
 
       // Consume '('.
-      if (!this.parseToken('(').success && !this.parseToken('var').success) return null;
+      if (!this.parseToken('(').success) return null;
 
       // Consume _?.
       this.parseSpaces();
 
       // Consume ')'.
-      if (!this.parseToken(')').success && !this.parseToken('var').success) return null;
+      if (!this.parseToken(')').success) return null;
 
       // Alternate parsing. _ '=' _ expression | '=' !(operator) expression
       let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
 
       // [1]. _ '=' _ expression
       (() => {
@@ -399,6 +407,9 @@ class Parser {
 
       // [2]. '=' !(operator) expression
       if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.column, state.line);
+
         (() => {
           // Consume '='.
           if (!this.parseToken('=').success) return;
