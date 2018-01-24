@@ -1,0 +1,25 @@
+integer =
+  | [0-9]+
+
+operator =
+  | [+-*/\\^%!><=÷×≠≈¹²³√]+
+
+identifier =
+  | [a-zA-Z][a-zA-Z_0-9]*
+
+spaces =
+  | [ \t]+
+
+names =
+  | identifier (_? ',' _? identifier)*
+
+expression =
+  | integer
+  | identifier
+
+functiondeclaration =
+  | 'fun' _ identifier _? '(' _? ')' (_ '=' _ expression | '=' !(operator) expression)
+
+typedeclaration =
+  | 'type' _ identifier _? '(' _? ')' (_? '<:' _? names)?
+  | 'type' _ identifier (_? '<:' _? names)? _? ':' subjectdeclaration
