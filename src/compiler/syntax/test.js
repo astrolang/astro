@@ -1,5 +1,5 @@
 const { print } = require('../utils');
-const Parser = require('./parser4');
+const Parser = require('./parser');
 
 
 print('name  nom');
