@@ -68,3 +68,27 @@ print('fun _n77m_m()=age');
 print(new Parser('fun _n77m_m()=age').parseFunctionDeclaration());
 print('fun _n77m_m ( ) = age');
 print(new Parser('fun _n77m_m ( ) = age').parseFunctionDeclaration());
+print(',some'); // fail
+print(new Parser(',some').parseNames()); // fail
+print('20, 45'); // fail
+print(new Parser('20, 45').parseNames()); // fail
+print('some');
+print(new Parser('some').parseNames());
+print('the,new,age');
+print(new Parser('the,new,age').parseNames());
+print('the, _ew,_007');
+print(new Parser('the, _ew,_007').parseNames());
+print('type person() : var name = 4'); // fail
+print(new Parser('type person() : var name = 4').parseTypeDeclaration()); // fail
+print('type person: print(50)'); // fail
+print(new Parser('type person: print(50)').parseTypeDeclaration()); // fail
+print('typePerson'); // fail
+print(new Parser('typePerson').parseTypeDeclaration()); // fail
+print('type Person()');
+print(new Parser('type Person()').parseTypeDeclaration());
+print('type P_rson: var age = 6');
+print(new Parser('type P_rson: var age = 6').parseTypeDeclaration());
+print('type Hx99 <: Human, Animal: var age = 6');
+print(new Parser('type Hx99 <: Human, Animal: var age = 6').parseTypeDeclaration());
+print('type Waiter ( ) <: Human, Employee');
+print(new Parser('type Waiter ( ) <: Human, Employee').parseTypeDeclaration());
