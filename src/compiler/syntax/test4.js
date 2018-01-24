@@ -66,3 +66,5 @@ print('fun name() = 678');
 print(new Parser('fun name() = 678').parseFunctionDeclaration());
 print('fun _n77m_m()=age');
 print(new Parser('fun _n77m_m()=age').parseFunctionDeclaration());
+print('fun _n77m_m ( ) = age');
+print(new Parser('fun _n77m_m ( ) = age').parseFunctionDeclaration());
