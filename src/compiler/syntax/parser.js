@@ -212,6 +212,68 @@ class Parser {
     return parseData;
   }
 
+  // names = identifier (_? ',' _? identifier)*
+  parseNames() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const identifiers = [];
+    let parseData = { success: false, data: null };
+
+    (() => {
+      // Consume identifier.
+      if (!this.parseIdentifier().success) return null;
+      identifiers.push(this.lastParseData.data);
+
+      // Optional-multiple parsing. (_? ',' _? identifier)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume ','.
+          if (!this.parseToken(',').success) return;
+
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          identifiers.push(this.lastParseData.data);
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Update parseData.
+      parseData = { success: true, data: identifiers };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, column, line);
+
+    return parseData;
+  }
+
+
   // expression = integer | identifier
   parseExpression() {
     if (this.parseInteger().success) {
@@ -431,6 +493,151 @@ class Parser {
 
       // Update parseData.
       parseData = { success: true, data: [identifier, expression] };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, column, line);
+
+    return parseData;
+  }
+
+
+  // typedeclaration =
+  //  | 'type' _ identifier _? '(' _? ')' (_? '<:' _? names)?
+  //  | 'type' _ identifier (_? '<:' _? names)? _? ':' _? subjectdeclaration
+  parseTypeDeclaration() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let identifier;
+    let supertypes = null;
+    let declaration = null;
+    let parseData = { success: false, data: null };
+
+    (() => {
+      // Consume ('type').
+      if (!this.parseToken('type').success) return null;
+
+      // Consume _.
+      if (!this.parseSpaces().success) return null;
+
+      // Consume identifier.
+      if (!this.parseIdentifier().success) return null;
+      identifier = this.lastParseData.data;
+
+      // Alternate parsing.
+      // | _? '(' _? ')' (_? '<:' _? names)?
+      // | (_? '<:' _? names)? _? ':' _? subjectdeclaration
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. _? '(' _? ')' (_? '<:' _? names)?
+      (() => {
+        // Consume _?.
+        this.parseSpaces();
+
+        // Consume '('.
+        if (!this.parseToken('(').success) return;
+
+        // Consume _?.
+        this.parseSpaces();
+
+        // Consume ')'.
+        if (!this.parseToken(')').success) return;
+
+        // Optional parsing. (_? '<:' _? names)?
+        let optionalParseSuccessful = false;
+        const state1 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume '<:'.
+          if (!this.parseToken('<:').success) return;
+
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume names.
+          if (!this.parseNames().success) return;
+          supertypes = this.lastParseData.data;
+
+          optionalParseSuccessful = true;
+        })();
+
+        // If parsing optional fails, revert state to what it was before optional parsing started.
+        if (!optionalParseSuccessful) {
+          this.reset(state1.lastPosition, null, state1.column, state1.line);
+        }
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. (_? '<:' _? names)? _? ':' _? subjectdeclaration
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.column, state.line);
+        (() => {
+          // Optional parsing. (_? '<:' _? names)?
+          let optionalParseSuccessful = false;
+          const state1 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume _?.
+            this.parseSpaces();
+
+            // Consume '<:'.
+            if (!this.parseToken('<:').success) return;
+
+            // Consume _?.
+            this.parseSpaces();
+
+            // Consume names.
+            if (!this.parseNames().success) return;
+            supertypes = this.lastParseData.data;
+
+            optionalParseSuccessful = true;
+          })();
+
+          // If parsing optional fails, revert state to what it was before optional parsing started.
+          if (!optionalParseSuccessful) {
+            this.reset(state1.lastPosition, null, state1.column, state1.line);
+          }
+
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume subjectdeclaration.
+          if (!this.parseSubjectDeclaration().success) return;
+          declaration = this.lastParseData.data;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, data: [identifier, supertypes, declaration] };
 
       // Update lastParseData.
       this.lastParseData = parseData;
