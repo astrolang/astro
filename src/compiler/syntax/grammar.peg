@@ -1,3 +1,19 @@
+indent =
+  | '    '+
+
+samedent =
+  | '    '+
+  | ''
+
+dedent =
+  | '    '+
+
+newline =
+  | '\r'? '\n'
+
+nextline =
+  | newline (_? newline)*
+
 integer =
   | [0-9]+
 
@@ -7,7 +23,7 @@ operator =
 identifier =
   | [a-zA-Z][a-zA-Z_0-9]*
 
-spaces =
+_ =
   | [ \t]+
 
 names =
