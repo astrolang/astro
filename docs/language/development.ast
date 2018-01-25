@@ -1,4 +1,15 @@
 # Astro 0.1.14a
+# 25/01/18
+abst Animal = var name, age
+abst Animal(var name, var age) = Dog | Cat | Bird
+abst Animal(var name, var age)
+abst Animal = Dog | Cat | Bird
+
+type Animal = var name, age
+type Animal(var name, var age)
+type Animal = Dog | Cat | Bird
+
+# Astro 0.1.14a
 # 16/01/18
 # REDESIGNING DELEGATED PROPERTIES
 # Delegated properties are subjects whose assignment and value retireval is delegated to
