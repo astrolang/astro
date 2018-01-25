@@ -14,6 +14,8 @@ class Parser {
     // Parser
     this.lastPosition = -1;
     this.lastParseData = null;
+    // Indentation
+    this.lastIndentCount = 0;
     // Information
     this.column = 0;
     this.line = 1;
@@ -46,7 +48,7 @@ class Parser {
 
   // Check if there is a next char and return it.
   peekChar() {
-    // Checking if end of input has not yet been reached
+    // Checking if end of input has not yet been reached.
     if (this.lastPosition + 1 < this.code.length) {
       return this.code.charAt(this.lastPosition + 1);
     }
@@ -54,9 +56,10 @@ class Parser {
   }
 
   // Reset properties.
-  reset(lastPosition, lastParseData, column, line) {
+  reset(lastPosition, lastParseData, lastIndentCount, column, line) {
     this.lastPosition = lastPosition;
-    this.lastParseData = lastParseData || this.lastParseData;
+    this.lastParseData = lastParseData !== null ?  lastParseData : this.lastParseData;
+    this.lastIndentCount = lastIndentCount !== null ? lastIndentCount : this.lastIndentCount;
     this.column = column;
     this.line = line;
   }
@@ -84,11 +87,10 @@ class Parser {
     }
 
     // Revert state, lastParseData included.
-    this.reset(lastPosition, lastParseData, column, line);
+    this.reset(lastPosition, lastParseData, null, column, line);
 
     return parseData;
   }
-
 
   // Parse input string.
   parseToken(str) {
@@ -113,7 +115,196 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // newline = '\r'? '\n'.
+  parseNewline() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let parseData = { success: false, data: null };
+
+    (() => {
+      // Consume '\r'?.
+      this.parseToken('\r');
+
+      // Consume '\n'.
+      if (!this.parseToken('\n').success) return null;
+
+      // Update parseData.
+      parseData = { success: true, data: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+
+      // Update line and column information.
+      this.line += 1;
+      this.column = 0;
+
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // nextline = newline (_* newline)*.
+  parseNextLine() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let parseData = { success: false, data: null };
+
+    (() => {
+      // Consume newline.
+      if (!this.parseNewline().success) return null;
+
+      // Optional-multiple parsing. (_? newline)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume newline.
+          if (!this.parseNewline().success) return;
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Update parseData.
+      parseData = { success: true, data: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // indent = '    '+
+  parseIndent() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let indentCount = 0;
+    let parseData = { success: false, data: null };
+
+    // Parse subsequent 4-space tokens.
+    while (this.parseToken('    ').success) {
+      indentCount += 1;
+    }
+
+    // Check if current indentation count is 1 indent more than previous indentation.
+    if (indentCount === this.lastIndentCount + 1) {
+      // Update lastIndentCount.
+      this.lastIndentCount = indentCount;
+
+      // Update parseData.
+      parseData = { success: true, data: indentCount };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // samedent = '    '+ | ''
+  parseSamedent() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let indentCount = 0;
+    let parseData = { success: false, data: null };
+
+    // Parse subsequent 4-space tokens.
+    while (this.parseToken('    ').success) {
+      indentCount += 1;
+    }
+
+    // Check if current indentation count is the same as previous indentation.
+    if (indentCount === this.lastIndentCount) {
+      // Update parseData.
+      parseData = { success: true, data: indentCount };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // dedent = '    '+
+  parseDedent() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    let indentCount = 0;
+    let parseData = { success: false, data: null };
+
+    // Parse subsequent 4-space tokens.
+    while (this.parseToken('    ').success) {
+      indentCount += 1;
+    }
+
+    // Check if current indentation count is 1 indent less than previous indentation.
+    if (indentCount === this.lastIndentCount - 1) {
+      // Update lastIndentCount.
+      this.lastIndentCount = indentCount;
+
+      // Update parseData.
+      parseData = { success: true, data: indentCount };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -145,7 +336,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -176,7 +367,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -207,7 +398,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -251,7 +442,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -268,11 +459,10 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
-
 
   // expression = integer | identifier
   parseExpression() {
@@ -311,7 +501,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -369,7 +559,7 @@ class Parser {
       // [2]. '=' !(operator) expression
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, state.column, state.line);
+        this.reset(state.lastPosition, null, null, state.column, state.line);
 
         (() => {
           // Consume '='.
@@ -402,7 +592,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -470,7 +660,7 @@ class Parser {
       // [2]. '=' !(operator) expression
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, state.column, state.line);
+        this.reset(state.lastPosition, null, null, state.column, state.line);
 
         (() => {
           // Consume '='.
@@ -503,11 +693,10 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
-
 
   // typedeclaration =
   //  | 'type' _ identifier _? '(' _? ')' (_? '<:' _? names)?
@@ -578,7 +767,7 @@ class Parser {
 
         // If parsing optional fails, revert state to what it was before optional parsing started.
         if (!optionalParseSuccessful) {
-          this.reset(state1.lastPosition, null, state1.column, state1.line);
+          this.reset(state1.lastPosition, null, null, state1.column, state1.line);
         }
 
         // This alternative was parsed successfully.
@@ -588,7 +777,7 @@ class Parser {
       // [2]. (_? '<:' _? names)? _? ':' _? subjectdeclaration
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, state.column, state.line);
+        this.reset(state.lastPosition, null, null, state.column, state.line);
         (() => {
           // Optional parsing. (_? '<:' _? names)?
           let optionalParseSuccessful = false;
@@ -612,7 +801,7 @@ class Parser {
 
           // If parsing optional fails, revert state to what it was before optional parsing started.
           if (!optionalParseSuccessful) {
-            this.reset(state1.lastPosition, null, state1.column, state1.line);
+            this.reset(state1.lastPosition, null, null, state1.column, state1.line);
           }
 
           // Consume _?.
@@ -648,7 +837,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, column, line);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
