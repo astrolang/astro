@@ -29,9 +29,76 @@ _ =
 names =
   | identifier (_? ',' _? identifier)*
 
-expression =
-  | integer
+
+
+
+
+listliteral =
+  | '[' expression (_? ',' _? expression)* (_? ';' expression (_? ',' _? expression)*)* (_? ',')? ']' // ignorenewline
+  | '[' nextline indent expression (_? ',' _? expression)* (_? ';' expression (_? ',' _? expression)*)* (_? ',')? nextline dedent ']'
+
+dictliteral =
+  | '{' expression _? ':' _? expression (_? ',' _? expression _? ':' _? expression)*  (_? ',')? '}' // ignorenewline
+  | '{' nextline indent expression _? ':' _? expression (_? ',' _? expression _? ':' _? expression)*  (_? ',')? nextline dedent '}'
+  | '{' nextline indent expression _? ':' _? dictblock (_? ','? nextline samedent expression _? ':' _? dictblock  )* nextline dedent '}'
+
+dictblock =
+  | nextline indent expression _? ':' _? (expression | dictblock) nextline dedent
+
+regexliteral =
+  | '/' [^/]+ '/'
+
+calltuplepostfix =
+  | '(' ... ')' // ignorenewline
+  | '(' nextline indent ... nextline dedent ')'
+
+subatompostfix =
+  | commandnotationpostfix
+  | calltuplepostfix
+  | dotnotationpostfix
+  | cascadingnotationpostfix
+  | listelementpostfix
+  | dictelementpostfix
+
+subatom =
+  |
+  | listliteral
   | identifier
+
+atom =
+  | subatom (_? subatompostfix)+
+
+prefixatom =
+  | operator+ atom
+
+postfixatom =
+  | atom operator+
+
+prepostfixatom =
+  | prefixatom
+  | postfixatom
+  | atom
+
+infixexpression =
+  | prefixatom operator+ &(postfixatom | atom) infixexpression* // +x-y!, +x-y
+  | atom operator+ &(postfixatom | atom) infixexpression* // x-y!, x-y
+  | prepostfixatom _ operator+ _ infixexpression* // x! - +y, +x - +y, x - y, ...
+  | prepostfixatom
+
+tupleexpression =
+  | simpleexpression (_? ',' _? simpleexpression)*
+
+expression =
+  | conditionalexpression
+  | declaration
+
+declaration =
+  | subjectdeclaration
+  | typedeclaration
+  | functiondeclaration
+
+
+
 
 functiondeclaration =
   | 'fun' _ identifier _? '(' _? ')' (_ '=' _ expression | '=' !(operator) expression)
@@ -39,3 +106,8 @@ functiondeclaration =
 typedeclaration =
   | 'type' _ identifier _? '(' _? ')' (_? '<:' _? names)?
   | 'type' _ identifier (_? '<:' _? names)? _? ':' subjectdeclaration
+
+subjectdeclaration =
+  | ('let'/'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
+
+
