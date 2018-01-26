@@ -1,5 +1,9 @@
 # Astro 0.1.14a
 # 25/01/18
+# Remove do-while
+
+# Astro 0.1.14a
+# 25/01/18
 abst Animal = var name, age
 abst Animal(var name, var age) = Dog | Cat | Bird
 abst Animal(var name, var age)
@@ -57,11 +61,12 @@ fun age(a) = set (a.age + 5) get (a.age - 5)
     x._name | _name() | @_name
     x.name | name() | @name
 
-- removw hifhlight on `extend` kewyord
-    extend MyType
+- remove highlight on `do` kewyord
+    do: x
+    while x > y
 
-- highlight `del` kewyord •
-    del name = 50
+- remove highlight on `extend` kewyord
+    extend MyType
 
 - remove highlight on nonstandard numeric literals
     2344'f32 #'
@@ -70,24 +75,27 @@ fun age(a) = set (a.age + 5) get (a.age - 5)
 - fix regex highlight (/[^/]+/)
     let x = /\d/ + re.'\[a-z]' + /\d/
 
-- highlight dot natation member call and function call.
+- highlight dot n0tation member call and function call.
     john~name, ~age
     print~('hello')~('world')
-
-- remove highlight on `set` and `get`.
-    fun age(a) = set (a.age + 5) get (a.age - 5)
 
 - fix multible binding highlight
     let a b c = 45
 
-- highlight cascading function call
+- highlight `del` kewyord •
+    del name = 50
+
+- remove highlight on `set` and `get` •
+    fun age(a) = set (a.age + 5) get (a.age - 5)
+
+- highlight cascading function call •
     print_.('hello')_.('world')
 
-- fix names highlight. No trailing underscore.
+- fix names highlight. No trailing underscore •
     Foo_.name
     Foo_.name_
 
-- remove `fib` highlight
+- remove `fib` highlight •
     fib foo(): pass
 
 # Astro 0.1.13a
