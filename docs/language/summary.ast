@@ -1205,14 +1205,14 @@ TRY, EXCEPT & ENSURE
     # Ensure block is optional, but when it is present, it is always run.
     try:
         process bigData
-    except err: #: IncompleteDataError
-        print err.msg
+    except IncompleteDataError:
+        print error.message # the error object can alwasy accessed in `except` block.
     ensure:
         restore bigData
 
     # The except body can be ommitted if it's only printing the error message.
     try: process bigData
-    except err #: IncompleteDataError
+    except IncompleteDataError
 
     # An object defined in the try's header always has it's at the end of the try block.
     try file = open('dancing-masquerade.txt'):
