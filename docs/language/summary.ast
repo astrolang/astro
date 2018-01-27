@@ -767,17 +767,10 @@ ASSIGNMENT DESTRUCTURING
     let a, b, c = (1, 2, 3, 4, 5)
 
 SCOPE LABELLING
-    # Labels allow the programmer to specify the scope a control primitive (e.g. break, yield, return) affects using the `at` keyword.
+    # Labels allow the programmer to specify the conditional block to break, yield, return, etc. to.
     for line in file: @(outer)
         for c in line where c == '\t':
-            break at outer # breaks the outer loop
-    ..
-
-    # Labelling a function.
-    @(top)
-    fun outer(object):
-        fun inner():
-            return object.value at top
+            break @outer # breaks the outer loop
     ..
 
 EXT KEYWORD
