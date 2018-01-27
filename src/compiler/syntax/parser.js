@@ -58,7 +58,7 @@ class Parser {
   // Reset properties.
   reset(lastPosition, lastParseData, lastIndentCount, column, line) {
     this.lastPosition = lastPosition;
-    this.lastParseData = lastParseData !== null ?  lastParseData : this.lastParseData;
+    this.lastParseData = lastParseData !== null ? lastParseData : this.lastParseData;
     this.lastIndentCount = lastIndentCount !== null ? lastIndentCount : this.lastIndentCount;
     this.column = column;
     this.line = line;
@@ -210,7 +210,7 @@ class Parser {
     return parseData;
   }
 
-  // indent = '    '+
+  // indent = ' '+
   parseIndent() {
     // Keep original state.
     const {
@@ -218,12 +218,15 @@ class Parser {
     } = this;
 
     let indentCount = 0;
+    let spaceCount = 0;
     let parseData = { success: false, data: null };
 
-    // Parse subsequent 4-space tokens.
-    while (this.parseToken('    ').success) {
-      indentCount += 1;
+    // Parse subsequent spaces.
+    while (this.parseToken(' ').success) {
+      spaceCount += 1;
     }
+
+    indentCount = spaceCount / 4;
 
     // Check if current indentation count is 1 indent more than previous indentation.
     if (indentCount === this.lastIndentCount + 1) {
@@ -244,7 +247,7 @@ class Parser {
     return parseData;
   }
 
-  // samedent = '    '+ | ''
+  // samedent = ' '+ | ''
   parseSamedent() {
     // Keep original state.
     const {
@@ -252,13 +255,15 @@ class Parser {
     } = this;
 
     let indentCount = 0;
+    let spaceCount = 0;
     let parseData = { success: false, data: null };
 
-    // Parse subsequent 4-space tokens.
-    while (this.parseToken('    ').success) {
-      indentCount += 1;
+    // Parse subsequent spaces.
+    while (this.parseToken(' ').success) {
+      spaceCount += 1;
     }
 
+    indentCount = spaceCount / 4;
     // Check if current indentation count is the same as previous indentation.
     if (indentCount === this.lastIndentCount) {
       // Update parseData.
@@ -275,7 +280,7 @@ class Parser {
     return parseData;
   }
 
-  // dedent = '    '+
+  // dedent = ' '+
   parseDedent() {
     // Keep original state.
     const {
@@ -283,12 +288,15 @@ class Parser {
     } = this;
 
     let indentCount = 0;
+    let spaceCount = 0;
     let parseData = { success: false, data: null };
 
-    // Parse subsequent 4-space tokens.
-    while (this.parseToken('    ').success) {
-      indentCount += 1;
+    // Parse subsequent spaces.
+    while (this.parseToken(' ').success) {
+      spaceCount += 1;
     }
+
+    indentCount = spaceCount / 4;
 
     // Check if current indentation count is 1 indent less than previous indentation.
     if (indentCount === this.lastIndentCount - 1) {
