@@ -4,12 +4,12 @@ SINGLE-LINE COMMENTS
 
 MULTILINE COMMENTS
     #=
-        Multiline comments can span multiple lines.
-        They begin with `#=`.
-        #=
-            They can be neste.
-        =#
-        And they end with `=#`.
+    Multiline comments can span multiple lines.
+    They begin with `#=`.
+    #=
+        They can be neste.
+    =#
+    And they end with `=#`.
     =#
 
 SUBJECT BINDING
