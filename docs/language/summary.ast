@@ -276,11 +276,8 @@ LISTS
     # `!` is used to access the index backwards.
     var last = contestants[!1] # last index.
 
-    # Using negative step to reverse index access.
+    # Negative step can be used to reverse index access.
     var reversed = contestants[:-1:]
-
-    # Reverse access can also be done using `!`.
-    var reversed = contestants[!1:]
 
     # Using a constructor to create a List.
     let number = List(4, 4, '')
@@ -432,6 +429,9 @@ RANGE
 
     # A range can have a step value.
     let evens = 2..2.. # The step value is the `2` in the middle.
+
+    # Negative step can be used to reverse the range's iteration.
+    var reversed = ..-1..20
 
     # Using a range in a for loop.
     for i in 1..10:
