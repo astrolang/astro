@@ -952,6 +952,9 @@ TYPE DEFINITION (2)
         var make
         var year
 
+    # The block begin punctuator, `:`, can be replaced with `=` for single expression definitions.
+    type Car = var make, year
+
     # Types need constructors for object creation. A constructor always has the same name as the type.
     # The special `new` function creates a new object of the particular type.
     fun Car(make, year) = new(make, year)
@@ -1076,17 +1079,18 @@ ABSTRACT TYPES & FUNCTIONS
     fun rewind(player) #: Player
     rewind(p) #: Error!
 
-    # An abstract type can have fields which can only be declared as parameters rather than in the body.
+    # An abstract type can have fields.
     abst Human(name, age)
-    abst Human: var name, age # Invalid!
+    abst Human = var name, age
 
     # Abstract types can have subtypes declared within them effectively making them algebraic data types.
     abst Tree:
         | Leaf(value) #: (T) -> Leaf
         | Node(l, r) #: (Leaf, Tree) -> Node
 
-    # The block begin punctuator, `:`, can be replaced with `=` for single expression definitions.
-    abst Platform = Web | Mobile | Desktop
+    # If both fields and subtypes needs to be declared, the declarations can be separated.
+    abst Animal = var name
+    abst Animal = Dog | Cat | Parrot
 
 TYPE CHECKING
     # The `typeof` operator can be used to get an object's type.
