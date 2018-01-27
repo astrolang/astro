@@ -7,7 +7,7 @@ MULTILINE COMMENTS
     Multiline comments can span multiple lines.
     They begin with `#=`.
     #=
-        They can be neste.
+        They can be nested.
     =#
     And they end with `=#`.
     =#
@@ -45,8 +45,7 @@ SHADOWING
     let phone = 08074789222 # `phone` rebound to an object of different type
 
 IDENTIFIERS
-    # Name of subjects must always start with a character and can be followed with characters,
-    # digits or underscore.
+    # Name of subjects must start with a character and can be followed by characters, digits or underscore.
     var my_name
     fun doNothing(): pass
 
@@ -111,8 +110,7 @@ TYPE DEFINITION (1)
     var jane = Person('Jane Doe', 30)
 
 DELEGATED PROPERTIES
-    # Delegated properties are subjects whose assignment and value retireval is delegated to
-    # some functions.
+    # Delegated properties are subjects whose assignment and access operations are delegated to specified functions.
     type Person(var name: '', var age: del(age, age))
     fun age(x, v) = x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
     fun age(x) = x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
