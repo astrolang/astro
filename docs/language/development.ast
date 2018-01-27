@@ -1,5 +1,11 @@
 # Astro 0.1.14a
 # 27/01/18
+# Limiting Scope labelling to conditional expressions only.
+# Change at syntax
+@(top)
+for x in a: for i in b where i == x:
+    break x @top
+
 # Change `except` syntax
 let file
 try:
@@ -9,11 +15,37 @@ except FileNotFoundError:
 ensure:
     file.close()
 
+# Change list index and range syntax
+for i in ..-1..20: # reverse
+    print 'hello'
+
+list[:-1:]
+reverse(..20)
+
+list[!1] # ith index from back
+list[!1] # last index
+
+# Function argument mutation. Astro follows the inverse of Python's philosophy.
+# imperative for non-mutative functions, reported for mutative functions.
+fun reverse(iterable):
+    var t = []
+    for i in reverse indices(iterable):
+        t.push iterable[i]
+    return t
+
+fun reversed(var iterable):
+    let t = iterable
+    let { len } = iterable
+    for i in reverse indices(iterable):
+        iterable[i] = t[len - (len - i)]
+
+list.reverse()
+list.reversed()
+
 # Astro 0.1.14a
 # 25/01/18
-# Remove do-while
-
-# Limiting Scope labelling to conditional expressions only
+# Remove do-while. STALE
+do: x while a == b # Invalid
 
 # Astro 0.1.14a
 # 25/01/18
@@ -73,6 +105,9 @@ fun age(a) = set (a.age + 5) get (a.age - 5)
     x.name_ | name_() | @name_
     x._name | _name() | @_name
     x.name | name() | @name
+
+- remove highlight on `at` kewyord
+    break 45 at top
 
 - remove highlight on `do` kewyord
     do: x
