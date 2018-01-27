@@ -1,6 +1,19 @@
 # Astro 0.1.14a
+# 27/01/18
+# Change `except` syntax
+let file
+try:
+    file = open('sample.txt')
+except FileNotFoundError:
+    print error.message
+ensure:
+    file.close()
+
+# Astro 0.1.14a
 # 25/01/18
 # Remove do-while
+
+# Limiting Scope labelling to conditional expressions only
 
 # Astro 0.1.14a
 # 25/01/18
