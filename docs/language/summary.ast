@@ -517,12 +517,6 @@ MULTILINE EXPRESSIONS
     let total = (1 + 2 + 3 + 4
     + 5 + 6 + 7)
 
-    # However once the content of a parens are indented, a block is expected, so continuation punctuator is needed for incomplete expression.
-    let price = (
-        print('price bound to a value')
-        add(450, 600)
-    )
-
     let total = (
         1 + 2 + 3 + 4 ...
         + 5 + 6 + 7
