@@ -49,6 +49,9 @@ IDENTIFIERS
     var my_name
     fun doNothing(): pass
 
+    # Astro supports wde range of unicode characters for identifiers.
+    var φ = arctan(y/x)
+
     # Names preceded by underscores are special to the compiler.
     # Likewise, uppercase single letter identifier are reserved for generic type annotations.
     let _song = 'Sorry' # Invalid!
