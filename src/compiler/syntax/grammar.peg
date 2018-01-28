@@ -1,12 +1,12 @@
 indent =
-  | '    '+
+  | ' '+
 
 samedent =
-  | '    '+
+  | ' '+
   | ''
 
 dedent =
-  | '    '+
+  | ' '+
 
 newline =
   | '\r'? '\n'
@@ -30,43 +30,223 @@ names =
   | identifier (_? ',' _? identifier)*
 
 
+// ========================================
 
+noname =
+  | '_'
 
+space =
+  | [ \t]
 
-listliteral =
-  | '[' expression (_? ',' _? expression)* (_? ';' expression (_? ',' _? expression)*)* (_? ',')? ']' // ignorenewline
-  | '[' nextline indent expression (_? ',' _? expression)* (_? ';' expression (_? ',' _? expression)*)* (_? ',')? nextline dedent ']'
+linecontinuation =
+  | space* '...' space* nextline samedent
 
-dictliteral =
-  | '{' expression _? ':' _? expression (_? ',' _? expression _? ':' _? expression)*  (_? ',')? '}' // ignorenewline
-  | '{' nextline indent expression _? ':' _? expression (_? ',' _? expression _? ':' _? expression)*  (_? ',')? nextline dedent '}'
-  | '{' nextline indent expression _? ':' _? dictblock (_? ','? nextline samedent expression _? ':' _? dictblock  )* nextline dedent '}'
+_ =
+  | linecontinuation
+  | spaces
 
-dictblock =
-  | nextline indent expression _? ':' _? (expression | dictblock) nextline dedent
+nameseparation =
+  | (!(identifier | numericliteral) | _)
+
+pathnamecodepoint =
+  | // TODO
+
+codepointnonewlineorsinglequote =
+  | .+ excluding(newline | "'") // TODO
+
+codepointnonewlineordoublequote =
+  | .+ excluding(newline | '"') // TODO
+
+codepointnonewlineortriplesinglequote =
+  | .+ excluding(newline | "'''") // TODO
+
+codepointnonewlineortripledoublequote =
+  | .+ excluding(newline | '"""') // TODO
+
+codepointnohashequal =
+  | .+ excluding('#=') // TODO
+
+codepointnonewline =
+  | .+ excluding(newline) // TODO
+
+codepointnonewlineorforwardslash =
+  | .+ excluding(newline | '/') // TODO
+
+singlelinecomment =
+  | "#" codepointnonewline* &(newline)
+
+multilinecomment =
+  | "#=" codepointnohashequal* (multilinecomment codepointnohashequal*)? '=#' _? &(newline)
+
+comment =
+  | singlelinecomment
+  | multilinecomment
+
+singlelinestring =
+  | "'" codepointnonewlineorsinglequote* "'" (nextcodeline samedent "'" codepointnonewlineorsinglequote* "'")*
+  | '"' codepointnonewlineordoublequote* '"' (nextcodeline samedent '"' codepointnonewlineordoublequote* '"')*
+
+multilinestring =
+  | "'''" codepointnonewlineortriplesinglequote* (nextline samedent codepointnonewlineortriplesinglequote) "'''"
+  | '"""' codepointnonewlineortripledoublequote* (nextline samedent codepointnonewlineortripledoublequote) '"""'
+
+stringliteral =
+  | singlelinestring
+  | multilinestring
 
 regexliteral =
-  | '/' [^/]+ '/'
+  | '/' codepointnonewlineorforwardslash* '/'
 
-calltuplepostfix =
-  | '(' ... ')' // ignorenewline
-  | '(' nextline indent ... nextline dedent ')'
+nextcodeline =
+  | _? nextline (samedent comment nextline)*
+
+endcomma =
+  | _? ','
+
+listliteral =
+  | '[' _? ']' // ignorenewline
+  | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
+  | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
+
+dictliteral =
+  | '{' _? '}' // ignorenewline
+  | '{' _? infixexpression _? ':' _? infixexpression (_? ',' _? infixexpression _? ':' _? infixexpression)*  endcomma? _? '}' // ignorenewline
+  | '{' nextcodeline indent infixexpression _? ':' _? infixexpression (_? ',' _? infixexpression _? ':' _? infixexpression)*  endcomma? nextcodeline dedent '}'
+  | '{' nextcodeline indent infixexpression _? ':' _? dictblock (_? ','? nextcodeline samedent infixexpression _? ':' _? dictblock)* nextcodeline dedent '}'
+
+dictblock =
+  | nextcodeline indent infixexpression _? ':' _? (infixexpression | dictblock) endcomma? nextcodeline dedent
+
+tupleliteral =
+  | '(' _? ')' // ignorenewline
+  | '(' _? infixexpression endcomma _? ')' // ignorenewline
+  | '(' _? infixexpression (_? ',' _? infixexpression)+ endcomma? ')' // ignorenewline
+  | '(' nextcodeline indent infixexpression (nextcodeline samedent infixexpression) endcomma? nextcodeline dedent ')'
+
+namedtupleliteral =
+  | '(' _? ':' _?  ')' // ignorenewline
+  | '(' _? identifier _? ':' _? infixexpression (_? ',' _? identifier _? ':' _? infixexpression)* endcomma? ')' // ignorenewline
+  | '(' nextcodeline indent identifier _? ':' _? infixexpression (nextcodeline samedent identifier _? ':' _? infixexpression) endcomma? nextcodeline dedent ')'
+
+symbolliteral =
+  | '$' identifier
+  | '$' '(' _? openexpression _? ')' // ignorenewline
+  | '$' '(' block ')'
+
+literal =
+  | numberliteral
+  | stringliteral
+  | regexliteral
+  | listliteral
+  | dictliteral
+  | tupleliteral
+  | namedtupleliteral
+  | symbolliteral
+
+commandnotationpostfix =
+  | _ symbolliteral
+  | _ numericliteral
+  | _ symbolliteral
+  | _ identifier
+
+callpostfix =
+  | '(' (_? identifier _? ':')? _? infixexpression (_? ',' (_? identifier _? ':')? _? infixexpression)* endcomma? _? ')' // ignorenewline
+  | '(' nextcodeline indent (identifier _? ':' _?)? infixexpression (nextcodeline samedent (identifier _? ':' _?)? infixexpression) endcomma? nextcodeline dedent ')'
+
+dotnotationpostfix =
+  | _? '.' identifier
+  | _? '.' '$' identifier
+  | _? '.' '$' '[' _? listarguments _? ']' // ignorenewline
+  | _? '.' '$' '{' _? dictarguments _? '}' // ignorenewline
+
+cascadingnotationpostfix =
+  | _? '~' identifier
+  | _? '~' '$' identifier
+  | _? '~' '$' '[' _? listarguments _? ']' // ignorenewline
+  | _? '~' '$' '{' _? dictarguments _? '}' // ignorenewline
+
+listelementpostfix =
+  | _? '[' _? listarguments _? ']' // ignorenewline
+
+listarguments =
+  | listargument (_? ',' _? listargument)* endcomma?
+
+listargument =
+  | infixexpression '!' _? ':' (_? (infixexpression _? ':' _?)? infixexpression)?
+  | (infixexpression (_? ':' _? infixexpression)? _?)? ':' infixexpression '!'?
+  | infixexpression
+
+dictelementpostfix =
+  | _? '{' _? dictarguments _? '}' // ignorenewline
+
+dictarguments =
+  | infixexpression (_? ',' _? infixexpression)* endcomma?
+
+range =
+  | infixexpression '!' _? '..' (_? (infixexpression _? '..' _?)? infixexpression)?
+  | (infixexpression (_? '..' _? infixexpression)? _?)? '..' infixexpression '!'?
+
+ternaryoperator =
+  | '(' _? infixexpression _? ')' '?' infixexpression ':' infixexpression  // ignorenewline
+  | '(' _? infixexpression _? ')' _ '?' _ infixexpression _ ':' _ infixexpression  // ignorenewline
+
+generatorcomprehension =
+  | '{' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
+
+listcomprehension =
+  | '[' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? ']' // ignorenewline
+
+dictcomprehension =
+  | '{' _? infixexpression _? ':' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
+
+comprehension =
+  | generatorcomprehension
+  | listcomprehension
+  | dictcomprehension
+
+return =
+  | 'return' nameseparation expressionnocontrolptimitive
+
+yield =
+  | 'yield' (_ 'from')? nameseparation expressionnocontrolptimitive
+
+raise =
+  | 'raise' nameseparation expressionnocontrolptimitive
+
+continue =
+  | 'continue' (_? '@' identifier)?
+
+break =
+  | 'break' (nameseparation expressionnocontrolptimitive)?  (_? '@' identifier)?
+
+spill =
+  | 'spill' (_? '@' identifier)?
+
+controlprimitive =
+  | return
+  | yield
+  | continue
+  | break
+  | raise
+  | spill
 
 subatompostfix =
   | commandnotationpostfix
-  | calltuplepostfix
+  | callpostfix
   | dotnotationpostfix
   | cascadingnotationpostfix
   | listelementpostfix
   | dictelementpostfix
 
 subatom =
-  |
-  | listliteral
+  | '(' _? tupleexpression _? ')' // ignorenewline
+  | literal
+  | noname
   | identifier
 
 atom =
-  | subatom (_? subatompostfix)+
+  | subatom subatompostfix+ [!?] (dotnotationpostfix | cascadingnotationpostfix)  subatompostfix* // nillables
+  | subatom subatompostfix+
 
 prefixatom =
   | operator+ atom
@@ -80,25 +260,281 @@ prepostfixatom =
   | atom
 
 infixexpression =
-  | prefixatom operator+ &(postfixatom | atom) infixexpression* // +x-y!, +x-y
-  | atom operator+ &(postfixatom | atom) infixexpression* // x-y!, x-y
-  | prepostfixatom _ operator+ _ infixexpression* // x! - +y, +x - +y, x - y, ...
+  | range
+  | prefixatom operator+ infixexpressionrest+
+  | atom operator+ infixexpressionrest+
+  | prepostfixatom _ operator+ _ infixexpressionrest+
+
+infixexpressionrest =
+  | prefixatom operator+ infixexpressionrest+
+  | atom operator+ infixexpressionrest+
+  | prepostfixatom _ operator+ _ infixexpressionrest+
+  | prepostfixatom
+
+simpleexpression =
+  | ternaryoperator
+  | infixexpression
   | prepostfixatom
 
 tupleexpression =
   | simpleexpression (_? ',' _? simpleexpression)*
 
-expression =
-  | conditionalexpression
+subexpression =
   | declaration
+  | conditionalexpression
+  | controlprimitive
+  | tupleexpression
+
+expression =
+  | subexpression (_? ';' _? expression)* (_? ';')?
+
+// Used in control primitives.
+// makes `return exp, exp` possible
+// but not `return return exp`
+// and not `yield break exp`
+subexpressionnocontrolptimitive =
+  | declaration
+  | conditionalexpression
+  | tupleexpression
+
+expressionnocontrolptimitive =
+  | subexpressionnocontrolptimitive (_? ';' _? expressionnocontrolptimitive)* (_? ';')?
+
+// Used in declarations and condiational expressions.
+// makes `if ... : if ... : exp` possible
+subexpressionnoblock =
+  | tupleexpression
+  | controlprimitive
+
+expressionnoblock =
+  | subexpressionnoblock (_? ';' _? expressionnoblock)* (_? ';')?
+
+// Used in declarations and conditional expressions.
+// makes `if ... : if ... : block` possible
+// also makes `if ... : if ... : exp` possible
+// also makes `if ... : exp else: exp` possible
+// but not `if ... : if ... : exp else: exp`
+// and not `if ... : if ... : exp for ... : exp`
+// and not `if ... : if ... : exp else: exp else: exp`
+// and not `if ... : for ... : exp else: exp`
+subexpressiononeinlinenest =
+  | declarationinlinenest
+  | conditionalexpressioninlinenest
+  | controlprimitive
+  | tupleexpression
+
+expressiononeinlinenest =
+  | subexpressiononeinlinenest (_? ';' _? expressiononeinlinenest)* (_? ';')?
+
+block =
+  | nextcodeline indent openexpression (nextcodeline samedent openexpression)* nextcodeline dedent
+
+lhspattern =
+  | '(' _? lhsname (_? ',' _? lhsname)* endcomma? _? ')' // ignorenewline
+  | '(' nextcodeline indent  lhsname (_? ',' _? lhsname)* endcomma? nextcodeline dedent ')'
+  | '[' _? lhsname (_? ',' _? lhsname)* endcomma? _? ']' // ignorenewline
+  | '[' nextcodeline indent  lhsname (_? ',' _? lhsname)* endcomma? nextcodeline dedent ']'
+  | '{' _? lhsname (_? ',' _? lhsname)* endcomma? _? '}' // ignorenewline
+  | '{' nextcodeline indent lhsname (_? ',' _? lhsname)* endcomma? nextcodeline dedent '}'
+  |  lhsname (_? ',' _? lhsname)*
+
+lhsname
+  | noname
+  | identifier
+  | '...' identifier?
+
+ifhead =
+  | infixexpression (_ 'where' _ infixexpression)?
+  | subjectdeclaration (_ 'where' _ infixexpression)?
+
+elifexpression =
+  | 'elif' namesaparation ifhead _? ':' _? expressiononeinlinenest
+  | 'elif' namesaparation ifhead _? ':' block
+
+elseexpression =
+  | 'else' _? ':' _? expressiononeinlinenest
+  | 'else' _? ':' block
+
+ifexpression =
+  | 'if' namesaparation ifhead _? ':' _? expressiononeinlinenest (_? elifexpression)* (_? elseexpression)?
+  | 'if' namesaparation ifhead _? ':' block (_? elifexpression)* (_? elseexpression)?
+
+ifexpressioninlinenest =
+  | 'if' namesaparation ifhead _? ':' _? expressionnoblock
+  | 'if' namesaparation ifhead _? ':' block
+
+whileexpression =
+  | 'while' namesaparation ifhead _? ':' _? expressiononeinlinenest (_? endexpression)?
+  | 'while' namesaparation ifhead _? ':' block endexpression?
+
+whileexpressioninlinenest =
+  | 'while' namesaparation ifhead _? ':' _? expressionnoblock
+  | 'while' namesaparation ifhead _? ':' block
+
+dowhileexpression =
+  | 'do' _? ':'  _? expressiononeinlinenest _? 'while' namesaparation ifhead _?
+  | 'do' _? ':' block 'while' namesaparation ifhead _?
+
+loopexpression =
+  | 'loop' _? ':' _? expressiononeinlinenest (_? endexpression)?
+  | 'loop' _? ':' block endexpression?
+
+loopexpressioninlinenest =
+  | 'loop' _? ':' _? expressionnoblock
+  | 'loop' _? ':' block
+
+endexpression =
+  | 'end' _? ':' _? expressiononeinlinenest
+  | 'end' _? ':' block
+
+forhead =
+  | 'var'? lhspattern _ 'in' _ infixexpression (_ 'where' _ infixexpression)?
+
+forexpression =
+  | 'for' namesaparation forhead _? ':' _? expressiononeinlinenest (_? endexpression)?
+  | 'for' namesaparation forhead _? ':' block endexpression?
+
+forexpressioninlinenest =
+  | 'for' namesaparation forhead _? ':' _? expressionnoblock
+  | 'for' namesaparation forhead _? ':' block
+
+ensureexpression =
+  | 'ensure' _? ':' _? expressiononeinlinenest
+  | 'ensure' _? ':' block
+
+exceptexpression =
+  | 'except' _ identifier _? ':' _? expressiononeinlinenest
+  | 'except' _ identifier _? ':' block
+
+tryexpression =
+  | 'try' _? ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' _? ':' block (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' 'var'? namesaparation lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' 'var'? namesaparation lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
+
+matchpattern =
+  | (identifier _?)? '(' _? matchatom (_? ',' _? matchatom)* endcomma? _? ')' // ignorenewline
+  | (identifier _?)? '(' nextcodeline indent  matchatom (_? ',' _? matchatom)* endcomma? nextcodeline dedent ')'
+  | '[' _? matchatom (_? ',' _? matchatom)* endcomma? _? ']' // ignorenewline
+  | '[' nextcodeline indent  matchatom (_? ',' _? matchatom)* endcomma? nextcodeline dedent ']'
+  | '{' _? matchatom (_? ',' _? matchatom)* endcomma? _? '}' // ignorenewline
+  | '{' nextcodeline indent matchatom (_? ',' _? matchatom)* endcomma? nextcodeline dedent '}'
+  |  matchatom (_? ',' _? matchatom)*
+
+matchatom
+  | infixexpression
+  | noname
+  | identifier
+  | '...' identifier?
+
+matchsingleexpression =
+  | ('|' | '!') _? matchpattern _? '=>' _? expressiononeinlinenest
+  | ('|' | '!') _? matchpattern _? '=>' block
+
+matchexpression =
+  | infixexpression? (_? matchsingleexpression)+
+  | infixexpression? (nextcodeline samedent matchsingleexpression)+
+
+matchexpressioninlinenest =
+  | infixexpression? _? ('|' | '!') _? matchpattern _? '=>' _? expressionnoblock
+  | infixexpression? _? ('|' | '!') _? matchpattern _? '=>' block
+
+iifexpression =
+  | callpostfix _? '=>' _? expressiononeinlinenest
+  | callpostfix _? '=>' block
+
+iifexpression =
+  | callpostfix _? '=>' _? expressiononeinlinenest
+  | callpostfix _? '=>' block
+
+iifeexpressioninlinenest =
+  | callpostfix _? '=>' _? expressionnoblock
+
+lambdaexpression =
+  | '|' _? functionparameters endcomma? _? '|' _? '=>' _? expressiononeinlinenest
+  | '|' _? functionparameters endcomma? _? '|' _? '=>' block
+
+lambdaexpressioninlinenest =
+  | '|' _? functionparameters endcomma? _? '|' _? '=>' _? expressionnoblock
+  | '|' _? functionparameters endcomma? _? '|' _? '=>' block
+
+importpathname =
+  | pathnamecodepoint+
+  | '..'
+  | '.'
+
+importpath =
+  | ('/' _?)? importpathname (_? '/' _? importpathname)*
+  | stringliteral
+
+importdeclaration =
+  | 'import' (_ identifier _? ':') _ importpath  '{' (_? identifier _? ':')? _? (identifier | operator+) (_? ',' (_? identifier _? ':')? _? (identifier | operator+) )* endcomma? _? '}' // ignorenewline
+  | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent (identifier _? ':' _?)? (identifier | operator+) (nextcodeline samedent (identifier _? ':' _?)? (identifier | operator+)) endcomma? nextcodeline dedent '}'
+  | 'import' (_ identifier _? ':') _ importpath
+
+exportdeclaration =
+  | 'export' _? '{' _? (identifier | operator+) (_? ',' _? (identifier | operator+))* endcomma? _? '}' // ignorenewline
+
+conditionalexpression =
+  | matchexpression
+  | ifexpression
+  | whileexpression
+  | dowhileexpression
+  | loopexpression
+  | forexpression
+  | tryexpression
+
+conditionalexpreinlinenest =
+  | matchexpressioninlinenest
+  | ifexpressioninlinenest
+  | whileexpressioninlinenest
+  | loopexpressioninlinenest
+  | forexpressioninlinenest
 
 declaration =
+  | iifeexpression
+  | lambdaexpression
   | subjectdeclaration
-  | typedeclaration
   | functiondeclaration
+  | typedeclaration
+  | abstdeclaration
+  | importdeclaration
+  | exportdeclaration
 
+declarationinlinenest =
+  | iifeexpressioninlinenest
+  | lambdaexpressioninlinenest
+  | subjectdeclarationinlinenest
+  | functiondeclarationinlinenest
+  | typedeclarationinlinenest
+  | abstdeclarationinlinenest
 
+functionparameters =
+  | functionparameter (_? ',' _? functionparameter)* endcomma?
 
+functionparameter =
+  | identifier ('.' lhspattern?)? _? ':' _? infixexpression
+  | identifier
+
+functionhead =
+  | 'fun' _ identifier _? '(' _? parameters _?')' // ignorenewline
+  | 'fun' _ identifier _? '(' nextcodeline indent parameters nextcodeline dedent ')'
+
+functiondeclaration =
+  | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
+  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | functionhead _? ':' block
+
+functiondeclarationinlinenest =
+  | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
+  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | functionhead _? ':' block
+
+// ========================================
+
+expression =
+  | integer
+  | identifier
 
 functiondeclaration =
   | 'fun' _ identifier _? '(' _? ')' (_ '=' _ expression | '=' !(operator) expression)
@@ -109,5 +545,3 @@ typedeclaration =
 
 subjectdeclaration =
   | ('let'/'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
-
-
