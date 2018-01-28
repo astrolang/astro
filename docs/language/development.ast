@@ -1,7 +1,7 @@
 # Astro 0.1.14a
 # 28/01/18
 # Remove '(' block ')' from subatom rule.
-# I discovered that the wrt below is not really possible. This is possible but not that.
+# I discovered that the wart mentioned below is not really possible. This is possible but not that.
 if y == b: if x > 5: (
     print 'hello'
     foo(45)
