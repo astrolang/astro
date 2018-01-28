@@ -1,5 +1,7 @@
 # Astro 0.1.14a
 # 28/01/18
+# Remove '(' block ')' from subatom rule.
+
 # WART
 # This ugly code is valid in Astro
 if y == b: if x > 5: (
@@ -10,9 +12,7 @@ if y == b: if x > 5: (
 else:
     print z
 # We can get rid of this by making sure expressionnoblock rule does not
-# contain at `'(' block ')'` the subatom level. or by getting rid of that entirely
-# also expressionnoblock must not have rule with block subrule, i.e. its version of
-# if, else, elifs etc. must not have blocks.
+# contain at `'(' block ')'` the subatom level. 
 
 # Astro 0.1.14a
 # 27/01/18
