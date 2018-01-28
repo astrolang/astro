@@ -172,8 +172,9 @@ listarguments =
   | listargument (_? ',' _? listargument)* endcomma?
 
 listargument =
-  | infixexpression '!' _? ':' (_? (infixexpression _? ':' _?)? infixexpression)?
-  | (infixexpression (_? ':' _? infixexpression)? _?)? ':' infixexpression '!'?
+  | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression '!'?)?
+  | ':' (_? infixexpression _? ':')? _? infixexpression '!'?
+  | ':'
   | infixexpression
 
 dictelementpostfix =
@@ -183,8 +184,8 @@ dictarguments =
   | infixexpression (_? ',' _? infixexpression)* endcomma?
 
 range =
-  | infixexpression '!' _? '..' (_? (infixexpression _? '..' _?)? infixexpression)?
-  | (infixexpression (_? '..' _? infixexpression)? _?)? '..' infixexpression '!'?
+  | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
+  | '..' (_? infixexpression _? '..')? _? infixexpression
 
 ternaryoperator =
   | '(' _? infixexpression _? ')' '?' infixexpression ':' infixexpression  // ignorenewline
