@@ -1,6 +1,21 @@
 # Astro 0.1.14a
 # 28/01/18
 # Remove '(' block ')' from subatom rule.
+# I discovered that the wrt below is not really possible. This is possible but not that.
+if y == b: if x > 5: (
+    print 'hello'
+    foo(45)
+)
+else:
+    print z
+# Irrespective, it complicates the compiler and requires me to deal with scoping issues.
+print(
+    (
+        print name;
+        name
+    ),
+    age
+)
 
 # WART
 # This ugly code is valid in Astro
@@ -12,7 +27,7 @@ if y == b: if x > 5: (
 else:
     print z
 # We can get rid of this by making sure expressionnoblock rule does not
-# contain at `'(' block ')'` the subatom level. 
+# contain at `'(' block ')'` the subatom level.
 
 # Astro 0.1.14a
 # 27/01/18
