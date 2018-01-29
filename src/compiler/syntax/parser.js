@@ -7,8 +7,7 @@ const { print } = require('../utils');
  * - This compiler uses a recursive descent parser with no lexing phase.
  * - There is no lexing phase because the language is whitespace sensitive.
  * - Each parse function reverts its state when its unable to parse successfully.
- * - Inner IIFEs are used to make handling parsing failure within a parse function
- * clear and understandable.
+ * - Inner IIFEs are used to make handling parsing failure within a parse function clear.
  */
 class Parser {
   constructor(code) {
@@ -21,6 +20,7 @@ class Parser {
     // Information
     this.column = 0;
     this.line = 1;
+    this.ruleStarts = [];
     // Characters
     this.digitBinary = '01';
     this.digitOctal = '01234567';
@@ -59,12 +59,13 @@ class Parser {
   }
 
   // Reset properties.
-  reset(lastPosition, lastParseData, lastIndentCount, column, line) {
+  reset(lastPosition, lastParseData, lastIndentCount, column, line, popRuleStarts) {
     this.lastPosition = lastPosition;
     this.lastParseData = lastParseData !== null ? lastParseData : this.lastParseData;
     this.lastIndentCount = lastIndentCount !== null ? lastIndentCount : this.lastIndentCount;
     this.column = column;
     this.line = line;
+    if (popRuleStarts === true) this.ruleStarts.pop();
   }
 
   // Try if a set of parse functions will parse successfully.
@@ -75,7 +76,7 @@ class Parser {
     } = this;
 
     let index = 0;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Run each parsefunction one after the other.
     while (index < parseFunctions.length && this[`${parseFunctions[index]}`].success) {
@@ -85,12 +86,12 @@ class Parser {
     // Check if all parseFunctions parsed successfully.
     if (index === parseFunctions.length) {
       // Update parseData.
-      parseData = { success: true, data: null };
+      parseData = { success: true, message: null, ast: null };
       return parseData;
     }
 
     // Revert state, lastParseData included.
-    this.reset(lastPosition, lastParseData, null, column, line);
+    this.reset(lastPosition, lastParseData, null, column, line, true);
 
     return parseData;
   }
@@ -102,7 +103,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Check if input string matches the subsequent chars in code.
     if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + str.length + 1)) {
@@ -110,7 +111,7 @@ class Parser {
       this.lastPosition += str.length;
 
       // Update parseData.
-      parseData = { success: true, data: str };
+      parseData = { success: true, message: null, ast: str };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -118,7 +119,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -130,7 +131,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     (() => {
       // Consume '\r'?.
@@ -140,7 +141,7 @@ class Parser {
       if (!this.parseToken('\n').success) return null;
 
       // Update parseData.
-      parseData = { success: true, data: null };
+      parseData = { success: true, message: null, ast: null };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -156,7 +157,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -168,7 +169,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     (() => {
       // Consume newline.
@@ -197,7 +198,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, data: null };
+      parseData = { success: true, message: null, ast: null };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -208,7 +209,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -222,7 +223,7 @@ class Parser {
 
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -237,7 +238,7 @@ class Parser {
       this.lastIndentCount = indentCount;
 
       // Update parseData.
-      parseData = { success: true, data: indentCount };
+      parseData = { success: true, message: null, ast: indentCount };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -245,7 +246,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -259,7 +260,7 @@ class Parser {
 
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -270,7 +271,7 @@ class Parser {
     // Check if current indentation count is the same as previous indentation.
     if (indentCount === this.lastIndentCount) {
       // Update parseData.
-      parseData = { success: true, data: indentCount };
+      parseData = { success: true, message: null, ast: indentCount };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -278,7 +279,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -292,7 +293,7 @@ class Parser {
 
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -307,7 +308,7 @@ class Parser {
       this.lastIndentCount = indentCount;
 
       // Update parseData.
-      parseData = { success: true, data: indentCount };
+      parseData = { success: true, message: null, ast: indentCount };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -315,7 +316,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -328,7 +329,7 @@ class Parser {
     } = this;
 
     const token = [];
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Consume the first character. [a-zA-Z]
     if (this.identifierBeginChar.indexOf(this.peekChar()) > -1) {
@@ -339,7 +340,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, data: token.join('') };
+      parseData = { success: true, message: null, ast: token.join('') };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -347,7 +348,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -360,7 +361,7 @@ class Parser {
     } = this;
 
     const token = [];
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Consume operator chars. [+-*/\\^%!><=÷×≠≈¹²³√]+
     while (this.operators.indexOf(this.peekChar()) > -1) {
@@ -370,7 +371,7 @@ class Parser {
     // Check if it was able to consume at least an operator.
     if (token.length > 0) {
       // Update parseData.
-      parseData = { success: true, data: token.join('') };
+      parseData = { success: true, message: null, ast: token.join('') };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -378,7 +379,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -391,7 +392,7 @@ class Parser {
     } = this;
 
     const token = [];
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Consume digitDecimal. [0-9]+
     while (this.digitDecimal.indexOf(this.peekChar()) > -1) {
@@ -401,7 +402,7 @@ class Parser {
     // Check if it was able to consume at least a digitDecimal.
     if (token.length > 0) {
       // Update parseData.
-      parseData = { success: true, data: token.join('') };
+      parseData = { success: true, message: null, ast: token.join('') };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -409,7 +410,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -422,7 +423,7 @@ class Parser {
     } = this;
 
     const identifiers = [];
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     (() => {
       // Consume identifier.
@@ -459,7 +460,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, data: identifiers };
+      parseData = { success: true, message: null, ast: identifiers };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -470,7 +471,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -493,7 +494,7 @@ class Parser {
     } = this;
 
     let count = 0;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     // Consume spaces. [ \t]+
     while (this.space.indexOf(this.peekChar()) > -1) {
@@ -504,7 +505,7 @@ class Parser {
     // Check if it was able to consume at least one whitespace.
     if (count > 0) {
       // Update parseData.
-      parseData = { success: true, data: null };
+      parseData = { success: true, message: null, ast: null };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -512,7 +513,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -528,7 +529,7 @@ class Parser {
     let mutability;
     let identifier;
     let expression;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     (() => {
       // Consume ('let'/'var').
@@ -592,7 +593,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, data: [mutability, identifier, expression] };
+      parseData = { success: true, message: null, ast: [mutability, identifier, expression] };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -603,7 +604,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -618,7 +619,7 @@ class Parser {
 
     let identifier;
     let expression;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     (() => {
       // Consume ('fun').
@@ -693,7 +694,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, data: [identifier, expression] };
+      parseData = { success: true, message: null, ast: [identifier, expression] };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -704,7 +705,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
@@ -721,7 +722,7 @@ class Parser {
     let identifier;
     let supertypes = null;
     let declaration = null;
-    let parseData = { success: false, data: null };
+    let parseData = { success: false, message: null, ast: null };
 
     (() => {
       // Consume ('type').
@@ -837,7 +838,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, data: [identifier, supertypes, declaration] };
+      parseData = { success: true, message: null, ast: [identifier, supertypes, declaration] };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -848,7 +849,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
+    this.reset(lastPosition, null, null, column, line, true);
 
     return parseData;
   }
