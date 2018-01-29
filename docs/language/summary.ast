@@ -160,7 +160,7 @@ SPECIFYING TYPES
     var identifier #: Str | Int
 
     # Intersection types.
-    var pegasus #: Horse & Bird
+    var pegasus #: Horse & Wing
 
 SOME BUILT-IN TYPES
     var index = UInt(2_000) # Unsigned integer type.
@@ -1013,12 +1013,12 @@ TYPE CONVERSION
 
 INHERITANCE
     # Types can inherit from one or more parent types in Astro.
-    type Animal
-    type Bird <: Animal # Bird type inherits fields from Animal.
-    type Horse <: Animal  # Horse type inherits fields from Animal.
+    type Person
+    type Parent1 <: Person # Parent1 type inherits fields from Person.
+    type Parent2 <: Person  # Parent2 type inherits fields from Person.
 
     # Multiple inheritance is allowed as well.
-    type Pegasus <: Horse, Bird:  # Pegasus inherits Horse, Bird.
+    type Child <: Parent1, Parent2  # inherits Parent1, Parent2.
 
     # Astro has ways of resolving diamond problems, dicussed in "Method Ambiguities" and "Constructor Train"
     # below, but it is advised to use composition where inheritance does not make sense.
@@ -1043,12 +1043,12 @@ MULTIPLE DISPATCH
 METHOD AMBIGUITIES
     # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
     # Ambiguity error is thrown when a type inherits from types that have different specific implementations of function.
-    fun sound(bird) = print('chirp!') #: Bird
-    fun sound(horse) = print('neigh!') #: Horse
-    type Pegasus <: Horse, Bird # Error!
+    fun speak(parent1) = print('mom!') #: Parent1
+    fun speak(parent2) = print('dad!') #: Parent2
+    type Child <: Parent1, Parent2 # Error!
 
-    # To resolve this issue, the `sound` function need to be overloaded for `Pegasus` type.
-    fun sound(pegasus) = print('neigh! chirp!') #: Pegasus
+    # To resolve this issue, the `sound` function need to be overloaded for `Child` type.
+    fun speak(child) = print('child!') #: Child
 
     # Ambiguity error is also thrown when the arrangement of type paramters causes multiple dispatch ambiguity.
     fun foo(a, b) = print('fizz') #: (Int32, Real)
