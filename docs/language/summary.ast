@@ -1020,6 +1020,11 @@ INHERITANCE
     # Multiple inheritance is allowed as well.
     type Pegasus <: Horse, Bird:  # Pegasus inherits Horse, Bird.
 
+    # Astro has ways of resolving diamond problems, dicussed in "Method Ambiguities" and "Constructor Train"
+    # below, but it is advised to use composition where inheritance does not make sense.
+    type Car <: Engine #: This makes no sense, a `Car` is not an `Engine`
+    type Car = let engine #: This makes sense, a `Car` can have an `Engine`
+
 MULTIPLE DISPATCH
     # Astro uses a covariant multiple dispatch to resolve function calls.
     # The most specific function is always called based on the number and types of arguments passed.
@@ -1035,7 +1040,7 @@ MULTIPLE DISPATCH
     # `super` can be used in this case. It calls a version with a parent type.
     foo(4, 5) as (_, super) # generic
 
-METHOD RESOLUTION AMBIGUITIES
+METHOD AMBIGUITIES
     # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
     # Ambiguity error is thrown when a type inherits from types that have different specific implementations of function.
     fun sound(bird) = print('chirp!') #: Bird
