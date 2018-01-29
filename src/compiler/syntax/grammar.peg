@@ -1,3 +1,117 @@
+digitbinary =
+  | [0-1]
+
+digitoctal =
+  | [0-7]
+
+digitdecimal =
+  | [0-9]
+
+digithexadecimal =
+  | [0-9a-fA-F]
+
+integerbinaryliteral =
+  | '0b' digitbinary ('_'? digitbinary)*
+
+integeroctalliteral  =
+  | '0o' digitoctal ('_'? digitoctal)*
+
+integerdecimalliteral  =
+  | digitdecimal ('_'? digitdecimal)*
+
+integehexadecimalliteral  =
+  | '0x' digithexadecimal ('_'? digithexadecimal)*
+
+integerliteral =
+  | integerbinaryliteral
+  | integeroctalliteral
+  | integerdecimalliteral
+  | integerhexadecimalliteral
+
+floatbinaryliteral  =
+  | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+  | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+
+floatoctalliteral  =
+  | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+  | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+
+floatdecimalliteral  =
+  | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
+  | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
+
+floathexadecimalliteral  =
+  | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+  | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
+
+floatliteral =
+  | floatbinaryliteral
+  | floatoctalliteral
+  | floatdecimalliteral
+  | floathexadecimalliteral
+
+numericliteral =
+  | integerliteral
+  | floatliteral
+
+coefficientexpression =
+  | integerbinaryliteral identifier
+  | integeroctalliteral identifier
+  | integerdecimalliteral identifier
+  | floatbinaryliteral identifier
+  | floatoctalliteral identifier
+  | floatdecimalliteral identifier
+
+booleanliteral =
+  | 'true'
+  | 'false'
+
+noname =
+  | '_'
+
+identifierbeginchar =
+  | [a-zA-Z_] // TODO
+
+identifierendchar =
+  | identifierbeginchar
+  | digit
+
+identifier =
+  | identifierbeginchar identifierendchar*
+
+operatorchar =
+  | [+\-*/\\^%!><=÷×≠≈¹²³√]// TODO
+
+pathnamechar =
+  | identifierendchar | [\-] // TODO
+
+charnonewlineorsinglequote =
+  | .+ excluding(newline | "'") // TODO
+
+charnonewlineordoublequote =
+  | .+ excluding(newline | '"') // TODO
+
+charnonewlineortriplesinglequote =
+  | .+ excluding(newline | "'''") // TODO
+
+charnonewlineortripledoublequote =
+  | .+ excluding(newline | '"""') // TODO
+
+charnohashequal =
+  | .+ excluding('#=') // TODO
+
+charnonewline =
+  | .+ excluding(newline) // TODO
+
+charnonewlineorforwardslash =
+  | .+ excluding(newline | '/') // TODO
+
+space =
+  | [ \t]
+
+nameseparation =
+  | (!(identifier | numericliteral) | _)
+
 indent =
   | ' '+
 
@@ -14,30 +128,6 @@ newline =
 nextline =
   | newline (_? newline)*
 
-integer =
-  | [0-9]+
-
-operator =
-  | [+-*/\\^%!><=÷×≠≈¹²³√]+
-
-identifier =
-  | [a-zA-Z][a-zA-Z_0-9]*
-
-_ =
-  | [ \t]+
-
-names =
-  | identifier (_? ',' _? identifier)*
-
-
-// ========================================
-
-noname =
-  | '_'
-
-space =
-  | [ \t]
-
 linecontinuation =
   | space* '...' space* nextline samedent
 
@@ -45,57 +135,30 @@ _ =
   | linecontinuation
   | spaces
 
-nameseparation =
-  | (!(identifier | numericliteral) | _)
-
-pathnamecodepoint =
-  | // TODO
-
-codepointnonewlineorsinglequote =
-  | .+ excluding(newline | "'") // TODO
-
-codepointnonewlineordoublequote =
-  | .+ excluding(newline | '"') // TODO
-
-codepointnonewlineortriplesinglequote =
-  | .+ excluding(newline | "'''") // TODO
-
-codepointnonewlineortripledoublequote =
-  | .+ excluding(newline | '"""') // TODO
-
-codepointnohashequal =
-  | .+ excluding('#=') // TODO
-
-codepointnonewline =
-  | .+ excluding(newline) // TODO
-
-codepointnonewlineorforwardslash =
-  | .+ excluding(newline | '/') // TODO
-
 singlelinecomment =
-  | "#" codepointnonewline* &(newline)
+  | "#" charnonewline* &(newline)
 
 multilinecomment =
-  | "#=" codepointnohashequal* (multilinecomment codepointnohashequal*)? '=#' _? &(newline)
+  | "#=" charnohashequal* (multilinecomment charnohashequal*)? '=#' _? &(newline)
 
 comment =
   | singlelinecomment
   | multilinecomment
 
 singlelinestring =
-  | "'" codepointnonewlineorsinglequote* "'" (nextcodeline samedent "'" codepointnonewlineorsinglequote* "'")*
-  | '"' codepointnonewlineordoublequote* '"' (nextcodeline samedent '"' codepointnonewlineordoublequote* '"')*
+  | "'" charnonewlineorsinglequote* "'" (nextcodeline samedent "'" charnonewlineorsinglequote* "'")*
+  | '"' charnonewlineordoublequote* '"' (nextcodeline samedent '"' charnonewlineordoublequote* '"')*
 
 multilinestring =
-  | "'''" codepointnonewlineortriplesinglequote* (nextline samedent codepointnonewlineortriplesinglequote) "'''"
-  | '"""' codepointnonewlineortripledoublequote* (nextline samedent codepointnonewlineortripledoublequote) '"""'
+  | "'''" charnonewlineortriplesinglequote* (nextline samedent charnonewlineortriplesinglequote) "'''"
+  | '"""' charnonewlineortripledoublequote* (nextline samedent charnonewlineortripledoublequote) '"""'
 
 stringliteral =
   | singlelinestring
   | multilinestring
 
 regexliteral =
-  | '/' codepointnonewlineorforwardslash* '/'
+  | '/' charnonewlineorforwardslash* '/'
 
 nextcodeline =
   | _? nextline (samedent comment nextline)*
@@ -105,6 +168,8 @@ endcomma =
 
 listliteral =
   | '[' _? ']' // ignorenewline
+  | '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
+  | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
   | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
   | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
 
@@ -134,7 +199,8 @@ symbolliteral =
   | '$' '(' block ')'
 
 literal =
-  | numberliteral
+  | booleanliteral
+  | numericliteral
   | stringliteral
   | regexliteral
   | listliteral
@@ -154,10 +220,10 @@ callpostfix =
   | '(' nextcodeline indent (identifier _? ':' _?)? infixexpression (nextcodeline samedent (identifier _? ':' _?)? infixexpression) endcomma? nextcodeline dedent ')'
 
 dotnotationpostfix =
-  | _? '.' identifier
-  | _? '.' '$' identifier
-  | _? '.' '$' '[' _? listarguments _? ']' // ignorenewline
-  | _? '.' '$' '{' _? dictarguments _? '}' // ignorenewline
+  | [!?] _? '.' identifier
+  | [!?] _? '.' '$' identifier
+  | [!?] _? '.' '$' '[' _? listarguments _? ']' // ignorenewline
+  | [!?] _? '.' '$' '{' _? dictarguments _? '}' // ignorenewline
 
 cascadingnotationpostfix =
   | _? '~' identifier
@@ -240,19 +306,21 @@ subatompostfix =
   | dictelementpostfix
 
 subatom =
-  | '(' _? tupleexpression _? ')' // ignorenewline
+  | '(' _? tupleexpression _? ')' identifier? // ignorenewline
+  | '(' nextcodeline indent simpleexpression (_? ',' _? simpleexpression)* (_? ',')? nextcodeline dedent ')' identifier?
+  | coefficientexpression
   | literal
   | noname
   | identifier
 
 atom =
-  | subatom subatompostfix+ [!?] (dotnotationpostfix | cascadingnotationpostfix)  subatompostfix* // nillables
   | subatom subatompostfix+
 
 prefixatom =
   | operator+ atom
 
 postfixatom =
+  | integralliteral '.'
   | atom operator+
 
 prepostfixatom =
@@ -278,7 +346,7 @@ simpleexpression =
   | prepostfixatom
 
 tupleexpression =
-  | simpleexpression (_? ',' _? simpleexpression)*
+  | simpleexpression (_? ',' _? simpleexpression)* (_? ',')?
 
 subexpression =
   | declaration
@@ -319,8 +387,8 @@ expressionnoblock =
 // and not `if ... : if ... : exp else: exp else: exp`
 // and not `if ... : for ... : exp else: exp`
 subexpressiononeinlinenest =
-  | declarationinlinenest
-  | conditionalexpressioninlinenest
+  | declarationoneinlinenest
+  | conditionalexpressiononeinlinenest
   | controlprimitive
   | tupleexpression
 
@@ -360,7 +428,7 @@ ifexpression =
   | 'if' namesaparation ifhead _? ':' _? expressiononeinlinenest (_? elifexpression)* (_? elseexpression)?
   | 'if' namesaparation ifhead _? ':' block (_? elifexpression)* (_? elseexpression)?
 
-ifexpressioninlinenest =
+ifexpressiononeinlinenest =
   | 'if' namesaparation ifhead _? ':' _? expressionnoblock
   | 'if' namesaparation ifhead _? ':' block
 
@@ -368,7 +436,7 @@ whileexpression =
   | 'while' namesaparation ifhead _? ':' _? expressiononeinlinenest (_? endexpression)?
   | 'while' namesaparation ifhead _? ':' block endexpression?
 
-whileexpressioninlinenest =
+whileexpressiononeinlinenest =
   | 'while' namesaparation ifhead _? ':' _? expressionnoblock
   | 'while' namesaparation ifhead _? ':' block
 
@@ -380,7 +448,7 @@ loopexpression =
   | 'loop' _? ':' _? expressiononeinlinenest (_? endexpression)?
   | 'loop' _? ':' block endexpression?
 
-loopexpressioninlinenest =
+loopexpressiononeinlinenest =
   | 'loop' _? ':' _? expressionnoblock
   | 'loop' _? ':' block
 
@@ -395,7 +463,7 @@ forexpression =
   | 'for' namesaparation forhead _? ':' _? expressiononeinlinenest (_? endexpression)?
   | 'for' namesaparation forhead _? ':' block endexpression?
 
-forexpressioninlinenest =
+forexpressiononeinlinenest =
   | 'for' namesaparation forhead _? ':' _? expressionnoblock
   | 'for' namesaparation forhead _? ':' block
 
@@ -436,7 +504,7 @@ matchexpression =
   | infixexpression? (_? matchsingleexpression)+
   | infixexpression? (nextcodeline samedent matchsingleexpression)+
 
-matchexpressioninlinenest =
+matchexpressiononeinlinenest =
   | infixexpression? _? ('|' | '!') _? matchpattern _? '=>' _? expressionnoblock
   | infixexpression? _? ('|' | '!') _? matchpattern _? '=>' block
 
@@ -448,19 +516,19 @@ iifexpression =
   | callpostfix _? '=>' _? expressiononeinlinenest
   | callpostfix _? '=>' block
 
-iifeexpressioninlinenest =
+iifeexpressiononeinlinenest =
   | callpostfix _? '=>' _? expressionnoblock
 
 lambdaexpression =
   | '|' _? functionparameters endcomma? _? '|' _? '=>' _? expressiononeinlinenest
   | '|' _? functionparameters endcomma? _? '|' _? '=>' block
 
-lambdaexpressioninlinenest =
+lambdaexpressiononeinlinenest =
   | '|' _? functionparameters endcomma? _? '|' _? '=>' _? expressionnoblock
   | '|' _? functionparameters endcomma? _? '|' _? '=>' block
 
 importpathname =
-  | pathnamecodepoint+
+  | pathnamechar+
   | '..'
   | '.'
 
@@ -485,12 +553,12 @@ conditionalexpression =
   | forexpression
   | tryexpression
 
-conditionalexpreinlinenest =
-  | matchexpressioninlinenest
-  | ifexpressioninlinenest
-  | whileexpressioninlinenest
-  | loopexpressioninlinenest
-  | forexpressioninlinenest
+conditionalexpressiononeinlinenest =
+  | matchexpressiononeinlinenest
+  | ifexpressiononeinlinenest
+  | whileexpressiononeinlinenest
+  | loopexpressiononeinlinenest
+  | forexpressiononeinlinenest
 
 declaration =
   | iifeexpression
@@ -502,36 +570,110 @@ declaration =
   | importdeclaration
   | exportdeclaration
 
-declarationinlinenest =
-  | iifeexpressioninlinenest
-  | lambdaexpressioninlinenest
-  | subjectdeclarationinlinenest
-  | functiondeclarationinlinenest
-  | typedeclarationinlinenest
-  | abstdeclarationinlinenest
+declarationoneinlinenest =
+  | iifeexpressiononeinlinenest
+  | lambdaexpressiononeinlinenest
+  | subjectdeclarationoneinlinenest
+  | functiondeclarationonrinlinenest
+  | typedeclarationoneinlinenest
+  | abstdeclarationoneinlinenest
+
+typehead =
+  | ('type' | 'abst') _ identifier
+
+subtype =
+  | identifier (_? '(' _? functionparameters _? ')')? // ignorenewline
+  | identifier (_? '(' nextcodeline indent functionparameters nextcodeline dedent ')')?
+
+typebody =
+  | subjectdeclaration
+  | '|'? _? subtype (_? '|' subtype)*
+
+typebodyoneinlinenest =
+  | subjectdeclarationoneinlinenest
+  | '|'? _? subtype (_? '|' subtype)*
+
+typeblock =
+  | nextcodeline indent typebody (nextcodeline samedent typebody)* nextcodeline dedent
+
+typedeclaration =
+  | typehead _? '(' _? parameters _?')' (_? '<:' _? names)?// ignorenewline
+  | typehead _ identifier _? '(' nextcodeline indent parameters nextcodeline dedent ')' (_? '<:' _? names)?
+  | typehead (_ '=' _ | '=' !operator | _? ':' _?) typebodyoneinlinenest
+  | typehead (_ '=' _ | '=' !operator) nextcodeline indent typebody nextcodeline dedent
+  | typehead _? ':' typeblock
+
+typedeclarationoneinlinenest =
+  | typehead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
+  | typehead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | typehead _? ':' block
 
 functionparameters =
   | functionparameter (_? ',' _? functionparameter)* endcomma?
 
 functionparameter =
   | identifier ('.' lhspattern?)? _? ':' _? infixexpression
+  | lhspattern
   | identifier
 
 functionhead =
-  | 'fun' _ identifier _? '(' _? parameters _?')' // ignorenewline
-  | 'fun' _ identifier _? '(' nextcodeline indent parameters nextcodeline dedent ')'
+  | 'fun' _ identifier _? '(' _? functionparameters _?')' // ignorenewline
+  | 'fun' _ identifier _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
 
 functiondeclaration =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
   | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
   | functionhead _? ':' block
 
-functiondeclarationinlinenest =
+functiondeclarationoneinlinenest =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
   | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
   | functionhead _? ':' block
 
-// ========================================
+subjecthead =
+  | ('let' | 'var') nameseparation lhspattern
+  | ('let' | 'var') nameseparation identifier (_ identifier)+
+
+subjectdeclaration =
+  | subjecthead (_ '=' _ | '=' !operator) expressiononeinlinenest
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+
+subjectdeclarationoneinlinenest =
+  | subjecthead (_ '=' _ | '=' !operator) expressionnoblock
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+
+// =====================================================
+
+indent =
+  | ' '+
+
+samedent =
+  | ' '+
+  | ''
+
+dedent =
+  | ' '+
+
+newline =
+  | '\r'? '\n'
+
+nextline =
+  | newline (_? newline)*
+
+integer =
+  | [0-9]+
+
+operator =
+  | [+-*/\\^%!><=÷×≠≈¹²³√]+
+
+identifier =
+  | [a-zA-Z][a-zA-Z_0-9]*
+
+_ =
+  | [ \t]+
+
+names =
+  | identifier (_? ',' _? identifier)*
 
 expression =
   | integer
