@@ -8,7 +8,8 @@ program = { expressions }
 subjectDeclaration = {
   name,
   privateAccess,
-  mutability, value:expression } # AST-L2
+  mutability, value:expression
+} # AST-L2
 ```
 
 ## FUNCTION DECLARATION
