@@ -1,3 +1,5 @@
+/* eslint-disable no-constant-condition */
+// eslint-disable-next-line no-unused-vars
 const { print } = require('../utils');
 
 /**
@@ -20,15 +22,16 @@ class Parser {
     this.column = 0;
     this.line = 1;
     // Characters
-    this.digits = '0123456789';
-    this.digitsBin = '01';
-    this.digitsOct = '01234567';
-    this.digitsHex = '0123456789ABCDEFabcdef';
-    this.alphabets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; // Unicode?
-    this.spaces = ' \t'; // Unicode?
+    this.digitBinary = '01';
+    this.digitOctal = '01234567';
+    this.digitDecimal = '0123456789';
+    this.digitHexadecimal = '0123456789ABCDEFabcdef';
+    this.noName = '_';
+    this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
+    this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
     this.operators = '+-*/\\^%!><=÷×≠≈¹²³√'; // Unicode?
-    this.identifierBegin = `${this.alphabets}_`;
-    this.identifierMid = `${this.alphabets}${this.digits}_`;
+    this.pathNameChar = `${this.identifierEndChar}-`; // Unicode?
+    this.space = ' \t'; // Unicode?
   }
 
   // Increment number line count.
@@ -328,10 +331,10 @@ class Parser {
     let parseData = { success: false, data: null };
 
     // Consume the first character. [a-zA-Z]
-    if (this.identifierBegin.indexOf(this.peekChar()) > -1) {
+    if (this.identifierBeginChar.indexOf(this.peekChar()) > -1) {
       token.push(this.eatChar());
       // Consume remaining part of identifier. [a-zA-Z_0-9]*
-      while (this.identifierMid.indexOf(this.peekChar()) > -1) {
+      while (this.identifierEndChar.indexOf(this.peekChar()) > -1) {
         token.push(this.eatChar());
       }
 
@@ -390,12 +393,12 @@ class Parser {
     const token = [];
     let parseData = { success: false, data: null };
 
-    // Consume digits. [0-9]+
-    while (this.digits.indexOf(this.peekChar()) > -1) {
+    // Consume digitDecimal. [0-9]+
+    while (this.digitDecimal.indexOf(this.peekChar()) > -1) {
       token.push(this.eatChar());
     }
 
-    // Check if it was able to consume at least a digit.
+    // Check if it was able to consume at least a digitDecimal.
     if (token.length > 0) {
       // Update parseData.
       parseData = { success: true, data: token.join('') };
@@ -493,7 +496,7 @@ class Parser {
     let parseData = { success: false, data: null };
 
     // Consume spaces. [ \t]+
-    while (this.spaces.indexOf(this.peekChar()) > -1) {
+    while (this.space.indexOf(this.peekChar()) > -1) {
       this.eatChar();
       count += 1;
     }
