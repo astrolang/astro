@@ -1,7 +1,7 @@
 const { print } = require('../utils');
 const Parser = require('./parser');
 
-
+print('========= IDENTIFIER =========');
 print('name  nom');
 print(new Parser('name  nom').parseIdentifier());
 print('name_ 5');
@@ -14,6 +14,7 @@ print('_na99_me_ age');
 print(new Parser('_na99_me_ age').parseIdentifier());
 print('_na99_me_ age');
 print(new Parser('_na99_me_ age').parseIdentifier());
+print('========= INTEGER =========');
 print('99');
 print(new Parser('99').parseInteger());
 print('9978');
@@ -22,22 +23,26 @@ print('997890e747');
 print(new Parser('997890e747').parseInteger());
 print(' 997890e747'); // fail
 print(new Parser(' 997890e747').parseInteger()); // fail
+print('========= SPACES =========');
 print('\t\t997890e747');
 print(new Parser('\t\t997890e747').parseSpaces());
 print(' \t997890e747');
 print(new Parser(' \t997890e747').parseSpaces());
 print('     997890e747');
 print(new Parser('     997890e747').parseSpaces());
+print('========= ARBITRARY TOKEN =========');
 print('let');
 print(new Parser('let').parseToken('let'));
 print('var');
 print(new Parser('var').parseToken('var'));
 print('name');
 print(new Parser('name').parseToken('name'));
+print('========= EXPRESSION =========');
 print('name');
 print(new Parser('name').parseExpression());
 print('4455');
 print(new Parser('4455').parseExpression());
+print('========= SUBJECT DECLARATION =========');
 print('var 4 = age'); // fail
 print(new Parser('var 4 = age').parseSubjectDeclaration()); // fail
 print('mut x = age'); // fail
@@ -52,6 +57,7 @@ print('let name = 678');
 print(new Parser('let name = 678').parseSubjectDeclaration());
 print('var _n77m_m=age');
 print(new Parser('var _n77m_m=age').parseSubjectDeclaration());
+print('========= FUNCTION DECLARATION =========');
 print('fun 4() = age'); // fail
 print(new Parser('fun 4() = age').parseFunctionDeclaration()); // fail
 print('mut x() = age'); // fail
@@ -68,6 +74,7 @@ print('fun _n77m_m()=age');
 print(new Parser('fun _n77m_m()=age').parseFunctionDeclaration());
 print('fun _n77m_m ( ) = age');
 print(new Parser('fun _n77m_m ( ) = age').parseFunctionDeclaration());
+print('========= NAMES =========');
 print(',some'); // fail
 print(new Parser(',some').parseNames()); // fail
 print('20, 45'); // fail
@@ -78,23 +85,27 @@ print('the,new,age');
 print(new Parser('the,new,age').parseNames());
 print('the, _ew,_007');
 print(new Parser('the, _ew,_007').parseNames());
-print('type person() : var name = 4'); // fail
-print(new Parser('type person() : var name = 4').parseTypeDeclaration()); // fail
-print('type person: print(50)'); // fail
-print(new Parser('type person: print(50)').parseTypeDeclaration()); // fail
+print('========= TYPE DECLARATION =========');
 print('typePerson'); // fail
 print(new Parser('typePerson').parseTypeDeclaration()); // fail
+print('type person(): var name = 4');
+print(new Parser('type person(): var name = 4').parseTypeDeclaration());
 print('type Person()');
 print(new Parser('type Person()').parseTypeDeclaration());
-print('type P_rson: var age = 6');
-print(new Parser('type P_rson: var age = 6').parseTypeDeclaration());
+print('type P_rson : var age = 6');
+print(new Parser('type P_rson : var age = 6').parseTypeDeclaration());
 print('type Hx99 <: Human, Animal: var age = 6');
 print(new Parser('type Hx99 <: Human, Animal: var age = 6').parseTypeDeclaration());
 print('type Waiter ( ) <: Human, Employee');
 print(new Parser('type Waiter ( ) <: Human, Employee').parseTypeDeclaration());
-print('    ');
-print(new Parser('    ').parseIndent());
-print('');
+print('========= INDENT =========');
+print('     •'); // fail
+print(new Parser('     •').parseIndent()); // fail
+print('    •');
+print(new Parser('    *').parseIndent());
+print('•');
+print('========= SAMEDENT =========');
 print(new Parser('').parseSamedent());
+print('========= NEXTLINE =========');
 print(String.raw`\n\n    \n        \r\n`);
 print(new Parser('\n\n    \n        \r\n').parseNextLine());
