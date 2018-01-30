@@ -210,10 +210,7 @@ literal =
   | symbolliteral
 
 commandnotationpostfix =
-  | _ symbolliteral
-  | _ numericliteral
-  | _ symbolliteral
-  | _ identifier
+  | _ &(symbolliteral | numericliteral | identifier | range) infixexpression
 
 callpostfix =
   | '(' (_? identifier _? ':')? _? infixexpression (_? ',' (_? identifier _? ':')? _? infixexpression)* endcomma? _? ')' // ignorenewline
