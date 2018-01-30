@@ -82,6 +82,9 @@ identifier =
 operatorchar =
   | [+\-*/\\^%!><=÷×≠≈¹²³√]// TODO
 
+operator =
+  | operatorchar+
+
 pathnamechar =
   | identifierendchar | [\-] // TODO
 
@@ -314,11 +317,11 @@ atom =
   | subatom subatompostfix+
 
 prefixatom =
-  | operator+ atom
+  | operator atom
 
 postfixatom =
   | integralliteral '.'
-  | atom operator+
+  | atom operator
 
 prepostfixatom =
   | prefixatom
@@ -327,14 +330,14 @@ prepostfixatom =
 
 infixexpression =
   | range
-  | prefixatom operator+ infixexpressionrest+
-  | atom operator+ infixexpressionrest+
-  | prepostfixatom _ operator+ _ infixexpressionrest+
+  | prefixatom operator infixexpressionrest+
+  | atom operator infixexpressionrest+
+  | prepostfixatom _ operator _ infixexpressionrest+
 
 infixexpressionrest =
-  | prefixatom operator+ infixexpressionrest+
-  | atom operator+ infixexpressionrest+
-  | prepostfixatom _ operator+ _ infixexpressionrest+
+  | prefixatom operator infixexpressionrest+
+  | atom operator infixexpressionrest+
+  | prepostfixatom _ operator _ infixexpressionrest+
   | prepostfixatom
 
 simpleexpression =
@@ -534,12 +537,12 @@ importpath =
   | stringliteral
 
 importdeclaration =
-  | 'import' (_ identifier _? ':') _ importpath  '{' (_? identifier _? ':')? _? (identifier | operator+) (_? ',' (_? identifier _? ':')? _? (identifier | operator+) )* endcomma? _? '}' // ignorenewline
-  | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent (identifier _? ':' _?)? (identifier | operator+) (nextcodeline samedent (identifier _? ':' _?)? (identifier | operator+)) endcomma? nextcodeline dedent '}'
+  | 'import' (_ identifier _? ':') _ importpath  '{' (_? identifier _? ':')? _? (identifier | operator) (_? ',' (_? identifier _? ':')? _? (identifier | operator) )* endcomma? _? '}' // ignorenewline
+  | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent (identifier _? ':' _?)? (identifier | operator) (nextcodeline samedent (identifier _? ':' _?)? (identifier | operator)) endcomma? nextcodeline dedent '}'
   | 'import' (_ identifier _? ':') _ importpath
 
 exportdeclaration =
-  | 'export' _? '{' _? (identifier | operator+) (_? ',' _? (identifier | operator+))* endcomma? _? '}' // ignorenewline
+  | 'export' _? '{' _? (identifier | operator) (_? ',' _? (identifier | operator))* endcomma? _? '}' // ignorenewline
 
 conditionalexpression =
   | matchexpression
