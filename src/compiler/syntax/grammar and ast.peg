@@ -144,7 +144,7 @@ dedent =
 
 dedentoreoiend =
   | nextcodeline dedent
-  | nextcodeline (_? &eoi)
+  | nextcodeline? _? &eoi
 
 newline =
   | '\r'? '\n'
@@ -160,10 +160,10 @@ _ =
   | space+
 
 singlelinecomment =
-  | "#" charnonewline* &(newline)
+  | "#" charnonewline* &(newline | eoi)
 
 multilinecomment =
-  | "#=" charnohashequal* (multilinecomment charnohashequal*)? '=#' _? &(newline)
+  | "#=" charnohashequal* (multilinecomment charnohashequal*)? '=#' _? &(newline | eoi)
 
 comment =
   | singlelinecomment
@@ -664,3 +664,6 @@ subjectdeclarationoneinlinenest =
   | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   { mutability, identifier, expression }
 
+program =
+  | (comment? nextcodeline)? (samedent expression (nextcodeline eoi? | _? eoi))+
+  | (comment? nextcodeline? eoi)?
