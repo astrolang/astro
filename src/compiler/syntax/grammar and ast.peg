@@ -623,6 +623,7 @@ typedeclaration =
   | typehead (_ '=' _ | '=' !operator | _? ':' _?) typebodyoneinlinenest
   | typehead (_ '=' _ | '=' !operator) nextcodeline indent typebody dedentoreoiend
   | typehead _? ':' typeblock
+  { identifier, supertypes, field }
 
 typedeclarationoneinlinenest =
   | typehead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
@@ -645,6 +646,7 @@ functiondeclaration =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
   | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | functionhead _? ':' block
+  { identifier, expression }
 
 functiondeclarationoneinlinenest =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
