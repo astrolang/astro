@@ -1,3 +1,6 @@
+eoi =
+  | !.
+
 digitbinary =
   | [0-1]
 
@@ -12,15 +15,19 @@ digithexadecimal =
 
 integerbinaryliteral =
   | '0b' digitbinary ('_'? digitbinary)*
+  { type, value }
 
 integeroctalliteral  =
   | '0o' digitoctal ('_'? digitoctal)*
+  { type, value }
 
 integerdecimalliteral  =
   | digitdecimal ('_'? digitdecimal)*
+  { type, value }
 
 integehexadecimalliteral  =
   | '0x' digithexadecimal ('_'? digithexadecimal)*
+  { type, value }
 
 integerliteral =
   | integerbinaryliteral
@@ -31,18 +38,22 @@ integerliteral =
 floatbinaryliteral  =
   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+  { type, value }
 
 floatoctalliteral  =
   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+  { type, value }
 
 floatdecimalliteral  =
   | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
+  { type, value }
 
 floathexadecimalliteral  =
   | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
+  { type, value }
 
 floatliteral =
   | floatbinaryliteral
@@ -65,6 +76,7 @@ coefficientexpression =
 booleanliteral =
   | 'true'
   | 'false'
+  { type, value }
 
 noname =
   | '_'
@@ -78,12 +90,14 @@ identifierendchar =
 
 identifier =
   | identifierbeginchar identifierendchar*
+  { type, name }
 
 operatorchar =
   | [+\-*/\\^%!><=÷×≠≈¹²³√]// TODO
 
 operator =
   | operatorchar+
+  { type, name }
 
 pathnamechar =
   | identifierendchar | [\-] // TODO
@@ -117,13 +131,20 @@ nameseparation =
 
 indent =
   | ' '+
+  { level }
 
 samedent =
   | ' '+
   | ''
+  { level }
 
 dedent =
   | ' '+
+  { level }
+
+dedentoreoiend =
+  | nextcodeline dedent
+  | nextcodeline (_? &eoi)
 
 newline =
   | '\r'? '\n'
@@ -136,7 +157,7 @@ linecontinuation =
 
 _ =
   | linecontinuation
-  | spaces
+  | space+
 
 singlelinecomment =
   | "#" charnonewline* &(newline)
@@ -396,7 +417,7 @@ expressiononeinlinenest =
   | subexpressiononeinlinenest (_? ';' _? expressiononeinlinenest)* (_? ';')?
 
 block =
-  | nextcodeline indent openexpression (nextcodeline samedent openexpression)* nextcodeline dedent
+  | nextcodeline indent openexpression (nextcodeline samedent openexpression)* dedentoreoiend
 
 lhspattern =
   | '(' _? lhsname (_? ',' _? lhsname)* endcomma? _? ')' // ignorenewline
@@ -594,18 +615,18 @@ typebodyoneinlinenest =
   | '|'? _? subtype (_? '|' subtype)*
 
 typeblock =
-  | nextcodeline indent typebody (nextcodeline samedent typebody)* nextcodeline dedent
+  | nextcodeline indent typebody (nextcodeline samedent typebody)* dedentoreoiend
 
 typedeclaration =
   | typehead _? '(' _? parameters _?')' (_? '<:' _? names)?// ignorenewline
   | typehead _ identifier _? '(' nextcodeline indent parameters nextcodeline dedent ')' (_? '<:' _? names)?
   | typehead (_ '=' _ | '=' !operator | _? ':' _?) typebodyoneinlinenest
-  | typehead (_ '=' _ | '=' !operator) nextcodeline indent typebody nextcodeline dedent
+  | typehead (_ '=' _ | '=' !operator) nextcodeline indent typebody dedentoreoiend
   | typehead _? ':' typeblock
 
 typedeclarationoneinlinenest =
   | typehead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
-  | typehead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | typehead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | typehead _? ':' block
 
 functionparameters =
@@ -622,12 +643,12 @@ functionhead =
 
 functiondeclaration =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
-  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | functionhead _? ':' block
 
 functiondeclarationoneinlinenest =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
-  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | functionhead _? ':' block
 
 subjecthead =
@@ -636,11 +657,12 @@ subjecthead =
 
 subjectdeclaration =
   | subjecthead (_ '=' _ | '=' !operator) expressiononeinlinenest
-  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
 
 subjectdeclarationoneinlinenest =
   | subjecthead (_ '=' _ | '=' !operator) expressionnoblock
-  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression nextcodeline dedent
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
+  { mutability, identifier, expression }
 
 // =====================================================
 
@@ -674,6 +696,7 @@ _ =
 
 names =
   | identifier (_? ',' _? identifier)*
+  { names }
 
 expression =
   | integer
