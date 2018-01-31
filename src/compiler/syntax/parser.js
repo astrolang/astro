@@ -111,7 +111,7 @@ class Parser {
       this.lastPosition += str.length;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: str };
+      parseData = { success: true, message: null, ast: { token: str } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -238,7 +238,7 @@ class Parser {
       this.lastIndentCount = indentCount;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: indentCount };
+      parseData = { success: true, message: null, ast: { level: indentCount } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -271,7 +271,7 @@ class Parser {
     // Check if current indentation count is the same as previous indentation.
     if (indentCount === this.lastIndentCount) {
       // Update parseData.
-      parseData = { success: true, message: null, ast: indentCount };
+      parseData = { success: true, message: null, ast: { level: indentCount } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -308,7 +308,7 @@ class Parser {
       this.lastIndentCount = indentCount;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: indentCount };
+      parseData = { success: true, message: null, ast: { level: indentCount } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -321,7 +321,7 @@ class Parser {
     return parseData;
   }
 
-  // identifier= = [a-zA-Z][a-zA-Z_0-9]*
+  // identifier = identifierbeginchar identifierendchar*
   parseIdentifier() {
     // Keeping original state.
     const {
@@ -340,7 +340,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: token.join('') };
+      parseData = { success: true, message: null, ast: { type: 'identifier', name: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -353,7 +353,7 @@ class Parser {
     return parseData;
   }
 
-  // operator = [+-*/\\^%!><=÷×≠≈¹²³√]+
+  // operator = operatorchar+
   parseOperator() {
     // Keeping original state.
     const {
@@ -371,7 +371,7 @@ class Parser {
     // Check if it was able to consume at least an operator.
     if (token.length > 0) {
       // Update parseData.
-      parseData = { success: true, message: null, ast: token.join('') };
+      parseData = { success: true, message: null, ast: { type: 'operator', name: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -384,8 +384,9 @@ class Parser {
     return parseData;
   }
 
-  // integer = [0-9]+
-  parseInteger() {
+  // integerdecimalliteral  =
+  //   | digitdecimal ('_'? digitdecimal)*
+  parseIntegerDecimalLiteral() { // TODO
     // Keeping original state.
     const {
       lastPosition, column, line,
@@ -402,7 +403,7 @@ class Parser {
     // Check if it was able to consume at least a digitDecimal.
     if (token.length > 0) {
       // Update parseData.
-      parseData = { success: true, message: null, ast: token.join('') };
+      parseData = { success: true, message: null, ast: { type: 'integer', value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -423,12 +424,14 @@ class Parser {
     } = this;
 
     const identifiers = [];
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = {
+      success: false, message: null, ast: null,
+    };
 
     (() => {
       // Consume identifier.
       if (!this.parseIdentifier().success) return null;
-      identifiers.push(this.lastParseData.data);
+      identifiers.push(this.lastParseData.ast.name);
 
       // Optional-multiple parsing. (_? ',' _? identifier)*
       while (true) {
@@ -446,7 +449,7 @@ class Parser {
 
           // Consume identifier.
           if (!this.parseIdentifier().success) return;
-          identifiers.push(this.lastParseData.data);
+          identifiers.push(this.lastParseData.ast.name);
 
           parseSuccessful = true;
         })();
@@ -460,7 +463,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: identifiers };
+      parseData = { success: true, message: null, ast: { names: identifiers } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -477,8 +480,8 @@ class Parser {
   }
 
   // expression = integer | identifier
-  parseExpression() {
-    if (this.parseInteger().success) {
+  parseExpression() { // TODO
+    if (this.parseIntegerDecimalLiteral().success) {
       return this.lastParseData;
     } else if (this.parseIdentifier().success) {
       return this.lastParseData;
@@ -486,8 +489,10 @@ class Parser {
     return { success: false, data: null };
   }
 
-  // spaces = [ \t]+
-  parseSpaces() {
+  // _ =
+  //   | linecontinuation
+  //   | space+
+  parseSpaces() { // TODO
     // Keep original state.
     const {
       lastPosition, column, line,
@@ -534,14 +539,14 @@ class Parser {
     (() => {
       // Consume ('let'/'var').
       if (!this.parseToken('let').success && !this.parseToken('var').success) return null;
-      mutability = this.lastParseData.data;
+      mutability = this.lastParseData.ast.token;
 
       // Consume _.
       if (!this.parseSpaces().success) return null;
 
       // Consume identifier.
       if (!this.parseIdentifier().success) return null;
-      identifier = this.lastParseData.data;
+      identifier = this.lastParseData.ast.name;
 
       // Alternate parsing. _ '=' _ expression | '=' !(operator) expression
       let alternativeParseSuccessful = false;
@@ -562,7 +567,7 @@ class Parser {
 
         // Consume expression.
         if (!this.parseExpression().success) return;
-        expression = this.lastParseData.data;
+        expression = this.lastParseData.ast;
 
         // This alternative was parsed successfully.
         alternativeParseSuccessful = true;
@@ -582,7 +587,7 @@ class Parser {
 
           // Consume expression.
           if (!this.parseExpression().success) return;
-          expression = this.lastParseData.data;
+          expression = this.lastParseData.ast;
 
           // This alternative was parsed successfully.
           alternativeParseSuccessful = true;
@@ -593,7 +598,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: [mutability, identifier, expression] };
+      parseData = { success: true, message: null, ast: { mutability, identifier, expression } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -630,7 +635,7 @@ class Parser {
 
       // Consume identifier.
       if (!this.parseIdentifier().success) return null;
-      identifier = this.lastParseData.data;
+      identifier = this.lastParseData.ast.name;
 
       // Consume _?.
       this.parseSpaces();
@@ -663,7 +668,7 @@ class Parser {
 
         // Consume expression.
         if (!this.parseExpression().success) return;
-        expression = this.lastParseData.data;
+        expression = this.lastParseData.ast;
 
         // This alternative was parsed successfully.
         alternativeParseSuccessful = true;
@@ -694,7 +699,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: [identifier, expression] };
+      parseData = { success: true, message: null, ast: { identifier, expression } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -721,7 +726,7 @@ class Parser {
 
     let identifier;
     let supertypes = null;
-    let declaration = null;
+    let field = null;
     let parseData = { success: false, message: null, ast: null };
 
     (() => {
@@ -733,7 +738,7 @@ class Parser {
 
       // Consume identifier.
       if (!this.parseIdentifier().success) return null;
-      identifier = this.lastParseData.data;
+      identifier = this.lastParseData.ast.name;
 
       // Alternate parsing.
       // | _? '(' _? ')' (_? '<:' _? names)?
@@ -772,7 +777,7 @@ class Parser {
 
           // Consume names.
           if (!this.parseNames().success) return;
-          supertypes = this.lastParseData.data;
+          supertypes = this.lastParseData.ast.names;
 
           optionalParseSuccessful = true;
         })();
@@ -806,7 +811,7 @@ class Parser {
 
             // Consume names.
             if (!this.parseNames().success) return;
-            supertypes = this.lastParseData.data;
+            supertypes = this.lastParseData.ast.names;
 
             optionalParseSuccessful = true;
           })();
@@ -827,7 +832,7 @@ class Parser {
 
           // Consume subjectdeclaration.
           if (!this.parseSubjectDeclaration().success) return;
-          declaration = this.lastParseData.data;
+          field = this.lastParseData.data;
 
           // This alternative was parsed successfully.
           alternativeParseSuccessful = true;
@@ -838,7 +843,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: [identifier, supertypes, declaration] };
+      parseData = { success: true, message: null, ast: { identifier, supertypes, field } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
