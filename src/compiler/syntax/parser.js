@@ -45,7 +45,7 @@ class Parser {
     this.ruleStarts.push({ ruleName, line: this.line, column: this.column });
   }
 
-  // Consume next char.
+  // Consume next char, which also means updating lastPosition.
   eatChar() {
     // I use peek-before-consume strategy, so I don't need to do checks here
     // because it will already be done when `peek` is called.
@@ -132,14 +132,13 @@ class Parser {
 
   // eoi =
   // | !.
-  parseEoi(str) {
+  parseEoi() {
     // No state to reset.
-
     const ruleName = 'eoi';
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     // Check last position in code has been reached code.
-    if (this.lastPosition + 1, this.lastPosition + str.length + 1) {
+    if (this.lastPosition + 1 === this.code.length) {
       // Update parseData.
       parseData = { success: true, message: null, ast: null };
 
@@ -152,9 +151,192 @@ class Parser {
     return parseData;
   }
 
+  // integerbinaryliteral  =
+  //   | '0b' digitbinary ('_'? digitbinary)*
+  parseIntegerBinaryLiteral() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const ruleName = 'integerbinaryliteral';
+    const token = [];
+    let parseData = { success: false, message: ruleName, ast: null };
+
+    (() => {
+      // Consume '0b'.
+      if (!this.parseToken('0b').success) return null;
+      token.push('0b');
+
+      // Consume digitbinary.
+      if (this.digitBinary.indexOf(this.peekChar()) < 0) return null;
+      token.push(this.eatChar());
+
+      // Optional-multiple parsing. ('_'? digitbinary)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume '_'?.
+          this.parseToken('_');
+
+          // Consume digitbinary.
+          if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // integeroctalliteral  =
+  //   | '0o' digitoctal ('_'? digitoctal)*
+  parseIntegerOctalLiteral() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const ruleName = 'integeroctalliteral';
+    const token = [];
+    let parseData = { success: false, message: ruleName, ast: null };
+
+    (() => {
+      // Consume '0o'.
+      if (!this.parseToken('0o').success) return null;
+      token.push('0o');
+
+      // Consume digitoctal.
+      if (this.digitOctal.indexOf(this.peekChar()) < 0) return null;
+      token.push(this.eatChar());
+
+      // Optional-multiple parsing. ('_'? digitoctal)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume '_'?.
+          this.parseToken('_');
+
+          // Consume digitoctal.
+          if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // integehexadecimalliteral  =
+  //   | '0x' digithexadecimal ('_'? digithexadecimal)*
+  parseIntegerHexadecimalLiteral() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const ruleName = 'integehexadecimalliteral';
+    const token = [];
+    let parseData = { success: false, message: ruleName, ast: null };
+
+    (() => {
+      // Consume '0x'.
+      if (!this.parseToken('0x').success) return null;
+      token.push('0x');
+
+      // Consume digithexadecimal.
+      if (this.digitHexadecimal.indexOf(this.peekChar()) < 0) return null;
+      token.push(this.eatChar());
+
+      // Optional-multiple parsing. ('_'? digithexadecimal)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume '_'?.
+          this.parseToken('_');
+
+          // Consume digithexadecimal.
+          if (this.digitHexadecimal.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // integerdecimalliteral  =
   //   | digitdecimal ('_'? digitdecimal)*
-  parseIntegerDecimalLiteral() { // TODO
+  parseIntegerDecimalLiteral() {
     // Keeping original state.
     const {
       lastPosition, column, line,
@@ -162,27 +344,73 @@ class Parser {
 
     const ruleName = 'integerdecimalliteral';
     const token = [];
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
-    // Consume digitDecimal. [0-9]+
-    while (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+    (() => {
+      // Consume digitDecimal.
+      if (this.digitDecimal.indexOf(this.peekChar()) < 0) return null;
       token.push(this.eatChar());
-    }
 
-    // Check if it was able to consume at least a digitDecimal.
-    if (token.length > 0) {
+      // Optional-multiple parsing. ('_'? digitdecimal)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume '_'?.
+          this.parseToken('_');
+
+          // Consume digitdecimal.
+          if (this.digitDecimal.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: 'integer', value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
       return parseData;
-    }
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
     this.reset(lastPosition, null, null, column, line);
 
     return parseData;
+  }
+
+  // integerliteral =
+  //   | integerbinaryliteral
+  //   | integeroctalliteral
+  //   | integerhexadecimalliteral
+  //   | integerdecimalliteral
+  parseIntegerLiteral() { // TODO
+    const ruleName = 'integerliteral';
+
+    if (this.parseIntegerBinaryLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseIntegerOctalLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseIntegerHexadecimalLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseIntegerDecimalLiteral().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: ruleName, ast: null };
   }
 
   // identifier =
@@ -195,7 +423,7 @@ class Parser {
 
     const ruleName = 'identifier';
     const token = [];
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     // Consume the first character. [a-zA-Z]
     if (this.identifierBeginChar.indexOf(this.peekChar()) > -1) {
@@ -229,7 +457,7 @@ class Parser {
 
     const ruleName = 'operator';
     const token = [];
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     // Consume operator chars. [+-*/\\^%!><=÷×≠≈¹²³√]+
     while (this.operators.indexOf(this.peekChar()) > -1) {
@@ -263,7 +491,7 @@ class Parser {
     const ruleName = 'indent';
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -302,7 +530,7 @@ class Parser {
     const ruleName = 'samedent';
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -337,7 +565,7 @@ class Parser {
     const ruleName = 'dedent';
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -374,7 +602,7 @@ class Parser {
     } = this;
 
     const ruleName = 'newline';
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     (() => {
       // Consume '\r'?.
@@ -414,7 +642,7 @@ class Parser {
     } = this;
 
     const ruleName = 'nextline';
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     (() => {
       // Consume newline.
@@ -470,7 +698,7 @@ class Parser {
 
     const ruleName = 'spaces';
     let count = 0;
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     // Consume spaces. [ \t]+
     while (this.space.indexOf(this.peekChar()) > -1) {
@@ -495,17 +723,19 @@ class Parser {
   }
 
   // expression =
-  //   | integerdecimalliteral
+  //   | integerliteral
   //   | identifier
   parseExpression() { // TODO
     const ruleName = 'expression';
 
-    if (this.parseIntegerDecimalLiteral().success) {
+    if (this.parseIntegerLiteral().success) {
       return this.lastParseData;
     } else if (this.parseIdentifier().success) {
       return this.lastParseData;
     }
-    return { success: false, data: null };
+
+    // Parsing failed.
+    return { success: false, message: ruleName, ast: null };
   }
 
   // names =
@@ -519,7 +749,7 @@ class Parser {
     const ruleName = 'names';
     const identifiers = [];
     let parseData = {
-      success: false, message: null, ast: null,
+      success: false, message: ruleName, ast: null,
     };
 
     (() => {
@@ -586,7 +816,7 @@ class Parser {
     let identifier;
     let supertypes = null;
     let field = null;
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     (() => {
       // Consume ('type').
@@ -729,7 +959,7 @@ class Parser {
     const ruleName = 'functiondeclarationn';
     let identifier;
     let expression;
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     (() => {
       // Consume ('fun').
@@ -832,7 +1062,7 @@ class Parser {
     let mutability;
     let identifier;
     let expression;
-    let parseData = { success: false, message: null, ast: null };
+    let parseData = { success: false, message: ruleName, ast: null };
 
     (() => {
       // Consume ('let'/'var').
