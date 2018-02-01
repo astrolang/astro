@@ -97,7 +97,7 @@ class Parser {
     }
 
     // Revert state, lastParseData included.
-    this.reset(lastPosition, lastParseData, null, column, line, true);
+    this.reset(lastPosition, lastParseData, null, column, line);
 
     return parseData;
   }
@@ -125,11 +125,33 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
-  
+
+  // eoi =
+  // | !.
+  parseEoi(str) {
+    // No state to reset.
+
+    const ruleName = 'eoi';
+    let parseData = { success: false, message: null, ast: null };
+
+    // Check last position in code has been reached code.
+    if (this.lastPosition + 1, this.lastPosition + str.length + 1) {
+      // Update parseData.
+      parseData = { success: true, message: null, ast: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, but no state to revert.
+    return parseData;
+  }
+
   // integerdecimalliteral  =
   //   | digitdecimal ('_'? digitdecimal)*
   parseIntegerDecimalLiteral() { // TODO
@@ -158,7 +180,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -192,7 +214,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -225,7 +247,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -264,7 +286,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -299,7 +321,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -338,7 +360,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -378,7 +400,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -432,7 +454,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -467,7 +489,7 @@ class Parser {
     }
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -546,7 +568,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -691,7 +713,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -793,7 +815,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
@@ -885,7 +907,7 @@ class Parser {
     if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line, true);
+    this.reset(lastPosition, null, null, column, line);
 
     return parseData;
   }
