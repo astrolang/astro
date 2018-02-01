@@ -21,19 +21,19 @@ integeroctalliteral  =
   | '0o' digitoctal ('_'? digitoctal)*
   { type, value }
 
-integerdecimalliteral  =
-  | digitdecimal ('_'? digitdecimal)*
-  { type, value }
-
 integehexadecimalliteral  =
   | '0x' digithexadecimal ('_'? digithexadecimal)*
+  { type, value }
+
+integerdecimalliteral  =
+  | digitdecimal ('_'? digitdecimal)*
   { type, value }
 
 integerliteral =
   | integerbinaryliteral
   | integeroctalliteral
-  | integerdecimalliteral
   | integerhexadecimalliteral
+  | integerdecimalliteral // can eat others cake
 
 floatbinaryliteral  =
   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
@@ -45,21 +45,21 @@ floatoctalliteral  =
   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
   { type, value }
 
-floatdecimalliteral  =
-  | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
-  | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
-  { type, value }
-
 floathexadecimalliteral  =
   | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
   { type, value }
 
+floatdecimalliteral  =
+  | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
+  | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
+  { type, value }
+
 floatliteral =
   | floatbinaryliteral
   | floatoctalliteral
-  | floatdecimalliteral
   | floathexadecimalliteral
+  | floatdecimalliteral // can eat others cake
 
 numericliteral =
   | integerliteral
