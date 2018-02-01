@@ -20,7 +20,7 @@ class Parser {
     // Information
     this.column = 0;
     this.line = 1;
-    this.ruleStarts = [];
+    this.ruleStarts = []; // start position of an expression. [{ line, column }].
     // Characters
     this.digitBinary = '01';
     this.digitOctal = '01234567';
@@ -38,6 +38,11 @@ class Parser {
   incrementLineCount() {
     this.line += 1;
     this.column = 0; // Reset column number.
+  }
+
+  // Add positon to ruleStarts.
+  addRuleStart(ruleName) {
+    this.ruleStarts.push({ ruleName, line: this.line, column: this.column });
   }
 
   // Consume next char.
@@ -59,6 +64,7 @@ class Parser {
   }
 
   // Reset properties.
+  // Used in top-level expression only.
   reset(lastPosition, lastParseData, lastIndentCount, column, line, popRuleStarts) {
     this.lastPosition = lastPosition;
     this.lastParseData = lastParseData !== null ? lastParseData : this.lastParseData;
@@ -123,6 +129,39 @@ class Parser {
 
     return parseData;
   }
+  
+  // integerdecimalliteral  =
+  //   | digitdecimal ('_'? digitdecimal)*
+  parseIntegerDecimalLiteral() { // TODO
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const ruleName = 'integerdecimalliteral';
+    const token = [];
+    let parseData = { success: false, message: null, ast: null };
+
+    // Consume digitDecimal. [0-9]+
+    while (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+      token.push(this.eatChar());
+    }
+
+    // Check if it was able to consume at least a digitDecimal.
+    if (token.length > 0) {
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type: 'integer', value: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line, true);
+
+    return parseData;
+  }
 
   // identifier =
   //   | identifierbeginchar identifierendchar*
@@ -132,6 +171,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'identifier';
     const token = [];
     let parseData = { success: false, message: null, ast: null };
 
@@ -165,6 +205,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'operator';
     const token = [];
     let parseData = { success: false, message: null, ast: null };
 
@@ -197,6 +238,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'indent';
     let indentCount = 0;
     let spaceCount = 0;
     let parseData = { success: false, message: null, ast: null };
@@ -235,6 +277,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'samedent';
     let indentCount = 0;
     let spaceCount = 0;
     let parseData = { success: false, message: null, ast: null };
@@ -269,6 +312,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'dedent';
     let indentCount = 0;
     let spaceCount = 0;
     let parseData = { success: false, message: null, ast: null };
@@ -307,6 +351,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'newline';
     let parseData = { success: false, message: null, ast: null };
 
     (() => {
@@ -346,6 +391,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'nextline';
     let parseData = { success: false, message: null, ast: null };
 
     (() => {
@@ -400,6 +446,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'spaces';
     let count = 0;
     let parseData = { success: false, message: null, ast: null };
 
@@ -429,6 +476,8 @@ class Parser {
   //   | integerdecimalliteral
   //   | identifier
   parseExpression() { // TODO
+    const ruleName = 'expression';
+
     if (this.parseIntegerDecimalLiteral().success) {
       return this.lastParseData;
     } else if (this.parseIdentifier().success) {
@@ -445,6 +494,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'names';
     const identifiers = [];
     let parseData = {
       success: false, message: null, ast: null,
@@ -510,6 +560,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'typedeclaration';
     let identifier;
     let supertypes = null;
     let field = null;
@@ -653,6 +704,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'functiondeclarationn';
     let identifier;
     let expression;
     let parseData = { success: false, message: null, ast: null };
@@ -754,6 +806,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
+    const ruleName = 'subjectdeclaration';
     let mutability;
     let identifier;
     let expression;
