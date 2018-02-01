@@ -29,7 +29,7 @@ class Parser {
     this.noName = '_';
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
-    this.operators = '+-*/\\^%!><=÷×≠≈¹²³√'; // Unicode?
+    this.operatorChar = '+-*/\\^%!><=÷×≠≈¹²³√'; // Unicode?
     this.pathNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.space = ' \t'; // Unicode?
   }
@@ -459,8 +459,8 @@ class Parser {
     const token = [];
     let parseData = { success: false, message: ruleName, ast: null };
 
-    // Consume operator chars. [+-*/\\^%!><=÷×≠≈¹²³√]+
-    while (this.operators.indexOf(this.peekChar()) > -1) {
+    // Consume operatorchar+.
+    while (this.operatorChar.indexOf(this.peekChar()) > -1) {
       token.push(this.eatChar());
     }
 
