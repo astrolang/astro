@@ -614,6 +614,9 @@ typebodyoneinlinenest =
   | subjectdeclarationoneinlinenest
   | '|'? _? subtype (_? '|' subtype)*
 
+names =
+  | identifier (_? ',' _? identifier)*
+
 typeblock =
   | nextcodeline indent typebody (nextcodeline samedent typebody)* dedentoreoiend
 
