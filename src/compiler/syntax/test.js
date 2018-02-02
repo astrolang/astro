@@ -370,7 +370,7 @@ print(new Parser('5_45_0e9').parseFloatDecimalLiteral());
 
 print('========= FLOATLITERAL =========');
 
-print(String.raw`ff.56_FF>>>>>>>>>>>>>>>>>>>>>>>>MID`); // fail
+print(String.raw`ff.56_FF>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser('ff.56_FF').parseFloatLiteral()); // fail
 
 print(String.raw`0b0.11_FF>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
@@ -399,3 +399,29 @@ print(new Parser('0o56_77_0.74_66e7').parseFloatLiteral());
 
 print(String.raw`056_77_0.74_667`);
 print(new Parser('056_77_0.74_667').parseFloatLiteral());
+
+print('========= NUMERICLITERAL =========');
+
+print(String.raw`ff.56_FF>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('ff.56_FF').parseNumericLiteral()); // fail
+
+print(String.raw`.59e+11`);
+print(new Parser('.59e+11').parseNumericLiteral());
+
+print(String.raw`054.59`);
+print(new Parser('054.59').parseNumericLiteral());
+
+print(String.raw`0x5f_ee.29_00p1_0561`);
+print(new Parser('0x5f_ee.29_00p1_0561').parseNumericLiteral());
+
+print(String.raw`0o54_33.59`);
+print(new Parser('0o54_33.59').parseNumericLiteral());
+
+print(String.raw`0o5_45_06`);
+print(new Parser('0o5_45_06').parseNumericLiteral());
+
+print(String.raw`0x5`);
+print(new Parser('0x5').parseNumericLiteral());
+
+print(String.raw`0b10_011_001`);
+print(new Parser('0b10_011_001').parseNumericLiteral());
