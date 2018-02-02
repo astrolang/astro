@@ -633,9 +633,9 @@ class Parser {
     let parseData = { success: false, message: ruleName, ast: null };
 
     (() => {
-      // Consume '0b'.
-      if (!this.parseToken('0b').success) return null;
-      token.push('0b');
+      // Consume '0o'.
+      if (!this.parseToken('0o').success) return null;
+      token.push('0o');
 
       // Consume digitoctal.
       if (this.digitOctal.indexOf(this.peekChar()) < 0) return null;
