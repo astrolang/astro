@@ -557,7 +557,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        token = otherState.token;
+        ({ token } = otherState);
 
         (() => {
           // Consume 'e'.
@@ -577,13 +577,14 @@ class Parser {
           while (true) {
             let parseSuccessful = false;
             const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
             (() => {
               // Consume '_'?.
               this.parseToken('_');
 
               // Consume digitbinary.
               if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
-              token.push(this.eatChar());
+              // token.push(this.eatChar());
 
               parseSuccessful = true;
             })();
@@ -765,7 +766,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        token = otherState.token;
+        ({ token } = otherState);
 
         (() => {
           // Consume 'e'.
@@ -973,7 +974,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        token = otherState.token;
+        ({ token } = otherState);
 
         (() => {
           // Consume 'p'.
@@ -1190,7 +1191,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        token = otherState.token;
+        ({ token } = otherState);
 
         (() => {
           // Consume digitdecimal.
@@ -1369,8 +1370,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        number = otherState.number;
-        identifier = otherState.identifier;
+        ({ number, identifier } = otherState);
 
         (() => {
           // Consume floatoctalliteral.
@@ -1390,8 +1390,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        number = otherState.number;
-        identifier = otherState.identifier;
+        ({ number, identifier } = otherState);
 
         (() => {
           // Consume floatdecimalliteral.
@@ -1411,8 +1410,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        number = otherState.number;
-        identifier = otherState.identifier;
+        ({ number, identifier } = otherState);
 
         (() => {
           // Consume integerbinaryliteral.
@@ -1432,8 +1430,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        number = otherState.number;
-        identifier = otherState.identifier;
+        ({ number, identifier } = otherState);
 
         (() => {
           // Consume integeroctalliteral.
@@ -1453,8 +1450,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        number = otherState.number;
-        identifier = otherState.identifier;
+        ({ number, identifier } = otherState);
 
         (() => {
           // Check !('0b' | '0o' | '0x').
@@ -2002,8 +1998,8 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        supertypes = otherState.supertypes;
-        field = otherState.field;
+        ({ supertypes, field } = otherState);
+
         (() => {
           // Optional parsing. (_? '<:' _? names)?
           let optionalParseSuccessful = false;
@@ -2134,7 +2130,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        expression = otherState.expression;
+        ({ expression } = otherState);
 
         (() => {
           // Consume '='.
@@ -2228,7 +2224,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        expression = otherState.expression;
+        ({ expression } = otherState);
 
         (() => {
           // Consume '='.
