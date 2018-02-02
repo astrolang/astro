@@ -322,3 +322,26 @@ print(new Parser('0o54_33.59').parseFloatOctalLiteral());
 print(String.raw`0o5_45_0e+2_6`);
 print(new Parser('0o5_45_0e+2_6').parseFloatOctalLiteral());
 
+print('========= FLOATHEXADECIMALLITERAL =========');
+
+print(String.raw`0F_F6>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0E_F6').parseFloatHexadecimalLiteral()); // fail
+
+print(String.raw`0xG_FF>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0xG_FF').parseFloatHexadecimalLiteral()); // fail
+
+print(String.raw`0x5__.33_45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0x5__.33_45').parseFloatOctalLiteral()); // fail
+
+print(String.raw`0x1_23f.1_9FHG>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0x1_23f.1_9FHG').parseFloatHexadecimalLiteral()); // mid
+
+print(String.raw`0xf.e5__FFE>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0xf.e5__FFE').parseFloatHexadecimalLiteral()); // mid
+
+print(String.raw`0xff.01p-5A`);
+print(new Parser('0xff.01p-5A').parseFloatHexadecimalLiteral());
+
+print(String.raw`0x5f_ee.29_00p1_0561`);
+print(new Parser('0x5f_ee.29_00p1_0561').parseFloatHexadecimalLiteral());
+
