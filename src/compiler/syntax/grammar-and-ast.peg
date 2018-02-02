@@ -66,12 +66,13 @@ numericliteral =
   | integerliteral  // can eat others cake
 
 coefficientexpression =
-  | integerbinaryliteral identifier
-  | integeroctalliteral identifier
-  | integerdecimalliteral identifier
   | floatbinaryliteral identifier
   | floatoctalliteral identifier
   | floatdecimalliteral identifier
+  | integerbinaryliteral identifier
+  | integeroctalliteral identifier
+  | !('0b' | '0o' | '0x') integerdecimalliteral identifier // accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Now rectified.
+  { type, number, identifier }
 
 booleanliteral =
   | 'true'
