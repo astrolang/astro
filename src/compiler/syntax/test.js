@@ -426,7 +426,7 @@ print(new Parser('0x5').parseNumericLiteral());
 print(String.raw`0b10_011_001`);
 print(new Parser('0b10_011_001').parseNumericLiteral());
 
-print('========= COEFFICIENTEXPRESSION=========');
+print('========= COEFFICIENTEXPRESSION =========');
 
 print(String.raw`0x55f>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser('0x55f').parseCoefficientExpression()); // fail
@@ -451,3 +451,24 @@ print(new Parser('0b1__1011').parseCoefficientExpression());
 
 print(String.raw`0o775o`);
 print(new Parser('0o775o').parseCoefficientExpression());
+
+print('========= BOOLEANLITERAL =========');
+
+print(String.raw`0true>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0true').parseBooleanLiteral()); // fail
+
+print(String.raw`_false>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('_false').parseBooleanLiteral()); // mid
+
+print(String.raw`truename>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('truename').parseBooleanLiteral()); // mid
+
+print(String.raw`false20>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('false20').parseBooleanLiteral()); // mid
+
+print(String.raw`true`);
+print(new Parser('true').parseBooleanLiteral());
+
+print(String.raw`false`);
+print(new Parser('false').parseBooleanLiteral());
+
