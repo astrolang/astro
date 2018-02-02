@@ -1281,6 +1281,28 @@ class Parser {
     return parseData;
   }
 
+  // floatliteral =
+  //   | floatbinaryliteral
+  //   | floatoctalliteral
+  //   | floathexadecimalliteral
+  //   | floatdecimalliteral
+  parseFloatLiteral() {
+    const ruleName = 'floatliteral';
+
+    if (this.parseFloatBinaryLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseFloatOctalLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseFloatHexadecimalLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseFloatDecimalLiteral().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: ruleName, ast: null };
+  }
+
   // identifier =
   //   | identifierbeginchar identifierendchar*
   parseIdentifier() { // TODO
