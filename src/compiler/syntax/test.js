@@ -202,7 +202,7 @@ print(new Parser('0b10_011_001').parseIntegerBinaryLiteral());
 print('========= INTEGEROCTALLITERAL =========');
 
 print(String.raw`05_45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('05_45').parseIntegerBinaryLiteral()); // fail
+print(new Parser('05_45').parseIntegerOctalLiteral()); // fail
 
 print(String.raw`0o8_45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser('0o8_45').parseIntegerOctalLiteral()); // fail
@@ -298,3 +298,27 @@ print(new Parser('0b1_10.01_110e-1_00').parseFloatBinaryLiteral());
 
 print(String.raw`0b10_01e+1_001`);
 print(new Parser('0b10_01e+1_001').parseFloatBinaryLiteral());
+
+print('========= FLOATOCTALLITERAL =========');
+
+print(String.raw`05_45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('05_45').parseFloatOctalLiteral()); // fail
+
+print(String.raw`0o8_45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0o8_45').parseFloatOctalLiteral()); // fail
+
+print(String.raw`0o5__.33_45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0o5__.33_45').parseFloatOctalLiteral()); // fail
+
+print(String.raw`0o1.7_0e487>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0o1.7_0e487').parseFloatOctalLiteral()); // mid
+
+print(String.raw`0o5.7__e33_45>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0o5.7__e33_45').parseFloatOctalLiteral()); // mid
+
+print(String.raw`0o54_33.59`);
+print(new Parser('0o54_33.59').parseFloatOctalLiteral());
+
+print(String.raw`0o5_45_0e+2_6`);
+print(new Parser('0o5_45_0e+2_6').parseFloatOctalLiteral());
+
