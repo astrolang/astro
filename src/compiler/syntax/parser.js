@@ -75,7 +75,7 @@ class Parser {
   }
 
   // Try if a set of parse functions will parse successfully.
-  tryTo(...parseFunctions) {
+  tryTo(...parseFunctions) { // TODO: single parseFunction param
     // Keeping original state.
     const {
       lastPosition, column, line, lastParseData,
@@ -134,8 +134,8 @@ class Parser {
   // | !.
   parseEoi() {
     // No state to reset.
-    const ruleName = 'eoi';
-    let parseData = { success: false, message: ruleName, ast: null };
+    const type = 'eoi';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Check last position in code has been reached code.
     if (this.lastPosition + 1 === this.code.length) {
@@ -159,9 +159,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'integerbinaryliteral';
+    const type = 'integerbinaryliteral';
     const token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume '0b'.
@@ -196,7 +196,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -220,9 +220,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'integeroctalliteral';
+    const type = 'integeroctalliteral';
     const token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume '0o'.
@@ -257,7 +257,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -281,9 +281,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'integehexadecimalliteral';
+    const type = 'integehexadecimalliteral';
     const token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume '0x'.
@@ -318,7 +318,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -342,9 +342,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'integerdecimalliteral';
+    const type = 'integerdecimalliteral';
     const token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume digitDecimal.
@@ -375,7 +375,7 @@ class Parser {
       }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -397,7 +397,7 @@ class Parser {
   //   | integerhexadecimalliteral
   //   | integerdecimalliteral
   parseIntegerLiteral() {
-    const ruleName = 'integerliteral';
+    const type = 'integerliteral';
 
     if (this.parseIntegerBinaryLiteral().success) {
       return this.lastParseData;
@@ -410,7 +410,7 @@ class Parser {
     }
 
     // Parsing failed.
-    return { success: false, message: ruleName, ast: null };
+    return { success: false, message: { type, parser: this }, ast: null };
   }
 
   // floatbinaryliteral  =
@@ -422,9 +422,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'floatbinaryliteral';
+    const type = 'floatbinaryliteral';
     let token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume '0b'.
@@ -605,7 +605,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -630,9 +630,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'floatoctalliteral';
+    const type = 'floatoctalliteral';
     let token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume '0o'.
@@ -813,7 +813,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -838,9 +838,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'floathexadecimalliteral';
+    const type = 'floathexadecimalliteral';
     let token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume '0x'.
@@ -1021,7 +1021,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -1046,9 +1046,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'floatdecimalliteral';
+    const type = 'floatdecimalliteral';
     let token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Alternate parsing.
@@ -1265,7 +1265,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, value: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -1287,7 +1287,7 @@ class Parser {
   //   | floathexadecimalliteral
   //   | floatdecimalliteral
   parseFloatLiteral() {
-    const ruleName = 'floatliteral';
+    const type = 'floatliteral';
 
     if (this.parseFloatBinaryLiteral().success) {
       return this.lastParseData;
@@ -1300,14 +1300,14 @@ class Parser {
     }
 
     // Parsing failed.
-    return { success: false, message: ruleName, ast: null };
+    return { success: false, message: { type, parser: this }, ast: null };
   }
 
   // numericliteral =
   //   | integerliteral
   //   | floatliteral
   parseNumericLiteral() {
-    const ruleName = 'numericliteral';
+    const type = 'numericliteral';
 
     if (this.parseFloatLiteral().success) {
       return this.lastParseData;
@@ -1316,7 +1316,7 @@ class Parser {
     }
 
     // Parsing failed.
-    return { success: false, message: ruleName, ast: null };
+    return { success: false, message: { type, parser: this }, ast: null };
   }
 
   // coefficientexpression =
@@ -1325,17 +1325,17 @@ class Parser {
   //   | floatdecimalliteral identifier
   //   | integerbinaryliteral identifier
   //   | integeroctalliteral identifier
-  //   | integerdecimalliteral identifier
+  //   | !('0b' | '0o' | '0x') integerdecimalliteral identifier
   parseCoefficientExpression() {
     // Keeping original state.
     const {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'coefficientexpression';
+    const type = 'coefficientexpression';
     let number = null;
     let identifier = null;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Alternate parsing.
@@ -1479,7 +1479,42 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: ruleName, number, identifier } };
+      parseData = { success: true, message: null, ast: { type, number, identifier } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // booleanliteral =
+  //   | 'true'
+  //   | 'false'
+  parseBooleanLiteral() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'booleanliteral';
+    let value = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume 'true' | 'false'.
+      if (!this.parseToken('true').success && !this.parseToken('false').success) return null;
+      value = this.lastParseData.ast.token;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, value } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -1503,9 +1538,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'identifier';
+    const type = 'identifier';
     const token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Consume the first character. [a-zA-Z]
     if (this.identifierBeginChar.indexOf(this.peekChar()) > -1) {
@@ -1537,9 +1572,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'operator';
+    const type = 'operator';
     const token = [];
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Consume operatorchar+.
     while (this.operatorChar.indexOf(this.peekChar()) > -1) {
@@ -1570,10 +1605,10 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'indent';
+    const type = 'indent';
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -1609,10 +1644,10 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'samedent';
+    const type = 'samedent';
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -1644,10 +1679,10 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'dedent';
+    const type = 'dedent';
     let indentCount = 0;
     let spaceCount = 0;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Parse subsequent spaces.
     while (this.parseToken(' ').success) {
@@ -1683,8 +1718,8 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'newline';
-    let parseData = { success: false, message: ruleName, ast: null };
+    const type = 'newline';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume '\r'?.
@@ -1723,8 +1758,8 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'nextline';
-    let parseData = { success: false, message: ruleName, ast: null };
+    const type = 'nextline';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume newline.
@@ -1778,9 +1813,9 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'spaces';
+    const type = 'spaces';
     let count = 0;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Consume spaces. [ \t]+
     while (this.space.indexOf(this.peekChar()) > -1) {
@@ -1808,7 +1843,7 @@ class Parser {
   //   | integerliteral
   //   | identifier
   parseExpression() { // TODO
-    const ruleName = 'expression';
+    const type = 'expression';
 
     if (this.parseIntegerLiteral().success) {
       return this.lastParseData;
@@ -1817,7 +1852,7 @@ class Parser {
     }
 
     // Parsing failed.
-    return { success: false, message: ruleName, ast: null };
+    return { success: false, message: { type, parser: this }, ast: null };
   }
 
   // names =
@@ -1828,10 +1863,10 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'names';
+    const type = 'names';
     const identifiers = [];
     let parseData = {
-      success: false, message: ruleName, ast: null,
+      success: false, message: { type, parser: this }, ast: null,
     };
 
     (() => {
@@ -1894,11 +1929,11 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'typedeclaration';
+    const type = 'typedeclaration';
     let identifier;
     let supertypes = [];
     let field = null;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume ('type').
@@ -2041,10 +2076,10 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'functiondeclarationn';
+    const type = 'functiondeclarationn';
     let identifier;
     let expression;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume ('fun').
@@ -2145,11 +2180,11 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const ruleName = 'subjectdeclaration';
+    const type = 'subjectdeclaration';
     let mutability;
     let identifier;
     let expression;
-    let parseData = { success: false, message: ruleName, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume ('let' | 'var').
