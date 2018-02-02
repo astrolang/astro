@@ -219,20 +219,6 @@ print(new Parser('0o5459').parseIntegerOctalLiteral());
 print(String.raw`0o5_45_06`);
 print(new Parser('0o5_45_06').parseIntegerOctalLiteral());
 
-print('========= INTEGERDECIMALLITERAL =========');
-
-print(String.raw`5__45>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('5__45').parseIntegerDecimalLiteral()); // mid
-
-print(String.raw`05459`);
-print(new Parser('05459').parseIntegerDecimalLiteral());
-
-print(String.raw`5_45`);
-print(new Parser('5_45').parseIntegerDecimalLiteral());
-
-print(String.raw`5_45_09`);
-print(new Parser('5_45_09').parseIntegerDecimalLiteral());
-
 print('========= INTEGERHEXADECIMALLITERAL =========');
 
 print(String.raw`0F_F6>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -252,6 +238,20 @@ print(new Parser('0xffe5').parseIntegerHexadecimalLiteral());
 
 print(String.raw`0x5f_ee_0561`);
 print(new Parser('0x5f_ee_0561').parseIntegerHexadecimalLiteral());
+
+print('========= INTEGERDECIMALLITERAL =========');
+
+print(String.raw`5__45>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('5__45').parseIntegerDecimalLiteral()); // mid
+
+print(String.raw`05459`);
+print(new Parser('05459').parseIntegerDecimalLiteral());
+
+print(String.raw`5_45`);
+print(new Parser('5_45').parseIntegerDecimalLiteral());
+
+print(String.raw`5_45_09`);
+print(new Parser('5_45_09').parseIntegerDecimalLiteral());
 
 print('========= INTEGERLITERAL =========');
 
@@ -345,3 +345,25 @@ print(new Parser('0xff.01p-5A').parseFloatHexadecimalLiteral());
 print(String.raw`0x5f_ee.29_00p1_0561`);
 print(new Parser('0x5f_ee.29_00p1_0561').parseFloatHexadecimalLiteral());
 
+print('========= FLOATDECIMALLITERAL =========');
+
+print(String.raw`5__45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('5__45').parseFloatDecimalLiteral()); // fail
+
+print(String.raw`05_67.5e+400.45>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('05_67.5e+400.45').parseFloatDecimalLiteral()); // mid
+
+print(String.raw`.59e-11`);
+print(new Parser('.59e-11').parseFloatDecimalLiteral());
+
+print(String.raw`054.59`);
+print(new Parser('054.59').parseFloatDecimalLiteral());
+
+print(String.raw`5_4.0_33e-5_99`);
+print(new Parser('5_4.0_33e-5_99').parseFloatDecimalLiteral());
+
+print(String.raw`5_45_0.9`);
+print(new Parser('5_45_0.9').parseFloatDecimalLiteral());
+
+print(String.raw`5_45_0e9`);
+print(new Parser('5_45_0e9').parseFloatDecimalLiteral());
