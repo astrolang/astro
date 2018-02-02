@@ -1,4 +1,4 @@
-/* eslint-disable no-constant-condition */
+/* eslint-disable no-constant-condition, max-len */
 // eslint-disable-next-line no-unused-vars
 const { print } = require('../utils');
 
@@ -411,6 +411,212 @@ class Parser {
 
     // Parsing failed.
     return { success: false, message: ruleName, ast: null };
+  }
+
+  // floatbinaryliteral  =
+  //   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+  //   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+  parseFloatBinaryLiteral() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const ruleName = 'floatbinaryliteral';
+    const token = [];
+    let parseData = { success: false, message: ruleName, ast: null };
+
+    (() => {
+      // Consume '0b'.
+      if (!this.parseToken('0b').success) return null;
+      token.push('0b');
+
+      // Consume digitbinary.
+      if (this.digitBinary.indexOf(this.peekChar()) < 0) return null;
+      token.push(this.eatChar());
+
+      // Optional-multiple parsing. ('_'? digitbinary)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume '_'?.
+          this.parseToken('_');
+
+          // Consume digitbinary.
+          if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Alternate parsing.
+      // | '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+      // | 'e' [-+]? digitbinary ('_'? digitbinary)*
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+      (() => {
+        // Consume '.'.
+        if (!this.parseToken('.').success) return;
+        token.push('.');
+
+        // Consume digitbinary.
+        if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+        token.push(this.eatChar());
+
+        // Optional-multiple parsing. ('_'? digitbinary)*
+        while (true) {
+          let parseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume '_'?.
+            this.parseToken('_');
+
+            // Consume digitbinary.
+            if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+            token.push(this.eatChar());
+
+            parseSuccessful = true;
+          })();
+
+          // If parsing the above fails, revert state to what it was before that parsing began.
+          // And break out of the loop.
+          if (!parseSuccessful) {
+            this.reset(state2.lastPosition, null, state2.column, state2.line);
+            break;
+          }
+        }
+
+        // Optional parsing. ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+        let optionalParseSuccessful = false;
+        let state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume 'e'.
+          if (!this.parseToken('e').success) return;
+          token.push('e');
+
+          // Consume [-+]?.
+          if (this.parseToken('-').success || this.parseToken('+').success) {
+            token.push(this.lastParseData.ast.token);
+          }
+
+          // Consume digitbinary.
+          if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          // Optional-multiple parsing. ('_'? digitbinary)*
+          while (true) {
+            let parseSuccessful = false;
+            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            (() => {
+              // Consume '_'?.
+              this.parseToken('_');
+
+              // Consume digitbinary.
+              if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+              token.push(this.eatChar());
+
+              parseSuccessful = true;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              break;
+            }
+          }
+
+          // This optional was parsed successfully.
+          optionalParseSuccessful = true;
+        })();
+
+        // If parsing the above optional fails, revert state to what it was before that parsing began.
+        if (!optionalParseSuccessful) {
+          this.reset(state2.lastPosition, null, state2.column, state2.line);
+        }
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'e' [-+]? digitbinary ('_'? digitbinary)*
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume 'e'.
+          if (!this.parseToken('e').success) return;
+          token.push('e');
+
+          // Consume [-+]?.
+          if (this.parseToken('-').success || this.parseToken('+').success) {
+            token.push(this.lastParseData.ast.token);
+          }
+
+          // Consume digitbinary.
+          if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          // Optional-multiple parsing. ('_'? digitbinary)*
+          while (true) {
+            let parseSuccessful = false;
+            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            (() => {
+              // Consume '_'?.
+              this.parseToken('_');
+
+              // Consume digitbinary.
+              if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+              token.push(this.eatChar());
+
+              parseSuccessful = true;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              break;
+            }
+          }
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
   }
 
   // identifier =
@@ -1051,7 +1257,7 @@ class Parser {
   }
 
   // subjectdeclaration =
-  //   | ('let'/'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
+  //   | ('let' | 'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
   parseSubjectDeclaration() {
     // Keeping original state.
     const {
@@ -1065,7 +1271,7 @@ class Parser {
     let parseData = { success: false, message: ruleName, ast: null };
 
     (() => {
-      // Consume ('let'/'var').
+      // Consume ('let' | 'var').
       if (!this.parseToken('let').success && !this.parseToken('var').success) return null;
       mutability = this.lastParseData.ast.token;
 
