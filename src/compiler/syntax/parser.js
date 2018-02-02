@@ -1319,6 +1319,182 @@ class Parser {
     return { success: false, message: ruleName, ast: null };
   }
 
+  // coefficientexpression =
+  //   | floatbinaryliteral identifier
+  //   | floatoctalliteral identifier
+  //   | floatdecimalliteral identifier
+  //   | integerbinaryliteral identifier
+  //   | integeroctalliteral identifier
+  //   | integerdecimalliteral identifier
+  parseCoefficientExpression() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const ruleName = 'coefficientexpression';
+    let number = null;
+    let identifier = null;
+    let parseData = { success: false, message: ruleName, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | floatbinaryliteral identifier
+      // | floatoctalliteral identifier
+      // | floatdecimalliteral identifier
+      // | integerbinaryliteral identifier
+      // | integeroctalliteral identifier
+      // | !('0b' | '0o' | '0x') integerdecimalliteral identifier
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { number, identifier };
+
+      // [1]. floatbinaryliteral identifier
+      (() => {
+        // Consume floatbinaryliteral.
+        if (!this.parseFloatBinaryLiteral().success) return;
+        number = this.lastParseData.ast;
+
+        // Consume identifier.
+        if (!this.parseIdentifier().success) return;
+        identifier = this.lastParseData.ast;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. floatoctalliteral identifier
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        number = otherState.number;
+        identifier = otherState.identifier;
+
+        (() => {
+          // Consume floatoctalliteral.
+          if (!this.parseFloatOctalLiteral().success) return;
+          number = this.lastParseData.ast;
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          identifier = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. floatdecimalliteral identifier
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        number = otherState.number;
+        identifier = otherState.identifier;
+
+        (() => {
+          // Consume floatdecimalliteral.
+          if (!this.parseFloatDecimalLiteral().success) return;
+          number = this.lastParseData.ast;
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          identifier = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [4]. integerbinaryliteral identifier
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        number = otherState.number;
+        identifier = otherState.identifier;
+
+        (() => {
+          // Consume integerbinaryliteral.
+          if (!this.parseIntegerBinaryLiteral().success) return;
+          number = this.lastParseData.ast;
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          identifier = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [5]. integeroctalliteral identifier
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        number = otherState.number;
+        identifier = otherState.identifier;
+
+        (() => {
+          // Consume integeroctalliteral.
+          if (!this.parseIntegerOctalLiteral().success) return;
+          number = this.lastParseData.ast;
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          identifier = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [6]. !('0b' | '0o' | '0x') integerdecimalliteral identifier
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        number = otherState.number;
+        identifier = otherState.identifier;
+
+        (() => {
+          // Check !('0b' | '0o' | '0x').
+          if (this.parseToken('0b').success || this.parseToken('0o').success || this.parseToken('0x').success) return;
+          // Step back two chars.
+          this.lastPosition -= 2;
+
+          // Consume integerdecimalliteral.
+          if (!this.parseIntegerDecimalLiteral().success) return;
+          number = this.lastParseData.ast;
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          identifier = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type: ruleName, number, identifier } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // identifier =
   //   | identifierbeginchar identifierendchar*
   parseIdentifier() { // TODO
