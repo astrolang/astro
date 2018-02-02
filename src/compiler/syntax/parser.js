@@ -396,7 +396,7 @@ class Parser {
   //   | integeroctalliteral
   //   | integerhexadecimalliteral
   //   | integerdecimalliteral
-  parseIntegerLiteral() { // TODO
+  parseIntegerLiteral() {
     const ruleName = 'integerliteral';
 
     if (this.parseIntegerBinaryLiteral().success) {
@@ -1283,7 +1283,7 @@ class Parser {
 
   // identifier =
   //   | identifierbeginchar identifierendchar*
-  parseIdentifier() {
+  parseIdentifier() { // TODO
     // Keeping original state.
     const {
       lastPosition, column, line,
@@ -1674,7 +1674,7 @@ class Parser {
   // typedeclaration =
   //  | 'type' _ identifier _? '(' _? ')' (_? '<:' _? names)?
   //  | 'type' _ identifier (_? '<:' _? names)? _? ':' _? subjectdeclaration
-  parseTypeDeclaration() {
+  parseTypeDeclaration() { // TODO
     // Keeping original state.
     const {
       lastPosition, column, line,
@@ -1821,7 +1821,7 @@ class Parser {
 
   // functiondeclaration =
   //   | 'fun' _ identifier _? '(' _? ')' (_ '=' _ expression | '=' !(operator) expression)
-  parseFunctionDeclaration() {
+  parseFunctionDeclaration() { // TODO
     // Keeping original state.
     const {
       lastPosition, column, line,
@@ -1925,7 +1925,7 @@ class Parser {
 
   // subjectdeclaration =
   //   | ('let' | 'var') _ identifier (_ '=' _ expression | '=' !(operator) expression)
-  parseSubjectDeclaration() {
+  parseSubjectDeclaration() { // TODO
     // Keeping original state.
     const {
       lastPosition, column, line,
