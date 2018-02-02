@@ -1303,6 +1303,22 @@ class Parser {
     return { success: false, message: ruleName, ast: null };
   }
 
+  // numericliteral =
+  //   | integerliteral
+  //   | floatliteral
+  parseNumericLiteral() {
+    const ruleName = 'numericliteral';
+
+    if (this.parseFloatLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseIntegerLiteral().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: ruleName, ast: null };
+  }
+
   // identifier =
   //   | identifierbeginchar identifierendchar*
   parseIdentifier() { // TODO
