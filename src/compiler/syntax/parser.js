@@ -501,7 +501,7 @@ class Parser {
 
         // Optional parsing. ('e' [-+]? digitbinary ('_'? digitbinary)*)?
         let optionalParseSuccessful = false;
-        let state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
         (() => {
           // Consume 'e'.
           if (!this.parseToken('e').success) return;
@@ -519,7 +519,7 @@ class Parser {
           // Optional-multiple parsing. ('_'? digitbinary)*
           while (true) {
             let parseSuccessful = false;
-            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            const state3 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
             (() => {
               // Consume '_'?.
               this.parseToken('_');
@@ -534,7 +534,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              this.reset(state3.lastPosition, null, state3.column, state3.line);
               break;
             }
           }
@@ -581,6 +581,212 @@ class Parser {
 
               // Consume digitbinary.
               if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
+              token.push(this.eatChar());
+
+              parseSuccessful = true;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              break;
+            }
+          }
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type: ruleName, value: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // floatoctalliteral  =
+  //   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+  //   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+  parseFloatOctalLiteral() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const ruleName = 'floatoctalliteral';
+    const token = [];
+    let parseData = { success: false, message: ruleName, ast: null };
+
+    (() => {
+      // Consume '0b'.
+      if (!this.parseToken('0b').success) return null;
+      token.push('0b');
+
+      // Consume digitoctal.
+      if (this.digitOctal.indexOf(this.peekChar()) < 0) return null;
+      token.push(this.eatChar());
+
+      // Optional-multiple parsing. ('_'? digitoctal)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume '_'?.
+          this.parseToken('_');
+
+          // Consume digitoctal.
+          if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Alternate parsing.
+      // | '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+      // | 'e' [-+]? digitoctal ('_'? digitoctal)*
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+      (() => {
+        // Consume '.'.
+        if (!this.parseToken('.').success) return;
+        token.push('.');
+
+        // Consume digitoctal.
+        if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
+        token.push(this.eatChar());
+
+        // Optional-multiple parsing. ('_'? digitoctal)*
+        while (true) {
+          let parseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume '_'?.
+            this.parseToken('_');
+
+            // Consume digitoctal.
+            if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
+            token.push(this.eatChar());
+
+            parseSuccessful = true;
+          })();
+
+          // If parsing the above fails, revert state to what it was before that parsing began.
+          // And break out of the loop.
+          if (!parseSuccessful) {
+            this.reset(state2.lastPosition, null, state2.column, state2.line);
+            break;
+          }
+        }
+
+        // Optional parsing. ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+        let optionalParseSuccessful = false;
+        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume 'e'.
+          if (!this.parseToken('e').success) return;
+          token.push('e');
+
+          // Consume [-+]?.
+          if (this.parseToken('-').success || this.parseToken('+').success) {
+            token.push(this.lastParseData.ast.token);
+          }
+
+          // Consume digitoctal.
+          if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          // Optional-multiple parsing. ('_'? digitoctal)*
+          while (true) {
+            let parseSuccessful = false;
+            const state3 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            (() => {
+              // Consume '_'?.
+              this.parseToken('_');
+
+              // Consume digitoctal.
+              if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
+              token.push(this.eatChar());
+
+              parseSuccessful = true;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state3.lastPosition, null, state3.column, state3.line);
+              break;
+            }
+          }
+
+          // This optional was parsed successfully.
+          optionalParseSuccessful = true;
+        })();
+
+        // If parsing the above optional fails, revert state to what it was before that parsing began.
+        if (!optionalParseSuccessful) {
+          this.reset(state2.lastPosition, null, state2.column, state2.line);
+        }
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'e' [-+]? digitoctal ('_'? digitoctal)*
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume 'e'.
+          if (!this.parseToken('e').success) return;
+          token.push('e');
+
+          // Consume [-+]?.
+          if (this.parseToken('-').success || this.parseToken('+').success) {
+            token.push(this.lastParseData.ast.token);
+          }
+
+          // Consume digitoctal.
+          if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
+          token.push(this.eatChar());
+
+          // Optional-multiple parsing. ('_'? digitoctal)*
+          while (true) {
+            let parseSuccessful = false;
+            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            (() => {
+              // Consume '_'?.
+              this.parseToken('_');
+
+              // Consume digit0ctal.
+              if (this.digitOctal.indexOf(this.peekChar()) < 0) return;
               token.push(this.eatChar());
 
               parseSuccessful = true;
