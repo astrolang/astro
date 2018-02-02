@@ -367,3 +367,35 @@ print(new Parser('5_45_0.9').parseFloatDecimalLiteral());
 
 print(String.raw`5_45_0e9`);
 print(new Parser('5_45_0e9').parseFloatDecimalLiteral());
+
+print('========= FLOATLITERAL =========');
+
+print(String.raw`ff.56_FF>>>>>>>>>>>>>>>>>>>>>>>>MID`); // fail
+print(new Parser('ff.56_FF').parseFloatLiteral()); // fail
+
+print(String.raw`0b0.11_FF>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0b0.11_FF').parseFloatLiteral()); // mid
+
+print(String.raw`02.2eF_F6>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('02.2eF_F6').parseFloatLiteral()); // mid
+
+print(String.raw`0x1ffe-2_9FG>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0x1ffe-2_9FG').parseFloatLiteral()); // mid
+
+print(String.raw`0b1__1011>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0b1__1011').parseFloatLiteral()); // mid
+
+print(String.raw`0x10.56_p5`);
+print(new Parser('0x10.56_p5').parseFloatLiteral());
+
+print(String.raw`0b1_10.01_110e-1_00`);
+print(new Parser('0b1_10.01_110e-1_00').parseFloatBinaryLiteral());
+
+print(String.raw`0xffep5`);
+print(new Parser('0xffep5').parseFloatLiteral());
+
+print(String.raw`0o56_77_0.74_66e7`);
+print(new Parser('0o56_77_0.74_66e7').parseFloatLiteral());
+
+print(String.raw`056_77_0.74_667`);
+print(new Parser('056_77_0.74_667').parseFloatLiteral());
