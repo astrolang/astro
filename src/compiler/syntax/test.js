@@ -278,3 +278,23 @@ print(new Parser('0o56_77_074_667').parseIntegerLiteral());
 
 print(String.raw`056_77_074_667`);
 print(new Parser('056_77_074_667').parseIntegerLiteral());
+
+print('========= FLOATBINARYLITERAL =========');
+
+print(String.raw`01_01.01>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('01_01.01').parseFloatBinaryLiteral()); // fail
+
+print(String.raw`0b2e5_01>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0b2e5_01').parseFloatBinaryLiteral()); // fail
+
+print(String.raw`0b1e1_087>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0b1e1_087').parseFloatBinaryLiteral()); // mid
+
+print(String.raw`0b0.101__11>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('0b0.101__11').parseFloatBinaryLiteral()); // mid
+
+print(String.raw`0b1_10.01_110e-1_00`);
+print(new Parser('0b1_10.01_110e-1_00').parseFloatBinaryLiteral());
+
+print(String.raw`0b10_01e+1_001`);
+print(new Parser('0b10_01e+1_001').parseFloatBinaryLiteral());
