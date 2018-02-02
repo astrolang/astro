@@ -425,3 +425,29 @@ print(new Parser('0x5').parseNumericLiteral());
 
 print(String.raw`0b10_011_001`);
 print(new Parser('0b10_011_001').parseNumericLiteral());
+
+print('========= COEFFICIENTEXPRESSION=========');
+
+print(String.raw`0x55f>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0x55f').parseCoefficientExpression()); // fail
+
+print(String.raw`0x55.afj>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0x55.afj').parseCoefficientExpression()); // fail
+
+print(String.raw`0b01>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0b01').parseCoefficientExpression()); // fail
+
+print(String.raw`02.455f_name2+>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('02.455f_name2+').parseCoefficientExpression()); // mid
+
+print(String.raw`0b01_1e11e`);
+print(new Parser('0b01_1e11e').parseCoefficientExpression());
+
+print(String.raw`02.2e002e`);
+print(new Parser('02.2e002e').parseCoefficientExpression());
+
+print(String.raw`0b1__1011`);
+print(new Parser('0b1__1011').parseCoefficientExpression());
+
+print(String.raw`0o775o`);
+print(new Parser('0o775o').parseCoefficientExpression());
