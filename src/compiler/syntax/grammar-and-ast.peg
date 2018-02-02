@@ -62,8 +62,8 @@ floatliteral =
   | floatdecimalliteral // can eat others cake
 
 numericliteral =
-  | integerliteral
   | floatliteral
+  | integerliteral  // can eat others cake
 
 coefficientexpression =
   | integerbinaryliteral identifier
