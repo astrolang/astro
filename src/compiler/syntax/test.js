@@ -468,3 +468,20 @@ print(new Parser('name__55  nom').parseIdentifier()); // mid
 
 print(String.raw`_na99_me_`);
 print(new Parser('_na99_me_').parseIdentifier());
+
+print('========= OPERATOR =========');
+
+print(' -*=>>>>>>>>>>>>>>>>>>>>>>>>FAIL'); // fail
+print(new Parser(' -*=').parseOperator()); // fail
+
+print(String.raw`)++>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser(')++').parseOperator()); // fail
+
+print(String.raw`%^&_nom>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('%^&_nom').parseOperator()); // mid
+
+print(String.raw`=`);
+print(new Parser('=').parseOperator());
+
+print(String.raw`++/-`);
+print(new Parser('++/-').parseOperator());
