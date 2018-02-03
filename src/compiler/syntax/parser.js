@@ -26,7 +26,6 @@ class Parser {
     this.digitOctal = '01234567';
     this.digitDecimal = '0123456789';
     this.digitHexadecimal = '0123456789ABCDEFabcdef';
-    this.noName = '_';
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
     this.operatorChar = '+-*/\\^%!><=÷×≠≈¹²³√'; // Unicode?
@@ -1526,6 +1525,40 @@ class Parser {
     return parseData;
   }
 
+  // noname =
+  //   | '_'
+  parseNoName() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'noname';
+    let name;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume newline.
+      if (!this.parseToken('_').success) return null;
+      name = this.lastParseData.ast.token;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, name } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // identifier =
   //   | identifierbeginchar identifierendchar*
   parseIdentifier() { // TODO
@@ -1538,16 +1571,17 @@ class Parser {
     const token = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
-    // Consume the first character. [a-zA-Z]
+    // Consume the first character. identifierbeginchar
     if (this.identifierBeginChar.indexOf(this.peekChar()) > -1) {
       token.push(this.eatChar());
-      // Consume remaining part of identifier. [a-zA-Z_0-9]*
+
+      // Consume remaining part of identifier. identifierendchar*
       while (this.identifierEndChar.indexOf(this.peekChar()) > -1) {
         token.push(this.eatChar());
       }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: 'identifier', name: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, name: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
