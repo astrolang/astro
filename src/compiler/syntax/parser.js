@@ -28,7 +28,7 @@ class Parser {
     this.digitHexadecimal = '0123456789ABCDEFabcdef';
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
-    this.operatorChar = '+-*/\\^%!><=÷×≠≈¹²³√'; // Unicode?
+    this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√'; // Unicode?
     this.pathNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.space = ' \t'; // Unicode?
   }
@@ -1614,7 +1614,7 @@ class Parser {
     // Check if it was able to consume at least an operator.
     if (token.length > 0) {
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: 'operator', name: token.join('') } };
+      parseData = { success: true, message: null, ast: { type, name: token.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
