@@ -1,37 +1,6 @@
 const { print } = require('../utils');
 const Parser = require('./parser');
 
-print('========= IDENTIFIER =========');
-
-print(' name>>>>>>>>>>>>>>>>>>>>>>>>FAIL'); // fail
-print(new Parser(' name').parseIdentifier()); // fail
-
-print('>>>>>>>>>>>>>>>>>>>>>>>>FAIL'); // fail
-print(new Parser('').parseIdentifier()); // fail
-
-print('name  nom');
-print(new Parser('name  nom').parseIdentifier());
-
-print('name_ 5');
-print(new Parser('name_ 5').parseIdentifier());
-
-print('_na99_me_ age');
-print(new Parser('_na99_me_ age').parseIdentifier());
-
-print('========= INTEGER =========');
-
-print(' 997890e747>>>>>>>>>>>>>>>>>>>>>>>>FAIL'); // fail
-print(new Parser(' 997890e747').parseIntegerDecimalLiteral()); // fail
-
-print('99');
-print(new Parser('99').parseIntegerDecimalLiteral());
-
-print('9978');
-print(new Parser('9978').parseIntegerDecimalLiteral());
-
-print('997890e747>>>>>>>>>>>>>>>>>>>>>>>>MID'); // mid
-print(new Parser('997890e747').parseIntegerDecimalLiteral()); // mid
-
 print('========= SPACES =========');
 
 print('\t\t997890e747');
@@ -472,3 +441,13 @@ print(new Parser('true').parseBooleanLiteral());
 print(String.raw`false`);
 print(new Parser('false').parseBooleanLiteral());
 
+print('========= NONAME =========');
+
+print(String.raw`0true>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0true').parseNoName()); // fail
+
+print(String.raw`_false>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('_false').parseNoName()); // mid
+
+print(String.raw`_`);
+print(new Parser('_').parseNoName());
