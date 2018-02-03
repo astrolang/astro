@@ -451,3 +451,20 @@ print(new Parser('_false').parseNoName()); // mid
 
 print(String.raw`_`);
 print(new Parser('_').parseNoName());
+
+print('========= IDENTIFIER =========');
+
+print(String.raw` name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser(' name').parseIdentifier()); // fail
+
+print('>>>>>>>>>>>>>>>>>>>>>>>>FAIL'); // fail
+print(new Parser('').parseIdentifier()); // fail
+
+print(String.raw`99name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('99name').parseIdentifier()); // fail
+
+print(String.raw`name__55 nom>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('name__55  nom').parseIdentifier()); // mid
+
+print(String.raw`_na99_me_`);
+print(new Parser('_na99_me_').parseIdentifier());
