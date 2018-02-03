@@ -1,4 +1,4 @@
-/* eslint-disable no-constant-condition, max-len */
+/* eslint-disable no-loop-func, no-constant-condition, max-len */
 // eslint-disable-next-line no-unused-vars
 const { print } = require('../utils');
 
@@ -584,7 +584,7 @@ class Parser {
 
               // Consume digitbinary.
               if (this.digitBinary.indexOf(this.peekChar()) < 0) return;
-              // token.push(this.eatChar());
+              token.push(this.eatChar());
 
               parseSuccessful = true;
             })();
