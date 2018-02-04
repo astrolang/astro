@@ -542,3 +542,26 @@ print(new Parser('\r\n').parseNewline());
 print(String.raw`\n`);
 print(new Parser('\n').parseNewline());
 
+print('========= NEXTLINE =========');
+
+print(String.raw`\t\n>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('\t\n').parseNextLine()); // fail
+
+print(String.raw`\n\n    \n        >>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print((() => { // mid
+  const parser = new Parser('\n\n    \n        ');
+  parser.parseNextLine();
+  print(parser.lastPosition);
+  parser.lastPosition = -1;
+  return parser.parseNextLine();
+})());
+
+print(String.raw`\r\n`);
+print(new Parser('\r\n').parseNextLine());
+
+print(String.raw`\n`);
+print(new Parser('\n').parseNextLine());
+
+print(String.raw`\n\r\n`);
+print(new Parser('\n\r\n').parseNextLine());
+
