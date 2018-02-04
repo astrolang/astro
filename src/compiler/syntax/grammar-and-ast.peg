@@ -194,7 +194,7 @@ stringliteral =
   | multilinestring
 
 regexliteral =
-  | '/' charnonewlineorforwardslash* '/'
+  | '/' charsnonewlineorforwardslash* '/'
 
 endcomma =
   | _? ','
