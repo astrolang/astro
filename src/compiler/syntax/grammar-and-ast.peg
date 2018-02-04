@@ -151,22 +151,11 @@ dedent =
   | ' '+
   { level }
 
-dedentoreoiend =
-  | nextcodeline dedent
-  | nextcodeline? _? &eoi
-
 newline =
   | '\r'? '\n'
 
 nextline =
   | newline (_? newline)*
-
-linecontinuation =
-  | space* '...' space* nextline samedent
-
-_ =
-  | linecontinuation
-  | space+
 
 singlelinecomment =
   | "#" charsnonewline? &(newline | eoi)
@@ -177,6 +166,20 @@ multilinecomment =
 comment =
   | singlelinecomment
   | multilinecomment
+
+nextcodeline =
+  | _? nextline (samedent comment nextline)*
+
+dedentoreoiend =
+  | nextcodeline dedent
+  | nextcodeline? _? &eoi
+
+linecontinuation =
+  | space* '...' space* nextline samedent
+
+_ =
+  | linecontinuation
+  | space+
 
 singlelinestring =
   | "'" charsnonewlineorsinglequote? "'" (nextcodeline samedent "'" charsnonewlineorsinglequote? "'")*
@@ -192,9 +195,6 @@ stringliteral =
 
 regexliteral =
   | '/' charnonewlineorforwardslash* '/'
-
-nextcodeline =
-  | _? nextline (samedent comment nextline)*
 
 endcomma =
   | _? ','
