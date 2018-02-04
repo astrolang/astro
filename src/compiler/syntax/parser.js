@@ -1454,8 +1454,6 @@ class Parser {
         (() => {
           // Check !('0b' | '0o' | '0x').
           if (this.parseToken('0b').success || this.parseToken('0o').success || this.parseToken('0x').success) return;
-          // Step back two chars.
-          this.lastPosition -= 2;
 
           // Consume integerdecimalliteral.
           if (!this.parseIntegerDecimalLiteral().success) return;
@@ -1620,6 +1618,67 @@ class Parser {
       this.lastParseData = parseData;
       return parseData;
     }
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+
+  // charnonewlineorsinglequote =
+  //   | (!(newline | "'") .)+
+  parseCharNoNewlineOrSinglequote() { // TODO
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'charnonewlineorsinglequote';
+    const token = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // one-multiple parsing. (!(newline | "'") .)+
+      let loopCount = 0;
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Check !(newline | "'") .
+          if (this.parseNewline().success || this.parseToken("'").success) return;
+
+          // Consume ..
+          if (!this.peekChar()) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+
+          // Parsing successful, increment loop count.
+          loopCount += 1;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // At least one iteration of the above must be parsed successfully.
+      if (loopCount < 1) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { token: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
     this.reset(lastPosition, null, null, column, line);
