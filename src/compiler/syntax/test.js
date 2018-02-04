@@ -522,7 +522,7 @@ print(new Parser('•').parseSamedent());
 print('========= DEDENT =========');
 
 print(String.raw`    •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('    •').parseDedent());
+print(new Parser('    •').parseDedent()); // fail
 
 print(String.raw`•`);
 print((() => {
@@ -531,8 +531,14 @@ print((() => {
   return parser.parseDedent();
 })());
 
-print('========= NEXTLINE =========');
+print('========= NEWLINE =========');
 
-print(String.raw`\n\n    \n        \r\n`);
-print(new Parser('\n\n    \n        \r\n').parseNextLine());
+print(String.raw`\t\n>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('\t\n').parseNewline()); // fail
+
+print(String.raw`\r\n`);
+print(new Parser('\r\n').parseNewline());
+
+print(String.raw`\n`);
+print(new Parser('\n').parseNewline());
 
