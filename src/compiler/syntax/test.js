@@ -605,3 +605,23 @@ print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrForwardSlash()); // m
 print(String.raw`25fse?w&$3267`);
 print(new Parser('25fse?w&$3267').parseCharsNoNewlineOrForwardSlash());
 
+print('========= NAMESEPARATOR =========');
+
+print(String.raw`name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('name').parseNameSeparator()); // fail
+
+print(String.raw`556>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('556').parseNameSeparator()); // fail
+
+print(String.raw` games`);
+print(new Parser(' games').parseNameSeparator());
+
+print(String.raw`+age`);
+print(new Parser('+age').parseNameSeparator());
+
+print(String.raw`(556`);
+print(new Parser('(556').parseNameSeparator());
+
+print(String.raw`.name`);
+print(new Parser('.name').parseNameSeparator());
+
