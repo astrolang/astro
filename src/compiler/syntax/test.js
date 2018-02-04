@@ -565,3 +565,9 @@ print(new Parser('\n').parseNextLine());
 print(String.raw`\n\r\n`);
 print(new Parser('\n\r\n').parseNextLine());
 
+print('========= SINGLELINECOMMENT =========');
+print(String.raw`#hello world 99 @v !?\t66\n`);
+print(new Parser('#hello world 99 @v !?\t66\n').parseSingleLineComment());
+
+print(String.raw`#hello world 99 @v !?\t66`);
+print(new Parser('#hello world 99 @v !?\t66').parseSingleLineComment());
