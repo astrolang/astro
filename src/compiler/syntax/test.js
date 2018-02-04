@@ -497,9 +497,26 @@ print(new Parser("'").parseCharsNoNewlineOrSinglequote()); // fail
 print(String.raw`nam:e2*9s)!@'@34>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("nam:e2*9s)!@'@34").parseCharsNoNewlineOrSinglequote()); // mid
 
-print(String.raw`nam:e2*9s)!@\n>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('nam:e2*9s)!@\n').parseCharsNoNewlineOrSinglequote()); // mid
+print(String.raw`nam:e2*9s)!@\n6%a>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrSinglequote()); // mid
 
 print(String.raw`25fse?w&$32"67`);
 print(new Parser('25fse?w&$32"67').parseCharsNoNewlineOrSinglequote());
+
+print('========= CHARSNONEWLINEORDOUBLEQUOTE =========');
+
+print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('').parseCharsNoNewlineOrDoublequote()); // fail
+
+print(String.raw`">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('"').parseCharsNoNewlineOrDoublequote()); // fail
+
+print(String.raw`nam:e2*9s)!@"@34>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('nam:e2*9s)!@"@34').parseCharsNoNewlineOrDoublequote()); // mid
+
+print(String.raw`nam:e2*9s)!@\n6%a>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrDoublequote()); // mid
+
+print(String.raw`25fse?w&$32'67`);
+print(new Parser("25fse?w&$32'67").parseCharsNoNewlineOrDoublequote());
 
