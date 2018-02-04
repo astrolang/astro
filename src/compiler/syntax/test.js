@@ -520,3 +520,20 @@ print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrDoublequote()); // mi
 print(String.raw`25fse?w&$32'67`);
 print(new Parser("25fse?w&$32'67").parseCharsNoNewlineOrDoublequote());
 
+print('========= CHARSNONEWLINEORTRIPLESINGLEQUOTE =========');
+
+print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('').parseCharsNoNewlineOrTripleSinglequote()); // fail
+
+print(String.raw`'''>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser("'''").parseCharsNoNewlineOrTripleSinglequote()); // fail
+
+print(String.raw`nam:e2*9s)!@'''@34>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("nam:e2*9s)!@'''@34").parseCharsNoNewlineOrTripleSinglequote()); // mid
+
+print(String.raw`nam:e2*9s)!@\n6%a>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrTripleSinglequote()); // mid
+
+print(String.raw`25fse?w&$32"""67`);
+print(new Parser('25fse?w&$32"""67').parseCharsNoNewlineOrTripleSinglequote());
+
