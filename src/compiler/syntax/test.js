@@ -494,8 +494,8 @@ print(new Parser('').parseCharsNoNewlineOrSinglequote()); // fail
 print(String.raw`'>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser("'").parseCharsNoNewlineOrSinglequote()); // fail
 
-print(String.raw`nam:e2*9s)!@'>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser("nam:e2*9s)!@'").parseCharsNoNewlineOrSinglequote()); // mid
+print(String.raw`nam:e2*9s)!@'@34>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("nam:e2*9s)!@'@34").parseCharsNoNewlineOrSinglequote()); // mid
 
 print(String.raw`nam:e2*9s)!@\n>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser('nam:e2*9s)!@\n').parseCharsNoNewlineOrSinglequote()); // mid
