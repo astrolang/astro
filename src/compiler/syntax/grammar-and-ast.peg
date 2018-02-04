@@ -161,7 +161,7 @@ singlelinecomment =
   | "#" charsnonewline? &(newline | eoi)
 
 multilinecomment =
-  | "#=" charsnoequalhash? (multilinecomment charsnoequalhash?)? '=#' _? &(newline | eoi)
+  | "#=" charsnoequalhash? (multilinecomment charsnoequalhash?)* '=#' _? &(newline | eoi)
 
 comment =
   | singlelinecomment
