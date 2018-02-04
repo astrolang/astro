@@ -1627,7 +1627,7 @@ class Parser {
 
   // charsnonewlineorsinglequote =
   //   | (!(newline | "'") .)+
-  parseCharsNoNewlineOrSinglequote() { // TODO
+  parseCharsNoNewlineOrSingleQuote() { // TODO
     // Keep original state.
     const {
       lastPosition, column, line,
@@ -1687,7 +1687,7 @@ class Parser {
 
   // charsnonewlineordoublequote =
   //   | (!(newline | '"') .)+ // TODO
-  parseCharsNoNewlineOrDoublequote() { // TODO
+  parseCharsNoNewlineOrDoubleQuote() { // TODO
     // Keep original state.
     const {
       lastPosition, column, line,
@@ -1747,7 +1747,7 @@ class Parser {
 
   // charsnonewlineortriplesinglequote =
   //   | (!(newline | "'''") .)+ // TODO
-  parseCharsNoNewlineOrTripleSinglequote() { // TODO
+  parseCharsNoNewlineOrTripleSingleQuote() { // TODO
     // Keep original state.
     const {
       lastPosition, column, line,
