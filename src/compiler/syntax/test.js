@@ -588,3 +588,20 @@ print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewline()); // mid
 print(String.raw`25fse?w&$32#\r67`);
 print(new Parser('25fse?w&$32#\r67').parseCharsNoNewline());
 
+print('========= CHARSNONEWLINEORFORWARDSLASH =========');
+
+print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('').parseCharsNoNewlineOrForwardSlash()); // fail
+
+print(String.raw`/>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('/').parseCharsNoNewlineOrForwardSlash()); // fail
+
+print(String.raw`nam:e2*9s)!@/@34>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('nam:e2*9s)!@/@34').parseCharsNoNewlineOrForwardSlash()); // mid
+
+print(String.raw`nam:e2*9s)!@\n6%a>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrForwardSlash()); // mid
+
+print(String.raw`25fse?w&$3267`);
+print(new Parser('25fse?w&$3267').parseCharsNoNewlineOrForwardSlash());
+
