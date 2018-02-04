@@ -1,7 +1,1 @@
 sqrt(mean(x²))
-
-fun sqmean(x):
-    var sum = 0
-    for i in x:
-        sum += i * i
-    return sqrt(sum)
