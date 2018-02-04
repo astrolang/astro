@@ -572,8 +572,30 @@ print(String.raw`\n\r\n`);
 print(new Parser('\n\r\n').parseNextLine());
 
 print('========= SINGLELINECOMMENT =========');
+
 print(String.raw`#hello world 99 @v !?\t66\n`);
 print(new Parser('#hello world 99 @v !?\t66\n').parseSingleLineComment());
 
 print(String.raw`#hello world 99 @v !?\t66`);
 print(new Parser('#hello world 99 @v !?\t66').parseSingleLineComment());
+
+print('========= MULTILINECOMMENT =========');
+
+print(String.raw`#=hello world 99>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('#=hello world 99').parseMultiLineComment()); // fail
+
+print(String.raw`#=hello world #= hi =# 99>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('#=hello world #= hi =# 99').parseMultiLineComment()); // fail
+
+print(String.raw`#=hello world 99=#hello>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('#=hello world 99=#hello').parseMultiLineComment()); // fail
+
+print(String.raw`#=hello world 99=#`);
+print(new Parser('#=hello world 99=#').parseMultiLineComment());
+
+print(String.raw`#=hello #=world 99=# @v m346 66j6h=#\n`);
+print(new Parser('#=hello #=world 99=# @v m346 66j6h=#\n').parseMultiLineComment());
+
+print(String.raw`#=hello #=world 99=# @v m346 66j6h=#     \n`);
+print(new Parser('#=hello #=world 99=# @v m346 66j6h=#     \n').parseMultiLineComment());
+
