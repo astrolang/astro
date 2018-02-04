@@ -134,7 +134,7 @@ charnonewlineorforwardslash =
 space =
   | [ \t]
 
-nameseparation =
+nameseparator =
   | (!(identifier | numericliteral) | _)
 
 indent =
@@ -301,19 +301,19 @@ comprehension =
   | dictcomprehension
 
 return =
-  | 'return' nameseparation expressionnocontrolptimitive
+  | 'return' nameseparator expressionnocontrolptimitive
 
 yield =
-  | 'yield' (_ 'from')? nameseparation expressionnocontrolptimitive
+  | 'yield' (_ 'from')? nameseparator expressionnocontrolptimitive
 
 raise =
-  | 'raise' nameseparation expressionnocontrolptimitive
+  | 'raise' nameseparator expressionnocontrolptimitive
 
 continue =
   | 'continue' (_? '@' identifier)?
 
 break =
-  | 'break' (nameseparation expressionnocontrolptimitive)?  (_? '@' identifier)?
+  | 'break' (nameseparator expressionnocontrolptimitive)?  (_? '@' identifier)?
 
 spill =
   | 'spill' (_? '@' identifier)?
@@ -665,8 +665,8 @@ functiondeclarationoneinlinenest =
   | functionhead _? ':' block
 
 subjecthead =
-  | ('let' | 'var') nameseparation lhspattern
-  | ('let' | 'var') nameseparation identifier (_ identifier)+
+  | ('let' | 'var') nameseparator lhspattern
+  | ('let' | 'var') nameseparator identifier (_ identifier)+
 
 subjectdeclaration =
   | subjecthead (_ '=' _ | '=' !operator) expressiononeinlinenest
