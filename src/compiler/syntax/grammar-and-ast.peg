@@ -135,7 +135,8 @@ space =
   | [ \t]
 
 nameseparator =
-  | (!(identifier | numericliteral) | _)
+  | !(identifier | numericliteral)
+  | _
 
 indent =
   | ' '+
