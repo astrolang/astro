@@ -505,15 +505,19 @@ print(new Parser('.name').parseNameSeparator());
 
 print('========= INDENT =========');
 
-print('     •>>>>>>>>>>>>>>>>>>>>>>>>FAIL'); // fail
+print(String.raw`     •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser('     •').parseIndent()); // fail
 
-print('    •');
+print(String.raw`    •`);
 print(new Parser('    *').parseIndent());
 
 print('========= SAMEDENT =========');
 
-print(new Parser('').parseSamedent());
+print(String.raw`    •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('    •').parseSamedent());
+
+print(String.raw`•`);
+print(new Parser('•').parseSamedent());
 
 print('========= NEXTLINE =========');
 
