@@ -432,25 +432,31 @@ print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrTripleDoubleQuote());
 print(String.raw`25fse?w&$32'''67`);
 print(new Parser("25fse?w&$32'''67").parseCharsNoNewlineOrTripleDoubleQuote());
 
-print('========= CHARSNOEQUALHASH =========');
+print('========= CHARSNOHASHEQUAL =========');
 
 print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('').parseCharsNoEqualHash()); // fail
+print(new Parser('').parseCharsNoHashEqual()); // fail
 
 print(String.raw`=#>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('=#').parseCharsNoEqualHash()); // fail
+print(new Parser('=#').parseCharsNoHashEqual()); // fail
+
+print(String.raw`#=>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('#=').parseCharsNoHashEqual()); // fail
 
 print(String.raw`nam:e2*9s)!@=#@34>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('nam:e2*9s)!@=#@34').parseCharsNoEqualHash()); // mid
+print(new Parser('nam:e2*9s)!@=#@34').parseCharsNoHashEqual()); // mid
+
+print(String.raw`nam:e2*9s)!@#=@34>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('nam:e2*9s)!@#=@34').parseCharsNoHashEqual()); // mid
 
 print(String.raw`nam:e2*9s)!@\n6%a`);
-print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoEqualHash());
+print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoHashEqual());
 
 print(String.raw`25fse?w&$32#67`);
-print(new Parser('25fse?w&$32#67').parseCharsNoEqualHash());
+print(new Parser('25fse?w&$32#67').parseCharsNoHashEqual());
 
-print(String.raw`25fse?w&$32#=67`);
-print(new Parser('25fse?w&$32#=67').parseCharsNoEqualHash());
+print(String.raw`25fse?w&$32# =67`);
+print(new Parser('25fse?w&$32# =67').parseCharsNoHashEqual());
 
 print('========= CHARSNONEWLINE =========');
 

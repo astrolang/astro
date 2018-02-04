@@ -1865,15 +1865,15 @@ class Parser {
     return parseData;
   }
 
-  // charsnoequalhash =
-  //   | (!('=#') .)+ // TODO
-  parseCharsNoEqualHash() { // TODO
+  // charsnohashequal =
+  //   | (!('#=' | '=#') .)+ // TODO
+  parseCharsNoHashEqual() { // TODO
     // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
 
-    const type = 'charsnoequalhash';
+    const type = 'charsnohashequal';
     const token = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
@@ -1885,7 +1885,7 @@ class Parser {
         const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
         (() => {
           // Check !('=#').
-          if (this.parseToken('=#').success) return;
+          if (this.parseToken('#=').success || this.parseToken('=#').success) return;
 
           // Consume ..
           if (!this.peekChar()) return;
