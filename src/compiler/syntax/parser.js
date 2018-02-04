@@ -2333,7 +2333,139 @@ class Parser {
       if (!this.parseToken('#').success) return null;
 
       // Consume charsnonewline?.
-      if (this.parseCharsNoNewline()) token = this.lastParseData.ast.token;
+      if (this.parseCharsNoNewline()) ({ token } = this.lastParseData.ast);
+
+      // Check &(newline | eoi).
+      const state = { lastposition: this.lastposition, column: this.column, line: this.line };
+      if (!this.parseNewline().success && !this.parseEoi().success) return null;
+      this.reset(state.lastPosition, null, null, state.column, state.line);
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { token } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // innermultilinecomment =
+  //   | "#=" charsnohashequal? (innermultilinecomment charsnohashequal?)* '=#'
+  parseInnerMultiLineComment() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'innermultilinecomment';
+    const tokens = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume '#='.
+      if (!this.parseToken('#=').success) return null;
+
+      // Consume charsnohashequal?.
+      if (this.parseCharsNoHashEqual()) tokens.push(this.lastParseData.ast.token);
+
+      // Optional-multiple parsing. (multilinecomment charsnohashequal?)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume innermultilinecomment.
+          if (!this.parseInnerMultiLineComment().success) return;
+          tokens.push(this.lastParseData.ast.token);
+
+          // Consume charsnohashequal?.
+          if (this.parseCharsNoHashEqual()) tokens.push(this.lastParseData.ast.token);
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Consume '=#'.
+      if (!this.parseToken('=#').success) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { token: tokens.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // multilinecomment =
+  //   | "#=" charsnohashequal? (innermultilinecomment charsnohashequal?)* '=#' _? &(newline | eoi)
+  parseMultiLineComment() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'multilinecomment';
+    const tokens = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume '#='.
+      if (!this.parseToken('#=').success) return null;
+
+      // Consume charsnohashequal?.
+      if (this.parseCharsNoHashEqual()) tokens.push(this.lastParseData.ast.token);
+
+      // Optional-multiple parsing. (multilinecomment charsnohashequal?)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume innermultilinecomment.
+          if (!this.parseInnerMultiLineComment().success) return;
+          tokens.push(this.lastParseData.ast.token);
+
+          // Consume charsnohashequal?.
+          if (this.parseCharsNoHashEqual()) tokens.push(this.lastParseData.ast.token);
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Consume '=#'.
+      if (!this.parseToken('=#').success) return null;
+
+      // Consume _?.
+      this.parseSpaces();
 
       // Check &(newline | eoi).
       let state = { lastposition: this.lastposition, column: this.column, line: this.line };
@@ -2341,7 +2473,7 @@ class Parser {
       this.reset(state.lastPosition, null, null, state.column, state.line);
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { token } };
+      parseData = { success: true, message: null, ast: { token: tokens.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
