@@ -486,20 +486,20 @@ print(new Parser('=').parseOperator());
 print(String.raw`++/-`);
 print(new Parser('++/-').parseOperator());
 
-print('========= CHARNONEWLINEORSINGLEQUOTE =========');
+print('========= CHARSNONEWLINEORSINGLEQUOTE =========');
 
 print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('').parseCharNoNewlineOrSinglequote()); // fail
+print(new Parser('').parseCharsNoNewlineOrSinglequote()); // fail
 
 print(String.raw`'>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser("'").parseCharNoNewlineOrSinglequote()); // fail
+print(new Parser("'").parseCharsNoNewlineOrSinglequote()); // fail
 
 print(String.raw`nam:e2*9s)!@'>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser("nam:e2*9s)!@'").parseCharNoNewlineOrSinglequote()); // mid
+print(new Parser("nam:e2*9s)!@'").parseCharsNoNewlineOrSinglequote()); // mid
 
 print(String.raw`nam:e2*9s)!@\n>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('nam:e2*9s)!@\n').parseCharNoNewlineOrSinglequote()); // mid
+print(new Parser('nam:e2*9s)!@\n').parseCharsNoNewlineOrSinglequote()); // mid
 
 print(String.raw`25fse?w&$32"67`);
-print(new Parser('25fse?w&$32"67').parseCharNoNewlineOrSinglequote());
+print(new Parser('25fse?w&$32"67').parseCharsNoNewlineOrSinglequote());
 

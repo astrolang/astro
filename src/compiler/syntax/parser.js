@@ -1625,16 +1625,15 @@ class Parser {
     return parseData;
   }
 
-
-  // charnonewlineorsinglequote =
+  // charsnonewlineorsinglequote =
   //   | (!(newline | "'") .)+
-  parseCharNoNewlineOrSinglequote() { // TODO
+  parseCharsNoNewlineOrSinglequote() { // TODO
     // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
 
-    const type = 'charnonewlineorsinglequote';
+    const type = 'charsnonewlineorsinglequote';
     const token = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 

@@ -103,27 +103,27 @@ operator =
 pathnamechar =
   | identifierendchar | [\-] // TODO
 
-charnonewlineorsinglequote =
+charsnonewlineorsinglequote =
   | (!(newline | "'") .)+ // TODO
   { token }
 
-charnonewlineordoublequote =
+charsnonewlineordoublequote =
   | (!(newline | '"') .)+ // TODO
   { token }
 
-charnonewlineortriplesinglequote =
+charsnonewlineortriplesinglequote =
   | (!(newline | "'''") .)+ // TODO
   { token }
 
-charnonewlineortripledoublequote =
+charsnonewlineortripledoublequote =
   | (!(newline | '"""') .)+ // TODO
   { token }
 
-charnohashequal =
+charsnohashequal =
   | (!('#=') .)+ // TODO
   { token }
 
-charnonewline =
+charsnonewline =
   | (!(newline) .)+ // TODO
   { token }
 
@@ -168,22 +168,22 @@ _ =
   | space+
 
 singlelinecomment =
-  | "#" charnonewline* &(newline | eoi)
+  | "#" charsnonewline? &(newline | eoi)
 
 multilinecomment =
-  | "#=" charnohashequal* (multilinecomment charnohashequal*)? '=#' _? &(newline | eoi)
+  | "#=" charsnohashequal? (multilinecomment charsnohashequal?)? '=#' _? &(newline | eoi)
 
 comment =
   | singlelinecomment
   | multilinecomment
 
 singlelinestring =
-  | "'" charnonewlineorsinglequote* "'" (nextcodeline samedent "'" charnonewlineorsinglequote* "'")*
-  | '"' charnonewlineordoublequote* '"' (nextcodeline samedent '"' charnonewlineordoublequote* '"')*
+  | "'" charsnonewlineorsinglequote? "'" (nextcodeline samedent "'" charsnonewlineorsinglequote? "'")*
+  | '"' charsnonewlineordoublequote? '"' (nextcodeline samedent '"' charsnonewlineordoublequote? '"')*
 
 multilinestring =
-  | "'''" charnonewlineortriplesinglequote* (nextline samedent charnonewlineortriplesinglequote)* "'''"
-  | '"""' charnonewlineortripledoublequote* (nextline samedent charnonewlineortripledoublequote)* '"""'
+  | "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
+  | '"""' charsnonewlineortripledoublequote? (nextline samedent charsnonewlineortripledoublequote?)* '"""'
 
 stringliteral =
   | singlelinestring
