@@ -1693,7 +1693,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const type = 'charsnonewlineorsinglequote';
+    const type = 'charsnonewlineordoublequote';
     const token = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
@@ -1753,7 +1753,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const type = 'charsnonewlineorsinglequote';
+    const type = 'charsnonewlineortriplesinglequote';
     const token = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
@@ -1766,6 +1766,66 @@ class Parser {
         (() => {
           // Check !(newline | "'''").
           if (this.parseNewline().success || this.parseToken("'''").success) return;
+
+          // Consume ..
+          if (!this.peekChar()) return;
+          token.push(this.eatChar());
+
+          parseSuccessful = true;
+
+          // Parsing successful, increment loop count.
+          loopCount += 1;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // At least one iteration of the above must be parsed successfully.
+      if (loopCount < 1) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { token: token.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // charsnonewlineortripledoubequote =
+  //   | (!(newline | '"""') .)+ // TODO
+  parseCharsNoNewlineOrTripleDoubleQuote() { // TODO
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'charsnonewlineortripledoubequote';
+    const token = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // one-multiple parsing. (!(newline | '"""') .)+
+      let loopCount = 0;
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Check !(newline | '"""').
+          if (this.parseNewline().success || this.parseToken('"""').success) return;
 
           // Consume ..
           if (!this.peekChar()) return;
