@@ -127,7 +127,7 @@ charsnonewline =
   | (!(newline) .)+ // TODO
   { token }
 
-charnonewlineorforwardslash =
+charsnonewlineorforwardslash =
   | (!(newline | '/') .)+ // TODO
   { token }
 
