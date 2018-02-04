@@ -1985,7 +1985,7 @@ class Parser {
     return parseData;
   }
 
-  // charnonewlineorforwardslash =
+  // charsnonewlineorforwardslash =
   //   | (!(newline | '/') .)+ // TODO
   parseCharsNoNewlineOrForwardSlash() { // TODO
     // Keep original state.
@@ -1993,7 +1993,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const type = 'charnonewlineorforwardslash';
+    const type = 'charsnonewlineorforwardslash';
     const token = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
@@ -2301,6 +2301,47 @@ class Parser {
 
       // Update parseData.
       parseData = { success: true, message: null, ast: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // singlelinecomment =
+  //   | "#" charsnonewline? &(newline | eoi)
+  parseSingleLineComment() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'singlelinecomment';
+    let token = '';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume '#'.
+      if (!this.parseToken('#').success) return null;
+
+      // Consume charsnonewline?.
+      if (this.parseCharsNoNewline()) token = this.lastParseData.ast.token;
+
+      // Check &(newline | eoi).
+      let state = { lastposition: this.lastposition, column: this.column, line: this.line };
+      if (!this.parseNewline().success && !this.parseEoi().success) return null;
+      this.reset(state.lastPosition, null, null, state.column, state.line);
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { token } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
