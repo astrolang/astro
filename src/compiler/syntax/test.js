@@ -519,6 +519,18 @@ print(new Parser('    •').parseSamedent());
 print(String.raw`•`);
 print(new Parser('•').parseSamedent());
 
+print('========= DEDENT =========');
+
+print(String.raw`    •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('    •').parseDedent());
+
+print(String.raw`•`);
+print((() => {
+  const parser = new Parser('•');
+  parser.lastIndentCount = 1; // Increase indent count.
+  return parser.parseDedent();
+})());
+
 print('========= NEXTLINE =========');
 
 print(String.raw`\n\n    \n        \r\n`);
