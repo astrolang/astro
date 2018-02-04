@@ -119,8 +119,8 @@ charsnonewlineortripledoublequote =
   | (!(newline | '"""') .)+ // TODO
   { token }
 
-charsnohashequal =
-  | (!('#=') .)+ // TODO
+charsnoequalhash =
+  | (!('=#') .)+ // TODO
   { token }
 
 charsnonewline =
@@ -171,7 +171,7 @@ singlelinecomment =
   | "#" charsnonewline? &(newline | eoi)
 
 multilinecomment =
-  | "#=" charsnohashequal? (multilinecomment charsnohashequal?)? '=#' _? &(newline | eoi)
+  | "#=" charsnoequalhash? (multilinecomment charsnoequalhash?)? '=#' _? &(newline | eoi)
 
 comment =
   | singlelinecomment
