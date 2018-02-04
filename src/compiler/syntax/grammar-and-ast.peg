@@ -104,25 +104,32 @@ pathnamechar =
   | identifierendchar | [\-] // TODO
 
 charnonewlineorsinglequote =
-  | .+ excluding(newline | "'") // TODO
+  | (!(newline | "'") .)+ // TODO
+  { token }
 
 charnonewlineordoublequote =
-  | .+ excluding(newline | '"') // TODO
+  | (!(newline | '"') .)+ // TODO
+  { token }
 
 charnonewlineortriplesinglequote =
-  | .+ excluding(newline | "'''") // TODO
+  | (!(newline | "'''") .)+ // TODO
+  { token }
 
 charnonewlineortripledoublequote =
-  | .+ excluding(newline | '"""') // TODO
+  | (!(newline | '"""') .)+ // TODO
+  { token }
 
 charnohashequal =
-  | .+ excluding('#=') // TODO
+  | (!('#=') .)+ // TODO
+  { token }
 
 charnonewline =
-  | .+ excluding(newline) // TODO
+  | (!(newline) .)+ // TODO
+  { token }
 
 charnonewlineorforwardslash =
-  | .+ excluding(newline | '/') // TODO
+  | (!(newline | '/') .)+ // TODO
+  { token }
 
 space =
   | [ \t]
@@ -175,8 +182,8 @@ singlelinestring =
   | '"' charnonewlineordoublequote* '"' (nextcodeline samedent '"' charnonewlineordoublequote* '"')*
 
 multilinestring =
-  | "'''" charnonewlineortriplesinglequote* (nextline samedent charnonewlineortriplesinglequote) "'''"
-  | '"""' charnonewlineortripledoublequote* (nextline samedent charnonewlineortripledoublequote) '"""'
+  | "'''" charnonewlineortriplesinglequote* (nextline samedent charnonewlineortriplesinglequote)* "'''"
+  | '"""' charnonewlineortripledoublequote* (nextline samedent charnonewlineortripledoublequote)* '"""'
 
 stringliteral =
   | singlelinestring
