@@ -160,8 +160,11 @@ nextline =
 singlelinecomment =
   | "#" charsnonewline? &(newline | eoi)
 
+innermultilinecomment =
+  | "#=" charsnohashequal? (innermultilinecomment charsnohashequal?)* '=#'
+
 multilinecomment =
-  | "#=" charsnohashequal? (multilinecomment charsnohashequal?)* '=#' _? &(newline | eoi)
+  | "#=" charsnohashequal? (innermultilinecomment charsnohashequal?)* '=#' _? &(newline | eoi)
 
 comment =
   | singlelinecomment
