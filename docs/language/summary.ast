@@ -967,9 +967,6 @@ TYPE DEFINITION (2)
     type Car(var make, var year)
     let ride = Car('Camaro', 2016)
 
-    type Car(var make, var year):
-        var make, car 
-
     # On the other hand, a type can have a destructor.
     # Destructor can be used for last-nanosecond cleanups before an object is destroyed.
     # The object can be referenced in the destructor body with `self`
