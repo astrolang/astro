@@ -8,6 +8,9 @@ const { print } = require('../utils');
  * - There is no lexing phase because the language is whitespace sensitive.
  * - Each parse function reverts its state when its unable to parse successfully.
  * - Inner IIFEs are used to make handling parsing failure within a parse function clear.
+ * - Functions with productions like `(samedent comment nextline)*` which have state in the middle
+ * need to revert their state if an iteration fails. Productions with state at the end
+ * are not affected by this `('_' digitdecimal)*`
  */
 class Parser {
   constructor(code) {
@@ -2560,7 +2563,7 @@ class Parser {
   }
 
   // nextcodeline =
-  //   | _? nextline (samedent comment nextline)*
+  //   | _? nextline (samedent comment (nextline | &eoi))*
   parseNextCodeLine() {
     // Keep original state.
     const {
@@ -2568,7 +2571,7 @@ class Parser {
     } = this;
 
     const type = 'nextcodeline';
-    const comments = [];
+    let comments = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
@@ -2578,10 +2581,11 @@ class Parser {
       // Consume nextline.
       if (!this.parseNextLine().success) return null;
 
-      // Optional-multiple parsing. (samedent comment nextline)*
+      // Optional-multiple parsing. (samedent comment (nextline | &eoi))*
       while (true) {
         let parseSuccessful = false;
         const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        const otherState = { comments };
         (() => {
           // Consume samedent.
           if (!this.parseSamedent().success) return;
@@ -2591,7 +2595,8 @@ class Parser {
           comments.push(this.lastParseData.ast);
 
           // Consume nextline.
-          if (!this.parseNextLine().success) return;
+          if (!this.parseNextLine().success && !this.parseEoi().success) return;
+          print('boom')
 
           parseSuccessful = true;
         })();
@@ -2600,6 +2605,7 @@ class Parser {
         // And break out of the loop.
         if (!parseSuccessful) {
           this.reset(state.lastPosition, null, null, state.column, state.line);
+          ({ comments } = otherState);
           break;
         }
       }
