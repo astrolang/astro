@@ -2489,6 +2489,76 @@ class Parser {
     return parseData;
   }
 
+  // comment =
+  //   | multilinecomment
+  //   | !('#=') singlelinecomment
+  parseComment() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'comment';
+    let comment = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | multilinecomment
+      // | !('#=') singlelinecomment
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. multilinecomment
+      (() => {
+        // Consume multilinecomment.
+        if (!this.parseMultiLineComment().success) return;
+        comment = this.lastParseData.ast;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [6]. !('#=') singlelinecomment
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Check !('#=').
+          if (this.parseToken('#=').success) return;
+
+          // Consume singlelinecomment.
+          if (!this.parseSingleLineComment().success) return;
+          comment = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: comment };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // _ =
   //   | linecontinuation
   //   | space+
