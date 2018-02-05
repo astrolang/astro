@@ -2341,7 +2341,7 @@ class Parser {
       this.reset(state.lastPosition, null, null, state.column, state.line);
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { token } };
+      parseData = { success: true, message: null, ast: { type, token } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -2473,7 +2473,7 @@ class Parser {
       this.reset(state.lastPosition, null, null, state.column, state.line);
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { token: tokens.join('') } };
+      parseData = { success: true, message: null, ast: { type, token: tokens.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -2560,7 +2560,7 @@ class Parser {
   }
 
   // nextcodeline =
-  //   | comment? _? nextline (samedent comment nextline)*
+  //   | _? nextline (samedent comment nextline)*
   parseNextCodeLine() {
     // Keep original state.
     const {
@@ -2572,9 +2572,6 @@ class Parser {
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
-      // Consume comment?.
-      if (this.parseComment().success) comments.push(this.lastParseData.ast);
-
       // Consume _?.
       this.parseSpaces();
 

@@ -627,11 +627,5 @@ print(new Parser('\n').parseNextCodeLine());
 print(String.raw`\n#hello world 99\n  \r\n#99 world hello`);
 print(new Parser('\n#hello world 99\n  \r\n#hello world 99').parseNextCodeLine());
 
-print(String.raw`#hello world 99\n  \n#99 world hello`);
-print(new Parser('#hello world 99\n  \n#99 world hello').parseNextCodeLine());
-
 print(String.raw`\n#=hello    \n#=world 99\n  \r\n=#99 world hello=#\n   \n`);
 print(new Parser('\n#=hello    \n#=world 99\n  \r\n=#99 world hello=#\n   \n').parseNextCodeLine());
-
-print(String.raw`#=hello    \n#=world 99\n  \r\n=#99 world hello=#\n\n`);
-print(new Parser('#=hello    \n#=world 99\n  \r\n=#99 world hello=#\n\n').parseNextCodeLine());
