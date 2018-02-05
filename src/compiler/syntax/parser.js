@@ -189,7 +189,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -250,7 +250,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -311,7 +311,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -368,7 +368,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -452,7 +452,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -494,7 +494,7 @@ class Parser {
           // If parsing the above fails, revert state to what it was before that parsing began.
           // And break out of the loop.
           if (!parseSuccessful) {
-            this.reset(state2.lastPosition, null, state2.column, state2.line);
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
             break;
           }
         }
@@ -534,7 +534,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state3.lastPosition, null, state3.column, state3.line);
+              this.reset(state3.lastPosition, null, null, state3.column, state3.line);
               break;
             }
           }
@@ -591,7 +591,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
               break;
             }
           }
@@ -661,7 +661,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -703,7 +703,7 @@ class Parser {
           // If parsing the above fails, revert state to what it was before that parsing began.
           // And break out of the loop.
           if (!parseSuccessful) {
-            this.reset(state2.lastPosition, null, state2.column, state2.line);
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
             break;
           }
         }
@@ -743,7 +743,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state3.lastPosition, null, state3.column, state3.line);
+              this.reset(state3.lastPosition, null, null, state3.column, state3.line);
               break;
             }
           }
@@ -799,7 +799,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
               break;
             }
           }
@@ -869,7 +869,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -911,7 +911,7 @@ class Parser {
           // If parsing the above fails, revert state to what it was before that parsing began.
           // And break out of the loop.
           if (!parseSuccessful) {
-            this.reset(state2.lastPosition, null, state2.column, state2.line);
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
             break;
           }
         }
@@ -951,7 +951,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state3.lastPosition, null, state3.column, state3.line);
+              this.reset(state3.lastPosition, null, null, state3.column, state3.line);
               break;
             }
           }
@@ -1007,7 +1007,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
               break;
             }
           }
@@ -1088,7 +1088,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state3.lastPosition, null, state3.column, state3.line);
+              this.reset(state3.lastPosition, null, null, state3.column, state3.line);
               break;
             }
           }
@@ -1128,7 +1128,7 @@ class Parser {
           // If parsing the above fails, revert state to what it was before that parsing began.
           // And break out of the loop.
           if (!parseSuccessful) {
-            this.reset(state3.lastPosition, null, state3.column, state3.line);
+            this.reset(state3.lastPosition, null, null, state3.column, state3.line);
             break;
           }
         }
@@ -1168,7 +1168,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state4.lastPosition, null, state4.column, state4.line);
+              this.reset(state4.lastPosition, null, null, state4.column, state4.line);
               break;
             }
           }
@@ -1215,7 +1215,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
               break;
             }
           }
@@ -1251,7 +1251,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state2.lastPosition, null, state2.column, state2.line);
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
               break;
             }
           }
@@ -1660,7 +1660,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -1720,7 +1720,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -1780,7 +1780,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -1840,7 +1840,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -1900,7 +1900,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -1960,7 +1960,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -2020,7 +2020,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -2263,7 +2263,7 @@ class Parser {
   }
 
   // nextline =
-  //   | newline (_* newline)*.
+  //   | newline (_? newline)*.
   parseNextLine() {
     // Keep original state.
     const {
@@ -2336,7 +2336,7 @@ class Parser {
       if (this.parseCharsNoNewline()) ({ token } = this.lastParseData.ast);
 
       // Check &(newline | eoi).
-      const state = { lastposition: this.lastposition, column: this.column, line: this.line };
+      const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
       if (!this.parseNewline().success && !this.parseEoi().success) return null;
       this.reset(state.lastPosition, null, null, state.column, state.line);
 
@@ -2394,7 +2394,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -2456,7 +2456,7 @@ class Parser {
         // If parsing the above fails, revert state to what it was before that parsing began.
         // And break out of the loop.
         if (!parseSuccessful) {
-          this.reset(state.lastPosition, null, state.column, state.line);
+          this.reset(state.lastPosition, null, null, state.column, state.line);
           break;
         }
       }
@@ -2468,7 +2468,7 @@ class Parser {
       this.parseSpaces();
 
       // Check &(newline | eoi).
-      let state = { lastposition: this.lastposition, column: this.column, line: this.line };
+      const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
       if (!this.parseNewline().success && !this.parseEoi().success) return null;
       this.reset(state.lastPosition, null, null, state.column, state.line);
 
@@ -2544,6 +2544,71 @@ class Parser {
 
       // Update parseData.
       parseData = { success: true, message: null, ast: comment };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // nextcodeline =
+  //   | comment? _? nextline (samedent comment nextline)*
+  parseNextCodeLine() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'nextcodeline';
+    const comments = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume comment?.
+      if (this.parseComment().success) comments.push(this.lastParseData.ast);
+
+      // Consume _?.
+      this.parseSpaces();
+
+      // Consume nextline.
+      if (!this.parseNextLine().success) return null;
+
+      // Optional-multiple parsing. (samedent comment nextline)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume samedent.
+          if (!this.parseSamedent().success) return;
+
+          // Consume comment.
+          if (!this.parseComment().success) return;
+          comments.push(this.lastParseData.ast);
+
+          // Consume nextline.
+          if (!this.parseNextLine().success) return;
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { comments } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
