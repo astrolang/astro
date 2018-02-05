@@ -159,12 +159,15 @@ nextline =
 
 singlelinecomment =
   | "#" charsnonewline? &(newline | eoi)
+  { type, token }
 
 innermultilinecomment =
   | "#=" charsnohashequal? (innermultilinecomment charsnohashequal?)* '=#'
+  { type, token }
 
 multilinecomment =
   | "#=" charsnohashequal? (innermultilinecomment charsnohashequal?)* '=#' _? &(newline | eoi)
+  { type, token }
 
 comment =
   | multilinecomment
@@ -172,6 +175,7 @@ comment =
 
 nextcodeline =
   | comment? _? nextline (samedent comment nextline)*
+  { comments }
 
 dedentoreoiend =
   | nextcodeline dedent
