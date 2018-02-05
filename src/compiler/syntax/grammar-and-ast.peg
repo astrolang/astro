@@ -171,7 +171,7 @@ comment =
   | !('#=') singlelinecomment // Accepts others failed cake. Rectified with predicate.
 
 nextcodeline =
-  | _? nextline (samedent comment nextline)*
+  | comment? _? nextline (samedent comment nextline)*
 
 dedentoreoiend =
   | nextcodeline dedent
