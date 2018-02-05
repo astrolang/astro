@@ -114,14 +114,14 @@ TYPE DEFINITION (1)
 
 DELEGATED PROPERTIES
     # Delegated properties are subjects whose assignment and access operations are delegated to specified functions.
-    type Person(var name: '', var age: del(age, age))
+    type Person(var name: '', var age: delegate(age, age))
     fun age(x, v) = x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
     fun age(x) = x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
     john.age = 56
     john.age
 
-    # The `del`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
-    type Person(var name: '', var age: del)
+    # The `delegate`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
+    type Person(var name: '', var age: delegte)
 
     # A function with `@property` macro can be called like a property.
     fun f64(i): @property
@@ -1337,7 +1337,7 @@ POINTERS
     pointer.offset(500) # Error!
 
 RESERVED KEYWORDS
-    import, export, let, var, const, del, fun, type, abst, async,
+    import, export, let, var, const, delegate, fun, type, abst, async,
     ref, val, iso, acq,
     if, elif, else, while, for, try, except, ensure, defer, loop, unsafe
     spill, return, raise, break, continue, yield, from, await,
