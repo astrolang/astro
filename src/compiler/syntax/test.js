@@ -599,3 +599,20 @@ print(new Parser('#=hello #=world 99=# @v m346 66j6h=#\n').parseMultiLineComment
 print(String.raw`#=hello #=world 99=# @v m346 66j6h=#     \n`);
 print(new Parser('#=hello #=world 99=# @v m346 66j6h=#     \n').parseMultiLineComment());
 
+print('========= COMMENT =========');
+
+print(String.raw`#=hello world 99>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('#=hello world 99').parseComment()); // fail
+
+print(String.raw`#hello world 99`);
+print(new Parser('#hello world 99').parseComment());
+
+print(String.raw`#=hello world 99=#`);
+print(new Parser('#=hello world 99=#').parseComment());
+
+print(String.raw`#=hello #=world 99=# @v m346 66j6h=#\n`);
+print(new Parser('#=hello #=world 99=# @v m346 66j6h=#\n').parseComment());
+
+print(String.raw`#=hello #=world 99=# @v m346 66j6h=#     \n`);
+print(new Parser('#=hello #=world 99=# @v m346 66j6h=#     \n').parseComment());
+
