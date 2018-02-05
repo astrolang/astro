@@ -94,14 +94,14 @@ type Animal = Dog | Cat | Bird
 # REDESIGNING DELEGATED PROPERTIES
 # Delegated properties are subjects whose assignment and value retireval is delegated to
 # some functions.
-type Person(var name: '', var age: del(age, age))
+type Person(var name: '', var age: delegate(age, age))
 fun age(x, v) = x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
 fun age(x) = x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
 john.age = 56
 john.age
 
-# The `del`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
-type Person(var name: '', var age: del)
+# The `delegate`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
+type Person(var name: '', var age: delegate)
 
 # CHANGE OCCURENCES OF SIZE TO LEN
 
@@ -128,6 +128,13 @@ print
 fun age(a) = set (a.age + 5) get (a.age - 5)
 
 # FIX: SYNTAX HIGHLIGHT
+- highlight `delegate`
+    delegate(name, name)
+    delegate
+
+- remove highlight on `del`
+    del
+
 - highlight imported filename
     import foo/my-new-project
 
