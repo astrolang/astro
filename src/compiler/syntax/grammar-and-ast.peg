@@ -33,7 +33,7 @@ integerliteral =
   | integerbinaryliteral
   | integeroctalliteral
   | integerhexadecimalliteral
-  | integerdecimalliteral // can eat others cake
+  | integerdecimalliteral // Can eat others cake
 
 floatbinaryliteral  =
   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
@@ -59,11 +59,11 @@ floatliteral =
   | floatbinaryliteral
   | floatoctalliteral
   | floathexadecimalliteral
-  | floatdecimalliteral // can eat others cake
+  | floatdecimalliteral // Can eat others cake
 
 numericliteral =
   | floatliteral
-  | integerliteral  // can eat others cake
+  | integerliteral  // Can eat others cake
 
 coefficientexpression =
   | floatbinaryliteral identifier
