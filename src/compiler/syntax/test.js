@@ -621,6 +621,9 @@ print('========= NEXTCODELINE =========');
 print(String.raw`#hello world 99>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser('#hello world 99').parseNextCodeLine()); // fail
 
+print(String.raw`\n#hello world 99`);
+print(new Parser('\n#hello world 99').parseNextCodeLine());
+
 print(String.raw`\n`);
 print(new Parser('\n').parseNextCodeLine());
 
@@ -629,3 +632,32 @@ print(new Parser('\n#hello world 99\n  \r\n#hello world 99').parseNextCodeLine()
 
 print(String.raw`\n#=hello    \n#=world 99\n  \r\n=#99 world hello=#\n   \n`);
 print(new Parser('\n#=hello    \n#=world 99\n  \r\n=#99 world hello=#\n   \n').parseNextCodeLine());
+
+print('========= DEDENTOREOIEND =========');
+
+print(String.raw`\n        •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('\n        •');
+  parser.lastIndentCount = 2; // Two indent levels.
+  return parser.parseDedentOrEoiEnd();
+})());
+
+print(String.raw`    •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('    •');
+  parser.lastIndentCount = 2; // Two indent levels.
+  return parser.parseDedentOrEoiEnd();
+})());
+
+print(String.raw`\n`);
+print(new Parser('\n').parseDedentOrEoiEnd());
+
+print(String.raw`\n#hello world`);
+print(new Parser('\n#hello world').parseDedentOrEoiEnd());
+
+print(String.raw`\n    •`);
+print((() => {
+  const parser = new Parser('\n    •');
+  parser.lastIndentCount = 2; // Two indent levels.
+  return parser.parseDedentOrEoiEnd();
+})());
