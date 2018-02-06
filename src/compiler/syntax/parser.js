@@ -2596,7 +2596,6 @@ class Parser {
 
           // Consume nextline.
           if (!this.parseNextLine().success && !this.parseEoi().success) return;
-          print('boom')
 
           parseSuccessful = true;
         })();
@@ -2612,6 +2611,81 @@ class Parser {
 
       // Update parseData.
       parseData = { success: true, message: null, ast: { comments } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // dedentoreoiend =
+  //   | nextcodeline dedent
+  //   | nextcodeline? _? &eoi
+  parseDedentOrEoiEnd() {
+    // Keeping original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'dedentoreoiend';
+    let comments = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | nextcodeline dedent
+      // | nextcodeline? _? &eoi
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. nextcodeline dedent
+      (() => {
+        // Consume nextcodeline.
+        if (!this.parseNextCodeLine().success) return;
+        comments = this.lastParseData.ast;
+
+        // Consume dedent.
+        if (!this.parseDedent().success) return;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. nextcodeline? _? &eoi
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume nextcodeline?.
+          if (this.parseNextCodeLine().success) comments = this.lastParseData.ast;
+
+          // Consume _?.
+          this.parseSpaces();
+
+          // Consume &eoi.
+          if (!this.parseEoi().success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: comments };
 
       // Update lastParseData.
       this.lastParseData = parseData;
