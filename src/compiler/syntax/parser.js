@@ -133,7 +133,7 @@ class Parser {
   }
 
   // eoi =
-  // | !.
+  //   | !.
   parseEoi() {
     // No state to reset.
     const type = 'eoi';
