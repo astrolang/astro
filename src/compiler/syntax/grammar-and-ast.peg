@@ -180,6 +180,7 @@ nextcodeline =
 dedentoreoiend =
   | nextcodeline dedent
   | nextcodeline? _? &eoi
+  { comments }
 
 linecontinuation =
   | space* '...' space* nextline samedent
