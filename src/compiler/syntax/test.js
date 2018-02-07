@@ -799,3 +799,11 @@ print(new Parser("/[0-9a-z]+\\d+/").parseRegexLiteral());
 print(String.raw`//`);
 print(new Parser('//').parseRegexLiteral());
 
+print('========= ENDCOMMA =========');
+
+print(String.raw`,`);
+print(new Parser(",").parseEndComma());
+
+print(String.raw`\t\t  ,`);
+print(new Parser('\t\t  ,').parseEndComma());
+
