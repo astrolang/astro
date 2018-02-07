@@ -208,7 +208,8 @@ stringliteral =
   { type, token }
 
 regexliteral =
-  | '/' charsnonewlineorforwardslash* '/'
+  | '/' charsnonewlineorforwardslash? '/'
+  { type, token }
 
 endcomma =
   | _? ','
