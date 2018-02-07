@@ -2701,6 +2701,54 @@ class Parser {
     return parseData;
   }
 
+  // linecontinuation =
+  //   | space* '...' space* nextline samedent
+  parseLineContinuation() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'linecontinuation';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume space*.
+      while (this.space.indexOf(this.peekChar()) > -1) {
+        this.eatChar();
+      }
+
+      // Consume '...'.
+      if (!this.parseToken('...').success) return null;
+
+      // Consume space*.
+      while (this.space.indexOf(this.peekChar()) > -1) {
+        this.eatChar();
+      }
+
+      // Consume nextline.
+      if (!this.parseNextLine().success) return null;
+
+      // Consume samedent.
+      if (!this.parseSamedent().success) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // _ =
   //   | linecontinuation
   //   | space+
