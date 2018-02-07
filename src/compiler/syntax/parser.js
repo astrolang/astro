@@ -8,9 +8,9 @@ const { print } = require('../utils');
  * - There is no lexing phase because the language is whitespace sensitive.
  * - Each parse function reverts its state when its unable to parse successfully.
  * - Inner IIFEs are used to make handling parsing failure within a parse function clear.
- * - Functions with productions like `(samedent comment nextline)*` which have state in the middle
+ * - Functions with productions like `(samedent {comment} nextline)*` which have state in the middle
  * need to revert their state if an iteration fails. Productions with state at the end
- * are not affected by this `('_' digitdecimal)*`
+ * are not affected by this `('_' {digitdecimal})*`
  */
 class Parser {
   constructor(code) {
@@ -2885,6 +2885,135 @@ class Parser {
 
       // Update parseData.
       parseData = { success: true, message: null, ast: { token: tokens.join('') } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // multilinestring =
+  //   | "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
+  //   | '"""' charsnonewlineortripledoublequote? (nextline samedent charsnonewlineortripledoublequote?)* '"""'
+  parseMultiLineString() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'multilinestring';
+    let tokens = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
+      // | '"""' charsnonewlineortripledoublequote? (nextline samedent charsnonewlineortripledoublequote?)* '"""'
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      let otherState = { tokens };
+
+      // [1]. "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
+      (() => {
+        // Consume "'''".
+        if (!this.parseToken("'''").success) return;
+
+        // Consume charsnonewlineortriplesinglequote?.
+        if (this.parseCharsNoNewlineOrTripleSingleQuote().success) tokens.push(this.lastParseData.ast.token);
+
+        // Optional-multiple parsing. (nextline samedent charsnonewlineortriplesinglequote?)*
+        while (true) {
+          let parseSuccessful = false;
+          const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume nextline.
+            if (!this.parseNewline().success) return;
+
+            // Consume samedent.
+            if (!this.parseSamedent().success) return;
+
+            // Consume charsnonewlineortriplesinglequote?.
+            if (this.parseCharsNoNewlineOrTripleSingleQuote().success) tokens.push(this.lastParseData.ast.token);
+
+            parseSuccessful = true;
+          })();
+
+          // If parsing the above fails, revert state to what it was before that parsing began.
+          // And break out of the loop.
+          if (!parseSuccessful) {
+            this.reset(state.lastPosition, null, null, state.column, state.line);
+            break;
+          }
+        }
+
+        // Consume "'''".
+        if (!this.parseToken("'''").success) return;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. '"""' charsnonewlineortripledoublequote? (nextline samedent charsnonewlineortripledoublequote?)* '"""'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({tokens} = otherState);
+
+        (() => {
+          // Consume '"""'.
+          if (!this.parseToken('"""').success) return;
+
+          // Consume charsnonewlineortripledoublequote?.
+          if (this.parseCharsNoNewlineOrTripleDoubleQuote().success) tokens.push(this.lastParseData.ast.token);
+
+          // Optional-multiple parsing. (nextline samedent charsnonewlineortripledoublequote?)*
+          while (true) {
+            let parseSuccessful = false;
+            const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            (() => {
+              // Consume nextline.
+              if (!this.parseNewline().success) return;
+
+              // Consume samedent.
+              if (!this.parseSamedent().success) return;
+
+              // Consume charsnonewlineortripledoublequote?.
+              if (this.parseCharsNoNewlineOrTripleDoubleQuote().success) tokens.push(this.lastParseData.ast.token);
+
+              parseSuccessful = true;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state.lastPosition, null, null, state.column, state.line);
+              break;
+            }
+          }
+
+          // Consume '"""'.
+          if (!this.parseToken('"""').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { token: tokens.join('\n') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
