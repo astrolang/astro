@@ -3046,6 +3046,45 @@ class Parser {
 
   }
 
+  // regexliteral =
+  //   | '/' charsnonewlineorforwardslash? '/'
+  parseRegexLiteral() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'regexliteral';
+    let token = '';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume '/'.
+      if (!this.parseToken('/').success) return null;
+
+      // Consume charsnonewlineorforwardslash?.
+      if (this.parseCharsNoNewlineOrForwardSlash().success) token = this.lastParseData.ast.token;
+
+      // Consume '/'.
+      if (!this.parseToken('/').success) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, token } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // names =
   //   | identifier (_? ',' _? identifier)*
   parseNames() {
