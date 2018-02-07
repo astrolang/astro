@@ -14,16 +14,16 @@ const { print } = require('../utils');
  */
 class Parser {
   constructor(code) {
+    // Input code
     this.code = code;
-    // Parser
+    // Parser information
     this.lastPosition = -1;
     this.lastParseData = null;
-    // Indentation
-    this.lastIndentCount = 0;
-    // Information
     this.column = 0;
     this.line = 1;
     this.ruleStarts = []; // start position of an expression. [{ line, column }].
+    this.lastIndentCount = 0;
+    this.ignoreNewline = false;
     // Characters
     this.digitBinary = '01';
     this.digitOctal = '01234567';
@@ -2752,6 +2752,7 @@ class Parser {
   // _ =
   //   | linecontinuation
   //   | space+
+  //   | &{ignorenewline} nextcodeline
   parseSpaces() {
     // Keep original state.
     const {
@@ -2765,6 +2766,7 @@ class Parser {
       // Alternate parsing.
       // | linecontinuation
       // | space+
+      // | &{ignorenewline} nextcodeline
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
@@ -2786,6 +2788,28 @@ class Parser {
 
         (() => {
           // Consume space+.
+          let count = 0;
+
+          while (this.space.indexOf(this.peekChar()) > -1) {
+            this.eatChar();
+            count += 1;
+          }
+
+          // Check if it was able to consume at least one whitespace.
+          if (count < 1) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. &{ignorenewline} nextcodeline
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Check &{ignorenewline}.
           let count = 0;
 
           while (this.space.indexOf(this.peekChar()) > -1) {
@@ -3102,6 +3126,89 @@ class Parser {
 
       // Consume ','.
       if (!this.parseToken(',').success) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // listliteral =
+  //   | '[' _? ']' // ignorenewline
+  //   | '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
+  //   | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
+  //   | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
+  //   | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
+  parseListLiteral() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'listliteral';
+    let expressions = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | '[' _? ']' // ignorenewline
+      // | '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
+      // | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
+      // | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
+      // | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { expressions };
+
+      // [1]. '[' _? ']' // ignorenewline
+      (() => {
+        // Consume floatbinaryliteral.
+        if (!this.parseFloatBinaryLiteral().success) return;
+        number = this.lastParseData.ast;
+
+        // Consume identifier.
+        if (!this.parseIdentifier().success) return;
+        identifier = this.lastParseData.ast;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // // [2]. '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
+      // if (!alternativeParseSuccessful) {
+      //   // Revert state to what it was before alternative parsing started.
+      //   this.reset(state.lastPosition, null, null, state.column, state.line);
+      //   ({ number, identifier } = otherState);
+
+      //   (() => {
+      //     // Consume floatoctalliteral.
+      //     if (!this.parseFloatOctalLiteral().success) return;
+      //     number = this.lastParseData.ast;
+
+      //     // Consume identifier.
+      //     if (!this.parseIdentifier().success) return;
+      //     identifier = this.lastParseData.ast;
+
+      //     // This alternative was parsed successfully.
+      //     alternativeParseSuccessful = true;
+      //   })();
+      // }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
       parseData = { success: true, message: null, ast: null };
