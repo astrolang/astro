@@ -785,3 +785,17 @@ print(new Parser('"hello world"').parseStringLiteral());
 print(String.raw`""`);
 print(new Parser('""').parseStringLiteral());
 
+print('========= REGEXLITERAL =========');
+
+print(String.raw`/\\d+\n/>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser("/\\d+\n/").parseRegexLiteral()); // fail
+
+print(String.raw`/age / name />>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("/age / name /").parseRegexLiteral()); // mid
+
+print(String.raw`/[0-9a-z]+\\d+/`);
+print(new Parser("/[0-9a-z]+\\d+/").parseRegexLiteral());
+
+print(String.raw`//`);
+print(new Parser('//').parseRegexLiteral());
+
