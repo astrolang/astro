@@ -723,3 +723,31 @@ print(new Parser("'hello world'").parseSingleLineString());
 print(String.raw`"hello world"`);
 print(new Parser('"hello world"').parseSingleLineString());
 
+print('========= MULTILINESTRING =========');
+
+print(String.raw`'''>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser("'''").parseMultiLineString()); // fail
+
+print(String.raw`"""\n    hello world\n""">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('"""\n    hello world\n"""');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseMultiLineString();
+})());
+
+print(String.raw`"""hello\nworld\n    """>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('"""hello\nworld\n    """').parseMultiLineString()); // fail
+
+print(String.raw`"""\n    hello world\n    """`);
+print((() => {
+  const parser = new Parser('"""\n    hello world\n    """');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseMultiLineString();
+})());
+
+print(String.raw`'''hello\nworld'''`);
+print(new Parser("'''hello\nworld'''").parseMultiLineString());
+
+print(String.raw`"""hello\nworld\n"""`);
+print(new Parser('"""hello\nworld\n"""').parseMultiLineString());
+
