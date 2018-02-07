@@ -141,16 +141,16 @@ nameseparator =
   | !(identifier | numericliteral)
   | _
 
-indent =
+indent = // TODO. adding !space
   | ' '+
   { level }
 
-samedent =
+samedent = // TODO. adding !space
   | ' '+
   | ''
   { level }
 
-dedent =
+dedent = // TODO. adding !space
   | ' '+
   { level }
 
@@ -177,7 +177,7 @@ comment =
   | !('#=') singlelinecomment // Accepts others failed cake. Rectified with predicate.
 
 nextcodeline =
-  | _? nextline (samedent comment (nextline | &eoi))*
+  | space* nextline (samedent comment (nextline | &eoi))*
   { comments }
 
 dedentoreoiend =
@@ -191,7 +191,7 @@ linecontinuation =
 _ =
   | linecontinuation
   | space+
-  | &{ignorenewline} nextcodeline
+  | &{ignorenewline} nextcodeline samedent
 
 singlelinestring =
   | "'" charsnonewlineorsinglequote? "'"
