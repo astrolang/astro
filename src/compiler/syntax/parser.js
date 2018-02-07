@@ -2850,7 +2850,7 @@ class Parser {
         if (!this.parseToken("'").success) return;
 
         // Consume charsnonewlineorsinglequote?.
-        if (this.parseCharsNoNewlineOrSingleQuote()) tokens.push(this.lastParseData.ast.token);
+        if (this.parseCharsNoNewlineOrSingleQuote().success) tokens.push(this.lastParseData.ast.token);
 
         // Consume "'".
         if (!this.parseToken("'").success) return;
@@ -2870,7 +2870,7 @@ class Parser {
           if (!this.parseToken('"').success) return;
 
           // Consume charsnonewlineordoublequote?.
-          if (this.parseCharsNoNewlineOrDoubleQuote()) tokens.push(this.lastParseData.ast.token);
+          if (this.parseCharsNoNewlineOrDoubleQuote().success) tokens.push(this.lastParseData.ast.token);
 
           // Consume '"'.
           if (!this.parseToken('"').success) return;
@@ -2884,7 +2884,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { token: tokens.join('') } };
+      parseData = { success: true, message: null, ast: { type, token: tokens.join('') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -3013,7 +3013,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { token: tokens.join('\n') } };
+      parseData = { success: true, message: null, ast: { type, token: tokens.join('\n') } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -3027,6 +3027,23 @@ class Parser {
     this.reset(lastPosition, null, null, column, line);
 
     return parseData;
+  }
+
+  // stringliteral =
+  //   | multilinestring
+  //   | singlelinestring
+  parseStringLiteral() {
+    const type = 'stringliteral';
+
+    if (this.parseMultiLineString().success) {
+      return this.lastParseData;
+    } else if (this.parseSingleLineString().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+
   }
 
   // names =
