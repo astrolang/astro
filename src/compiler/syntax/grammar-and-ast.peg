@@ -192,14 +192,17 @@ _ =
 singlelinestring =
   | "'" charsnonewlineorsinglequote? "'"
   | '"' charsnonewlineordoublequote? '"'
+  { token }
 
 multilinestring =
   | "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
   | '"""' charsnonewlineortripledoublequote? (nextline samedent charsnonewlineortripledoublequote?)* '"""'
+  { token }
 
 stringliteral =
-  | singlelinestring
   | multilinestring
+  | singlelinestring // Can eat others cake
+  { token }
 
 regexliteral =
   | '/' charsnonewlineorforwardslash* '/'
