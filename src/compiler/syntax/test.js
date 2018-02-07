@@ -712,3 +712,14 @@ print(new Parser('  \t \t').parseSpaces());
 print(String.raw`\t    `);
 print(new Parser('\t    ').parseSpaces());
 
+print('========= SINGLELINESTRING =========');
+
+print(String.raw`">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('"').parseSingleLineString()); // fail
+
+print(String.raw`'hello world'`);
+print(new Parser("'hello world'").parseSingleLineString());
+
+print(String.raw`"hello world"`);
+print(new Parser('"hello world"').parseSingleLineString());
+
