@@ -2752,31 +2752,69 @@ class Parser {
   // _ =
   //   | linecontinuation
   //   | space+
-  parseSpaces() { // TODO
+  parseSpaces() {
     // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
 
     const type = 'spaces';
-    let count = 0;
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
-    // Consume spaces. [ \t]+
-    while (this.space.indexOf(this.peekChar()) > -1) {
-      this.eatChar();
-      count += 1;
-    }
+    (() => {
+      // Alternate parsing.
+      // | linecontinuation
+      // | space+
+      let alternativeParseSuccessful = false;
 
-    // Check if it was able to consume at least one whitespace.
-    if (count > 0) {
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. linecontinuation
+      (() => {
+        // linecontinuation.
+        if (!this.parseLineContinuation().success) return;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. space+
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume space+.
+          let count = 0;
+
+          while (this.space.indexOf(this.peekChar()) > -1) {
+            this.eatChar();
+            count += 1;
+          }
+          print(count)
+
+          // Check if it was able to consume at least one whitespace.
+          if (count < 1) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
       // Update parseData.
       parseData = { success: true, message: null, ast: null };
 
       // Update lastParseData.
       this.lastParseData = parseData;
       return parseData;
-    }
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
 
     // Parsing failed, so revert state.
     this.reset(lastPosition, null, null, column, line);
