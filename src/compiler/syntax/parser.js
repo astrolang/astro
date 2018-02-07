@@ -2085,7 +2085,7 @@ class Parser {
 
         (() => {
           // Consume _.
-          if (!this.parseSpaces().success) return;
+          if (!this.parse_().success) return;
 
           // This alternative was parsed successfully.
           alternativeParseSuccessful = true;
@@ -2286,7 +2286,7 @@ class Parser {
         const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
         (() => {
           // Consume _?.
-          this.parseSpaces();
+          this.parse_();
 
           // Consume newline.
           if (!this.parseNewline().success) return;
@@ -2468,7 +2468,7 @@ class Parser {
       if (!this.parseToken('=#').success) return null;
 
       // Consume _?.
-      this.parseSpaces();
+      this.parse_();
 
       // Check &(newline | eoi).
       const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
@@ -2563,7 +2563,7 @@ class Parser {
   }
 
   // nextcodeline =
-  //   | _? nextline (samedent comment (nextline | &eoi))*
+  //   | space* nextline (samedent comment (nextline | &eoi))*
   parseNextCodeLine() {
     // Keep original state.
     const {
@@ -2575,8 +2575,10 @@ class Parser {
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
-      // Consume _?.
-      this.parseSpaces();
+      // Consume space*.
+      while (this.space.indexOf(this.peekChar()) > -1) {
+        this.eatChar();
+      }
 
       // Consume nextline.
       if (!this.parseNextLine().success) return null;
@@ -2671,7 +2673,7 @@ class Parser {
           if (this.parseNextCodeLine().success) comments = this.lastParseData.ast;
 
           // Consume _?.
-          this.parseSpaces();
+          this.parse_();
 
           // Consume &eoi.
           if (!this.parseEoi().success) return;
@@ -2752,8 +2754,8 @@ class Parser {
   // _ =
   //   | linecontinuation
   //   | space+
-  //   | &{ignorenewline} nextcodeline
-  parseSpaces() {
+  //   | &{ignorenewline} nextline (samedent comment nextline)*
+  parse_() {
     // Keep original state.
     const {
       lastPosition, column, line,
@@ -2766,7 +2768,7 @@ class Parser {
       // Alternate parsing.
       // | linecontinuation
       // | space+
-      // | &{ignorenewline} nextcodeline
+      // | &{ignorenewline} nextcodeline samedent
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
@@ -2803,22 +2805,20 @@ class Parser {
         })();
       }
 
-      // [3]. &{ignorenewline} nextcodeline
+      // [3]. &{ignorenewline} nextcodeline samedent
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
 
         (() => {
           // Check &{ignorenewline}.
-          let count = 0;
+          if (!this.ignoreNewline) return;
 
-          while (this.space.indexOf(this.peekChar()) > -1) {
-            this.eatChar();
-            count += 1;
-          }
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
 
-          // Check if it was able to consume at least one whitespace.
-          if (count < 1) return;
+          // Consume samedent.
+          if (!this.parseSamedent().success) return;
 
           // This alternative was parsed successfully.
           alternativeParseSuccessful = true;
@@ -2866,7 +2866,7 @@ class Parser {
 
       // Save state before alternative parsing.
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-      let otherState = { tokens };
+      const otherState = { tokens };
 
       // [1]. "'" charsnonewlineorsinglequote? "'"
       (() => {
@@ -2887,7 +2887,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        ({tokens} = otherState);
+        ({ tokens } = otherState);
 
         (() => {
           // Consume '"'.
@@ -2945,7 +2945,7 @@ class Parser {
 
       // Save state before alternative parsing.
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-      let otherState = { tokens };
+      const otherState = { tokens };
 
       // [1]. "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
       (() => {
@@ -2958,7 +2958,7 @@ class Parser {
         // Optional-multiple parsing. (nextline samedent charsnonewlineortriplesinglequote?)*
         while (true) {
           let parseSuccessful = false;
-          const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
           (() => {
             // Consume nextline.
             if (!this.parseNewline().success) return;
@@ -2975,7 +2975,7 @@ class Parser {
           // If parsing the above fails, revert state to what it was before that parsing began.
           // And break out of the loop.
           if (!parseSuccessful) {
-            this.reset(state.lastPosition, null, null, state.column, state.line);
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
             break;
           }
         }
@@ -2991,7 +2991,7 @@ class Parser {
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
-        ({tokens} = otherState);
+        ({ tokens } = otherState);
 
         (() => {
           // Consume '"""'.
@@ -3003,7 +3003,7 @@ class Parser {
           // Optional-multiple parsing. (nextline samedent charsnonewlineortripledoublequote?)*
           while (true) {
             let parseSuccessful = false;
-            const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
             (() => {
               // Consume nextline.
               if (!this.parseNewline().success) return;
@@ -3020,7 +3020,7 @@ class Parser {
             // If parsing the above fails, revert state to what it was before that parsing began.
             // And break out of the loop.
             if (!parseSuccessful) {
-              this.reset(state.lastPosition, null, null, state.column, state.line);
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
               break;
             }
           }
@@ -3067,7 +3067,6 @@ class Parser {
 
     // Parsing failed.
     return { success: false, message: { type, parser: this }, ast: null };
-
   }
 
   // regexliteral =
@@ -3087,7 +3086,7 @@ class Parser {
       if (!this.parseToken('/').success) return null;
 
       // Consume charsnonewlineorforwardslash?.
-      if (this.parseCharsNoNewlineOrForwardSlash().success) token = this.lastParseData.ast.token;
+      if (this.parseCharsNoNewlineOrForwardSlash().success) ({ token } = this.lastParseData.ast);
 
       // Consume '/'.
       if (!this.parseToken('/').success) return null;
@@ -3122,7 +3121,7 @@ class Parser {
 
     (() => {
       // Consume _?.
-      this.parseSpaces();
+      this.parse_();
 
       // Consume ','.
       if (!this.parseToken(',').success) return null;
@@ -3175,13 +3174,14 @@ class Parser {
 
       // [1]. '[' _? ']' // ignorenewline
       (() => {
-        // Consume floatbinaryliteral.
-        if (!this.parseFloatBinaryLiteral().success) return;
-        number = this.lastParseData.ast;
+        // Consume '['.
+        if (!this.parseToken('[').success) return;
 
-        // Consume identifier.
-        if (!this.parseIdentifier().success) return;
-        identifier = this.lastParseData.ast;
+        // Consume _?.
+        this.parse_();
+
+        // Consume ']'.
+        if (!this.parseToken(']').success) return;
 
         // This alternative was parsed successfully.
         alternativeParseSuccessful = true;
@@ -3252,13 +3252,13 @@ class Parser {
         const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
         (() => {
           // Consume _?.
-          this.parseSpaces();
+          this.parse_();
 
           // Consume ','.
           if (!this.parseToken(',').success) return;
 
           // Consume _?.
-          this.parseSpaces();
+          this.parse_();
 
           // Consume identifier.
           if (!this.parseIdentifier().success) return;
