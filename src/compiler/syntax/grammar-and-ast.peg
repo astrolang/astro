@@ -190,8 +190,8 @@ _ =
   | space+
 
 singlelinestring =
-  | "'" charsnonewlineorsinglequote? "'" (nextcodeline samedent "'" charsnonewlineorsinglequote? "'")*
-  | '"' charsnonewlineordoublequote? '"' (nextcodeline samedent '"' charsnonewlineordoublequote? '"')*
+  | "'" charsnonewlineorsinglequote? "'"
+  | '"' charsnonewlineordoublequote? '"'
 
 multilinestring =
   | "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
