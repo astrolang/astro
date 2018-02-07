@@ -661,3 +661,29 @@ print((() => {
   parser.lastIndentCount = 2; // Two indent levels.
   return parser.parseDedentOrEoiEnd();
 })());
+
+print('========= LINECONTINUATION =========');
+
+print(String.raw`...>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('...').parseLineContinuation()); // fail
+
+print(String.raw`...\n    •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('...\n    •');
+  parser.lastIndentCount = 2; // Two indent levels.
+  return parser.parseLineContinuation();
+})());
+
+print(String.raw`...\n    •`);
+print((() => {
+  const parser = new Parser('...\n    •');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseLineContinuation();
+})());
+
+print(String.raw`...\n`);
+print(new Parser('...\n').parseLineContinuation());
+
+print(String.raw`... \r\n`);
+print(new Parser('... \r\n').parseLineContinuation());
+
