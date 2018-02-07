@@ -220,17 +220,17 @@ print('========= FLOATLITERAL =========');
 print(String.raw`ff.56_FF>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser('ff.56_FF').parseFloatLiteral()); // fail
 
+print(String.raw`0x1ffe-2_9FG>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0x1ffe-2_9FG').parseFloatLiteral()); // fail
+
+print(String.raw`0b1__1011>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('0b1__1011').parseFloatLiteral()); // fail
+
 print(String.raw`0b0.11_FF>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser('0b0.11_FF').parseFloatLiteral()); // mid
 
 print(String.raw`02.2eF_F6>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser('02.2eF_F6').parseFloatLiteral()); // mid
-
-print(String.raw`0x1ffe-2_9FG>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('0x1ffe-2_9FG').parseFloatLiteral()); // mid
-
-print(String.raw`0b1__1011>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('0b1__1011').parseFloatLiteral()); // mid
 
 print(String.raw`0x10.56_p5`);
 print(new Parser('0x10.56_p5').parseFloatLiteral());
@@ -690,27 +690,35 @@ print(new Parser('... \r\n').parseLineContinuation());
 print('========= _ =========');
 
 print(String.raw`...>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('...').parseSpaces()); // fail
+print(new Parser('...').parse_()); // fail
 
 print(String.raw`...\n    •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print((() => { // fail
   const parser = new Parser('...\n    •');
   parser.lastIndentCount = 2; // Two indent levels.
-  return parser.parseSpaces();
+  return parser.parse_();
 })());
 
 print(String.raw`...\n    •`);
 print((() => {
   const parser = new Parser('...\n    •');
   parser.lastIndentCount = 1; // One indent level.
-  return parser.parseSpaces();
+  return parser.parse_();
+})());
+
+print(String.raw`\n  \n    •`);
+print((() => {
+  const parser = new Parser('\n    •');
+  parser.lastIndentCount = 1; // One indent level.
+  parser.ignoreNewline = true;
+  return parser.parse_();
 })());
 
 print(String.raw`  \t \t`);
-print(new Parser('  \t \t').parseSpaces());
+print(new Parser('  \t \t').parse_());
 
 print(String.raw`\t    `);
-print(new Parser('\t    ').parseSpaces());
+print(new Parser('\t    ').parse_());
 
 print('========= SINGLELINESTRING =========');
 
@@ -791,10 +799,10 @@ print(String.raw`/\\d+\n/>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser("/\\d+\n/").parseRegexLiteral()); // fail
 
 print(String.raw`/age / name />>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser("/age / name /").parseRegexLiteral()); // mid
+print(new Parser('/age / name /').parseRegexLiteral()); // mid
 
 print(String.raw`/[0-9a-z]+\\d+/`);
-print(new Parser("/[0-9a-z]+\\d+/").parseRegexLiteral());
+print(new Parser('/[0-9a-z]+\\d+/').parseRegexLiteral());
 
 print(String.raw`//`);
 print(new Parser('//').parseRegexLiteral());
@@ -802,8 +810,13 @@ print(new Parser('//').parseRegexLiteral());
 print('========= ENDCOMMA =========');
 
 print(String.raw`,`);
-print(new Parser(",").parseEndComma());
+print(new Parser(',').parseEndComma());
 
 print(String.raw`\t\t  ,`);
 print(new Parser('\t\t  ,').parseEndComma());
+
+print('========= LISTLITERAL =========');
+
+print(String.raw`[ ]`);
+print(new Parser('[ ]').parseListLiteral());
 
