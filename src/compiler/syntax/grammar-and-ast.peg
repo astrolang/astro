@@ -34,6 +34,7 @@ integerliteral =
   | integeroctalliteral
   | integerhexadecimalliteral
   | integerdecimalliteral // Can eat others cake
+  { type, value }
 
 floatbinaryliteral  =
   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
@@ -60,10 +61,12 @@ floatliteral =
   | floatoctalliteral
   | floathexadecimalliteral
   | floatdecimalliteral // Can eat others cake
+  { type, value }
 
 numericliteral =
   | floatliteral
   | integerliteral  // Can eat others cake
+  { type, value }
 
 coefficientexpression =
   | floatbinaryliteral identifier
@@ -192,17 +195,17 @@ _ =
 singlelinestring =
   | "'" charsnonewlineorsinglequote? "'"
   | '"' charsnonewlineordoublequote? '"'
-  { token }
+  { type, token }
 
 multilinestring =
   | "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
   | '"""' charsnonewlineortripledoublequote? (nextline samedent charsnonewlineortripledoublequote?)* '"""'
-  { token }
+  { type, token }
 
 stringliteral =
   | multilinestring
   | singlelinestring // Can eat others cake
-  { token }
+  { type, token }
 
 regexliteral =
   | '/' charsnonewlineorforwardslash* '/'
