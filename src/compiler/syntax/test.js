@@ -687,3 +687,28 @@ print(new Parser('...\n').parseLineContinuation());
 print(String.raw`... \r\n`);
 print(new Parser('... \r\n').parseLineContinuation());
 
+print('========= _ =========');
+
+print(String.raw`...>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('...').parseSpaces()); // fail
+
+print(String.raw`...\n    •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('...\n    •');
+  parser.lastIndentCount = 2; // Two indent levels.
+  return parser.parseSpaces();
+})());
+
+print(String.raw`...\n    •`);
+print((() => {
+  const parser = new Parser('...\n    •');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseSpaces();
+})());
+
+print(String.raw`  \t \t`);
+print(new Parser('  \t \t').parseSpaces());
+
+print(String.raw`\t    `);
+print(new Parser('\t    ').parseSpaces());
+
