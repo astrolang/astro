@@ -191,6 +191,7 @@ linecontinuation =
 _ =
   | linecontinuation
   | space+
+  | &{ignorenewline} nextcodeline
 
 singlelinestring =
   | "'" charsnonewlineorsinglequote? "'"
@@ -220,6 +221,7 @@ listliteral =
   | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
   | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
   | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
+  { type, expressions }
 
 dictliteral =
   | '{' _? '}' // ignorenewline
