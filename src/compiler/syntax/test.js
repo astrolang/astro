@@ -723,6 +723,9 @@ print(new Parser("'hello world'").parseSingleLineString());
 print(String.raw`"hello world"`);
 print(new Parser('"hello world"').parseSingleLineString());
 
+print(String.raw`''`);
+print(new Parser("''").parseSingleLineString());
+
 print('========= MULTILINESTRING =========');
 
 print(String.raw`'''>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -757,4 +760,28 @@ print(new Parser("'''hello\nworld'''").parseMultiLineString());
 
 print(String.raw`"""hello\nworld\n"""`);
 print(new Parser('"""hello\nworld\n"""').parseMultiLineString());
+
+print(String.raw`""""""`);
+print(new Parser('""""""').parseMultiLineString());
+
+print('========= STRINGLITERAL =========');
+
+print(String.raw`'''>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("'''").parseStringLiteral()); // mid
+
+print(String.raw`"""\n    hello world\n    """`);
+print((() => {
+  const parser = new Parser('"""\n    hello world\n    """');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseStringLiteral();
+})());
+
+print(String.raw`'''hello\nworld'''`);
+print(new Parser("'''hello\nworld'''").parseStringLiteral());
+
+print(String.raw`"hello world"`);
+print(new Parser('"hello world"').parseStringLiteral());
+
+print(String.raw`""`);
+print(new Parser('""').parseStringLiteral());
 
