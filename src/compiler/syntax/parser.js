@@ -3085,6 +3085,41 @@ class Parser {
     return parseData;
   }
 
+  // endcomma =
+  //   | _? ','
+  parseEndComma() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'endcomma';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume _?.
+      this.parseSpaces();
+
+      // Consume ','.
+      if (!this.parseToken(',').success) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // names =
   //   | identifier (_? ',' _? identifier)*
   parseNames() {
