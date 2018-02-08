@@ -190,8 +190,8 @@ linecontinuation =
 
 _ =
   | linecontinuation
-  | space+
   | &{ignorenewline} nextcodeline samedent
+  | space+ // Can eat others cake
 
 singlelinestring =
   | "'" charsnonewlineorsinglequote? "'"
@@ -217,7 +217,7 @@ endcomma =
 
 listliteral =
   | '[' _? ']' // ignorenewline
-  | '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
+  | '[' _? listliteral ((_? ',')? _? listliteral)+ endcomma? _? ']' // ignorenewline
   | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
   | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
   | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
