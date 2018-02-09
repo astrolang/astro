@@ -1,4 +1,4 @@
-/* eslint-disable no-loop-func, no-constant-condition, max-len */
+/* eslint-disable no-loop-func, no-constant-condition, max-len, no-underscore-dangle */
 // eslint-disable-next-line no-unused-vars
 const { print } = require('../utils');
 
@@ -10,7 +10,7 @@ const { print } = require('../utils');
  * - Inner IIFEs are used to make handling parsing failure within a parse function clear.
  * - Functions with productions like `(samedent {comment} nextline)*` which have state in the middle
  * need to revert their state if an iteration fails. Productions with state at the end
- * are not affected by this `('_' {digitdecimal})*`
+ * are not affected by this `('_' {digitdecimal})*`.
  */
 class Parser {
   constructor(code) {
@@ -19,10 +19,10 @@ class Parser {
     // Parser information
     this.lastPosition = -1;
     this.lastParseData = null;
+    this.lastIndentCount = 0;
     this.column = 0;
     this.line = 1;
     this.ruleStarts = []; // start position of an expression. [{ line, column }].
-    this.lastIndentCount = 0;
     this.ignoreNewline = false;
     // Characters
     this.digitBinary = '01';
@@ -2048,6 +2048,34 @@ class Parser {
     return parseData;
   }
 
+  // spaces =
+  //   | space+
+  parseSpaces() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'spaces';
+    const parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    // Consume space+.
+    let count = 0;
+
+    while (this.space.indexOf(this.peekChar()) > -1) {
+      this.eatChar();
+      count += 1;
+    }
+
+    // Check if it was able to consume at least one whitespace.
+    if (count > 0) return { success: true, message: null, ast: null };
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // nameseparator =
   //   | !(identifier | numericliteral)
   //   | _
@@ -2753,22 +2781,22 @@ class Parser {
 
   // _ =
   //   | linecontinuation
-  //   | space+
   //   | &{ignorenewline} nextline (samedent comment nextline)*
+  //   | space+ // Can eat others cake
   parse_() {
     // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
 
-    const type = 'spaces';
+    const type = '_';
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Alternate parsing.
       // | linecontinuation
-      // | space+
       // | &{ignorenewline} nextcodeline samedent
+      // | space+ // Can eat others cake
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
@@ -2783,7 +2811,27 @@ class Parser {
         alternativeParseSuccessful = true;
       })();
 
-      // [2]. space+
+      // [2]. &{ignorenewline} nextcodeline samedent
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Check &{ignorenewline}.
+          if (!this.ignoreNewline) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume samedent.
+          if (!this.parseSamedent().success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. space+
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
@@ -2799,26 +2847,6 @@ class Parser {
 
           // Check if it was able to consume at least one whitespace.
           if (count < 1) return;
-
-          // This alternative was parsed successfully.
-          alternativeParseSuccessful = true;
-        })();
-      }
-
-      // [3]. &{ignorenewline} nextcodeline samedent
-      if (!alternativeParseSuccessful) {
-        // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, null, state.column, state.line);
-
-        (() => {
-          // Check &{ignorenewline}.
-          if (!this.ignoreNewline) return;
-
-          // Consume nextcodeline.
-          if (!this.parseNextCodeLine().success) return;
-
-          // Consume samedent.
-          if (!this.parseSamedent().success) return;
 
           // This alternative was parsed successfully.
           alternativeParseSuccessful = true;
@@ -3108,9 +3136,9 @@ class Parser {
     return parseData;
   }
 
-  // endcomma =
+  // _comma =
   //   | _? ','
-  parseEndComma() {
+  parse_Comma() {
     // Keep original state.
     const {
       lastPosition, column, line,
@@ -3145,15 +3173,18 @@ class Parser {
 
   // listliteral =
   //   | '[' _? ']' // ignorenewline
-  //   | '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
-  //   | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
-  //   | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
-  //   | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
-  parseListLiteral() {
+  //   | '[' _? listliteral (_comma? _? listliteral)+ _comma? _? ']' // ignorenewline
+  //   | '[' nextcodeline indent listliteral _comma? (nextcodeline samedent listliteral _comma?)+ _comma? nextcodeline dedent ']'
+  //   | '[' _? infixexpression (_comma _? infixexpression)* (_? ';' _? infixexpression (_comma _? infixexpression)*)* _comma? _? ']' // ignorenewline
+  //   | '[' nextcodeline indent infixexpression (_comma _? infixexpression)* (_? ';' infixexpression (_comma _? infixexpression)*)* _comma? nextcodeline dedent ']'
+  parseListLiteral() { // TODO
     // Keep original state.
     const {
-      lastPosition, column, line,
+      lastPosition, column, line, ignoreNewline,
     } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
 
     const type = 'listliteral';
     let expressions = [];
@@ -3162,10 +3193,10 @@ class Parser {
     (() => {
       // Alternate parsing.
       // | '[' _? ']' // ignorenewline
-      // | '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
-      // | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
-      // | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
-      // | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
+      // | '[' _? listliteral (_comma? _? listliteral)+ _comma? _? ']' // ignorenewline
+      // | '[' nextcodeline indent listliteral _comma? (nextcodeline samedent listliteral _comma?)+ _comma? nextcodeline dedent ']'
+      // | '[' _? infixexpression (_comma _? infixexpression)* (_? ';' _? infixexpression (_comma _? infixexpression)*)* _comma? _? ']' // ignorenewline
+      // '[' nextcodeline indent infixexpression (_comma _? infixexpression)* (_? ';' infixexpression (_comma _? infixexpression)*)* _comma? nextcodeline dedent ']'
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
@@ -3177,8 +3208,14 @@ class Parser {
         // Consume '['.
         if (!this.parseToken('[').success) return;
 
+        // &{ignorenewline}
+        this.ignoreNewline = true;
+
         // Consume _?.
         this.parse_();
+
+        // !{ignorenewline}
+        this.ignoreNewline = false;
 
         // Consume ']'.
         if (!this.parseToken(']').success) return;
@@ -3187,36 +3224,176 @@ class Parser {
         alternativeParseSuccessful = true;
       })();
 
-      // // [2]. '[' _? listliteral ((_? ',')? _? listliteral)+ commaend? _? ']' // ignorenewline
-      // if (!alternativeParseSuccessful) {
-      //   // Revert state to what it was before alternative parsing started.
-      //   this.reset(state.lastPosition, null, null, state.column, state.line);
-      //   ({ number, identifier } = otherState);
+      // [2]. '[' _? listliteral (_comma? _? listliteral)+ _comma? _? ']' // ignorenewline
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ expressions } = otherState);
+        this.ignoreNewline = false;
 
-      //   (() => {
-      //     // Consume floatoctalliteral.
-      //     if (!this.parseFloatOctalLiteral().success) return;
-      //     number = this.lastParseData.ast;
+        (() => {
+          // Consume '['.
+          if (!this.parseToken('[').success) return;
 
-      //     // Consume identifier.
-      //     if (!this.parseIdentifier().success) return;
-      //     identifier = this.lastParseData.ast;
+          // &{ignorenewline}
+          this.ignoreNewline = true;
 
-      //     // This alternative was parsed successfully.
-      //     alternativeParseSuccessful = true;
-      //   })();
-      // }
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Consume listliteral.
+          if (!this.parseListLiteral().success) return;
+          expressions.push(this.lastParseData.ast);
+
+          // One-multiple parsing. (_comma? _? listliteral)+
+          let loopCount = 0;
+          while (true) {
+            let parseSuccessful = false;
+            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            const otherState2 = { expressions };
+            (() => {
+              // Consume _comma?.
+              this.parse_Comma();
+
+              // Consume _?.
+              this.parse_();
+
+              // Consume listliteral.
+              if (!this.parseListLiteral().success) return;
+              expressions.push(this.lastParseData.ast);
+
+              parseSuccessful = true;
+
+              // Parsing successful, increment loop count.
+              loopCount += 1;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+              ({ expressions } = otherState2);
+              break;
+            }
+          }
+
+          // At least one iteration of the above must be parsed successfully.
+          if (loopCount < 1) return;
+
+          // Consume _comma?.
+          this.parse_Comma();
+
+          // Consume _?.
+          this.parse_();
+
+          // !{ignorenewline}
+          this.ignoreNewline = false;
+
+          // Consume ']'.
+          if (!this.parseToken(']').success) return;
+
+          print('beem]')
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. '[' nextcodeline indent listliteral _comma? (nextcodeline samedent listliteral _comma?)+ _comma? nextcodeline dedent ']'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ expressions } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '['.
+          if (!this.parseToken('[').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume listliteral.
+          if (!this.parseListLiteral().success) return;
+          expressions.push(this.lastParseData.ast);
+
+          // Consume _comma.
+          this.parse_Comma();
+
+          // One-multiple parsing. (nextcodeline samedent listliteral _comma?)+
+          let loopCount = 0;
+          while (true) {
+            let parseSuccessful = false;
+            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            const otherState2 = { expressions };
+            (() => {
+              // Consume nextcodeline.
+              if (!this.parseNextCodeLine().success) return;
+
+              // Consume samedent.
+              if (!this.parseSamedent().success) return;
+
+              // Consume listliteral.
+              if (!this.parseListLiteral().success) return;
+              expressions.push(this.lastParseData.ast);
+
+              // Consume _comma.
+              this.parse_Comma();
+
+              parseSuccessful = true;
+
+              // Parsing successful, increment loop count.
+              loopCount += 1;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+              ({ expressions } = otherState2);
+              break;
+            }
+          }
+
+          // At least one iteration of the above must be parsed successfully.
+          if (loopCount < 1) return;
+
+          // Consume _comma?.
+          this.parse_Comma();
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume ']'.
+          if (!this.parseToken(']').success) return;
+          
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
 
       // Check if any of the alternatives was parsed successfully
-      if (!alternativeParseSuccessful) return null;
+      if (!alternativeParseSuccessful) {
+        ({ expressions } = otherState);
+        return null;
+      }
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: null };
+      parseData = { success: true, message: null, ast: { type, expressions } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
       return parseData;
     })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
 
     // Check if above parsing is successful.
     if (parseData.success) return parseData;
