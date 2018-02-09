@@ -226,14 +226,14 @@ listliteral =
   | '[' nextcodeline indent infixexpression (_comma _? infixexpression)* (_? ';' infixexpression (_comma _? infixexpression)*)* _comma? nextcodeline dedent ']'
   { type, expressions }
 
+dictblock =
+  | nextcodeline indent infixexpression _? ':' _? (infixexpression | dictblock) endcomma? nextcodeline dedent
+
 dictliteral =
   | '{' _? '}' // ignorenewline
   | '{' _? infixexpression _? ':' _? infixexpression (_? ',' _? infixexpression _? ':' _? infixexpression)*  endcomma? _? '}' // ignorenewline
   | '{' nextcodeline indent infixexpression _? ':' _? infixexpression (_? ',' _? infixexpression _? ':' _? infixexpression)*  endcomma? nextcodeline dedent '}'
   | '{' nextcodeline indent infixexpression _? ':' _? dictblock (_? ','? nextcodeline samedent infixexpression _? ':' _? dictblock)* nextcodeline dedent '}'
-
-dictblock =
-  | nextcodeline indent infixexpression _? ':' _? (infixexpression | dictblock) endcomma? nextcodeline dedent
 
 tupleliteral =
   | '(' _? ')' // ignorenewline
