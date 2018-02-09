@@ -489,6 +489,23 @@ print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrForwardSlash()); // m
 print(String.raw`25fse?w&$3267`);
 print(new Parser('25fse?w&$3267').parseCharsNoNewlineOrForwardSlash());
 
+print('========= SPACES =========');
+
+print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('').parseSpaces()); // fail
+
+print(String.raw`/>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('/').parseSpaces()); // fail
+
+print(String.raw`\t   \t\n>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('\t   \t\n').parseSpaces()); // mid
+
+print(String.raw` \t >>>>>>>>>>>>>>>>>>>>>>>>MID`);
+print(new Parser(' \t ').parseSpaces());
+
+print(String.raw` `);
+print(new Parser(' ').parseSpaces());
+
 print('========= NAMESEPARATOR =========');
 
 print(String.raw`name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -807,16 +824,61 @@ print(new Parser('/[0-9a-z]+\\d+/').parseRegexLiteral());
 print(String.raw`//`);
 print(new Parser('//').parseRegexLiteral());
 
-print('========= ENDCOMMA =========');
+print('========= _COMMA =========');
 
 print(String.raw`,`);
-print(new Parser(',').parseEndComma());
+print(new Parser(',').parse_Comma());
 
 print(String.raw`\t\t  ,`);
-print(new Parser('\t\t  ,').parseEndComma());
+print(new Parser('\t\t  ,').parse_Comma());
 
 print('========= LISTLITERAL =========');
 
+// print(String.raw`[\n[][\n]]>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('[\n[\n][\n]]').parseListLiteral()); // fail
+
+// print(String.raw`[[\n  ]]>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('[[\n  ]]').parseListLiteral()); // fail
+
+
+// print(String.raw`[\n        [],\n    []\n]>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print((() => {
+//   const parser = new Parser('[\n        [],\n        []\n]'); // fail
+//   parser.lastIndentCount = 1; // One indent level.
+//   return parser.parseListLiteral();
+// })());
+
+print(String.raw`[\n        [],\n        []\n    ]`);
+print((() => {
+  const parser = new Parser('[\n        [],\n        []\n    ]');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseListLiteral();
+})());
+
+print(String.raw`[]`);
+print(new Parser('[]').parseListLiteral());
+
 print(String.raw`[ ]`);
 print(new Parser('[ ]').parseListLiteral());
+
+print(String.raw`[  \n]`);
+print(new Parser('[  \n]').parseListLiteral());
+
+print(String.raw`[[][]]`);
+print(new Parser('[[][]]').parseListLiteral());
+
+print(String.raw`[[],[]]`);
+print(new Parser('[[],[]]').parseListLiteral());
+
+print(String.raw`[[\n][\n]]`);
+print(new Parser('[[\n][\n]]').parseListLiteral());
+
+print(String.raw`[[]\n[\n]]`);
+print(new Parser('[[]\n[\n]]').parseListLiteral());
+
+print(String.raw`[\n    [],\n    []\n]`);
+print(new Parser('[\n    [],\n    []\n]').parseListLiteral());
+
+print(String.raw`[\n    [[], []]\n    []\n]`);
+print(new Parser('[\n    [[], []]\n    []\n]').parseListLiteral());
 
