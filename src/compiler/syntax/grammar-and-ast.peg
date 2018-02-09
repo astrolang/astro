@@ -137,6 +137,9 @@ charsnonewlineorforwardslash =
 space =
   | [ \t]
 
+spaces =
+  | space+
+
 nameseparator =
   | !(identifier | numericliteral)
   | _
@@ -212,15 +215,15 @@ regexliteral =
   | '/' charsnonewlineorforwardslash? '/'
   { type, token }
 
-endcomma =
+_comma =
   | _? ','
 
 listliteral =
   | '[' _? ']' // ignorenewline
-  | '[' _? listliteral ((_? ',')? _? listliteral)+ endcomma? _? ']' // ignorenewline
-  | '[' nextcodeline indent listliteral (_? ',')? (nextcodeline samedent listliteral (_? ',')?)+ commaend? nextcodeline dedent ']'
-  | '[' _? infixexpression (_? ',' _? infixexpression)* (_? ';' _? infixexpression (_? ',' _? infixexpression)*)* endcomma? _? ']' // ignorenewline
-  | '[' nextcodeline indent infixexpression (_? ',' _? infixexpression)* (_? ';' infixexpression (_? ',' _? infixexpression)*)* endcomma? nextcodeline dedent ']'
+  | '[' _? listliteral (_comma? _? listliteral)+ _comma? _? ']' // ignorenewline
+  | '[' nextcodeline indent listliteral _comma? (nextcodeline samedent listliteral _comma?)+ _comma? nextcodeline dedent ']'
+  | '[' _? infixexpression (_comma _? infixexpression)* (_? ';' _? infixexpression (_comma _? infixexpression)*)* _comma? _? ']' // ignorenewline
+  | '[' nextcodeline indent infixexpression (_comma _? infixexpression)* (_? ';' infixexpression (_comma _? infixexpression)*)* _comma? nextcodeline dedent ']'
   { type, expressions }
 
 dictliteral =
