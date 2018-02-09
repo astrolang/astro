@@ -228,22 +228,23 @@ listliteral =
 
 dictblock =
   | nextcodeline indent infixexpression _? ':' _? (infixexpression | dictblock) _comma? nextcodeline dedent
+  | '{'
 
 dictliteral =
   | '{' _? '}' // ignorenewline
-  | '{' spaces? infixexpression _? ':' _? infixexpression (_? ',' _? infixexpression _? ':' _? infixexpression)*  _comma? _? '}' // ignorenewline
-  | '{' nextcodeline indent infixexpression _? ':' _? infixexpression (_? ',' _? infixexpression _? ':' _? infixexpression)*  _comma? nextcodeline dedent '}'
-  | '{' nextcodeline indent infixexpression _? ':' _? dictblock (_? ','? nextcodeline samedent infixexpression _? ':' _? dictblock)* nextcodeline dedent '}'
+  | '{' nextcodeline indent infixexpression _? ':' _? dictblock (_comma? nextcodeline samedent infixexpression _? ':' _? dictblock)* nextcodeline dedent '}'
+  | '{' spaces? infixexpression _? ':' _? infixexpression (_comma _? infixexpression _? ':' _? infixexpression)*  _comma? _? '}' // ignorenewline
+  | '{' nextcodeline indent infixexpression _? ':' _? infixexpression (_comma _? infixexpression _? ':' _? infixexpression)*  _comma? nextcodeline dedent '}'
 
 tupleliteral =
   | '(' _? ')' // ignorenewline
   | '(' _? infixexpression _comma _? ')' // ignorenewline
-  | '(' _? infixexpression (_? ',' _? infixexpression)+ _comma? ')' // ignorenewline
+  | '(' _? infixexpression (_comma _? infixexpression)+ _comma? ')' // ignorenewline
   | '(' nextcodeline indent infixexpression (nextcodeline samedent infixexpression) _comma? nextcodeline dedent ')'
 
 namedtupleliteral =
   | '(' _? ':' _?  ')' // ignorenewline
-  | '(' _? identifier _? ':' _? infixexpression (_? ',' _? identifier _? ':' _? infixexpression)* _comma? ')' // ignorenewline
+  | '(' _? identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma? ')' // ignorenewline
   | '(' nextcodeline indent identifier _? ':' _? infixexpression (nextcodeline samedent identifier _? ':' _? infixexpression) _comma? nextcodeline dedent ')'
 
 symbolliteral =
@@ -266,7 +267,7 @@ commandnotationpostfix =
   | _ &(symbolliteral | numericliteral | identifier | range) infixexpression
 
 callpostfix =
-  | '(' (_? identifier _? ':')? _? infixexpression (_? ',' (_? identifier _? ':')? _? infixexpression)* _comma? _? ')' // ignorenewline
+  | '(' (_? identifier _? ':')? _? infixexpression (_comma (_? identifier _? ':')? _? infixexpression)* _comma? _? ')' // ignorenewline
   | '(' nextcodeline indent (identifier _? ':' _?)? infixexpression (nextcodeline samedent (identifier _? ':' _?)? infixexpression) _comma? nextcodeline dedent ')'
 
 dotnotationpostfix =
@@ -285,7 +286,7 @@ listelementpostfix =
   | _? '[' _? listarguments _? ']' // ignorenewline
 
 listarguments =
-  | listargument (_? ',' _? listargument)* _comma?
+  | listargument (_comma _? listargument)* _comma?
 
 listargument =
   | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression '!'?)?
@@ -297,7 +298,7 @@ dictelementpostfix =
   | _? '{' _? dictarguments _? '}' // ignorenewline
 
 dictarguments =
-  | infixexpression (_? ',' _? infixexpression)* _comma?
+  | infixexpression (_comma _? infixexpression)* _comma?
 
 range =
   | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
@@ -357,7 +358,7 @@ subatompostfix =
 
 subatom =
   | '(' _? tupleexpression _? ')' identifier? // ignorenewline
-  | '(' nextcodeline indent simpleexpression (_? ',' _? simpleexpression)* (_? ',')? nextcodeline dedent ')' identifier?
+  | '(' nextcodeline indent simpleexpression (_comma _? simpleexpression)* (_comma)? nextcodeline dedent ')' identifier?
   | coefficientexpression
   | literal
   | noname
@@ -396,7 +397,7 @@ simpleexpression =
   | prepostfixatom
 
 tupleexpression =
-  | simpleexpression (_? ',' _? simpleexpression)* (_? ',')?
+  | simpleexpression (_comma _? simpleexpression)* (_comma)?
 
 subexpression =
   | declaration
@@ -449,13 +450,13 @@ block =
   | nextcodeline indent openexpression (nextcodeline samedent openexpression)* dedentoreoiend
 
 lhspattern =
-  | '(' _? lhsname (_? ',' _? lhsname)* _comma? _? ')' // ignorenewline
-  | '(' nextcodeline indent  lhsname (_? ',' _? lhsname)* _comma? nextcodeline dedent ')'
-  | '[' _? lhsname (_? ',' _? lhsname)* _comma? _? ']' // ignorenewline
-  | '[' nextcodeline indent  lhsname (_? ',' _? lhsname)* _comma? nextcodeline dedent ']'
-  | '{' _? lhsname (_? ',' _? lhsname)* _comma? _? '}' // ignorenewline
-  | '{' nextcodeline indent lhsname (_? ',' _? lhsname)* _comma? nextcodeline dedent '}'
-  |  lhsname (_? ',' _? lhsname)*
+  | '(' _? lhsname (_comma _? lhsname)* _comma? _? ')' // ignorenewline
+  | '(' nextcodeline indent  lhsname (_comma _? lhsname)* _comma? nextcodeline dedent ')'
+  | '[' _? lhsname (_comma _? lhsname)* _comma? _? ']' // ignorenewline
+  | '[' nextcodeline indent  lhsname (_comma _? lhsname)* _comma? nextcodeline dedent ']'
+  | '{' _? lhsname (_comma _? lhsname)* _comma? _? '}' // ignorenewline
+  | '{' nextcodeline indent lhsname (_comma _? lhsname)* _comma? nextcodeline dedent '}'
+  |  lhsname (_comma _? lhsname)*
 
 lhsname
   | noname
@@ -532,13 +533,13 @@ tryexpression =
   | 'try' 'var'? namesaparation lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
 
 matchpattern =
-  | (identifier _?)? '(' _? matchatom (_? ',' _? matchatom)* _comma? _? ')' // ignorenewline
-  | (identifier _?)? '(' nextcodeline indent  matchatom (_? ',' _? matchatom)* _comma? nextcodeline dedent ')'
-  | '[' _? matchatom (_? ',' _? matchatom)* _comma? _? ']' // ignorenewline
-  | '[' nextcodeline indent  matchatom (_? ',' _? matchatom)* _comma? nextcodeline dedent ']'
-  | '{' _? matchatom (_? ',' _? matchatom)* _comma? _? '}' // ignorenewline
-  | '{' nextcodeline indent matchatom (_? ',' _? matchatom)* _comma? nextcodeline dedent '}'
-  |  matchatom (_? ',' _? matchatom)*
+  | (identifier _?)? '(' _? matchatom (_comma _? matchatom)* _comma? _? ')' // ignorenewline
+  | (identifier _?)? '(' nextcodeline indent  matchatom (_comma _? matchatom)* _comma? nextcodeline dedent ')'
+  | '[' _? matchatom (_comma _? matchatom)* _comma? _? ']' // ignorenewline
+  | '[' nextcodeline indent  matchatom (_comma _? matchatom)* _comma? nextcodeline dedent ']'
+  | '{' _? matchatom (_comma _? matchatom)* _comma? _? '}' // ignorenewline
+  | '{' nextcodeline indent matchatom (_comma _? matchatom)* _comma? nextcodeline dedent '}'
+  |  matchatom (_comma _? matchatom)*
 
 matchatom
   | infixexpression
@@ -587,12 +588,12 @@ importpath =
   | stringliteral
 
 importdeclaration =
-  | 'import' (_ identifier _? ':') _ importpath  '{' (_? identifier _? ':')? _? (identifier | operator) (_? ',' (_? identifier _? ':')? _? (identifier | operator) )* _comma? _? '}' // ignorenewline
+  | 'import' (_ identifier _? ':') _ importpath  '{' (_? identifier _? ':')? _? (identifier | operator) (_comma (_? identifier _? ':')? _? (identifier | operator) )* _comma? _? '}' // ignorenewline
   | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent (identifier _? ':' _?)? (identifier | operator) (nextcodeline samedent (identifier _? ':' _?)? (identifier | operator)) _comma? nextcodeline dedent '}'
   | 'import' (_ identifier _? ':') _ importpath
 
 exportdeclaration =
-  | 'export' _? '{' _? (identifier | operator) (_? ',' _? (identifier | operator))* _comma? _? '}' // ignorenewline
+  | 'export' _? '{' _? (identifier | operator) (_comma _? (identifier | operator))* _comma? _? '}' // ignorenewline
 
 conditionalexpression =
   | matchexpression
@@ -644,7 +645,7 @@ typebodyoneinlinenest =
   | '|'? _? subtype (_? '|' subtype)*
 
 names =
-  | identifier (_? ',' _? identifier)*
+  | identifier (_comma _? identifier)*
 
 typeblock =
   | nextcodeline indent typebody (nextcodeline samedent typebody)* dedentoreoiend
@@ -663,7 +664,7 @@ typedeclarationoneinlinenest =
   | typehead _? ':' block
 
 functionparameters =
-  | functionparameter (_? ',' _? functionparameter)* _comma?
+  | functionparameter (_comma _? functionparameter)* _comma?
 
 functionparameter =
   | identifier ('.' lhspattern?)? _? ':' _? infixexpression
