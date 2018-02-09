@@ -110,101 +110,106 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 
 ### Project folder structure
 ```
-.
-├── CHANGELOG.md
+.├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── MVP.md
 ├── README.md
 ├── docs
-│   ├── README.md
-│   ├── compiler
-│   │   ├── README.md
-│   │   ├── asts.md
-│   │   └── compiler-notes.ast
-│   └── language
-│       ├── README.md
-│       ├── development.ast
-│       ├── feature-proposals.md
-│       └── summary.ast
+│   ├── README.md
+│   ├── compiler
+│   │   ├── README.md
+│   │   ├── asts.md
+│   │   └── compiler-notes.ast
+│   └── language
+│       ├── README.md
+│       ├── development.ast
+│       ├── feature-proposals.md
+│       └── summary.ast
 ├── media
-│   └── images
-│       └── astro-syntax.png
+│   └── images
+│       └── astro-syntax.png
 ├── package-lock.json
 ├── package.json
 ├── samples
-│   ├── README.md
-│   ├── fibonacci
-│   │   └── fibonacci.ast
-│   ├── fizzbuzz
-│   │   └── fizzbuzz.ast
-│   ├── hello-world
-│   │   └── hello-world.ast
-│   ├── miscellaneous
-│   │   └── preview.ast
-│   ├── normalize
-│   │   └── normalize.ast
-│   ├── product
-│   │   └── product.ast
-│   ├── sum
-│   │   └── sum.ast
-│   ├── vectorized
-│   │   └── vectorized.ast
-│   └── wordcount
-│       └── wordcount.ast
+│   ├── README.md
+│   ├── fibonacci
+│   │   └── fibonacci.ast
+│   ├── fizzbuzz
+│   │   └── fizzbuzz.ast
+│   ├── hello-world
+│   │   └── hello-world.ast
+│   ├── miscellaneous
+│   │   └── preview.ast
+│   ├── normalize
+│   │   └── normalize.ast
+│   ├── product
+│   │   └── product.ast
+│   ├── rosetta
+│   │   ├── 100-doors.ast
+│   │   ├── 15-puzzle-game.ast
+│   │   ├── 99-bottles.ast
+│   │           •
+│   │           •
+│   │           •
+│   │   ├── string-comparison.ast
+│   │   ├── sum-of-squares.ast
+│   │   └── tokenize-a-string.ast
+│   ├── sum
+│   │   └── sum.ast
+│   ├── vectorized
+│   │   └── vectorized.ast
+│   └── wordcount
+│       └── wordcount.ast
 ├── src
-│   ├── compiler
-│   │   ├── README.md
-│   │   ├── codegen
-│   │   │   ├── ast2llvm.js
-│   │   │   └── ast2wast.js
-│   │   ├── semantics
-│   │   │   └── scope.js
-│   │   ├── syntax
-│   │   │   ├── asts.js
-│   │   │   ├── grammar.pegjs
-│   │   │   ├── parser-builder.ast
-│   │   │   ├── parser-builder.js
-│   │   │   ├── parser.js
-│   │   │   ├── parser2.js
-│   │   │   ├── parser3.js
-│   │   │   └── text
-│   │   └── utils
-│   │       └── index.js
-│   ├── stdlib
-│   │   └── README.md
-│   └── support
-│       ├── README.md
-│       └── editors
-│           ├── atom
-│           │   ├── README.md
-│           │   ├── grammars
-│           │   │   └── astro.cson
-│           │   ├── package.json
-│           │   └── snippets
-│           │       └── snippets.cson
-│           ├── sublime-text
-│           │   └── astro.sublime-syntax
-│           └── vscode
-│               ├── CHANGELOG.md
-│               ├── README.md
-│               ├── language-configuration.json
-│               ├── package.json
-│               ├── syntaxes
-│               │   └── astro.tmLanguage.json
-│               ├── tsconfig.json
-│               └── vsc-extension-quickstart.md
+│   ├── compiler
+│   │   ├── README.md
+│   │   ├── codegen
+│   │   │   ├── ast2llvm.js
+│   │   │   └── ast2wast.js
+│   │   ├── semantics
+│   │   │   └── scope.js
+│   │   ├── syntax
+│   │   │   ├── grammar-and-ast.peg
+│   │   │   ├── parser.js
+│   │   │   └── test.js
+│   │   ├── test.ast
+│   │   └── utils
+│   │       └── index.js
+│   ├── stdlib
+│   │   └── README.md
+│   └── support
+│       ├── README.md
+│       └── editors
+│           ├── atom
+│           │   ├── README.md
+│           │   ├── grammars
+│           │   │   └── astro.cson
+│           │   ├── package.json
+│           │   └── snippets
+│           │       └── snippets.cson
+│           ├── sublime-text
+│           │   └── astro.sublime-syntax
+│           └── vscode
+│               ├── CHANGELOG.md
+│               ├── README.md
+│               ├── language-configuration.json
+│               ├── package.json
+│               ├── syntaxes
+│               │   └── astro.tmLanguage.json
+│               ├── tsconfig.json
+│               └── vsc-extension-quickstart.md
 └── tests
     ├── README.md
     ├── compiler
-    │   ├── codegen
-    │   ├── semantics
-    │   ├── syntax
-    │   │   ├── declarations.spec.js
-    │   │   └── misc.spec.js
-    │   └── utils
-    │       └── utils.spec.js
+    │   ├── codegen
+    │   ├── semantics
+    │   ├── syntax
+    │   │   ├── declarations.spec.js
+    │   │   └── misc.spec.js
+    │   └── utils
+    │       └── utils.spec.js
     └── samples
-        └── fibonacci.spec.js
+        └── fibonacci.spec.js
 ```
