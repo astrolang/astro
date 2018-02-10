@@ -218,47 +218,47 @@ regexliteral =
 _comma =
   | _? ','
 
-listargs =
+listarguments =
   | listliteral (_comma? _? listliteral)+ _comma?
   | infixexpression (_comma _? infixexpression)* _comma?
 
 listliteral =
   | '[' _? ']' // ignorenewline
-  | '[' spaces? listarg (_? ';' _? listarg)* (_? ';')? _? ']' // ignorenewline
-  | '[' nextcodeline indent listarg (_? ';' _? listarg)* (_? ';')? nextcodeline dedent ']'
+  | '[' spaces? listarguments (_? ';' _? listarguments)* (_? ';')? _? ']' // ignorenewline
+  | '[' nextcodeline indent listarguments (_? ';' _? listarguments)* (_? ';')? nextcodeline dedent ']'
   { type, expressions }
 
 dictblock =
   | nextcodeline indent infixexpression _? ':' _? dictargs _comma? nextcodeline dedent
   { type, expressions }
 
-dictargs =
+dictarguments =
   | infixexpression _? ':' _? (dictblock | dictliteral) (_comma? _? infixexpression _? ':' _? (dictblock | dictliteral))* _comma?
   | infixexpression _? ':' _? infixexpression (_comma? _? infixexpression _? ':' _? infixexpression)* _comma?
 
 dictliteral =
   | '{' _? '}' // ignorenewline
-  | '{' spaces? dictargs _? '}' // ignorenewline
-  | '{' nextcodeline indent dictargs nextcodeline dedent '}'
+  | '{' spaces? dictarguments _? '}' // ignorenewline
+  | '{' nextcodeline indent dictarguments nextcodeline dedent '}'
   { type, expressions }
 
-tupleargs =
+tuplearguments =
   | infixexpression _comma
   | infixexpression (_comma _? infixexpression)+ _comma?
 
 tupleliteral =
   | '(' _? ')' // ignorenewline
-  | '(' spaces? tupleargs _? ')' // ignorenewline
-  | '(' nextcodeline indent infixexpression (nextcodeline samedent infixexpression) _comma? nextcodeline dedent ')'
+  | '(' spaces? tuplearguments _? ')' // ignorenewline
+  | '(' nextcodeline indent tuplearguments nextcodeline dedent ')'
   { type, expressions }
 
-namedtupleargs =
+namedtuplearguments =
   | identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma?
 
 namedtupleliteral =
   | '(' _? ':' _?  ')' // ignorenewline
-  | '(' spaces? namedtupleargs _? ')' // ignorenewline
-  | '(' nextcodeline indent namedtupleargs nextcodeline dedent ')'
+  | '(' spaces? namedtuplearguments _? ')' // ignorenewline
+  | '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
   { type, expressions }
 
 symbolliteral = // TODO: charsnonewlineor
@@ -281,9 +281,12 @@ literal =
 commandnotationpostfix =
   | _ &(symbolliteral | numericliteral | identifier | range) infixexpression
 
+callarguments =
+  | (identifier _? ':' _?)? infixexpression (_comma _? (identifier _? ':' _?)? infixexpression)* _comma?
+
 callpostfix =
-  | '(' (_? identifier _? ':')? _? infixexpression (_comma (_? identifier _? ':')? _? infixexpression)* _comma? _? ')' // ignorenewline
-  | '(' nextcodeline indent (identifier _? ':' _?)? infixexpression (nextcodeline samedent (identifier _? ':' _?)? infixexpression) _comma? nextcodeline dedent ')'
+  | '(' spaces? callarguments _? ')' // ignorenewline
+  | '(' nextcodeline indent callarguments nextcodeline dedent ')'
 
 dotnotationpostfix =
   | [!?] _? '.' identifier
