@@ -227,30 +227,34 @@ listliteral =
   { type, expressions }
 
 dictblock =
-  | nextcodeline indent infixexpression _? ':' _? (infixexpression | dictblock) _comma? nextcodeline dedent
-  | '{'
-
+    | nextcodeline indent infixexpression _? ':' _? (dictblock | infixexpression) (_comma _? infixexpression _? ':' _? (dictblock | infixexpression))*  _comma? nextcodeline dedent
+    { type, expressions }
 dictliteral =
   | '{' _? '}' // ignorenewline
-  | '{' nextcodeline indent infixexpression _? ':' _? dictblock (_comma? nextcodeline samedent infixexpression _? ':' _? dictblock)* nextcodeline dedent '}'
+  | '{' spaces? infixexpression _? ':' _? dictliteral (_comma? nextcodeline samedent infixexpression _? ':' _? dictliteral)* _)comma? _? '}'  // ignorenewline
+  | '{' nextcodeline indent infixexpression _? ':' _? (dictliteral | dictblock) (_comma? nextcodeline samedent infixexpression _? ':' _? (dictliteral | dictblock))* nextcodeline dedent '}'
   | '{' spaces? infixexpression _? ':' _? infixexpression (_comma _? infixexpression _? ':' _? infixexpression)*  _comma? _? '}' // ignorenewline
   | '{' nextcodeline indent infixexpression _? ':' _? infixexpression (_comma _? infixexpression _? ':' _? infixexpression)*  _comma? nextcodeline dedent '}'
+  { type, expressions }
 
 tupleliteral =
   | '(' _? ')' // ignorenewline
   | '(' _? infixexpression _comma _? ')' // ignorenewline
   | '(' _? infixexpression (_comma _? infixexpression)+ _comma? ')' // ignorenewline
   | '(' nextcodeline indent infixexpression (nextcodeline samedent infixexpression) _comma? nextcodeline dedent ')'
+  { type, expressions }
 
 namedtupleliteral =
   | '(' _? ':' _?  ')' // ignorenewline
   | '(' _? identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma? ')' // ignorenewline
   | '(' nextcodeline indent identifier _? ':' _? infixexpression (nextcodeline samedent identifier _? ':' _? infixexpression) _comma? nextcodeline dedent ')'
+  { type, expressions }
 
-symbolliteral =
+symbolliteral = // TODO: charsnonewlineor
   | '$' identifier
-  | '$' '(' _? openexpression _? ')' // ignorenewline
+  | '$' '(' _? expression _? ')' // ignorenewline
   | '$' '(' block ')'
+  { type, expressions }
 
 literal =
   | booleanliteral
@@ -447,7 +451,7 @@ expressiononeinlinenest =
   | subexpressiononeinlinenest (_? ';' _? expressiononeinlinenest)* (_? ';')?
 
 block =
-  | nextcodeline indent openexpression (nextcodeline samedent openexpression)* dedentoreoiend
+  | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
 
 lhspattern =
   | '(' _? lhsname (_comma _? lhsname)* _comma? _? ')' // ignorenewline
