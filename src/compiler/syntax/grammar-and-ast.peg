@@ -285,6 +285,7 @@ callarguments =
   | (identifier _? ':' _?)? infixexpression (_comma _? (identifier _? ':' _?)? infixexpression)* _comma?
 
 callpostfix =
+  | '(' _? ')' // ignorenewline
   | '(' spaces? callarguments _? ')' // ignorenewline
   | '(' nextcodeline indent callarguments nextcodeline dedent ')'
 
