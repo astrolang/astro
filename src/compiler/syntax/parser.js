@@ -3408,6 +3408,30 @@ class Parser {
     return parseData;
   }
 
+  // infixexpression =
+  //   | range
+  //   | prefixatom operator infixexpressionrest+
+  //   | atom operator infixexpressionrest+
+  //   | prepostfixatom _ operator _ infixexpressionrest+
+  parseInfixExpression() { // TODO: incorrect implementation
+    const type = 'infixexpression';
+
+    if (this.parseNumericLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseListLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseIdentifier().success) {
+      return this.lastParseData;
+    } else if (this.parseStringLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseRegexLiteral().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
   // names =
   //   | identifier (_? ',' _? identifier)*
   parseNames() {
