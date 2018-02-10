@@ -218,36 +218,47 @@ regexliteral =
 _comma =
   | _? ','
 
+listargs =
+  | listliteral (_comma? _? listliteral)+ _comma?
+  | infixexpression (_comma _? infixexpression)* _comma?
+
 listliteral =
   | '[' _? ']' // ignorenewline
-  | '[' spaces? listliteral (_comma? _? listliteral)+ _comma? _? ']' // ignorenewline
-  | '[' nextcodeline indent listliteral _comma? (nextcodeline samedent listliteral _comma?)+ _comma? nextcodeline dedent ']'
-  | '[' spaces? infixexpression (_comma _? infixexpression)* (_? ';' _? infixexpression (_comma _? infixexpression)*)* _comma? _? ']' // ignorenewline
-  | '[' nextcodeline indent infixexpression (_comma _? infixexpression)* (_? ';' infixexpression (_comma _? infixexpression)*)* _comma? nextcodeline dedent ']'
+  | '[' spaces? listarg (_? ';' _? listarg)* (_? ';')? _? ']' // ignorenewline
+  | '[' nextcodeline indent listarg (_? ';' _? listarg)* (_? ';')? nextcodeline dedent ']'
   { type, expressions }
 
 dictblock =
-    | nextcodeline indent infixexpression _? ':' _? (dictblock | infixexpression) (_comma _? infixexpression _? ':' _? (dictblock | infixexpression))*  _comma? nextcodeline dedent
-    { type, expressions }
+  | nextcodeline indent infixexpression _? ':' _? dictargs _comma? nextcodeline dedent
+  { type, expressions }
+
+dictargs =
+  | infixexpression _? ':' _? (dictblock | dictliteral) (_comma? _? infixexpression _? ':' _? (dictblock | dictliteral))* _comma?
+  | infixexpression _? ':' _? infixexpression (_comma? _? infixexpression _? ':' _? infixexpression)* _comma?
+
 dictliteral =
   | '{' _? '}' // ignorenewline
-  | '{' spaces? infixexpression _? ':' _? dictliteral (_comma? nextcodeline samedent infixexpression _? ':' _? dictliteral)* _)comma? _? '}'  // ignorenewline
-  | '{' nextcodeline indent infixexpression _? ':' _? (dictliteral | dictblock) (_comma? nextcodeline samedent infixexpression _? ':' _? (dictliteral | dictblock))* nextcodeline dedent '}'
-  | '{' spaces? infixexpression _? ':' _? infixexpression (_comma _? infixexpression _? ':' _? infixexpression)*  _comma? _? '}' // ignorenewline
-  | '{' nextcodeline indent infixexpression _? ':' _? infixexpression (_comma _? infixexpression _? ':' _? infixexpression)*  _comma? nextcodeline dedent '}'
+  | '{' spaces? dictargs _? '}' // ignorenewline
+  | '{' nextcodeline indent dictargs nextcodeline dedent '}'
   { type, expressions }
+
+tupleargs =
+  | infixexpression _comma
+  | infixexpression (_comma _? infixexpression)+ _comma?
 
 tupleliteral =
   | '(' _? ')' // ignorenewline
-  | '(' _? infixexpression _comma _? ')' // ignorenewline
-  | '(' _? infixexpression (_comma _? infixexpression)+ _comma? ')' // ignorenewline
+  | '(' spaces? tupleargs _? ')' // ignorenewline
   | '(' nextcodeline indent infixexpression (nextcodeline samedent infixexpression) _comma? nextcodeline dedent ')'
   { type, expressions }
 
+namedtupleargs =
+  | identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma?
+
 namedtupleliteral =
   | '(' _? ':' _?  ')' // ignorenewline
-  | '(' _? identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma? ')' // ignorenewline
-  | '(' nextcodeline indent identifier _? ':' _? infixexpression (nextcodeline samedent identifier _? ':' _? infixexpression) _comma? nextcodeline dedent ')'
+  | '(' spaces? namedtupleargs _? ')' // ignorenewline
+  | '(' nextcodeline indent namedtupleargs nextcodeline dedent ')'
   { type, expressions }
 
 symbolliteral = // TODO: charsnonewlineor
