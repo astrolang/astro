@@ -221,6 +221,7 @@ _comma =
 listarguments =
   | listliteral (_comma? _? listliteral)+ _comma?
   | infixexpression (_comma _? infixexpression)* _comma?
+  { expressions }
 
 listliteral =
   | '[' _? ']' // ignorenewline
@@ -232,15 +233,21 @@ dictblock =
   | nextcodeline indent infixexpression _? ':' _? dictargs _comma? nextcodeline dedent
   { type, expressions }
 
+dictargument =
+  | infixexpression _? ':' _? infixexpression
+  | identifier
+  { key, value }
+
 dictarguments =
   | infixexpression _? ':' _? (dictblock | dictliteral) (_comma? _? infixexpression _? ':' _? (dictblock | dictliteral))* _comma?
-  | infixexpression _? ':' _? infixexpression (_comma? _? infixexpression _? ':' _? infixexpression)* _comma?
+  | dictargument (_comma? _? dictargument)* _comma?
+  { expressions: [{ key, value }] }
 
 dictliteral =
   | '{' _? '}' // ignorenewline
   | '{' spaces? dictarguments _? '}' // ignorenewline
   | '{' nextcodeline indent dictarguments nextcodeline dedent '}'
-  { type, expressions }
+  { type, expressions: [{ key, value }] }
 
 tuplearguments =
   | infixexpression _comma
