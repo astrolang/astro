@@ -196,19 +196,19 @@ _ =
   | &{ignorenewline} nextcodeline samedent
   | space+ // Can eat others cake
 
-singlelinestring =
+singlelinestringliteral =
   | "'" charsnonewlineorsinglequote? "'"
   | '"' charsnonewlineordoublequote? '"'
   { type, token }
 
-multilinestring =
+multilinestringliteral =
   | "'''" charsnonewlineortriplesinglequote? (nextline samedent charsnonewlineortriplesinglequote?)* "'''"
   | '"""' charsnonewlineortripledoublequote? (nextline samedent charsnonewlineortripledoublequote?)* '"""'
   { type, token }
 
 stringliteral =
-  | multilinestring
-  | singlelinestring // Can eat others cake
+  | multilinestringliteral
+  | singlelinestringliteral // Can eat others cake
   { type, token }
 
 regexliteral =
