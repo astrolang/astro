@@ -219,7 +219,7 @@ _comma =
   | _? ','
 
 listarguments =
-  | listliteral (_comma? _? listliteral)+ _comma?
+  | listliteral (_? listliteral)+ _comma?
   | infixexpression (_comma _? infixexpression)* _comma?
   { expressions }
 
