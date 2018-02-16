@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const { print } = require('../utils');
 const Parser = require('./parser');
 
@@ -737,57 +738,57 @@ print(new Parser('  \t \t').parse_());
 print(String.raw`\t    `);
 print(new Parser('\t    ').parse_());
 
-print('========= SINGLELINESTRING =========');
+print('========= SINGLELINESTRINGLITERAL =========');
 
 print(String.raw`">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('"').parseSingleLineString()); // fail
+print(new Parser('"').parseSingleLineStringLiteral()); // fail
 
 print(String.raw`'hello world'`);
-print(new Parser("'hello world'").parseSingleLineString());
+print(new Parser("'hello world'").parseSingleLineStringLiteral());
 
 print(String.raw`"hello world"`);
-print(new Parser('"hello world"').parseSingleLineString());
+print(new Parser('"hello world"').parseSingleLineStringLiteral());
 
 print(String.raw`''`);
-print(new Parser("''").parseSingleLineString());
+print(new Parser("''").parseSingleLineStringLiteral());
 
-print('========= MULTILINESTRING =========');
+print('========= MULTILINESTRINGLITERAL =========');
 
 print(String.raw`'''>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser("'''").parseMultiLineString()); // fail
+print(new Parser("'''").parseMultiLineStringLiteral()); // fail
 
 print(String.raw`"""\n    hello world\n""">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print((() => { // fail
   const parser = new Parser('"""\n    hello world\n"""');
   parser.lastIndentCount = 1; // One indent level.
-  return parser.parseMultiLineString();
+  return parser.parseMultiLineStringLiteral();
 })());
 
 print(String.raw`"""hello\nworld\n    """>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('"""hello\nworld\n    """').parseMultiLineString()); // fail
+print(new Parser('"""hello\nworld\n    """').parseMultiLineStringLiteral()); // fail
 
 print(String.raw`"""\n    hello world\n        """>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print((() => { // fail
   const parser = new Parser('"""\n    hello world\n        """');
   parser.lastIndentCount = 1; // One indent level.
-  return parser.parseMultiLineString();
+  return parser.parseMultiLineStringLiteral();
 })());
 
 print(String.raw`"""\n    hello world\n    """`);
 print((() => {
   const parser = new Parser('"""\n    hello world\n    """');
   parser.lastIndentCount = 1; // One indent level.
-  return parser.parseMultiLineString();
+  return parser.parseMultiLineStringLiteral();
 })());
 
 print(String.raw`'''hello\nworld'''`);
-print(new Parser("'''hello\nworld'''").parseMultiLineString());
+print(new Parser("'''hello\nworld'''").parseMultiLineStringLiteral());
 
 print(String.raw`"""hello\nworld\n"""`);
-print(new Parser('"""hello\nworld\n"""').parseMultiLineString());
+print(new Parser('"""hello\nworld\n"""').parseMultiLineStringLiteral());
 
 print(String.raw`""""""`);
-print(new Parser('""""""').parseMultiLineString());
+print(new Parser('""""""').parseMultiLineStringLiteral());
 
 print('========= STRINGLITERAL =========');
 
@@ -813,7 +814,7 @@ print(new Parser('""').parseStringLiteral());
 print('========= REGEXLITERAL =========');
 
 print(String.raw`/\\d+\n/>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser("/\\d+\n/").parseRegexLiteral()); // fail
+print(new Parser('/\\d+\n/').parseRegexLiteral()); // fail
 
 print(String.raw`/age / name />>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser('/age / name /').parseRegexLiteral()); // mid
@@ -832,53 +833,47 @@ print(new Parser(',').parse_Comma());
 print(String.raw`\t\t  ,`);
 print(new Parser('\t\t  ,').parse_Comma());
 
-print('========= LISTLITERAL =========');
+print('========= LISTARGUMENTS =========');
 
-// print(String.raw`[\n[][\n]]>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('[\n[\n][\n]]').parseListLiteral()); // fail
+print(String.raw`[1, 2],[3, 4]`);
+print(new Parser("[1, 2],[3, 4]").parseListArguments());
 
-// print(String.raw`[[\n  ]]>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('[[\n  ]]').parseListLiteral()); // fail
+print(String.raw`.1, 'string', /\\d+/, 5_000`);
+print(new Parser(".1, 'string', /\\d+/, 5_000").parseListArguments());
 
+print(String.raw`.1,['hi','hello'],'string',/\\d+/,5_000`);
+print(new Parser(".1,['hi','hello'],'string',/\\d+/,5_000").parseListArguments());
 
-// print(String.raw`[\n        [],\n    []\n]>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print((() => {
-//   const parser = new Parser('[\n        [],\n        []\n]'); // fail
-//   parser.lastIndentCount = 1; // One indent level.
-//   return parser.parseListLiteral();
-// })());
+print('========= LISTARGUMENTSMULTIPLE =========');
 
-print(String.raw`[\n        [],\n        []\n    ]`);
-print((() => {
-  const parser = new Parser('[\n        [],\n        []\n    ]');
-  parser.lastIndentCount = 1; // One indent level.
-  return parser.parseListLiteral();
-})());
+print(String.raw`[1, 2] [3, 4]>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('[1, 2] [3, 4]').parseListArgumentsMultiple()); // mid
+
+print(String.raw`[1, 2]\n[3, 4],[5, 6]>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('[1, 2]\n[3, 4],[5, 6]').parseListArgumentsMultiple()); // mid
+
+print(String.raw`[1, 2]\n[3, 4]`);
+print(new Parser('[1, 2]\n[3, 4]').parseListArgumentsMultiple());
+
+print(String.raw`1, 2; 3, 4`);
+print(new Parser('1, 2; 3, 4').parseListArgumentsMultiple());
+
+print(String.raw`.1,['hi','hello'],'string',/\\d+/,5_000`);
+print(new Parser(".1,['hi','hello'],'string',/\\d+/,5_000").parseListArgumentsMultiple());
+
+print('========= LISTLITERAL ========='); // TODO: Incomplete
 
 print(String.raw`[]`);
 print(new Parser('[]').parseListLiteral());
 
-print(String.raw`[ ]`);
-print(new Parser('[ ]').parseListLiteral());
-
 print(String.raw`[  \n]`);
 print(new Parser('[  \n]').parseListLiteral());
 
-print(String.raw`[[][]]`);
-print(new Parser('[[][]]').parseListLiteral());
+print(String.raw`[[1, 2]\n[3, 4]]`);
+print(new Parser('[[1, 2]\n[3, 4]]').parseListLiteral());
 
-print(String.raw`[[],[]]`);
-print(new Parser('[[],[]]').parseListLiteral());
+print(String.raw`[1, 2; 3, 4]`);
+print(new Parser('[1, 2; 3, 4]').parseListLiteral());
 
-print(String.raw`[[\n][\n]]`);
-print(new Parser('[[\n][\n]]').parseListLiteral());
-
-print(String.raw`[[]\n[\n]]`);
-print(new Parser('[[]\n[\n]]').parseListLiteral());
-
-print(String.raw`[\n    [],\n    []\n]`);
-print(new Parser('[\n    [],\n    []\n]').parseListLiteral());
-
-print(String.raw`[\n    [[], []]\n    []\n]`);
-print(new Parser('[\n    [[], []]\n    []\n]').parseListLiteral());
-
+print(String.raw`[.1,['hi','hello'],'string',/\\d+/,5_000]`);
+print(new Parser("[.1,['hi','hello'],'string',/\\d+/,5_000]").parseListLiteral());
