@@ -219,14 +219,19 @@ _comma =
   | _? ','
 
 listarguments =
-  | listliteral (_? listliteral)+ _comma?
   | infixexpression (_comma _? infixexpression)* _comma?
+  { expressions }
+
+listargumentsmultiple =
+  | listliteral (nextcodeline samedent listliteral)+
+  | listarguments (_? ';' _? listarguments)+ (_? ';')?
+  | listarguments (_? ';')?
   { expressions }
 
 listliteral =
   | '[' _? ']' // ignorenewline
-  | '[' spaces? listarguments (_? ';' _? listarguments)* (_? ';')? _? ']' // ignorenewline
-  | '[' nextcodeline indent listarguments (_? ';' _? listarguments)* (_? ';')? nextcodeline dedent ']'
+  | '[' spaces? listargumentsmultiple _? ']' // ignorenewline
+  | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']'
   { type, expressions }
 
 dictblock =
