@@ -852,22 +852,21 @@ FUNCTION DEFINITION (2)
 
 MUTATIVE FUNCTIONS
     # Mutative functions are functions that mutate the arguments passed to them.
-    # Like Python Astro follows a convention where function names are used to determine if a function is mutative.
-    # But unlike Python, imperative tone is used for non-mutative functions, while reported tone is used for mutative functions.
-    fun reverse(iterable):
-        var t = []
-        for i in reverse indices(iterable):
-            t.push iterable[i]
-        return t
-
-    fun reversed(var iterable):
+    # Like Python, Astro follows a convention where function names are used to determine if a function is mutative.
+    fun reverse(var iterable):
         let t = iterable
         let { len } = iterable
         for i in reverse indices(iterable):
             iterable[i] = t[len - (len - i)]
 
-    list.reverse() # non-mutative
-    list.reversed() # mutative
+    fun reversed(iterable):
+        var t = []
+        for i in reverse indices(iterable):
+            t.push iterable[i]
+        return t
+
+    list.reverse() # Mutates list
+    list.reversed() # Does not mutate list
 
 LAMBDAS
     # Functions are first-class objects and can be passed around just like regular objects.
