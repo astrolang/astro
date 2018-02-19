@@ -414,14 +414,14 @@ DICTIONARIES & OBJECTS
 
 SET
     # Set is an unordered collection of items with no duplicate elements.
-    let fruits = set.['orange', 'mango', 'guava', 'apple', 'orange', 'guava', 'pineapple']
-    let citrus = set.['lime', 'lemon', 'orange']
+    let fruits = set.{'orange', 'mango', 'guava', 'apple', 'orange', 'guava', 'pineapple'}
+    let citrus = set.{'lime', 'lemon', 'orange'}
     fruits.len # 4
 
     # Set operations.
-    let union = citrus | fruits # set.['lime', 'lemon', 'orange', 'mango', 'guava', 'apple', 'pineapple']
-    let intersection = citrus & fruits # set.['orange']
-    let difference = citrus - fruits # set.['lime', 'lemon']
+    let union = citrus | fruits # set.{'lime', 'lemon', 'orange', 'mango', 'guava', 'apple', 'pineapple'}
+    let intersection = citrus & fruits # set.{'orange'}
+    let difference = citrus - fruits # set.{'lime', 'lemon'}
 
 RANGE
     # Range is an iterable that allows iterating through a range of values.
@@ -645,16 +645,16 @@ FOR LOOP
 
 COMPREHENSION
     # Comprehensions are syntactic sugar for iterator generators.
-    let list = {i | i in random(0, 200)}
+    let list = gen.[i | i in random(0, 200)]
 
     # Extending a comprehension with `where`.
     let list = [x | x in 1..21 where x mod 2 != 0]
 
     # Set comprehension.
-    let set = set.[i | i in random(0, 200)]
+    let set = set.{i | i in random(0, 200)}
 
     # Nested loops.
-    let dict = {x : y | x in 1..30; y in 31..60 where even(y)}
+    let dict = { x: y | x in 1..30; y in 31..60 where even(y)}
 
 BREAK WITH
     # Break-with breaks a loop and returns a value.
