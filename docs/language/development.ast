@@ -1,4 +1,26 @@
 # Astro 0.1.14a
+# 19/02/18
+# Changing set literal
+let set = set.{1, 2, 3}
+
+# Function argument mutation. Astro follows of Python's philosophy.
+# imperative for non-mutative functions, reported for mutative functions.
+fun reverse(var iterable):
+    let t = iterable
+    let { len } = iterable
+    for i in reverse indices(iterable):
+        iterable[i] = t[len - (len - i)]
+
+fun reversed(iterable):
+    var t = []
+    for i in reverse indices(iterable):
+        t.push iterable[i]
+    return t
+
+list.reverse() # Mutates list
+list.reversed() # Does not mutate list
+
+# Astro 0.1.14a
 # 28/01/18
 # Remove '(' block ')' from subatom rule.
 # I discovered that the wart mentioned below is not really possible. This is possible but not that.
