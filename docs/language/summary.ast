@@ -403,10 +403,10 @@ DICTIONARIES & OBJECTS
         age: 23
     }
 
-    # To use variables from the outer scope as a dictionary key, the variable name needs to be escaped with `$`.
+    # To use variable names from the outer scope as a dictionary key, the name needs to be enclosed in a bracket.
     var professor = {
-        $id1: 'Charles Xavier'
-        $id2: 56
+        (id1): 'Charles Xavier'
+        (id2): 56
     }
 
     # Empty dictionary.
