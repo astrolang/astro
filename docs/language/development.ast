@@ -4,7 +4,6 @@
 # Not using symbols to represent them.
 { (name): 'John' }
 
-
 # Changing set literal
 let set = set.{1, 2, 3}
 
