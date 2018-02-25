@@ -982,3 +982,51 @@ print(new Parser('{\n    /name/ : "john" , 500 : "500",\n}').parseDictLiteral())
 
 print(String.raw`{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}`);
 print(new Parser('{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}').parseDictLiteral());
+
+print('========= TUPLEARGUMENTS =========');
+
+print(String.raw`"Hi">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('"Hi"').parseTupleArguments()); // fail
+
+print(String.raw`"Hi", 1, .2, 0o23e56, /regex/`);
+print(new Parser('"Hi", 1, .2, 0o23e56, /regex/').parseTupleArguments());
+
+print(String.raw`"Hi", 1, .2, 0o23e56, /regex/,`);
+print(new Parser('"Hi", 1, .2, 0o23e56, /regex/,').parseTupleArguments());
+
+print(String.raw`"Hi",`);
+print(new Parser('"Hi",').parseTupleArguments());
+
+print('========= TUPLELITERAL =========');
+
+print(String.raw`(\n        50_230, "Tosin"\n)>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('(\n        50_230, "Tosin"\n)');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseTupleLiteral();
+})());
+
+print(String.raw`("Hi")>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('("Hi")').parseTupleLiteral()); // fail
+
+print(String.raw`(\n        50_230, "Tosin"\n    )`);
+print((() => {
+  const parser = new Parser('(\n        50_230, "Tosin"\n    )');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseTupleLiteral();
+})());
+
+print(String.raw`(\n    (\n        "john", name, 20\n    ), "500", /regex/, \n)`);
+print(new Parser('(\n    (\n        "john", name, 20\n    ), "500", /regex/, \n)').parseTupleLiteral());
+
+print(String.raw`("Hi", 1, .2, 0o23e56, /regex/)`);
+print(new Parser('("Hi", 1, .2, 0o23e56, /regex/)').parseTupleLiteral());
+
+print(String.raw`("Hi", 1, .2, 0o23e56, /regex/,)`);
+print(new Parser('("Hi", 1, .2, 0o23e56, /regex/,)').parseTupleLiteral());
+
+print(String.raw`("Hi",)`);
+print(new Parser('("Hi",)').parseTupleLiteral());
+
+print(String.raw`()`);
+print(new Parser('()').parseTupleLiteral());
