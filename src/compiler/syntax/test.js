@@ -1,4 +1,4 @@
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-underscore-dangle, max-len */
 const { print } = require('../utils');
 const Parser = require('./parser');
 
@@ -836,7 +836,7 @@ print(new Parser('\t\t  ,').parse_Comma());
 print('========= LISTARGUMENTS =========');
 
 print(String.raw`[1, 2],[3, 4]`);
-print(new Parser("[1, 2],[3, 4]").parseListArguments());
+print(new Parser('[1, 2],[3, 4]').parseListArguments());
 
 print(String.raw`.1, 'string', /\\d+/, 5_000`);
 print(new Parser(".1, 'string', /\\d+/, 5_000").parseListArguments());
@@ -866,14 +866,119 @@ print('========= LISTLITERAL ========='); // TODO: Incomplete
 print(String.raw`[]`);
 print(new Parser('[]').parseListLiteral());
 
-print(String.raw`[  \n]`);
-print(new Parser('[  \n]').parseListLiteral());
+print(String.raw`[ 20, /hello/\n,45,"hi"]`);
+print(new Parser('[ 20, /hello/\n,45,"hi"]').parseListLiteral());
 
 print(String.raw`[[1, 2]\n[3, 4]]`);
 print(new Parser('[[1, 2]\n[3, 4]]').parseListLiteral());
 
+print(String.raw`[\n    [1, 2]\n    [3, 4]\n]`);
+print(new Parser('[\n    [1, 2]\n    [3, 4]\n]').parseListLiteral());
+
 print(String.raw`[1, 2; 3, 4]`);
 print(new Parser('[1, 2; 3, 4]').parseListLiteral());
 
-print(String.raw`[.1,['hi','hello'],'string',/\\d+/,5_000]`);
-print(new Parser("[.1,['hi','hello'],'string',/\\d+/,5_000]").parseListLiteral());
+print(String.raw`[.1,['hi','hello'],'string',/\\d+/,5_000,]`);
+print(new Parser("[.1,['hi','hello'],'string',/\\d+/,5_000,]").parseListLiteral());
+
+print('========= DICTARGUMENT =========');
+
+print(String.raw`age: 50,`);
+print(new Parser('age: 50,').parseDictArgument());
+
+// print(String.raw`(age): 30`);
+// print(new Parser('(age): 30').parseDictArgument());
+
+// print(String.raw`2 + 1: 2 + 1`);
+// print(new Parser('2 + 1: 2 + 1').parseDictArgument());
+
+print(String.raw`/name/ : "john"\n•`);
+print(new Parser('/name/ : "john"\n•').parseDictArgument());
+
+print(String.raw`"value": 1_000e24,`);
+print(new Parser('"value": 1_000e24,').parseDictArgument());
+
+print(String.raw`"value": {\n    [.1, 2, 3]: 1_000e24\n}\n•`);
+print(new Parser('"value": {\n    [.1, 2, 3]: 1_000e24\n}\n•').parseDictArgument());
+
+print('========= DICTARGUMENTS =========');
+
+print(String.raw`sage: age, 50, name: "Tosin">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('sage: age, 50, name: "Tosin"').parseDictArguments()); // mid
+
+print(String.raw`age: 50, name:  {\n    /nom/ :"Tosin",  \n}>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid (no eoi lookup)
+print(new Parser('age: 50, name:  {\n    /nom/ :"Tosin",  \n}').parseDictArguments()); // mid
+
+print(String.raw`age: 50, name: { \n    /nom/ :"Tosin",  \n}\nboom : /2ery/, "jaw": 45>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('age: 50, name: { \n    /nom/ :"Tosin",  \n}\nboom : /2ery/, "jaw": 45').parseDictArguments()); // mid
+
+print(String.raw`age: 50, name: "Tosin",`);
+print(new Parser('age: 50, name: "Tosin",').parseDictArguments());
+
+print(String.raw`age: 50,`);
+print(new Parser('age: 50,').parseDictArguments());
+
+print(String.raw`age: 50, name: { /nom/ :"Tosin" }, boom : /2ery/,`);
+print(new Parser('age: 50, name: { /nom/ :"Tosin" }, boom : /2ery/,').parseDictArguments());
+
+print(String.raw`age: 50, name: {\n    /nom/ :"Tosin"\n}, boom : /2ery/, "jaw": 45,`);
+print(new Parser('age: 50, name: {\n    /nom/ :"Tosin"\n}, boom : /2ery/, "jaw": 45,').parseDictArguments());
+
+print(String.raw`age: 50, name:  \n    /nom/ :"Tosin",  \nboom : /2ery/, "jaw": 45,`);
+print(new Parser('age: 50, name:  \n    /nom/ :"Tosin",  \nboom : /2ery/, "jaw": 45,').parseDictArguments());
+
+print(String.raw`age: 50\nname: /nom/\nview: /2ery/,`);
+print(new Parser('age: 50\nname: /nom/\nview: /2ery/,').parseDictArguments());
+
+// print(String.raw`(age): 30, age: 50, name: "Tosin"`);
+// print(new Parser('(age): 30, age: 50, name: "Tosin"').parseDictArguments());
+
+// print(String.raw`2 + 1: 2 + 1, (age): 30, 2_000e56 / 5 + 67 : 45 / 65 - 77`);
+// print(new Parser('2 + 1: 2 + 1, (age): 30, 2_000e56 / 5 + 67 : 45 / 65 - 77').parseDictArguments());
+
+print('========= DICTBLOCK =========');
+
+print(String.raw`\n        age: 50, name: "Tosin"\n•>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('\n        age: 50, name: "Tosin"\n•');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseDictBlock();
+})());
+
+print(String.raw`\n        age: 50, name: "Tosin"\n    •`);
+print((() => {
+  const parser = new Parser('\n        age: 50, name: "Tosin"\n    •');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseDictBlock();
+})());
+
+print(String.raw`\n    /name/ : "john" , 500 : "500"\n`);
+print(new Parser('\n    /name/ : "john" , 500 : "500"\n').parseDictBlock());
+
+print(String.raw`\n    "value": 1_000e24, game, 34: 34, /reg/: sunny\n`);
+print(new Parser('\n    "value": 1_000e24, game, 34: 34, /reg/: sunny\n').parseDictBlock());
+
+print('========= DICTLITERAL =========');
+
+print(String.raw`{\n        age: 50, name: "Tosin"\n}>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('{\n        age: 50, name: "Tosin"\n}');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseDictLiteral();
+})());
+
+print(String.raw`{\n        age: 50, name: "Tosin"\n    }`);
+print((() => {
+  const parser = new Parser('{\n        age: 50, name: "Tosin"\n    }');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseDictLiteral();
+})());
+
+print(String.raw`{\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}`);
+print(new Parser('{\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}').parseDictLiteral());
+
+print(String.raw`{\n    /name/ : "john" , 500 : "500",\n}`);
+print(new Parser('{\n    /name/ : "john" , 500 : "500",\n}').parseDictLiteral());
+
+print(String.raw`{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}`);
+print(new Parser('{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}').parseDictLiteral());
