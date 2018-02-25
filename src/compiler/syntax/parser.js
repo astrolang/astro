@@ -4641,6 +4641,19 @@ class Parser {
     return { success: false, message: { type, parser: this }, ast: null };
   }
 
+  // expression =
+  //   | subexpression (_? ';' _? expression)* (_? ';')?
+  parseExpression() { // TODO: incorrect implementation
+    const type = 'expression';
+
+    if (this.parseInfixExpression().success) {
+      return this.lastParseData;
+    } 
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
   // names =
   //   | identifier (_? ',' _? identifier)*
   parseNames() {
