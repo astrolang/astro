@@ -234,19 +234,19 @@ listliteral =
   | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']'
   { type, expressions }
 
-dictblock =
-  | nextcodeline indent infixexpression _? ':' _? dictargs _comma? nextcodeline dedent
-  { type, expressions }
-
 dictargument =
-  | infixexpression _? ':' _? infixexpression
-  | identifier
+  | infixexpression _? ':' _? dictblock &(infixexpression | '}')
+  | infixexpression _? ':' _? infixexpression &(_comma | nextcodeline _? | _? '}')
+  | identifier &(_comma | nextcodeline _? | _? '}')
   { key, value }
 
 dictarguments =
-  | infixexpression _? ':' _? (dictblock | dictliteral) (_comma? _? infixexpression _? ':' _? (dictblock | dictliteral))* _comma?
-  | dictargument (_comma? _? dictargument)* _comma?
+  | dictargument ((_comma _? | nextcodeline samedent)? dictargument)* _comma?
   { expressions: [{ key, value }] }
+
+dictblock =
+  | nextcodeline indent dictarguments nextcodeline dedent
+  { type, expressions: [{ key, value }] }
 
 dictliteral =
   | '{' _? '}' // ignorenewline
