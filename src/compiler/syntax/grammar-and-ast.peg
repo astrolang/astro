@@ -279,7 +279,7 @@ symbolliteral =
   | '$' identifier
   | '$' '(' _? expression _? ')' // ignorenewline
   | '$' '(' block ')'
-  { type, expressions }
+  { type, expression }
 
 listcomprehension =
   | '[' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? ']' // ignorenewline
