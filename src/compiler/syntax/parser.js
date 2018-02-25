@@ -3,6 +3,10 @@
 const { print } = require('../utils');
 
 /**
+ * MAINTENANCE NOTES
+ * - Code resuse is crucial. There is a lot of duplication in this source file and for good reasons. Clarity and performance.
+ * - You should check `src/boilerplate/parser-boilerplate.js` for reusable code templates.
+ * IMPLEMENTATION NOTES
  * - This compiler uses a recursive descent parser with no lexing phase.
  * - There is no lexing phase because the language is whitespace sensitive.
  * - Each parse function reverts its state when its unable to parse successfully.
@@ -10,7 +14,7 @@ const { print } = require('../utils');
  * - Functions with productions like `(samedent {comment} nextline)*` which have state in the middle
  * need to revert their state if an iteration fails. Productions with state at the end
  * are not affected by this `('_' {digitdecimal})*`.
- * - States to always think about when writing new rules.
+ * - States to always consider when writing new rules.
  *  * `lastIndentCount` and `ignoreNewline` for rules with indentation.
  *  * stateful variables holding values associated with the rule.
  */
@@ -3624,11 +3628,11 @@ class Parser {
 
         // Consume _?.
         this.parse_();
-        
+
         // Consume dictblock.
         if (!this.parseDictBlock().success) return;
         value = this.lastParseData.ast;
-        
+
         // Check &(infixexpression | '}').
         const state2 = { lastPosition: this.lastPosition, column: this.column, line: this.line };
         if (!this.parseInfixExpression().success && !this.parseToken('}').success) return;
@@ -3657,11 +3661,11 @@ class Parser {
 
           // Consume _?.
           this.parse_();
-          
+
           // Consume infixexpression.
           if (!this.parseInfixExpression().success) return;
           value = this.lastParseData.ast;
-          
+
           // Check &(_comma | nextcodeline _? | _? '}').
           const state2 = { lastPosition: this.lastPosition, column: this.column, line: this.line };
           // Alternate parsing.
@@ -3669,16 +3673,16 @@ class Parser {
           // | nextcodeline _?
           // | _? '}'
           let alternativeParseSuccessful2 = false;
-    
+
           // [1]. _comma
           (() => {
             // Consume _comma.
             if (!this.parse_Comma().success) return;
-            
+
             // This alternative was parsed successfully.
             alternativeParseSuccessful2 = true;
           })();
-    
+
           // [2]. nextcodeline _?
           if (!alternativeParseSuccessful2) {
             // Revert state to what it was before alternative parsing started.
@@ -3686,15 +3690,15 @@ class Parser {
             (() => {
               // Consume nextcodeline.
               if (!this.parseNextCodeLine().success) return;
-            
+
               // Consume _?.
               this.parse_();
-            
+
               // This alternative was parsed successfully.
               alternativeParseSuccessful2 = true;
             })();
           }
-    
+
           // [3]. _? '}'
           if (!alternativeParseSuccessful2) {
             // Revert state to what it was before alternative parsing started.
@@ -3702,18 +3706,18 @@ class Parser {
             (() => {
               // Consume _?.
               this.parse_();
-              
+
               // Consume '}'.
               if (!this.parseToken('}').success) return;
-            
+
               // This alternative was parsed successfully.
               alternativeParseSuccessful2 = true;
             })();
           }
-          
+
           // Check if any of the alternatives was parsed successfully
           if (!alternativeParseSuccessful2) return;
-          
+
           // Revert state to what it was before alternative parsing started.
           this.reset(state2.lastPosition, null, null, state2.column, state2.line);
 
@@ -3741,16 +3745,16 @@ class Parser {
           // | nextcodeline _?
           // | _? '}'
           let alternativeParseSuccessful2 = false;
-    
+
           // [1]. _comma
           (() => {
             // Consume _comma.
             if (!this.parse_Comma().success) return;
-            
+
             // This alternative was parsed successfully.
             alternativeParseSuccessful2 = true;
           })();
-    
+
           // [2]. nextcodeline _?
           if (!alternativeParseSuccessful2) {
             // Revert state to what it was before alternative parsing started.
@@ -3758,15 +3762,15 @@ class Parser {
             (() => {
               // Consume nextcodeline.
               if (!this.parseNextCodeLine().success) return;
-            
+
               // Consume _?.
               this.parse_();
-            
+
               // This alternative was parsed successfully.
               alternativeParseSuccessful2 = true;
             })();
           }
-    
+
           // [3]. _? '}'
           if (!alternativeParseSuccessful2) {
             // Revert state to what it was before alternative parsing started.
@@ -3774,18 +3778,18 @@ class Parser {
             (() => {
               // Consume _?.
               this.parse_();
-              
+
               // Consume '}'.
               if (!this.parseToken('}').success) return;
-            
+
               // This alternative was parsed successfully.
               alternativeParseSuccessful2 = true;
             })();
           }
-          
+
           // Check if any of the alternatives was parsed successfully
           if (!alternativeParseSuccessful2) return;
-          
+
           // Revert state to what it was before alternative parsing started.
           this.reset(state2.lastPosition, null, null, state2.column, state2.line);
 
@@ -3813,7 +3817,7 @@ class Parser {
 
     return parseData;
   }
-  
+
   // dictarguments =
   //   | dictargument ((_comma _? | nextcodeline samedent)? dictargument)* _comma?
   //   { expressions: [{ key, value }] }
@@ -3888,7 +3892,7 @@ class Parser {
           if (!optionalParseSuccessful3) {
             this.reset(state5.lastPosition, null, null, state5.column, state5.line);
           }
-          
+
           // Consume dictargument.
           if (!this.parseDictArgument().success) return;
           expressions.push(this.lastParseData.ast);
@@ -3903,10 +3907,10 @@ class Parser {
           break;
         }
       }
-      
+
       // Check _comma.
       this.parse_Comma();
-      
+
       // Update parseData.
       parseData = { success: true, message: null, ast: { expressions } };
 
