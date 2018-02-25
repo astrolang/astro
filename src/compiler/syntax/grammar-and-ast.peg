@@ -267,18 +267,30 @@ tupleliteral =
 
 namedtuplearguments =
   | identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma?
+  { expressions: [{ key, value }] }
 
 namedtupleliteral =
   | '(' _? ':' _?  ')' // ignorenewline
   | '(' spaces? namedtuplearguments _? ')' // ignorenewline
   | '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
-  { type, expressions }
+  { type, expressions: [{ key, value }] }
 
-symbolliteral = // TODO: charsnonewlineor
+symbolliteral =
   | '$' identifier
   | '$' '(' _? expression _? ')' // ignorenewline
   | '$' '(' block ')'
   { type, expressions }
+
+listcomprehension =
+  | '[' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? ']' // ignorenewline
+
+dictcomprehension =
+  | '{' _? infixexpression _? ':' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
+
+comprehension =
+  | generatorcomprehension
+  | listcomprehension
+  | dictcomprehension
 
 literal =
   | booleanliteral
@@ -290,6 +302,7 @@ literal =
   | tupleliteral
   | namedtupleliteral
   | symbolliteral
+  | comprehension
 
 commandnotationpostfix =
   | _ &(symbolliteral | numericliteral | identifier | range) infixexpression
@@ -339,20 +352,6 @@ range =
 ternaryoperator =
   | '(' _? infixexpression _? ')' '?' infixexpression ':' infixexpression  // ignorenewline
   | '(' _? infixexpression _? ')' _ '?' _ infixexpression _ ':' _ infixexpression  // ignorenewline
-
-generatorcomprehension =
-  | '{' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
-
-listcomprehension =
-  | '[' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? ']' // ignorenewline
-
-dictcomprehension =
-  | '{' _? infixexpression _? ':' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
-
-comprehension =
-  | generatorcomprehension
-  | listcomprehension
-  | dictcomprehension
 
 return =
   | 'return' nameseparator expressionnocontrolptimitive
