@@ -255,8 +255,9 @@ dictliteral =
   { type, expressions: [{ key, value }] }
 
 tuplearguments =
-  | infixexpression _comma
   | infixexpression (_comma _? infixexpression)+ _comma?
+  | infixexpression _comma
+  { expressions }
 
 tupleliteral =
   | '(' _? ')' // ignorenewline
