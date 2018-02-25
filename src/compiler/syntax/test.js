@@ -1030,3 +1030,56 @@ print(new Parser('("Hi",)').parseTupleLiteral());
 
 print(String.raw`()`);
 print(new Parser('()').parseTupleLiteral());
+
+print('========= NAMEDTUPLEARGUMENTS =========');
+
+print(String.raw`"greet": "Hi">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('"greet": "Hi"').parseNamedTupleArguments()); // fail
+
+print(String.raw`greet:"Hi",index:1,cost:.2,total:0o23e56,pattern:/regex/,`);
+print(new Parser('greet:"Hi",index:1,cost:.2,total:0o23e56,pattern:/regex/,').parseNamedTupleArguments());
+
+print(String.raw`greet:"Hi",index:1,cost:.2,total:0o23e56,pattern:/regex/,`);
+print(new Parser('greet:"Hi",index:1,cost:.2,total:0o23e56,pattern:/regex/,').parseNamedTupleArguments());
+
+print(String.raw`greet: "Hi",`);
+print(new Parser('greet: "Hi",').parseNamedTupleArguments());
+
+print(String.raw`greet :"Hi"`);
+print(new Parser('greet :"Hi"').parseNamedTupleArguments());
+
+print('========= NAMEDTUPLELITERAL =========');
+
+print(String.raw`(\n        price: 50_230, name: "Tosin"\n)>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('(\n        price: 50_230, name: "Tosin"\n)');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseNamedTupleLiteral();
+})());
+
+print(String.raw`()>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('()').parseNamedTupleLiteral()); // fail
+
+print(String.raw`(\n        price: 50_230, name: "Tosin"\n    )`);
+print((() => {
+  const parser = new Parser('(\n        price: 50_230, name: "Tosin"\n    )');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseNamedTupleLiteral();
+})());
+
+print(String.raw`(\n    tup: (\n        name: "john", age :20\n    ), label:"500", pattern  :/regex/, \n)`);
+print(new Parser('(\n    tup: (\n        name: "john", age :20\n    ), label:"500", pattern  :/regex/, \n)').parseNamedTupleLiteral());
+
+print(String.raw`(greet:"Hi",index:1,cost:.2,total:0o23e56,pattern:/regex/,)`);
+print(new Parser('(greet:"Hi",index:1,cost:.2,total:0o23e56,pattern:/regex/,)').parseNamedTupleLiteral());
+
+print(String.raw`(greet:"Hi",index:1,cost:.2,\ntotal:0o23e56,pattern:/regex/,)`);
+print(new Parser('(greet:"Hi",index:1,cost:.2,\ntotal:0o23e56,pattern:/regex/,)').parseNamedTupleLiteral());
+
+print(String.raw`(greet: "Hi",)`);
+print(new Parser('(greet: "Hi",)').parseNamedTupleLiteral());
+
+print(String.raw`(:)`);
+print(new Parser('(:)').parseNamedTupleLiteral());
+
+
