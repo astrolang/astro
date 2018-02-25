@@ -4121,7 +4121,6 @@ class Parser {
     return parseData;
   }
 
-
   // tuplearguments =
   //   | infixexpression (_comma _? infixexpression)+ _comma?
   //   | infixexpression _comma
@@ -4370,6 +4369,248 @@ class Parser {
     return parseData;
   }
 
+  // namedtuplearguments =
+  //   | identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma?
+  //   { expressions: [{ key, value }] }
+  parseNamedTupleArguments() {
+    // Keep original state.
+    const {
+      lastPosition, column, line, ignoreNewline,
+    } = this;
+
+    const type = 'namedtuplearguments';
+    let expressions = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      let key = null;
+      let value = null;
+
+      // Consume identifier.
+      if (!this.parseIdentifier().success) return;
+      key = this.lastParseData.ast.name;
+
+      // Consume _?.
+      this.parse_();
+
+      // Consume ':'.
+      if (!this.parseToken(':').success) return;
+
+      // Consume _?.
+      this.parse_();
+
+      // Consume infixexpression.
+      if (!this.parseInfixExpression().success) return;
+      value = this.lastParseData.ast;
+
+      expressions.push({ key, value });
+
+      // Optional-multiple parsing. (_comma _? identifier _? ':' _? infixexpression)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume comma.
+          if (!this.parse_Comma().success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          key = this.lastParseData.ast.name;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          value = this.lastParseData.ast;
+
+          expressions.push({ key, value });
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, null, state.column, state.line);
+          break;
+        }
+      }
+
+      // Consume _comma?.
+      this.parse_Comma();
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expressions } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // namedtupleliteral =
+  //   | '(' _? ':' _?  ')' // ignorenewline
+  //   | '(' spaces? namedtuplearguments _? ')' // ignorenewline
+  //   | '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
+  //   { type, expressions: [{ key, value }] }
+  parseNamedTupleLiteral() {
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'namedtupleliteral';
+    let expressions = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | '(' _? ':' _?  ')'  // ignorenewline
+      // | '(' spaces? namedtuplearguments _? ')' // ignorenewline
+      // | '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = {
+        lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
+      };
+      const otherState = { expressions: [...expressions] };
+
+      // [1]. '(' _? ':' _?  ')'  // ignorenewline
+      (() => {
+        // Consume '('.
+        if (!this.parseToken('(').success) return;
+
+        // Ignore newline from this point
+        this.ignoreNewline = true;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ')'.
+        if (!this.parseToken(')').success) return;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. '(' spaces? namedtuplearguments _? ')' // ignorenewline
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ expressions } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '('.
+          if (!this.parseToken('(').success) return;
+
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Ignore newline from this point
+          this.ignoreNewline = true;
+
+          // Consume namedtuplearguments.
+          if (!this.parseNamedTupleArguments().success) return;
+          ({ expressions } = this.lastParseData.ast);
+
+          // Consume _?
+          this.parse_();
+
+          // Consume ')'.
+          if (!this.parseToken(')').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ expressions } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '('.
+          if (!this.parseToken('(').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume namedtuplearguments.
+          if (!this.parseNamedTupleArguments().success) return;
+          ({ expressions } = this.lastParseData.ast);
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume ')'.
+          if (!this.parseToken(')').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expressions } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
+
+    return parseData;
+  }
+
   // infixexpression =
   //   | range
   //   | prefixatom operator infixexpressionrest+
@@ -4391,6 +4632,8 @@ class Parser {
     } else if (this.parseDictLiteral().success) {
       return this.lastParseData;
     } else if (this.parseTupleLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseNamedTupleLiteral().success) {
       return this.lastParseData;
     }
 
