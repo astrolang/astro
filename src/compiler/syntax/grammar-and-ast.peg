@@ -279,13 +279,15 @@ symbolliteral =
   | '$' identifier
   | '$' '(' _? expression _? ')' // ignorenewline
   | '$' '(' block ')'
-  { type, expression }
+  { type, expressions }
 
 listcomprehension =
   | '[' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? ']' // ignorenewline
+  { type, expression, iterators:[{ lhs, rhs}], guard }
 
 dictcomprehension =
-  | '{' _? infixexpression _? ':' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
+  | '{' _? (infixexpression _? ':' _? infixexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
+  { type, key, value, iterators:[{ lhs, rhs}], guard }
 
 comprehension =
   | generatorcomprehension
