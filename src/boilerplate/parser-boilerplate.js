@@ -8,6 +8,9 @@ this.parse_Comma();
 if (!this.parseInfixExpression().success) return null;
 expression.push(this.lastParseData.ast);
 
+// Consume (subdictliteral | infixexpression).
+if (!this.parseSubDictLiteral().success || !this.parseInfixExpression().success) return;
+value = this.lastParseData.ast;
 //------------------------------------
 
 // nextline =
@@ -186,7 +189,6 @@ const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.
 if (!optionalParseSuccessful) {
   this.reset(state2.lastPosition, null, null, state2.column, state2.line);
 }
-
 
 //------------------------------------
 
