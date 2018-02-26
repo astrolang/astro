@@ -393,7 +393,7 @@ DICTIONARIES & OBJECTS
     let sister = siblings.sister.name
 
     # Dictionary values are accessed using `{}` and can return nil.
-    let mum = parent{'mum', 'name'}
+    let mum = parent['mum', 'name']
 
     # Dictionary values can also be accessed using the dot operator, but since dictionaries can return nil, the nil operator is needed.
     let mum = parent.mum?.name
