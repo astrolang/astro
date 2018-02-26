@@ -234,9 +234,25 @@ listliteral =
   | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']'
   { type, expressions }
 
+objectargument =
+  | identifier _? ':' _? objectblock &(infixexpression | '}')
+  | identifier _? ':' _? infixexpression &(_comma | nextcodeline _? | _? '}')
+  | identifier &(_comma | nextcodeline _? | _? '}')
+  { key, value }
+
+objectblock =
+  | nextcodeline indent objectarguments nextcodeline dedent
+  { type, expressions: [{ key, value }] }
+
+objectliteral =
+  | '{' _? '}' // ignorenewline
+  | '{' spaces? objectarguments _? '}' // ignorenewline
+  | '{' nextcodeline indent objectarguments nextcodeline dedent '}'
+  { type, expressions: [{ key, value }] }
+
 dictargument =
-  | infixexpression _? ':' _? dictblock &(infixexpression | '}')
-  | infixexpression _? ':' _? infixexpression &(_comma | nextcodeline _? | _? '}')
+  | infixexpression _? ':' _? objectblock &(infixexpression | '}')
+  | infixexpression _? ':' _? (subdictliteral | infixexpression) &(_comma | nextcodeline _? | _? '}')
   | identifier &(_comma | nextcodeline _? | _? '}')
   { key, value }
 
@@ -244,14 +260,10 @@ dictarguments =
   | dictargument ((_comma _? | nextcodeline samedent)? dictargument)* _comma?
   { expressions: [{ key, value }] }
 
-dictblock =
-  | nextcodeline indent dictarguments nextcodeline dedent
-  { type, expressions: [{ key, value }] }
-
 dictliteral =
-  | '{' _? '}' // ignorenewline
-  | '{' spaces? dictarguments _? '}' // ignorenewline
-  | '{' nextcodeline indent dictarguments nextcodeline dedent '}'
+  | '@' spaces? '{' _? '}' // ignorenewline
+  | '@' spaces? '{' spaces? dictarguments _? '}' // ignorenewline
+  | '@' spaces? '{' nextcodeline indent dictarguments nextcodeline dedent '}'
   { type, expressions: [{ key, value }] }
 
 tuplearguments =
@@ -299,6 +311,7 @@ literal =
   | stringliteral
   | regexliteral
   | listliteral
+  | objectliteral
   | dictliteral
   | tupleliteral
   | namedtupleliteral
