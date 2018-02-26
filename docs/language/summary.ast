@@ -362,11 +362,12 @@ DICTIONARIES & OBJECTS
     # Dictonaries are dynamic data structures and will return nil where expected key is not present
     let game = { title: 'BioShock Infinite', year: 2014 } # Dictionary.
 
-    # Objects are static construct and can be introspected at compile-time. Object literals are marked with `obj`.
+    # Objects are static construct and can be introspected at compile-time. Object literals are marked with `obj` or `@`.
     let game = obj.{ title: 'BioShock Infinite', year: 2014 } # Object
+    let game = @{ title: 'BioShock Infinite', year: 2014 }
 
     # Object keys must be valid identifiers.
-    let parents = obj.{
+    let parents = @{
         dad: {
             name: 'Sunday Williams'
             age: 46
@@ -382,7 +383,7 @@ DICTIONARIES & OBJECTS
     }
 
     # Nested dictionaries/objects can be simplified with indentation.
-    let siblings = {
+    let siblings = @{
         sister:
             name: 'Shade Williams'
             age: 15
