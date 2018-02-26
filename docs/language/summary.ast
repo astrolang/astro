@@ -359,14 +359,15 @@ ARRAYS
 DICTIONARIES & OBJECTS
     # Objects and dictionaries are both associative data structures.
 
-    # Dictonaries are dynamic data structures and will return nil where expected key is not present
-    let game = { title: 'BioShock Infinite', year: 2014 } # Dictionary.
+    # Objects are static construct and can be introspected at compile-time.
+    let game = { title: 'BioShock Infinite', year: 2014 }
 
-    # Objects are static construct and can be introspected at compile-time. Object literals are marked `@`.
-    let game = @{ title: 'BioShock Infinite', year: 2014 }
+    # Dictonaries are dynamic data structures and will return nil where expected key is not present
+    # Dictonary literals are marked `@`.
+    let game = @{ title: 'BioShock Infinite', year: 2014 } # Dictionary.
 
     # Object keys must be valid identifiers.
-    let parents = @{
+    let parents = {
         dad: {
             name: 'Sunday Williams'
             age: 46
@@ -374,7 +375,7 @@ DICTIONARIES & OBJECTS
     }
 
     # Dictionary keys can be any valid expression.
-    let parents = {
+    let parents = @{
         'mum': {
             'name': 'Esther Williams'
             'age': 42
@@ -382,7 +383,7 @@ DICTIONARIES & OBJECTS
     }
 
     # Nested dictionaries/objects can be simplified with indentation.
-    let siblings = @{
+    let siblings = {
         sister:
             name: 'Shade Williams'
             age: 15
@@ -409,8 +410,11 @@ DICTIONARIES & OBJECTS
         (id2): 56
     }
 
+    # Empty object.
+    var emptyObj = {}
+
     # Empty dictionary.
-    var emptyDict = {}
+    var emptyDict = @{}
 
 SET
     # Set is an unordered collection of items with no duplicate elements.
