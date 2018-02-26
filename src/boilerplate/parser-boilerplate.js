@@ -9,7 +9,7 @@ if (!this.parseInfixExpression().success) return null;
 expression.push(this.lastParseData.ast);
 
 // Consume (subdictliteral | infixexpression).
-if (!this.parseSubDictLiteral().success || !this.parseInfixExpression().success) return;
+if (!this.parseSubDictLiteral().success && !this.parseInfixExpression().success) return;
 value = this.lastParseData.ast;
 //------------------------------------
 
