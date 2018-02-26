@@ -5008,8 +5008,8 @@ class Parser {
   }
 
   // literal =
-  //   | booleanliteral
   //   | numericliteral
+  //   | booleanliteral
   //   | stringliteral
   //   | regexliteral
   //   | listliteral
@@ -5018,44 +5018,12 @@ class Parser {
   //   | namedtupleliteral
   //   | symbolliteral
   //   | comprehension
-  parseComprehension() { // TODO: incorrect implementation
+  parseLiteral() { // TODO: incorrect implementation
     const type = 'literal';
-
-    if (this.parseListComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    } else if (this.parseDictComprehension().success) {
-      return this.lastParseData;
-    }
-
-    // Parsing failed.
-    return { success: false, message: { type, parser: this }, ast: null };
-  }
-
-  // infixexpression =
-  //   | range
-  //   | prefixatom operator infixexpressionrest+
-  //   | atom operator infixexpressionrest+
-  //   | prepostfixatom _ operator _ infixexpressionrest+
-  parseInfixExpression() { // TODO: incorrect implementation
-    const type = 'infixexpression';
 
     if (this.parseNumericLiteral().success) {
       return this.lastParseData;
-    } else if (this.parseIdentifier().success) {
+    } else if (this.parseBooleanLiteral().success) {
       return this.lastParseData;
     } else if (this.parseStringLiteral().success) {
       return this.lastParseData;
@@ -5074,6 +5042,24 @@ class Parser {
     } else if (this.parseComprehension().success) {
       return this.lastParseData;
     }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
+  // infixexpression =
+  //   | range
+  //   | prefixatom operator infixexpressionrest+
+  //   | atom operator infixexpressionrest+
+  //   | prepostfixatom _ operator _ infixexpressionrest+
+  parseInfixExpression() { // TODO: incorrect implementation
+    const type = 'infixexpression';
+
+    if (this.parseIdentifier().success) {
+      return this.lastParseData;
+    } else if (this.parseLiteral().success) {
+      return this.lastParseData;
+    } 
 
     // Parsing failed.
     return { success: false, message: { type, parser: this }, ast: null };

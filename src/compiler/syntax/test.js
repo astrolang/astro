@@ -1048,7 +1048,7 @@ print(new Parser('greet: "Hi",').parseNamedTupleArguments());
 print(String.raw`greet :"Hi"`);
 print(new Parser('greet :"Hi"').parseNamedTupleArguments());
 
-print('========= LITERAL =========');
+print('========= NAMEDTUPLELITERAL =========');
 
 print(String.raw`(\n        price: 50_230, name: "Tosin"\n)>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print((() => { // fail
@@ -1095,3 +1095,71 @@ print('========= LISTCOMPREHENSION ========='); // TODO: Tests Incomplete
 print('========= DICTCOMPREHENSION ========='); // TODO: Tests Incomplete
 
 print('========= COMPREHENSION ========='); // TODO: Tests Incomplete
+
+print('========= LITERAL ========='); // TODO: Tests Incomplete
+
+print(String.raw`true`);
+print(new Parser('true').parseLiteral());
+
+print(String.raw`false`);
+print(new Parser('false').parseLiteral());
+
+print(String.raw`5_4.0_33e-5_99`);
+print(new Parser('5_4.0_33e-5_99').parseLiteral());
+
+print(String.raw`0xff.01p-5A`);
+print(new Parser('0xff.01p-5A').parseLiteral());
+
+print(String.raw`0o5_45_0e+2_6`);
+print(new Parser('0o5_45_0e+2_6').parseLiteral());
+
+print(String.raw`0x5`);
+print(new Parser('0x5').parseLiteral());
+
+print(String.raw`'''hello\nworld'''`);
+print(new Parser("'''hello\nworld'''").parseLiteral());
+
+print(String.raw`""`);
+print(new Parser('""').parseLiteral());
+
+print(String.raw`'''hello\nworld'''`);
+print(new Parser("'''hello\nworld'''").parseLiteral());
+
+print(String.raw`/[0-9a-z]+\\d+/`);
+print(new Parser('/[0-9a-z]+\\d+/').parseLiteral());
+
+print(String.raw`[1, 2; 3, 4]`);
+print(new Parser('[1, 2; 3, 4]').parseLiteral());
+
+print(String.raw`[.1,['hi','hello'],'string',/\\d+/,5_000,]`);
+print(new Parser("[.1,['hi','hello'],'string',/\\d+/,5_000,]").parseLiteral());
+
+print(String.raw`[]`);
+print(new Parser('[]').parseLiteral());
+
+print(String.raw`{\n    /name/ : "john" , 500 : "500",\n}`);
+print(new Parser('{\n    /name/ : "john" , 500 : "500",\n}').parseLiteral());
+
+print(String.raw`{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}`);
+print(new Parser('{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}').parseLiteral());
+
+print(String.raw`("Hi", 1, .2, 0o23e56, /regex/)`);
+print(new Parser('("Hi", 1, .2, 0o23e56, /regex/)').parseLiteral());
+
+print(String.raw`("Hi", 1, .2, 0o23e56, /regex/,)`);
+print(new Parser('("Hi", 1, .2, 0o23e56, /regex/,)').parseLiteral());
+
+print(String.raw`()`);
+print(new Parser('()').parseLiteral());
+
+print(String.raw`(greet: "Hi",)`);
+print(new Parser('(greet: "Hi",)').parseLiteral());
+
+print(String.raw`(:)`);
+print(new Parser('(:)').parseLiteral());
+
+print(String.raw`(\n    tup: (\n        name: "john", age :20\n    ), label:"500", pattern  :/regex/, \n)`);
+print(new Parser('(\n    tup: (\n        name: "john", age :20\n    ), label:"500", pattern  :/regex/, \n)').parseLiteral());
+
+print(String.raw`$( 2_0056 )`);
+print(new Parser('$( 2_0056 )').parseLiteral());
