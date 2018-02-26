@@ -319,7 +319,7 @@ literal =
   | comprehension
 
 commandnotationpostfix =
-  | (range | symbolliteral | stringliteral | numericliteral | identifier )
+  | spaces &(range | symbolliteral | stringliteral | numericliteral | identifier) infixexpression
   { type, expression, arguments: [{ key, value }] }
 
 callarguments =
@@ -327,17 +327,17 @@ callarguments =
   { expressions: [{ key, value }] }
 
 callpostfix =
-  | '(' _? ')' // ignorenewline
-  | '(' spaces? callarguments _? ')' // ignorenewline
-  | '(' nextcodeline indent callarguments nextcodeline dedent ')'
+  | spaces? '(' _? ')' // ignorenewline
+  | spaces? '(' spaces? callarguments _? ')' // ignorenewline
+  | spaces? '(' nextcodeline indent callarguments nextcodeline dedent ')'
   { type, expression, arguments: [{ key, value }] }
 
 dotnotationpostfix =
-  | [!?] _? '.' '$'? identifier
+  | spaces? '.' '$'? identifier
   { type, expression, map, name }
 
 cascadingnotationpostfix =
-  | _? '~' '$'? identifier
+  | spaces? '~' '$'? identifier
   { type, expression, map, name }
 
 listargument =
@@ -413,7 +413,7 @@ subatom =
   | identifier
 
 atom =
-  | subatom subatompostfix+
+  | subatom (spaces? [!?])? (subatompostfix (spaces? [!?])?)*
 
 prefixatom =
   | operator atom
@@ -447,7 +447,14 @@ simpleexpression =
 tupleexpression =
   | simpleexpression (_comma _? simpleexpression)* _comma?
 
+dotnotationline =
+  | ('.' | '~') '$'? identifier (spaces? [!?])? (subatompostfix (spaces? [!?])?)*
+
+dotnotationblock =
+  | nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) nextcodeline dedent\
+
 subexpression =
+  | dotnotationblock
   | declaration
   | conditionalexpression
   | controlprimitive
