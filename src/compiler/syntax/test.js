@@ -490,23 +490,6 @@ print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrForwardSlash()); // m
 print(String.raw`25fse?w&$3267`);
 print(new Parser('25fse?w&$3267').parseCharsNoNewlineOrForwardSlash());
 
-print('========= SPACES =========');
-
-print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('').parseSpaces()); // fail
-
-print(String.raw`/>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('/').parseSpaces()); // fail
-
-print(String.raw`\t   \t\n>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('\t   \t\n').parseSpaces()); // mid
-
-print(String.raw` \t >>>>>>>>>>>>>>>>>>>>>>>>MID`);
-print(new Parser(' \t ').parseSpaces());
-
-print(String.raw` `);
-print(new Parser(' ').parseSpaces());
-
 print('========= NAMESEPARATOR =========');
 
 print(String.raw`name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -704,6 +687,23 @@ print(new Parser('...\n').parseLineContinuation());
 
 print(String.raw`... \r\n`);
 print(new Parser('... \r\n').parseLineContinuation());
+
+print('========= SPACES =========');
+
+print(String.raw`>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('').parseSpaces()); // fail
+
+print(String.raw`/>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('/').parseSpaces()); // fail
+
+print(String.raw`\t   \t\n>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('\t   \t\n').parseSpaces()); // mid
+
+print(String.raw` \t >>>>>>>>>>>>>>>>>>>>>>>>MID`);
+print(new Parser(' \t ').parseSpaces());
+
+print(String.raw` `);
+print(new Parser(' ').parseSpaces());
 
 print('========= _ =========');
 

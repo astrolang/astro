@@ -132,9 +132,6 @@ charsnonewlineorforwardslash =
 space =
   | [ \t]
 
-spaces =
-  | space+
-
 nameseparator =
   | !(identifier | numericliteral)
   | _
@@ -185,6 +182,9 @@ dedentoreoiend =
 
 linecontinuation =
   | space* '...' space* nextline samedent
+
+spaces =
+  | space+
 
 _ =
   | linecontinuation
