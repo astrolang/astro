@@ -77,11 +77,6 @@ coefficientexpression =
   | !('0b' | '0o' | '0x') integerdecimalliteral identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
   { type, number, identifier }
 
-booleanliteral =
-  | 'true'
-  | 'false'
-  { type, value }
-
 noname =
   | '_'
 
@@ -196,6 +191,11 @@ _ =
   | &{ignorenewline} nextcodeline samedent
   | space+ // Can eat others cake
 
+booleanliteral =
+  | 'true'
+  | 'false'
+  { type, value }
+
 singlelinestringliteral =
   | "'" charsnonewlineorsinglequote? "'"
   | '"' charsnonewlineordoublequote? '"'
@@ -290,7 +290,6 @@ dictcomprehension =
   { type, key, value, iterators:[{ lhs, rhs}], guard }
 
 comprehension =
-  | generatorcomprehension
   | listcomprehension
   | dictcomprehension
 

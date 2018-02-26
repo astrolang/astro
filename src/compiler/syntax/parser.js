@@ -1498,41 +1498,6 @@ class Parser {
     return parseData;
   }
 
-  // booleanliteral =
-  //   | 'true'
-  //   | 'false'
-  parseBooleanLiteral() {
-    // Keep original state.
-    const {
-      lastPosition, column, line,
-    } = this;
-
-    const type = 'booleanliteral';
-    let value = null;
-    let parseData = { success: false, message: { type, parser: this }, ast: null };
-
-    (() => {
-      // Consume 'true' | 'false'.
-      if (!this.parseToken('true').success && !this.parseToken('false').success) return null;
-      value = this.lastParseData.ast.token;
-
-      // Update parseData.
-      parseData = { success: true, message: null, ast: { type, value } };
-
-      // Update lastParseData.
-      this.lastParseData = parseData;
-      return parseData;
-    })();
-
-    // Check if above parsing is successful.
-    if (parseData.success) return parseData;
-
-    // Parsing failed, so revert state.
-    this.reset(lastPosition, null, null, column, line);
-
-    return parseData;
-  }
-
   // noname =
   //   | '_'
   parseNoName() {
@@ -2871,6 +2836,41 @@ class Parser {
 
       // Update parseData.
       parseData = { success: true, message: null, ast: null };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // booleanliteral =
+  //   | 'true'
+  //   | 'false'
+  parseBooleanLiteral() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'booleanliteral';
+    let value = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume 'true' | 'false'.
+      if (!this.parseToken('true').success && !this.parseToken('false').success) return null;
+      value = this.lastParseData.ast.token;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, value } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -4995,9 +4995,47 @@ class Parser {
   //   | listcomprehension
   //   | dictcomprehension
   parseComprehension() { // TODO: incorrect implementation
-    const type = 'infixexpression';
+    const type = 'comprehension';
 
     if (this.parseListComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
+  // literal =
+  //   | booleanliteral
+  //   | numericliteral
+  //   | stringliteral
+  //   | regexliteral
+  //   | listliteral
+  //   | dictliteral
+  //   | tupleliteral
+  //   | namedtupleliteral
+  //   | symbolliteral
+  //   | comprehension
+  parseComprehension() { // TODO: incorrect implementation
+    const type = 'literal';
+
+    if (this.parseListComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
       return this.lastParseData;
     } else if (this.parseDictComprehension().success) {
       return this.lastParseData;
@@ -5032,6 +5070,8 @@ class Parser {
     } else if (this.parseNamedTupleLiteral().success) {
       return this.lastParseData;
     } else if (this.parseSymbolLiteral().success) {
+      return this.lastParseData;
+    } else if (this.parseComprehension().success) {
       return this.lastParseData;
     }
 
