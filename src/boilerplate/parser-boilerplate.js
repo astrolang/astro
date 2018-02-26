@@ -1,3 +1,15 @@
+// Consume nextcodeline.
+if (!this.parseNextCodeLine().success) return null;
+
+// Consume _comma?.
+this.parse_Comma();
+
+// Consume infixexpression.
+if (!this.parseInfixExpression().success) return null;
+expression.push(this.lastParseData.ast);
+
+//------------------------------------
+
 // nextline =
 //   | newline (_* newline)*.
 parseNextLine() {
