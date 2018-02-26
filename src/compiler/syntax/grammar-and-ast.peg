@@ -307,29 +307,25 @@ literal =
 
 commandnotationpostfix =
   | _ &(symbolliteral | numericliteral | identifier | range) infixexpression
-  { }
+  { type, expression, arguments: [{ key, value }] }
 
 callarguments =
   | (identifier _? ':' _?)? infixexpression (_comma _? (identifier _? ':' _?)? infixexpression)* _comma?
+  { expressions: [{ key, value }] }
 
 callpostfix =
   | '(' _? ')' // ignorenewline
   | '(' spaces? callarguments _? ')' // ignorenewline
   | '(' nextcodeline indent callarguments nextcodeline dedent ')'
+  { type, expression, arguments: [{ key, value }] }
 
 dotnotationpostfix =
-  | [!?] _? '.' identifier
-  | [!?] _? '.' '$' identifier
+  | [!?] _? '.' '$'? identifier
+  { type, expression, map, name }
 
 cascadingnotationpostfix =
-  | _? '~' identifier
-  | _? '~' '$' identifier
-
-listelementpostfix =
-  | _? '[' _? listarguments _? ']' // ignorenewline
-
-listarguments =
-  | listargument (_comma _? listargument)* _comma?
+  | _? '~' '$'? identifier
+  { type, expression, map, name }
 
 listargument =
   | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression '!'?)?
@@ -337,8 +333,16 @@ listargument =
   | ':'
   | infixexpression
 
+listarguments =
+  | listargument (_comma _? listargument)* _comma?
+
+listelementpostfix =
+  | _? '[' spaces? listarguments _? ']' // ignorenewline
+  | _? '[' nextcodeline indent listarguments nextcodeline dedent ']'
+
 dictelementpostfix =
-  | _? '{' _? dictarguments _? '}' // ignorenewline
+  | _? '{' spaces? dictarguments _? '}' // ignorenewline
+  | _? '{' nextcodeline indent dictarguments nextcodeline dedent '}'
 
 dictarguments =
   | infixexpression (_comma _? infixexpression)* _comma?
@@ -346,10 +350,11 @@ dictarguments =
 range =
   | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
   | '..' (_? infixexpression _? '..')? _? infixexpression
+  { type, begin, step, end }
 
 ternaryoperator =
-  | '(' _? infixexpression _? ')' '?' infixexpression ':' infixexpression  // ignorenewline
-  | '(' _? infixexpression _? ')' _ '?' _ infixexpression _ ':' _ infixexpression  // ignorenewline
+  | '(' spaces? infixexpression _? ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
+  | '(' nextcodeline indent infixexpression nextcodeline dedent ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
 
 return =
   | 'return' nameseparator expressionnocontrolptimitive
@@ -386,8 +391,9 @@ subatompostfix =
   | dictelementpostfix
 
 subatom =
-  | '(' _? tupleexpression _? ')' identifier? // ignorenewline
-  | '(' nextcodeline indent simpleexpression (_comma _? simpleexpression)* (_comma)? nextcodeline dedent ')' identifier?
+  | '(' spaces? tupleexpression _? ')' identifier? // ignorenewline
+  | '(' nextcodeline indent tupleexpression nextcodeline dedent ')' identifier?
+  | '~' '$'? identifier
   | coefficientexpression
   | literal
   | noname
@@ -398,7 +404,6 @@ atom =
 
 prefixatom =
   | operator atom
-  | '~' atom
 
 postfixatom =
   | integralliteral '.'
@@ -427,7 +432,7 @@ simpleexpression =
   | prepostfixatom
 
 tupleexpression =
-  | simpleexpression (_comma _? simpleexpression)* (_comma)?
+  | simpleexpression (_comma _? simpleexpression)* _comma?
 
 subexpression =
   | declaration
@@ -480,11 +485,11 @@ block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
 
 lhspattern =
-  | '(' _? lhsname (_comma _? lhsname)* _comma? _? ')' // ignorenewline
+  | '(' spaces? lhsname (_comma _? lhsname)* _comma? _? ')' // ignorenewline
   | '(' nextcodeline indent  lhsname (_comma _? lhsname)* _comma? nextcodeline dedent ')'
-  | '[' _? lhsname (_comma _? lhsname)* _comma? _? ']' // ignorenewline
+  | '[' spaces? lhsname (_comma _? lhsname)* _comma? _? ']' // ignorenewline
   | '[' nextcodeline indent  lhsname (_comma _? lhsname)* _comma? nextcodeline dedent ']'
-  | '{' _? lhsname (_comma _? lhsname)* _comma? _? '}' // ignorenewline
+  | '{' spaces? lhsname (_comma _? lhsname)* _comma? _? '}' // ignorenewline
   | '{' nextcodeline indent lhsname (_comma _? lhsname)* _comma? nextcodeline dedent '}'
   |  lhsname (_comma _? lhsname)*
 
@@ -563,11 +568,11 @@ tryexpression =
   | 'try' 'var'? namesaparation lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
 
 matchpattern =
-  | (identifier _?)? '(' _? matchatom (_comma _? matchatom)* _comma? _? ')' // ignorenewline
+  | (identifier _?)? '(' spaces? matchatom (_comma _? matchatom)* _comma? _? ')' // ignorenewline
   | (identifier _?)? '(' nextcodeline indent  matchatom (_comma _? matchatom)* _comma? nextcodeline dedent ')'
-  | '[' _? matchatom (_comma _? matchatom)* _comma? _? ']' // ignorenewline
+  | '[' spaces? matchatom (_comma _? matchatom)* _comma? _? ']' // ignorenewline
   | '[' nextcodeline indent  matchatom (_comma _? matchatom)* _comma? nextcodeline dedent ']'
-  | '{' _? matchatom (_comma _? matchatom)* _comma? _? '}' // ignorenewline
+  | '{' spaces? matchatom (_comma _? matchatom)* _comma? _? '}' // ignorenewline
   | '{' nextcodeline indent matchatom (_comma _? matchatom)* _comma? nextcodeline dedent '}'
   |  matchatom (_comma _? matchatom)*
 
@@ -663,7 +668,7 @@ typehead =
   | ('type' | 'abst') _ identifier
 
 subtype =
-  | identifier (_? '(' _? functionparameters _? ')')? // ignorenewline
+  | identifier (_? '(' spaces? functionparameters _? ')')? // ignorenewline
   | identifier (_? '(' nextcodeline indent functionparameters nextcodeline dedent ')')?
 
 typebody =
@@ -676,22 +681,24 @@ typebodyoneinlinenest =
 
 names =
   | identifier (_comma _? identifier)*
+  { names }
 
 typeblock =
   | nextcodeline indent typebody (nextcodeline samedent typebody)* dedentoreoiend
 
 typedeclaration =
-  | typehead _? '(' _? parameters _?')' (_? '<:' _? names)?// ignorenewline
-  | typehead _ identifier _? '(' nextcodeline indent parameters nextcodeline dedent ')' (_? '<:' _? names)?
+  | typehead _? '(' spaces? parameters _?')' (_? '<:' _? names)?// ignorenewline
+  | typehead _? '(' nextcodeline indent parameters nextcodeline dedent ')' (_? '<:' _? names)?
   | typehead (_ '=' _ | '=' !operator | _? ':' _?) typebodyoneinlinenest
   | typehead (_ '=' _ | '=' !operator) nextcodeline indent typebody dedentoreoiend
   | typehead _? ':' typeblock
-  { identifier, supertypes, field }
+  { type, name, supertypes, body }
 
 typedeclarationoneinlinenest =
   | typehead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
   | typehead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | typehead _? ':' block
+  { type, name, supertypes, body }
 
 functionparameters =
   | functionparameter (_comma _? functionparameter)* _comma?
@@ -702,19 +709,20 @@ functionparameter =
   | identifier
 
 functionhead =
-  | 'fun' _ identifier _? '(' _? functionparameters _?')' // ignorenewline
+  | 'fun' _ identifier _? '(' spaces? functionparameters _?')' // ignorenewline
   | 'fun' _ identifier _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
 
 functiondeclaration =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
   | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | functionhead _? ':' block
-  { identifier, expression }
+  { type, name, parameters: [{ mutable, name, alias, value }], body }
 
 functiondeclarationoneinlinenest =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
   | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | functionhead _? ':' block
+  { type, name, parameters: [{ mutable, name, alias, value }], body }
 
 subjecthead =
   | ('let' | 'var') nameseparator lhspattern
@@ -723,11 +731,14 @@ subjecthead =
 subjectdeclaration =
   | subjecthead (_ '=' _ | '=' !operator) expressiononeinlinenest
   | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
+  { type, mutable, name }
+  { type, lhs, rhs }
 
 subjectdeclarationoneinlinenest =
   | subjecthead (_ '=' _ | '=' !operator) expressionnoblock
   | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
-  { mutability, identifier, expression }
+  { type, mutable, name }
+  { type, lhs, rhs }
 
 program =
   | (comment? nextcodeline)? (samedent expression (nextcodeline eoi? | _? eoi))+
