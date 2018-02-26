@@ -319,7 +319,7 @@ literal =
   | comprehension
 
 commandnotationpostfix =
-  | spaces &(symbolliteral | numericliteral | identifier | range) infixexpression
+  | (range | symbolliteral | stringliteral | numericliteral | identifier )
   { type, expression, arguments: [{ key, value }] }
 
 callarguments =
