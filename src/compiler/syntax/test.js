@@ -960,29 +960,29 @@ print(new Parser('\n    "value": 1_000e24, game, 34: 34, /reg/: sunny\n').parseD
 
 print('========= DICTLITERAL =========');
 
-print(String.raw`{\n        age: 50, name: "Tosin"\n}>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(String.raw`@{\n        age: 50, name: "Tosin"\n}>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print((() => { // fail
-  const parser = new Parser('{\n        age: 50, name: "Tosin"\n}');
+  const parser = new Parser('@{\n        age: 50, name: "Tosin"\n}');
   parser.lastIndentCount = 1; // One indent level.
   return parser.parseDictLiteral();
 })());
 
-print(String.raw`{\n        age: 50, name: "Tosin"\n    }`);
+print(String.raw`@ {\n        age: 50, name: "Tosin"\n    }`);
 print((() => {
-  const parser = new Parser('{\n        age: 50, name: "Tosin"\n    }');
+  const parser = new Parser('@ {\n        age: 50, name: "Tosin"\n    }');
   parser.lastIndentCount = 1; // One indent level.
   return parser.parseDictLiteral();
 })());
 
-print(String.raw`{\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}`);
-print(new Parser('{\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}').parseDictLiteral());
+print(String.raw`@ {\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}`);
+print(new Parser('@ {\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}').parseDictLiteral());
 
-print(String.raw`{\n    /name/ : "john" , 500 : "500",\n}`);
-print(new Parser('{\n    /name/ : "john" , 500 : "500",\n}').parseDictLiteral());
+print(String.raw`@{\n    /name/ : "john" , 500 : "500",\n}`);
+print(new Parser('@{\n    /name/ : "john" , 500 : "500",\n}').parseDictLiteral());
 
-print(String.raw`{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}`);
-print(new Parser('{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}').parseDictLiteral());
-
+print(String.raw`@{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}`);
+print(new Parser('@{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}').parseDictLiteral());
+/*
 print('========= TUPLEARGUMENTS =========');
 
 print(String.raw`"Hi">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -1163,3 +1163,21 @@ print(new Parser('(\n    tup: (\n        name: "john", age :20\n    ), label:"50
 
 print(String.raw`$( 2_0056 )`);
 print(new Parser('$( 2_0056 )').parseLiteral());
+
+print('========= COMMANDNOTATION =========');
+
+print(String.raw`argument>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('argument').parseCommandNotation()); // fail
+
+print(String.raw` >>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('').parseCommandNotation()); // fail
+
+print(String.raw`$( 2_0056 )`);
+print(new Parser('$( 2_0056 )').parseCommandNotation());
+
+print(String.raw`$( 2_0056 )`);
+print(new Parser('$( 2_0056 )').parseCommandNotation());
+
+print(String.raw`$( 2_0056 )`);
+print(new Parser('$( 2_0056 )').parseCommandNotation());
+ */
