@@ -5548,6 +5548,62 @@ class Parser {
     return { success: false, message: { type, parser: this }, ast: null };
   }
 
+  // commandnotationpostfix =
+  //   | spaces &(range | symbolliteral | stringliteral | numericliteral | identifier) infixexpression
+  //   { type, expression, arguments: [{ key, value }] }
+  parseCommandNotationPostfix() { // TODO: Unimplemented
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'functioncall';
+    let expression = null;
+    let args = [];
+    let parseData = { success: false, message: { type: 'commandnotationpostfix', parser: this }, ast: null };
+
+    (() => {
+      // Consume spaces.
+      if (!this.parseSpaces().success) return null;
+
+      // Check &(range | symbolliteral | stringliteral | numericliteral | identifier).
+      const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
+      if (
+        !this.parseRange().success &&
+        !this.parseSymbolLiteral().success &&
+        !this.parseStringLiteral().success &&
+        !this.parseNumericLiteral().success &&
+        !this.parseIdentifier().success
+      ) return null;
+      this.reset(state.lastPosition, null, null, state.column, state.line);
+
+      // Consume infixexpression.
+      if (!this.parseInfixExpression().success) return null;
+      args.push({ key: null, value: this.lastParseData.ast });
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression, arguments: args } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
+
+    return parseData;
+  }
+
   // range =
   //   | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
   //   | '..' (_? infixexpression _? '..')? _? infixexpression
