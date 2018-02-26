@@ -881,6 +881,96 @@ print(new Parser('[1, 2; 3, 4]').parseListLiteral());
 print(String.raw`[.1,['hi','hello'],'string',/\\d+/,5_000,]`);
 print(new Parser("[.1,['hi','hello'],'string',/\\d+/,5_000,]").parseListLiteral());
 
+print('========= OBJECTARGUMENT =========');
+
+print(String.raw`"name": "john"\n•>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('"name": "john"\n•').parseObjectArgument()); // fail
+
+print(String.raw`age: 50,`);
+print(new Parser('age: 50,').parseObjectArgument());
+
+print(String.raw`value: 1_000e24,`);
+print(new Parser('value: 1_000e24,').parseObjectArgument());
+
+print(String.raw`value: {\n    price: 1_000e24\n}\n•`);
+print(new Parser('value: {\n    price: 1_000e24\n}\n•').parseObjectArgument());
+
+print('========= OBJECTARGUMENTS =========');
+
+print(String.raw`sage: "Damien", 50, name: "Tosin">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('sage: "Damien", 50, name: "Tosin"').parseObjectArguments()); // mid
+
+print(String.raw`sage: "Damien", name:  {\n    nom :"Tosin",  \n}>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid (no eoi lookup)
+print(new Parser('sage: "Damien", name:  {\n    nom :"Tosin",  \n}').parseObjectArguments()); // mid
+
+print(String.raw`sage: "Damien", name: { \n    /nom/ :"Tosin",  \n}\nboom : /2ery/, jaw: 45>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('sage: "Damien", name: { \n    /nom/ :"Tosin",  \n}\nboom : /2ery/, jaw: 45').parseObjectArguments()); // mid
+
+print(String.raw`age: 50, name: "Tosin",`);
+print(new Parser('age: 50, name: "Tosin",').parseObjectArguments());
+
+print(String.raw`age: 50,`);
+print(new Parser('age: 50,').parseObjectArguments());
+
+print(String.raw`age: 50, name: { nom :"Tosin" }, boom : /2ery/,`);
+print(new Parser('age: 50, name: { nom :"Tosin" }, boom : /2ery/,').parseObjectArguments());
+
+print(String.raw`age: 50, name: {\n    nom :"Tosin"\n}, boom : /2ery/, jaw: 45,`);
+print(new Parser('age: 50, name: {\n    nom :"Tosin"\n}, boom : /2ery/, jaw: 45,').parseObjectArguments());
+
+print(String.raw`age: 50, name:  \n    nom :"Tosin",  \nboom : /2ery/, jaw: 45,`);
+print(new Parser('age: 50, name:  \n    nom :"Tosin",  \nboom : /2ery/, jaw: 45,').parseObjectArguments());
+
+print(String.raw`age: 50\nname: /nom/\nview: /2ery/,`);
+print(new Parser('age: 50\nname: /nom/\nview: /2ery/,').parseObjectArguments());
+
+print('========= OBJECTBLOCK =========');
+
+print(String.raw`\n        age: 50, name: "Tosin"\n•>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('\n        age: 50, name: "Tosin"\n•');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseObjectBlock();
+})());
+
+print(String.raw`\n        age: 50, name: "Tosin"\n    •`);
+print((() => {
+  const parser = new Parser('\n        age: 50, name: "Tosin"\n    •');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseObjectBlock();
+})());
+
+print(String.raw`\n    name : "john" , price : "500"\n`);
+print(new Parser('\n    name : "john" , price : "500"\n').parseObjectBlock());
+
+print(String.raw`\n    value: 1_000e24, game, price: 34, reg: sunny\n`);
+print(new Parser('\n    value: 1_000e24, game, price: 34, reg: sunny\n').parseObjectBlock());
+
+print('========= OBJECTLITERAL =========');
+
+print(String.raw`{\n        age: 50, name: "Tosin"\n}>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('{\n        age: 50, name: "Tosin"\n}');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseObjectLiteral();
+})());
+
+print(String.raw`{\n        age: 50, name: "Tosin"\n    }`);
+print((() => {
+  const parser = new Parser('{\n        age: 50, name: "Tosin"\n    }');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseObjectLiteral();
+})());
+
+print(String.raw`{\n    name : {\n        johnage: 20\n    }, price : "500",\n}`);
+print(new Parser('{\n    name : {\n        johnage: 20\n    }, price : "500",\n}').parseObjectLiteral());
+
+print(String.raw`{\n    name : "john" , price : "500",\n}`);
+print(new Parser('{\n    name : "john" , price : "500",\n}').parseObjectLiteral());
+
+print(String.raw`{\n    value: 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, reg: sunny\n}`);
+print(new Parser('{\n    value: 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, reg: sunny\n}').parseObjectLiteral());
+
 print('========= DICTARGUMENT =========');
 
 print(String.raw`age: 50,`);
@@ -936,28 +1026,6 @@ print(new Parser('age: 50\nname: /nom/\nview: /2ery/,').parseDictArguments());
 // print(String.raw`2 + 1: 2 + 1, (age): 30, 2_000e56 / 5 + 67 : 45 / 65 - 77`);
 // print(new Parser('2 + 1: 2 + 1, (age): 30, 2_000e56 / 5 + 67 : 45 / 65 - 77').parseDictArguments());
 
-print('========= DICTBLOCK =========');
-
-print(String.raw`\n        age: 50, name: "Tosin"\n•>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print((() => { // fail
-  const parser = new Parser('\n        age: 50, name: "Tosin"\n•');
-  parser.lastIndentCount = 1; // One indent level.
-  return parser.parseDictBlock();
-})());
-
-print(String.raw`\n        age: 50, name: "Tosin"\n    •`);
-print((() => {
-  const parser = new Parser('\n        age: 50, name: "Tosin"\n    •');
-  parser.lastIndentCount = 1; // One indent level.
-  return parser.parseDictBlock();
-})());
-
-print(String.raw`\n    /name/ : "john" , 500 : "500"\n`);
-print(new Parser('\n    /name/ : "john" , 500 : "500"\n').parseDictBlock());
-
-print(String.raw`\n    "value": 1_000e24, game, 34: 34, /reg/: sunny\n`);
-print(new Parser('\n    "value": 1_000e24, game, 34: 34, /reg/: sunny\n').parseDictBlock());
-
 print('========= DICTLITERAL =========');
 
 print(String.raw`@{\n        age: 50, name: "Tosin"\n}>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -974,14 +1042,15 @@ print((() => {
   return parser.parseDictLiteral();
 })());
 
-print(String.raw`@ {\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}`);
-print(new Parser('@ {\n    /name/ : {\n        "john": 20\n    }, 500 : "500",\n}').parseDictLiteral());
+print(String.raw`@ {\n    /name/ : {\n        john: 20\n    }, 500 : "500",\n}`);
+print(new Parser('@ {\n    /name/ : {\n        john: 20\n    }, 500 : "500",\n}').parseDictLiteral());
 
 print(String.raw`@{\n    /name/ : "john" , 500 : "500",\n}`);
 print(new Parser('@{\n    /name/ : "john" , 500 : "500",\n}').parseDictLiteral());
 
 print(String.raw`@{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}`);
 print(new Parser('@{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}').parseDictLiteral());
+
 /*
 print('========= TUPLEARGUMENTS =========');
 
