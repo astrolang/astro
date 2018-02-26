@@ -1051,7 +1051,7 @@ print(new Parser('@{\n    /name/ : "john" , 500 : "500",\n}').parseDictLiteral()
 print(String.raw`@{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}`);
 print(new Parser('@{\n    "value": 1_000e24  \n    game  \n    hello: {\n        a: 10\n    }, /reg/: sunny\n}').parseDictLiteral());
 
-/*
+
 print('========= TUPLEARGUMENTS =========');
 
 print(String.raw`"Hi">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -1233,20 +1233,32 @@ print(new Parser('(\n    tup: (\n        name: "john", age :20\n    ), label:"50
 print(String.raw`$( 2_0056 )`);
 print(new Parser('$( 2_0056 )').parseLiteral());
 
-print('========= COMMANDNOTATION =========');
+print('========= COMMANDNOTATIONPOSTFIX =========');
 
-print(String.raw`argument>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('argument').parseCommandNotation()); // fail
+print(String.raw`foo>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('foo').parseCommandNotationPostfix()); // fail
 
-print(String.raw` >>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('').parseCommandNotation()); // fail
+print(String.raw` [1, 2, 3]>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser(' [1, 2, 3]').parseCommandNotationPostfix()); // fail
 
-print(String.raw`$( 2_0056 )`);
-print(new Parser('$( 2_0056 )').parseCommandNotation());
+print(String.raw` 2_0056`);
+print(new Parser(' 2_0056').parseCommandNotationPostfix());
 
-print(String.raw`$( 2_0056 )`);
-print(new Parser('$( 2_0056 )').parseCommandNotation());
+print(String.raw` $symbol`);
+print(new Parser('  $symbol').parseCommandNotationPostfix());
 
-print(String.raw`$( 2_0056 )`);
-print(new Parser('$( 2_0056 )').parseCommandNotation());
- */
+print(String.raw` 'hello world'`);
+print(new Parser(" 'hello world'").parseCommandNotationPostfix());
+
+print(String.raw` foo`);
+print(new Parser(' foo').parseCommandNotationPostfix());
+
+// print(String.raw`  1..20`);
+// print(new Parser('  1..20').parseCommandNotationPostfix());
+
+// print(String.raw`  foo 25`);
+// print(new Parser('  foo 25').parseCommandNotationPostfix());
+
+// print(String.raw`  'hi' + 25`);
+// print(new Parser("  'hi' +  25").parseCommandNotationPostfix());
+
