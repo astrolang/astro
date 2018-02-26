@@ -294,8 +294,8 @@ comprehension =
   | dictcomprehension
 
 literal =
-  | booleanliteral
   | numericliteral
+  | booleanliteral
   | stringliteral
   | regexliteral
   | listliteral
@@ -307,6 +307,7 @@ literal =
 
 commandnotationpostfix =
   | _ &(symbolliteral | numericliteral | identifier | range) infixexpression
+  { }
 
 callarguments =
   | (identifier _? ':' _?)? infixexpression (_comma _? (identifier _? ':' _?)? infixexpression)* _comma?
@@ -319,14 +320,10 @@ callpostfix =
 dotnotationpostfix =
   | [!?] _? '.' identifier
   | [!?] _? '.' '$' identifier
-  | [!?] _? '.' '$' '[' _? listarguments _? ']' // ignorenewline
-  | [!?] _? '.' '$' '{' _? dictarguments _? '}' // ignorenewline
 
 cascadingnotationpostfix =
   | _? '~' identifier
   | _? '~' '$' identifier
-  | _? '~' '$' '[' _? listarguments _? ']' // ignorenewline
-  | _? '~' '$' '{' _? dictarguments _? '}' // ignorenewline
 
 listelementpostfix =
   | _? '[' _? listarguments _? ']' // ignorenewline
@@ -401,6 +398,7 @@ atom =
 
 prefixatom =
   | operator atom
+  | '~' atom
 
 postfixatom =
   | integralliteral '.'
