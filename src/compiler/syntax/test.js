@@ -1048,7 +1048,7 @@ print(new Parser('greet: "Hi",').parseNamedTupleArguments());
 print(String.raw`greet :"Hi"`);
 print(new Parser('greet :"Hi"').parseNamedTupleArguments());
 
-print('========= NAMEDTUPLELITERAL =========');
+print('========= LITERAL =========');
 
 print(String.raw`(\n        price: 50_230, name: "Tosin"\n)>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print((() => { // fail
@@ -1082,4 +1082,10 @@ print(new Parser('(greet: "Hi",)').parseNamedTupleLiteral());
 print(String.raw`(:)`);
 print(new Parser('(:)').parseNamedTupleLiteral());
 
+print('========= SYMBOLLITERAL ========='); // TODO: Tests Incomplete
 
+print(String.raw`$()>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('$()').parseSymbolLiteral()); // fail
+
+print(String.raw`$( 2_0056 )`);
+print(new Parser('$( 2_0056 )').parseSymbolLiteral());
