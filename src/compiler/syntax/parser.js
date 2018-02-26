@@ -4865,6 +4865,148 @@ class Parser {
     return parseData;
   }
 
+  // dictcomprehension =
+  //   | '{' _? (infixexpression _? ':' _? infixexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
+  //   { type, key, value, iterators:[{ lhs, rhs}], guard }
+  parseDictComprehension() { // TODO: Unimplemented
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'dictcomprehension';
+    let expressions = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | '$' identifier
+      // | '$' '(' spaces? expression _? ')' // ignorenewline
+      // | '$' '(' block ')'
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = {
+        lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
+      };
+      const otherState = { expressions: [...expressions] };
+
+      // [1]. '$' identifier
+      (() => {
+        // Consume '$'.
+        if (!this.parseToken('$').success) return;
+
+        // Consume identifier.
+        if (!this.parseIdentifier().success) return;
+        expressions.push(this.lastParseData.ast);
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. '$' '(' spaces? expression _? ')' // ignorenewline
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ expressions } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '$'.
+          if (!this.parseToken('$').success) return;
+
+          // Consume '('.
+          if (!this.parseToken('(').success) return;
+
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Ignore newline from this point
+          this.ignoreNewline = true;
+
+          // Consume expression.
+          if (!this.parseExpression().success) return;
+          expressions.push(this.lastParseData.ast);
+
+          // Consume _?
+          this.parse_();
+
+          // Consume ')'.
+          if (!this.parseToken(')').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. '$' '(' block ')'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ expressions } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '$'.
+          if (!this.parseToken('$').success) return;
+
+          // Consume '('.
+          if (!this.parseToken('(').success) return;
+
+          // Consume expression.
+          if (!this.parseExpression().success) return;
+          expressions.push(this.lastParseData.ast);
+
+          // Consume ')'.
+          if (!this.parseToken(')').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expressions } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
+
+    return parseData;
+  }
+
+  // comprehension =
+  //   | listcomprehension
+  //   | dictcomprehension
+  parseComprehension() { // TODO: incorrect implementation
+    const type = 'infixexpression';
+
+    if (this.parseListComprehension().success) {
+      return this.lastParseData;
+    } else if (this.parseDictComprehension().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
   // infixexpression =
   //   | range
   //   | prefixatom operator infixexpressionrest+

@@ -1091,3 +1091,7 @@ print(String.raw`$( 2_0056 )`);
 print(new Parser('$( 2_0056 )').parseSymbolLiteral());
 
 print('========= LISTCOMPREHENSION ========='); // TODO: Tests Incomplete
+
+print('========= DICTCOMPREHENSION ========='); // TODO: Tests Incomplete
+
+print('========= COMPREHENSION ========='); // TODO: Tests Incomplete
