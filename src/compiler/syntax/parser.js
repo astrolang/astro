@@ -5666,7 +5666,7 @@ class Parser {
           this.parse_();
 
           // Optional parsing. (identifier _? ':' _?)?
-          let optionalParseSuccessful = false;
+          let optionalParseSuccessful2 = false;
           const state3 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
           (() => {
             // Consume identifier.
@@ -5687,7 +5687,7 @@ class Parser {
           })();
 
           // If parsing the above optional fails, revert state to what it was before that parsing began.
-          if (!optionalParseSuccessful) {
+          if (!optionalParseSuccessful2) {
             this.reset(state3.lastPosition, null, null, state3.column, state3.line);
             key = null;
           }
@@ -5876,6 +5876,59 @@ class Parser {
     this.reset(lastPosition, null, lastIndentCount, column, line);
 
     return parseData;
+  }
+
+  // dotnotationpostfix =
+  //   | spaces? '.' '$'? identifier
+  //   { type, expression, mapped, field }
+  parseDotNotationPostfix() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'dotnotation';
+    const expression = null;
+    let mapped = false;
+    let name = null;
+    let parseData = { success: false, message: { type: 'dotnotationpostfix', parser: this }, ast: null };
+
+    (() => {
+      // Consume spaces?.
+      this.parseSpaces();
+
+      // Consume '.'.
+      if (!this.parseToken('.').success) return null;
+
+      // Consume '$'?.
+      if (this.parseToken('$').success) mapped = true;
+
+      // Consume identifier.
+      if (!this.parseIdentifier().success) return null;
+      ({ name }  = this.lastParseData.ast);
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression, mapped, name } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // cascadingnotationpostfix =
+  //   | spaces? '~' '$'? identifier
+  //   { type, expression, mapped, field }
+  parseCascadingNotationPostfix() {
+
   }
 
   // range =
