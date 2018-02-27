@@ -353,13 +353,6 @@ listelementpostfix =
   | _? '[' spaces? listarguments _? ']' // ignorenewline
   | _? '[' nextcodeline indent listarguments nextcodeline dedent ']'
 
-dictelementpostfix =
-  | _? '{' spaces? dictarguments _? '}' // ignorenewline
-  | _? '{' nextcodeline indent dictarguments nextcodeline dedent '}'
-
-dictarguments =
-  | infixexpression (_comma _? infixexpression)* _comma?
-
 range =
   | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
   | '..' (_? infixexpression _? '..')? _? infixexpression
