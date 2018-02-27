@@ -1313,7 +1313,7 @@ print(new Parser('  (greet:"Hi",index:1 ,cost:.2,\n0o23e56,pattern:/regex/,)').p
 print(String.raw`(greet: "Hi",)`);
 print(new Parser('(greet: "Hi",)').parseCallPostfix());
 
-print('========= DOTNOTATION =========');
+print('========= DOTNOTATIONPOSTFIX =========');
 
 print(String.raw`. name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser('. name').parseDotNotationPostfix()); // fail
@@ -1326,4 +1326,18 @@ print(new Parser('  .address45').parseDotNotationPostfix());
 
 print(String.raw`.$commons`);
 print(new Parser('.$commons').parseDotNotationPostfix());
+
+print('========= CASCADINGNOTATIONPOSTFIX =========');
+
+print(String.raw`~ name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('~ name').parseCascadingNotationPostfix()); // fail
+
+print(String.raw`~address45`);
+print(new Parser('~address45').parseCascadingNotationPostfix());
+
+print(String.raw`  ~address45`);
+print(new Parser('  ~address45').parseCascadingNotationPostfix());
+
+print(String.raw`~$commons`);
+print(new Parser('~$commons').parseCascadingNotationPostfix());
 
