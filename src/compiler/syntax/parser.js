@@ -5928,7 +5928,46 @@ class Parser {
   //   | spaces? '~' '$'? identifier
   //   { type, expression, mapped, field }
   parseCascadingNotationPostfix() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
 
+    const type = 'cascadingnotation';
+    const expression = null;
+    let mapped = false;
+    let name = null;
+    let parseData = { success: false, message: { type: 'cascadingnotationpostfix', parser: this }, ast: null };
+
+    (() => {
+      // Consume spaces?.
+      this.parseSpaces();
+
+      // Consume '~'.
+      if (!this.parseToken('~').success) return null;
+
+      // Consume '$'?.
+      if (this.parseToken('$').success) mapped = true;
+
+      // Consume identifier.
+      if (!this.parseIdentifier().success) return null;
+      ({ name }  = this.lastParseData.ast);
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression, mapped, name } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
   }
 
   // range =
