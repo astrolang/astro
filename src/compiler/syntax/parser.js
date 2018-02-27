@@ -3652,7 +3652,7 @@ class Parser {
         (() => {
           // Consume identifier.
           if (!this.parseIdentifier().success) return;
-          key = this.lastParseData.ast.name
+          key = this.lastParseData.ast.name;
 
           // Consume _?.
           this.parse_();
@@ -3736,7 +3736,7 @@ class Parser {
         (() => {
           // Consume identifier.
           if (!this.parseIdentifier().success) return;
-          key = this.lastParseData.ast.name
+          key = this.lastParseData.ast.name;
           value = this.lastParseData.ast;
 
           // Check &(_comma | nextcodeline _? | _? '}').
@@ -3829,7 +3829,7 @@ class Parser {
     } = this;
 
     const type = 'objectarguments';
-    let expressions = [];
+    const expressions = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
@@ -4362,7 +4362,7 @@ class Parser {
     } = this;
 
     const type = 'dictarguments';
-    let expressions = [];
+    const expressions = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
@@ -4626,7 +4626,7 @@ class Parser {
   parseTupleArguments() {
     // Keep original state.
     const {
-      lastPosition, column, line, ignoreNewline,
+      lastPosition, column, line,
     } = this;
 
     const type = 'tuplearguments';
@@ -4653,7 +4653,7 @@ class Parser {
         let loopCount = 0;
         while (true) {
           let parseSuccessful = false;
-          const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
           (() => {
             // Consume comma.
             if (!this.parse_Comma().success) return;
@@ -4674,13 +4674,13 @@ class Parser {
           // If parsing the above fails, revert state to what it was before that parsing began.
           // And break out of the loop.
           if (!parseSuccessful) {
-            this.reset(state.lastPosition, null, null, state.column, state.line);
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
             break;
           }
         }
 
         // At least one iteration of the above must be parsed successfully.
-        if (loopCount < 1) return null;
+        if (loopCount < 1) return;
 
         // Consume _comma?.
         this.parse_Comma();
@@ -4873,11 +4873,11 @@ class Parser {
   parseNamedTupleArguments() {
     // Keep original state.
     const {
-      lastPosition, column, line, ignoreNewline,
+      lastPosition, column, line,
     } = this;
 
     const type = 'namedtuplearguments';
-    let expressions = [];
+    const expressions = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
@@ -4885,20 +4885,20 @@ class Parser {
       let value = null;
 
       // Consume identifier.
-      if (!this.parseIdentifier().success) return;
+      if (!this.parseIdentifier().success) return null;
       key = this.lastParseData.ast.name;
 
       // Consume _?.
       this.parse_();
 
       // Consume ':'.
-      if (!this.parseToken(':').success) return;
+      if (!this.parseToken(':').success) return null;
 
       // Consume _?.
       this.parse_();
 
       // Consume infixexpression.
-      if (!this.parseInfixExpression().success) return;
+      if (!this.parseInfixExpression().success) return null;
       value = this.lastParseData.ast;
 
       expressions.push({ key, value });
@@ -5610,10 +5610,10 @@ class Parser {
   parseCallArguments() {
     // Keep original state.
     const {
-      lastPosition, column, line, ignoreNewline,
+      lastPosition, column, line,
     } = this;
 
-    const type = 'namedtuplearguments';
+    const type = 'callarguments';
     const expressions = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
@@ -5621,26 +5621,40 @@ class Parser {
       let key = null;
       let value = null;
 
-      // Consume identifier.
-      if (!this.parseIdentifier().success) return;
-      key = this.lastParseData.ast.name;
+      // Optional parsing. (identifier _? ':' _?)?
+      let optionalParseSuccessful = false;
+      const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Consume identifier.
+        if (!this.parseIdentifier().success) return;
+        key = this.lastParseData.ast.name;
 
-      // Consume _?.
-      this.parse_();
+        // Consume _?.
+        this.parse_();
 
-      // Consume ':'.
-      if (!this.parseToken(':').success) return;
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
 
-      // Consume _?.
-      this.parse_();
+        // Consume _?.
+        this.parse_();
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+        key = null;
+      }
 
       // Consume infixexpression.
-      if (!this.parseInfixExpression().success) return;
+      if (!this.parseInfixExpression().success) return null;
       value = this.lastParseData.ast;
 
       expressions.push({ key, value });
 
-      // Optional-multiple parsing. (_comma _? identifier _? ':' _? infixexpression)*
+      // Optional-multiple parsing. (_comma _? (identifier _? ':' _?)? infixexpression)*
       while (true) {
         let parseSuccessful = false;
         const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
@@ -5651,18 +5665,32 @@ class Parser {
           // Consume _?.
           this.parse_();
 
-          // Consume identifier.
-          if (!this.parseIdentifier().success) return;
-          key = this.lastParseData.ast.name;
+          // Optional parsing. (identifier _? ':' _?)?
+          let optionalParseSuccessful = false;
+          const state3 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume identifier.
+            if (!this.parseIdentifier().success) return;
+            key = this.lastParseData.ast.name;
 
-          // Consume _?.
-          this.parse_();
+            // Consume _?.
+            this.parse_();
 
-          // Consume ':'.
-          if (!this.parseToken(':').success) return;
+            // Consume ':'.
+            if (!this.parseToken(':').success) return;
 
-          // Consume _?.
-          this.parse_();
+            // Consume _?.
+            this.parse_();
+
+            // This optional was parsed successfully.
+            optionalParseSuccessful = true;
+          })();
+
+          // If parsing the above optional fails, revert state to what it was before that parsing began.
+          if (!optionalParseSuccessful) {
+            this.reset(state3.lastPosition, null, null, state3.column, state3.line);
+            key = null;
+          }
 
           // Consume infixexpression.
           if (!this.parseInfixExpression().success) return;
@@ -5715,36 +5743,34 @@ class Parser {
     // Ignore ignorenewline from outer scope, this rule may contain indentation.
     this.ignoreNewline = false;
 
-    const type = 'namedtupleliteral';
-    let expressions = [];
-    let parseData = { success: false, message: { type, parser: this }, ast: null };
+    const type = 'functioncall';
+    let expression = null;
+    let args = [];
+    let parseData = { success: false, message: { type: 'callpostfix', parser: this }, ast: null };
 
     (() => {
       // Alternate parsing.
-      // | '(' _? ':' _?  ')'  // ignorenewline
-      // | '(' spaces? namedtuplearguments _? ')' // ignorenewline
-      // | '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
+      // | spaces? '(' _? ')' // ignorenewline
+      // | spaces? '(' spaces? callarguments _? ')' // ignorenewline
+      // | spaces? '(' nextcodeline indent callarguments nextcodeline dedent ')'
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
       const state = {
         lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
       };
-      const otherState = { expressions: [...expressions] };
+      const otherState = { args: [...args] };
 
-      // [1]. '(' _? ':' _?  ')'  // ignorenewline
+      // [1]. spaces? '(' _? ')' // ignorenewline
       (() => {
+        // Consume spaces?.
+        this.parseSpaces();
+
         // Consume '('.
         if (!this.parseToken('(').success) return;
 
         // Ignore newline from this point
         this.ignoreNewline = true;
-
-        // Consume _?.
-        this.parse_();
-
-        // Consume ':'.
-        if (!this.parseToken(':').success) return;
 
         // Consume _?.
         this.parse_();
@@ -5756,14 +5782,17 @@ class Parser {
         alternativeParseSuccessful = true;
       })();
 
-      // [2]. '(' spaces? namedtuplearguments _? ')' // ignorenewline
+      // [2]. spaces? '(' spaces? callarguments _? ')' // ignorenewline
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
-        ({ expressions } = otherState);
+        ({ args } = otherState);
         this.ignoreNewline = false;
 
         (() => {
+          // Consume spaces?.
+          this.parseSpaces();
+
           // Consume '('.
           if (!this.parseToken('(').success) return;
 
@@ -5773,9 +5802,9 @@ class Parser {
           // Ignore newline from this point
           this.ignoreNewline = true;
 
-          // Consume namedtuplearguments.
-          if (!this.parseNamedTupleArguments().success) return;
-          ({ expressions } = this.lastParseData.ast);
+          // Consume callarguments.
+          if (!this.parseCallArguments().success) return;
+          args = this.lastParseData.ast.expressions;
 
           // Consume _?
           this.parse_();
@@ -5788,14 +5817,17 @@ class Parser {
         })();
       }
 
-      // [3]. '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
+      // [3]. spaces? '(' nextcodeline indent callarguments nextcodeline dedent ')'
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
-        ({ expressions } = otherState);
+        ({ args } = otherState);
         this.ignoreNewline = false;
 
         (() => {
+          // Consume spaces?.
+          this.parseSpaces();
+
           // Consume '('.
           if (!this.parseToken('(').success) return;
 
@@ -5805,9 +5837,9 @@ class Parser {
           // Consume indent.
           if (!this.parseIndent().success) return;
 
-          // Consume namedtuplearguments.
-          if (!this.parseNamedTupleArguments().success) return;
-          ({ expressions } = this.lastParseData.ast);
+          // Consume callarguments.
+          if (!this.parseCallArguments().success) return;
+          args = this.lastParseData.ast.expressions;
 
           // Consume nextcodeline.
           if (!this.parseNextCodeLine().success) return;
@@ -5827,7 +5859,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type, expressions } };
+      parseData = { success: true, message: null, ast: { type, expression, arguments: args } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
