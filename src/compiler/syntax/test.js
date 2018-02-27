@@ -1262,3 +1262,54 @@ print(new Parser(' foo').parseCommandNotationPostfix());
 // print(String.raw`  'hi' + 25`);
 // print(new Parser("  'hi' +  25").parseCommandNotationPostfix());
 
+print('========= CALLARGUMENTS =========');
+
+print(String.raw`"greet": "Hi">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('"greet": "Hi"').parseCallArguments()); // mid
+
+print(String.raw`greet:"Hi", 1,cost:.2,total:0o23e56 , /regex/,`);
+print(new Parser('greet:"Hi", 1,cost:.2,total:0o23e56 , /regex/,').parseCallArguments());
+
+print(String.raw`total:0o23e56,pattern:/regex/,`);
+print(new Parser('total:0o23e56,pattern:/regex/,').parseCallArguments());
+
+print(String.raw`"Hi",`);
+print(new Parser('"Hi",').parseCallArguments());
+
+print(String.raw`greet :"Hi"`);
+print(new Parser('greet :"Hi"').parseCallArguments());
+
+print('========= CALLPOSTFIX =========');
+
+print(String.raw`(\n        price: 50_230, name: "Tosin"\n)>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print((() => { // fail
+  const parser = new Parser('(\n        price: 50_230, name: "Tosin"\n)');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseCallPostfix();
+})());
+
+print(String.raw`(:)>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('(:)').parseCallPostfix()); // fail
+
+print(String.raw`()`);
+print(new Parser('()').parseCallPostfix());
+
+print(String.raw`(\n        price: 50_230, name: "Tosin"\n    )`);
+print((() => {
+  const parser = new Parser('(\n        price: 50_230, name: "Tosin"\n    )');
+  parser.lastIndentCount = 1; // One indent level.
+  return parser.parseCallPostfix();
+})());
+
+print(String.raw`  (\n    (\n        name: "john", age :20\n    ), label:"500", pattern  :/regex/, \n)`);
+print(new Parser('  (\n    (\n        name: "john", age :20\n    ), label:"500", pattern  :/regex/, \n)').parseCallPostfix());
+
+print(String.raw`  (greet ,index:1, .2,total:0o23e56,pattern:/regex/,)`);
+print(new Parser('  (greet ,index:1, .2,total:0o23e56,pattern:/regex/,)').parseCallPostfix());
+
+print(String.raw`  (greet:"Hi",index:1 ,cost:.2,\n0o23e56,pattern:/regex/,)`);
+print(new Parser('  (greet:"Hi",index:1 ,cost:.2,\n0o23e56,pattern:/regex/,)').parseCallPostfix());
+
+print(String.raw`(greet: "Hi",)`);
+print(new Parser('(greet: "Hi",)').parseCallPostfix());
+
