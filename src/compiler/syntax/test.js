@@ -1313,3 +1313,17 @@ print(new Parser('  (greet:"Hi",index:1 ,cost:.2,\n0o23e56,pattern:/regex/,)').p
 print(String.raw`(greet: "Hi",)`);
 print(new Parser('(greet: "Hi",)').parseCallPostfix());
 
+print('========= DOTNOTATION =========');
+
+print(String.raw`. name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('. name').parseDotNotationPostfix()); // fail
+
+print(String.raw`.address45`);
+print(new Parser('.address45').parseDotNotationPostfix());
+
+print(String.raw`  .address45`);
+print(new Parser('  .address45').parseDotNotationPostfix());
+
+print(String.raw`.$commons`);
+print(new Parser('.$commons').parseDotNotationPostfix());
+
