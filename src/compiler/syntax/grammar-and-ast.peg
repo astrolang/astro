@@ -334,11 +334,11 @@ callpostfix =
 
 dotnotationpostfix =
   | spaces? '.' '$'? identifier
-  { type, expression, map, name }
+  { type, expression, mapped, field }
 
 cascadingnotationpostfix =
   | spaces? '~' '$'? identifier
-  { type, expression, map, name }
+  { type, expression, mapped, field }
 
 listargument =
   | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression '!'?)?
