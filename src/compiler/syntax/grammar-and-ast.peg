@@ -342,18 +342,18 @@ cascadingnotationpostfix =
   | spaces? '~' '$'? listelementpostfix
   { type, expression, mapped, field }
 
-listargument =
+listaccessargument =
   | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression '!'?)?
   | ':' (_? infixexpression _? ':')? _? infixexpression '!'?
   | ':'
   | infixexpression
 
-listarguments =
-  | listargument (_comma _? listargument)* _comma?
+listaccessarguments =
+  | listaccessargument (_comma _? listaccessargument)* _comma?
 
-listelementpostfix =
-  | spaces? '[' spaces? listarguments _? ']' // ignorenewline
-  | spaces? '[' nextcodeline indent listarguments nextcodeline dedent ']'
+listaccesspostfix =
+  | spaces? '[' spaces? listaccessarguments _? ']' // ignorenewline
+  | spaces? '[' nextcodeline indent listaccessarguments nextcodeline dedent ']'
 
 range =
   | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
@@ -395,8 +395,7 @@ subatompostfix =
   | callpostfix
   | dotnotationpostfix
   | cascadingnotationpostfix
-  | listelementpostfix
-  | dictelementpostfix
+  | listaccesspostfix
 
 subatom =
   | '(' spaces? tupleexpression _? ')' identifier? // ignorenewline
