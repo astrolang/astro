@@ -2,5 +2,10 @@ fun quibble(s):
     let result = " and ".join(s).replace(/ and /, ", ", len(s) - 1)
     "{ $result }"
 
-let s = [ [] ["ABC"] ["ABC", "DEF"] ["ABC", "DEF", "G", "H"] ]
+let s = [
+    []
+    ["ABC"]
+    ["ABC", "DEF"]
+    ["ABC", "DEF", "G", "H"]
+]
 for i in s: print(quibble i)
