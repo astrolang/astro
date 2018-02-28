@@ -319,7 +319,7 @@ literal =
   | comprehension
 
 commandnotationpostfix =
-  | spaces &(range | symbolliteral | stringliteral | numericliteral | identifier) infixexpression
+  | spaces &(identifier | stringliteral | numericliteral | lambdaexpression | range | symbolliteral) infixexpression
   { type, expression, arguments: [{ key, value }] }
 
 callarguments =
@@ -333,11 +333,13 @@ callpostfix =
   { type, expression, arguments: [{ key, value }] }
 
 dotnotationpostfix =
+  | spaces? '.' '$' listelementpostfix // TODO
   | spaces? '.' '$'? identifier
   { type, expression, mapped, field }
 
 cascadingnotationpostfix =
   | spaces? '~' '$'? identifier
+  | spaces? '~' '$'? listelementpostfix
   { type, expression, mapped, field }
 
 listargument =
@@ -350,8 +352,8 @@ listarguments =
   | listargument (_comma _? listargument)* _comma?
 
 listelementpostfix =
-  | _? '[' spaces? listarguments _? ']' // ignorenewline
-  | _? '[' nextcodeline indent listarguments nextcodeline dedent ']'
+  | spaces? '[' spaces? listarguments _? ']' // ignorenewline
+  | spaces? '[' nextcodeline indent listarguments nextcodeline dedent ']'
 
 range =
   | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?

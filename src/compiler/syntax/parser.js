@@ -5549,7 +5549,7 @@ class Parser {
   }
 
   // commandnotationpostfix =
-  //   | spaces &(range | symbolliteral | stringliteral | numericliteral | identifier) infixexpression
+  //   | spaces &(identifier | stringliteral | numericliteral | lambdaexpression | range | symbolliteral) infixexpression
   //   { type, expression, arguments: [{ key, value }] }
   parseCommandNotationPostfix() { // TODO: Unimplemented
     // Keep original state.
@@ -5569,14 +5569,15 @@ class Parser {
       // Consume spaces.
       if (!this.parseSpaces().success) return null;
 
-      // Check &(range | symbolliteral | stringliteral | numericliteral | identifier).
+      // Check &(identifier | stringliteral | numericliteral | lambdaexpression | range | symbolliteral).
       const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
       if (
-        !this.parseRange().success &&
-        !this.parseSymbolLiteral().success &&
+        !this.parseIdentifier().success &&
         !this.parseStringLiteral().success &&
         !this.parseNumericLiteral().success &&
-        !this.parseIdentifier().success
+        !this.parseLambdaExpression().success &&
+        !this.parseRange().success &&
+        !this.parseSymbolLiteral().success
       ) return null;
       this.reset(state.lastPosition, null, null, state.column, state.line);
 
@@ -5744,7 +5745,7 @@ class Parser {
     this.ignoreNewline = false;
 
     const type = 'functioncall';
-    let expression = null;
+    const expression = null;
     let args = [];
     let parseData = { success: false, message: { type: 'callpostfix', parser: this }, ast: null };
 
@@ -5975,6 +5976,16 @@ class Parser {
   //   | '..' (_? infixexpression _? '..')? _? infixexpression
   //   { type, begin, step, end }
   parseRange() { // TODO: incorrect implementation
+    const type = 'range';
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
+  // lambdaexpression =
+  //   | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressiononeinlinenest
+  //   | '|' _? functionparameters _comma? _? '|' _? '=>' block
+  parseLambdaExpression() { // TODO: incorrect implementation
     const type = 'range';
 
     // Parsing failed.
