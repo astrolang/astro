@@ -402,6 +402,7 @@ subatom =
   | '(' spaces? tupleexpression _? ')' identifier? // ignorenewline
   | '(' nextcodeline indent tupleexpression nextcodeline dedent ')' identifier?
   | '~' '$'? identifier
+  | operator callpostfix
   | coefficientexpression
   | literal
   | noname
@@ -724,8 +725,8 @@ functionparameter =
   | identifier
 
 functionhead =
-  | 'fun' _ identifier _? '(' spaces? functionparameters _?')' // ignorenewline
-  | 'fun' _ identifier _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
+  | 'fun' _ (identifier | operator) _? '(' spaces? functionparameters _?')' // ignorenewline
+  | 'fun' _ (identifier | operator) _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
 
 functiondeclaration =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
