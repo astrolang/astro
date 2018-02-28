@@ -8,10 +8,10 @@ fun merge(left, right):
     let result = []
     while not (left.isEmpty or right.isEmpty):
         if left[1] <= right[1]:
-            result ++ left.shift()
+            result.push left.shift()
         else:
-            result ++ right.shift()
-    result ++ left ++ right
+            result.push right.shift()
+    result.push left.push right
 
 let arr = [7, 6, 5, 9, 8, 4, 3, 1, 2, 0]
 print mergeSort arr
