@@ -1341,3 +1341,57 @@ print(new Parser('  ~address45').parseCascadingNotationPostfix());
 print(String.raw`~$commons`);
 print(new Parser('~$commons').parseCascadingNotationPostfix());
 
+print('========= INDEXARGUMENT =========');
+
+print(String.raw` : >>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser(" : ").parseIndexArgument()); // fail
+
+print(String.raw`45:name:'hi'`);
+print(new Parser("45:name:'hi'").parseIndexArgument());
+
+// print(String.raw`-1::'hi'`);
+// print(new Parser("-1::'hi'").parseIndexArgument());
+
+print(String.raw`:name:'hi'`);
+print(new Parser(":name:'hi'").parseIndexArgument());
+
+print(String.raw`:`);
+print(new Parser(":").parseIndexArgument());
+
+print(String.raw`'name'`);
+print(new Parser("'name'").parseIndexArgument());
+
+print('========= INDEXARGUMENT =========');
+
+print(String.raw`greet:"Hi":56, 1,5:.2,total:0o23e56 , /regex/`);
+print(new Parser('greet:"Hi":56, 1,5:.2,total:0o23e56 , /regex/').parseIndexArguments());
+
+print(String.raw`0x56ffe, :`);
+print(new Parser('0x56ffe, :').parseIndexArguments());
+
+print(String.raw`"Hi"`);
+print(new Parser('"Hi"').parseIndexArguments());
+
+// print(String.raw`:-1,45`);
+// print(new Parser(":-1,45").parseIndexArguments());
+
+print(String.raw`:1,45`);
+print(new Parser(":1,45").parseIndexArguments());
+
+print('========= INDEXPOSTFIX =========');
+
+print(String.raw`[ greet:"Hi":56, 1,5:.2,total:0o23e56 , /regex/ ]`);
+print(new Parser('[ greet:"Hi":56, 1,5:.2,total:0o23e56 , /regex/ ]').parseIndexPostfix());
+
+print(String.raw` [0x56ffe,\n:]`);
+print(new Parser(' [0x56ffe,\n:]').parseIndexPostfix());
+
+print(String.raw`[\n    "Hi"\n]`);
+print(new Parser('[\n    "Hi"\n]').parseIndexPostfix());
+
+// print(String.raw`[:-1,45]`);
+// print(new Parser("[:-1,45]").parseIndexPostfix());
+
+print(String.raw`[:1,45]`);
+print(new Parser("[:1,45]").parseIndexPostfix());
+
