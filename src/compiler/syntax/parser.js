@@ -6390,6 +6390,176 @@ class Parser {
     return parseData;
   }
 
+  // ternaryoperator =
+  //   | '(' spaces? infixexpression _? ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
+  //   | '(' nextcodeline indent infixexpression nextcodeline dedent ')' _? '?' _? infixexpression _? ':' _? infixexpression
+  //   { type, condition, truebody, falsebody }
+  parseTernaryOperator() {
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'index';
+    let condition = null;
+    let truebody = null;
+    let falsebody = null;
+    let parseData = { success: false, message: { type: 'indexpostfix', parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | '(' spaces? infixexpression _? ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
+      // | '(' nextcodeline indent infixexpression nextcodeline dedent ')' _? '?' _? infixexpression _? ':' _? infixexpression
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = {
+        lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
+      };
+      const otherState = { condition, truebody, falsebody };
+
+      // [1]. '(' spaces? infixexpression _? ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
+      (() => {
+        // Consume '('.
+        if (!this.parseToken('(').success) return;
+
+        // Consume spaces?.
+        this.parseSpaces();
+
+        // Ignore newline from this point
+        this.ignoreNewline = true;
+
+        // Consume infixexpression.
+        if (!this.parseInfixExpression().success) return;
+        condition = this.lastParseData.ast;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume ')'.
+        if (!this.parseToken(')').success) return;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume '?'.
+        if (!this.parseToken('?').success) return;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume infixexpression.
+        if (!this.parseInfixExpression().success) return;
+        truebody = this.lastParseData.ast;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume infixexpression.
+        if (!this.parseInfixExpression().success) return;
+        falsebody = this.lastParseData.ast;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. '(' nextcodeline indent infixexpression nextcodeline dedent ')' _? '?' _? infixexpression _? ':' _? infixexpression
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ condition, truebody, falsebody } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '('.
+          if (!this.parseToken('(').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          condition = this.lastParseData.ast;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume ')'.
+          if (!this.parseToken(')').success) return;
+
+          // Consume _?
+          this.parse_();
+
+          // Consume '?'.
+          if (!this.parseToken('?').success) return;
+
+          // Consume _?
+          this.parse_();
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          truebody = this.lastParseData.ast;
+
+          // Consume _?
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume _?
+          this.parse_();
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          falsebody = this.lastParseData.ast;
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          falsebody = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, condition, truebody, falsebody } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
+
+    return parseData;
+  }
+
   // lambdaexpression =
   //   | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressiononeinlinenest
   //   | '|' _? functionparameters _comma? _? '|' _? '=>' block
@@ -6400,6 +6570,7 @@ class Parser {
     return { success: false, message: { type, parser: this }, ast: null };
   }
 
+  // infixexpression =
   // infixexpression =
   //   | range
   //   | prefixatom operator infixexpressionrest+
