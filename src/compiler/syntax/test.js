@@ -1469,14 +1469,11 @@ print('========= YIELD =========');
 print(String.raw`yieldjohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("yieldjohn").parseYield()); // mid
 
+print(String.raw`yield from>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("yield from").parseYield()); // mid
+
 print(String.raw`yield john`);
 print(new Parser("yield john").parseYield());
-
-print(String.raw`yield from 45`);
-print(new Parser("yield from 45").parseYield());
-
-print(String.raw`yield from 45`);
-print(new Parser("yield from 45").parseYield());
 
 print(String.raw`yield from 45`);
 print(new Parser("yield from 45").parseYield());
@@ -1561,3 +1558,19 @@ print(new Parser("spill 0b100e56").parseSpill());
 // print(String.raw`spill+john`);
 // print(new Parser("spill+john").parseSpill());
 
+print('========= CONTROLPRIMITIVE =========');
+
+print(String.raw`spill john`);
+print(new Parser("spill john").parseControlPrimitive());
+
+print(String.raw`break name @name`);
+print(new Parser("break name @name").parseControlPrimitive());
+
+print(String.raw`raise 0b100e56`);
+print(new Parser("raise 0b100e56").parseControlPrimitive());
+
+print(String.raw`yield from 45`);
+print(new Parser("yield from 45").parseControlPrimitive());
+
+print(String.raw`return 0b100e56`);
+print(new Parser("return 0b100e56").parseControlPrimitive());
