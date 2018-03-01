@@ -5972,9 +5972,7 @@ class Parser {
   }
 
   // indexargument =
-  //   | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression)?
-  //   | ':' (_? infixexpression _? ':')? _? infixexpression
-  //   | ':'
+  //   | infixexpression _? ':' (_? infixexpression? _? ':')? (_? infixexpression)?
   //   | infixexpression
   //   { begin, step, end: { value, backwards } }
   parseIndexArgument() {
@@ -5995,9 +5993,7 @@ class Parser {
 
     (() => {
       // Alternate parsing.
-      // | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression)?
-      // | ':' (_? infixexpression _? ':')? _? infixexpression
-      // | ':'
+      // | infixexpression _? ':' (_? infixexpression? _? ':')? (_? infixexpression)?
       // | infixexpression
       let alternativeParseSuccessful = false;
 
@@ -6007,35 +6003,19 @@ class Parser {
       };
       const otherState = { index, begin, step, end };
 
-      // [1]. infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression)?
+      // [1]. (infixexpression _?)? ':' (_? infixexpression? _? ':')? _? infixexpression?
       (() => {
-        // Consume infixexpression.
-        if (!this.parseInfixExpression().success) return;
-        begin = this.lastParseData.ast;
-
-        // Consume _?.
-        this.parse_();
-
-        // Consume ':'.
-        if (!this.parseToken(':').success) return;
-
-        // Optional parsing. (_? infixexpression _? ':')?
+        // Optional parsing. (infixexpression _?)?
         let optionalParseSuccessful = false;
         const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-        const otherState = { step };
+        const otherState = { begin };
         (() => {
-          // Consume _?.
-          this.parse_();
-
           // Consume infixexpression.
           if (!this.parseInfixExpression().success) return;
-          step = this.lastParseData.ast;
+          begin = this.lastParseData.ast;
 
           // Consume _?.
           this.parse_();
-
-          // Consume ':'.
-          if (!this.parseToken(':').success) return;
 
           // This optional was parsed successfully.
           optionalParseSuccessful = true;
@@ -6044,20 +6024,28 @@ class Parser {
         // If parsing the above optional fails, revert state to what it was before that parsing began.
         if (!optionalParseSuccessful) {
           this.reset(state.lastPosition, null, null, state.column, state.line);
-          ({ step } = otherState);
+          ({ begin } = otherState);
         }
 
-        // Optional parsing. (_? infixexpression _? '!'?)?
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Optional parsing. (_? infixexpression? _? ':')?
         let optionalParseSuccessful2 = false;
         const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-        const otherState2 = { end };
+        const otherState2 = { step };
         (() => {
           // Consume _?.
           this.parse_();
 
-          // Consume infixexpression.
-          if (!this.parseInfixExpression().success) return;
-          end = this.lastParseData.ast;
+          // Consume infixexpression?.
+          if (this.parseInfixExpression().success) step = this.lastParseData.ast;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
 
           // This optional was parsed successfully.
           optionalParseSuccessful2 = true;
@@ -6066,81 +6054,20 @@ class Parser {
         // If parsing the above optional fails, revert state to what it was before that parsing began.
         if (!optionalParseSuccessful2) {
           this.reset(state2.lastPosition, null, null, state2.column, state2.line);
-          ({ end } = otherState2);
+          ({ step } = otherState2);
         }
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume infixexpression?.
+        if (this.parseInfixExpression().success) end = this.lastParseData.ast;
 
         // This alternative was parsed successfully.
         alternativeParseSuccessful = true;
       })();
 
-      // [2]. ':' (_? infixexpression _? ':')? _? infixexpression
-      if (!alternativeParseSuccessful) {
-        // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
-        ({ begin, step, end } = otherState);
-        this.ignoreNewline = false;
-
-        (() => {
-          // Consume ':'.
-          if (!this.parseToken(':').success) return;
-
-          // Optional parsing. (_? infixexpression _? ':')?
-          let optionalParseSuccessful = false;
-          const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-          const otherState = { step };
-          (() => {
-            // Consume _?.
-            this.parse_();
-
-            // Consume infixexpression.
-            if (!this.parseInfixExpression().success) return;
-            step = this.lastParseData.ast;
-
-            // Consume _?.
-            this.parse_();
-
-            // Consume ':'.
-            if (!this.parseToken(':').success) return;
-
-            // This optional was parsed successfully.
-            optionalParseSuccessful = true;
-          })();
-
-          // If parsing the above optional fails, revert state to what it was before that parsing began.
-          if (!optionalParseSuccessful) {
-            this.reset(state.lastPosition, null, null, state.column, state.line);
-            ({ step } = otherState);
-          }
-
-          // Consume _?.
-          this.parse_();
-
-          // Consume infixexpression.
-          if (!this.parseInfixExpression().success) return;
-          end = this.lastParseData.ast;
-
-          // This alternative was parsed successfully.
-          alternativeParseSuccessful = true;
-        })();
-      }
-
-      // [3]. ':'
-      if (!alternativeParseSuccessful) {
-        // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
-        ({ index, begin, step, end } = otherState);
-        this.ignoreNewline = false;
-
-        (() => {
-          // Consume ':'.
-          if (!this.parseToken(':').success) return;
-
-          // This alternative was parsed successfully.
-          alternativeParseSuccessful = true;
-        })();
-      }
-
-      // [4]. infixexpression
+      // [2]. infixexpression
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
@@ -6368,11 +6295,99 @@ class Parser {
   //   | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
   //   | '..' (_? infixexpression _? '..')? _? infixexpression
   //   { type, begin, step, end }
-  parseRange() { // TODO: incorrect implementation
-    const type = 'range';
+  parseRange() {
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
 
-    // Parsing failed.
-    return { success: false, message: { type, parser: this }, ast: null };
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'range';
+    let begin = null;
+    let step = null;
+    let end = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+       // Optional parsing. (infixexpression _?)?
+       let optionalParseSuccessful = false;
+       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+       const otherState = { begin };
+       (() => {
+         // Consume infixexpression.
+         if (!this.parseInfixExpression().success) return;
+         begin = this.lastParseData.ast;
+
+         // Consume _?.
+         this.parse_();
+
+         // This optional was parsed successfully.
+         optionalParseSuccessful = true;
+       })();
+
+       // If parsing the above optional fails, revert state to what it was before that parsing began.
+       if (!optionalParseSuccessful) {
+         this.reset(state.lastPosition, null, null, state.column, state.line);
+         ({ begin } = otherState);
+       }
+
+       // Consume '..'.
+       if (!this.parseToken('..').success) return;
+
+       // Optional parsing. (_? infixexpression _? '..')?
+       let optionalParseSuccessful2 = false;
+       const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+       const otherState2 = { step };
+       (() => {
+         // Consume _?.
+         this.parse_();
+
+         // Consume infixexpression.
+         if (!this.parseInfixExpression().success) return;
+         step = this.lastParseData.ast;
+
+         // Consume _?.
+         this.parse_();
+
+         // Consume '..'.
+         if (!this.parseToken('..').success) return;
+
+         // This optional was parsed successfully.
+         optionalParseSuccessful2 = true;
+       })();
+
+       // If parsing the above optional fails, revert state to what it was before that parsing began.
+       if (!optionalParseSuccessful2) {
+         this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+         ({ step } = otherState2);
+       }
+
+       // Consume _?.
+       this.parse_();
+
+       // Consume infixexpression?.
+       if (this.parseInfixExpression().success) end = this.lastParseData.ast;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { begin, step, end } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
+
+    return parseData;
   }
 
   // lambdaexpression =
