@@ -276,9 +276,6 @@ LISTS
     # A slice can have a step value.
     let odds = numbers[1:2:30] # The step value is the `2` in the middle.
 
-    # `!` is used to access the index backwards.
-    var last = contestants[!1] # last index.
-
     # Negative step can be used to reverse index access.
     var reversed = contestants[:-1:]
 
@@ -658,7 +655,7 @@ COMPREHENSION
     let set = set.{i | i in random(0, 200)}
 
     # Nested loops.
-    let dict = { x: y | x in 1..30; y in 31..60 where even(y)}
+    let dict = @{ x: y | x in 1..30; y in 31..60 where even(y) }
 
 BREAK WITH
     # Break-with breaks a loop and returns a value.
@@ -715,7 +712,7 @@ WHILE LOOP & LOOP
     while x < 50
 
     # Nillable assignment in while loop.
-    while let details = books{title}:
+    while let details = books[title]:
         print details
         if details.author != 'J.K. Rowlings':
             break
