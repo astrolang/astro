@@ -1434,3 +1434,130 @@ print(new Parser("(  /hello/  )?age:cost").parseTernaryOperator());
 
 // print(String.raw`(/hello/ == regex)?age:cost`);
 // print(new Parser("(/hello/ == regex)?age:cost").parseTernaryOperator());
+
+print('========= RETURN =========');
+
+print(String.raw`returnjohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("returnjohn").parseReturn()); // mid
+
+print(String.raw`return 0b100e56`);
+print(new Parser("return 0b100e56").parseReturn());
+
+print(String.raw`return john`);
+print(new Parser("return john").parseReturn());
+
+print(String.raw`return 0b100e56`);
+print(new Parser("return 0b100e56").parseReturn());
+
+print(String.raw`return`);
+print(new Parser("return").parseReturn());
+
+// print(String.raw`return john + /regex/`);
+// print(new Parser("return john + /regex/").parseReturn());
+
+// print(String.raw`return john,/regex/`);
+// print(new Parser("return john,/regex/").parseReturn());
+
+// print(String.raw`return(john)`);
+// print(new Parser("return(john)").parseReturn());
+
+// print(String.raw`return+john`);
+// print(new Parser("return+john").parseReturn());
+
+print('========= YIELD =========');
+
+print(String.raw`yieldjohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("yieldjohn").parseYield()); // mid
+
+print(String.raw`yield john`);
+print(new Parser("yield john").parseYield());
+
+print(String.raw`yield from 45`);
+print(new Parser("yield from 45").parseYield());
+
+print(String.raw`yield from 45`);
+print(new Parser("yield from 45").parseYield());
+
+print(String.raw`yield from 45`);
+print(new Parser("yield from 45").parseYield());
+
+// print(String.raw`yield john + /regex/`);
+// print(new Parser("yield john + /regex/").parseYield());
+
+// print(String.raw`yield john,/regex/`);
+// print(new Parser("yield john,/regex/").parseYield());
+
+// print(String.raw`yield(john)`);
+// print(new Parser("yield(john)").parseYield());
+
+// print(String.raw`yield+john`);
+// print(new Parser("yield+john").parseYield());
+
+print('========= RAISE =========');
+
+print(String.raw`raisejohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("raisejohn").parseRaise()); // mid
+
+print(String.raw`raise john`);
+print(new Parser("raise john").parseRaise());
+
+print(String.raw`raise 0b100e56`);
+print(new Parser("raise 0b100e56").parseRaise());
+
+// print(String.raw`raise john + /regex/`);
+// print(new Parser("raise john + /regex/").parseRaise());
+
+// print(String.raw`raise john,/regex/`);
+// print(new Parser("raise john,/regex/").parseRaise());
+
+// print(String.raw`raise(john)`);
+// print(new Parser("raise(john)").parseRaise());
+
+// print(String.raw`raise+john`);
+// print(new Parser("raise+john").parseRaise());
+
+print('========= CONTINUE =========');
+
+print(String.raw`continue @john`);
+print(new Parser("continue @john").parseContinue());
+
+print(String.raw`continue`);
+print(new Parser("continue").parseContinue());
+
+print('========= BREAK =========');
+
+print(String.raw`break @john`);
+print(new Parser("break @john").parseBreak());
+
+print(String.raw`break`);
+print(new Parser("break").parseBreak());
+
+print(String.raw`break name`);
+print(new Parser("break name").parseBreak());
+
+print(String.raw`break name @name`);
+print(new Parser("break name @name").parseBreak());
+
+print('========= SPILL =========');
+
+print(String.raw`spilljohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("spilljohn").parseSpill()); // mid
+
+print(String.raw`spill john`);
+print(new Parser("spill john").parseSpill());
+
+print(String.raw`spill 0b100e56`);
+print(new Parser("spill 0b100e56").parseSpill());
+
+// print(String.raw`spill john + /regex/`);
+// print(new Parser("spill john + /regex/").parseSpill());
+
+// print(String.raw`spill john,/regex/`);
+// print(new Parser("spill john,/regex/").parseSpill());
+
+// print(String.raw`spill(john)`);
+// print(new Parser("spill(john)").parseSpill());
+
+// print(String.raw`spill+john`);
+// print(new Parser("spill+john").parseSpill());
+
