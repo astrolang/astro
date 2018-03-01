@@ -5560,7 +5560,7 @@ class Parser {
     // Ignore ignorenewline from outer scope, this rule may contain indentation.
     this.ignoreNewline = false;
 
-    const type = 'functioncall';
+    const type = 'call';
     const expression = null;
     const args = [];
     let parseData = { success: false, message: { type: 'commandnotationpostfix', parser: this }, ast: null };
@@ -5684,7 +5684,7 @@ class Parser {
             this.parse_();
 
             // This optional was parsed successfully.
-            optionalParseSuccessful = true;
+            optionalParseSuccessful2 = true;
           })();
 
           // If parsing the above optional fails, revert state to what it was before that parsing began.
@@ -5744,7 +5744,7 @@ class Parser {
     // Ignore ignorenewline from outer scope, this rule may contain indentation.
     this.ignoreNewline = false;
 
-    const type = 'functioncall';
+    const type = 'call';
     const expression = null;
     let args = [];
     let parseData = { success: false, message: { type: 'callpostfix', parser: this }, ast: null };
@@ -5967,6 +5967,399 @@ class Parser {
 
     // Parsing failed, so revert state.
     this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // indexargument =
+  //   | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression)?
+  //   | ':' (_? infixexpression _? ':')? _? infixexpression
+  //   | ':'
+  //   | infixexpression
+  //   { begin, step, end: { value, backwards } }
+  parseIndexArgument() {
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'indexargument';
+    let index = null;
+    let begin = null;
+    let step = null;
+    let end = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression)?
+      // | ':' (_? infixexpression _? ':')? _? infixexpression
+      // | ':'
+      // | infixexpression
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = {
+        lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
+      };
+      const otherState = { index, begin, step, end };
+
+      // [1]. infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression)?
+      (() => {
+        // Consume infixexpression.
+        if (!this.parseInfixExpression().success) return;
+        begin = this.lastParseData.ast;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Optional parsing. (_? infixexpression _? ':')?
+        let optionalParseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        const otherState = { step };
+        (() => {
+          // Consume _?.
+          this.parse_();
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          step = this.lastParseData.ast;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // This optional was parsed successfully.
+          optionalParseSuccessful = true;
+        })();
+
+        // If parsing the above optional fails, revert state to what it was before that parsing began.
+        if (!optionalParseSuccessful) {
+          this.reset(state.lastPosition, null, null, state.column, state.line);
+          ({ step } = otherState);
+        }
+
+        // Optional parsing. (_? infixexpression _? '!'?)?
+        let optionalParseSuccessful2 = false;
+        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        const otherState2 = { end };
+        (() => {
+          // Consume _?.
+          this.parse_();
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          end = this.lastParseData.ast;
+
+          // This optional was parsed successfully.
+          optionalParseSuccessful2 = true;
+        })();
+
+        // If parsing the above optional fails, revert state to what it was before that parsing began.
+        if (!optionalParseSuccessful2) {
+          this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+          ({ end } = otherState2);
+        }
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. ':' (_? infixexpression _? ':')? _? infixexpression
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ begin, step, end } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Optional parsing. (_? infixexpression _? ':')?
+          let optionalParseSuccessful = false;
+          const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          const otherState = { step };
+          (() => {
+            // Consume _?.
+            this.parse_();
+
+            // Consume infixexpression.
+            if (!this.parseInfixExpression().success) return;
+            step = this.lastParseData.ast;
+
+            // Consume _?.
+            this.parse_();
+
+            // Consume ':'.
+            if (!this.parseToken(':').success) return;
+
+            // This optional was parsed successfully.
+            optionalParseSuccessful = true;
+          })();
+
+          // If parsing the above optional fails, revert state to what it was before that parsing began.
+          if (!optionalParseSuccessful) {
+            this.reset(state.lastPosition, null, null, state.column, state.line);
+            ({ step } = otherState);
+          }
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          end = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. ':'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ index, begin, step, end } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [4]. infixexpression
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ index, begin, step, end } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+
+          // Consume infixexpression.
+          if (!this.parseInfixExpression().success) return;
+          index = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { index, begin, step, end } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
+
+    return parseData;
+  }
+
+  // indexarguments =
+  //   | indexargument (_comma _? indexargument)* _comma?
+  //   { expressions: [{ index, begin, step, end: { value, backwards } }] }
+  parseIndexArguments() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'indexarguments';
+    const expressions = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume indexargument.
+      if (!this.parseIndexArgument().success) return null;
+      expressions.push(this.lastParseData.ast);
+
+      // Optional-multiple parsing. (_comma _? indexargument)*
+      while (true) {
+        let parseSuccessful = false;
+        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Check _comma.
+          if (!this.parse_Comma().success) return;
+
+          // Check _?.
+          this.parse_();
+
+          // Consume indexargument.
+          if (!this.parseIndexArgument().success) return;
+          expressions.push(this.lastParseData.ast);
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+          break;
+        }
+      }
+
+      // Check _comma?.
+      this.parse_Comma();
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { expressions } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // indexpostfix =
+  //   | spaces? '[' spaces? indexarguments _? ']' // ignorenewline
+  //   | spaces? '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+  //   { type, arguments: [{ key, value }] }
+  parseIndexPostfix() {
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'index';
+    let expression = null;
+    let args = [];
+    let parseData = { success: false, message: { type: 'indexpostfix', parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | spaces? '[' spaces? indexarguments _? ']' // ignorenewline
+      // | spaces? '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = {
+        lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
+      };
+      const otherState = { args: [...args] };
+
+      // [1]. spaces? '[' spaces? indexarguments _? ']' // ignorenewline
+      (() => {
+        // Consume spaces?.
+        this.parseSpaces();
+
+        // Consume '['.
+        if (!this.parseToken('[').success) return;
+
+        // Consume spaces?.
+        this.parseSpaces();
+
+        // Ignore newline from this point
+        this.ignoreNewline = true;
+
+        // Consume indexarguments.
+        if (!this.parseIndexArguments().success) return;
+        args = this.lastParseData.ast.expressions;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume ']'.
+        if (!this.parseToken(']').success) return;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. spaces? '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ args } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Consume '['.
+          if (!this.parseToken('[').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume indexarguments.
+          if (!this.parseListArguments().success) return;
+          args = this.lastParseData.ast.expressions;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume ']'.
+          if (!this.parseToken(']').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, arguments: args } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
 
     return parseData;
   }
