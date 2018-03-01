@@ -2023,8 +2023,7 @@ class Parser {
   }
 
   // nameseparator =
-  //   | !(identifier | numericliteral)
-  //   | _
+  //   | !(identifier | numericliteral) _?
   parseNameSeparator() {
     // Keep original state.
     const {
@@ -2035,39 +2034,11 @@ class Parser {
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
-      // Alternate parsing.
-      // | !(identifier | numericliteral)
-      // | _
-      let alternativeParseSuccessful = false;
+      // Consume !(identifier | numericliteral).
+      if (this.parseIdentifier().success || this.parseNumericLiteral().success) return;
 
-      // Save state before alternative parsing.
-      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-
-      // [1]. !(identifier | numericliteral)
-      (() => {
-        // Consume !(identifier | numericliteral).
-        if (this.parseIdentifier().success || this.parseNumericLiteral().success) return;
-
-        // This alternative was parsed successfully.
-        alternativeParseSuccessful = true;
-      })();
-
-      // [2]. _
-      if (!alternativeParseSuccessful) {
-        // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, null, state.column, state.line);
-
-        (() => {
-          // Consume _.
-          if (!this.parse_().success) return;
-
-          // This alternative was parsed successfully.
-          alternativeParseSuccessful = true;
-        })();
-      }
-
-      // Check if any of the alternatives was parsed successfully
-      if (!alternativeParseSuccessful) return null;
+      // Consume _?.
+      this.parse_().success;
 
       // Update parseData.
       parseData = { success: true, message: null, ast: null };
@@ -5974,7 +5945,7 @@ class Parser {
   // indexargument =
   //   | infixexpression _? ':' (_? infixexpression? _? ':')? (_? infixexpression)?
   //   | infixexpression
-  //   { begin, step, end: { value, backwards } }
+  //   { index, begin, step, end }
   parseIndexArgument() {
     // Keep original state.
     const {
@@ -6110,7 +6081,7 @@ class Parser {
 
   // indexarguments =
   //   | indexargument (_comma _? indexargument)* _comma?
-  //   { expressions: [{ index, begin, step, end: { value, backwards } }] }
+  //   { expressions: [{ index, begin, step, end }] }
   parseIndexArguments() {
     // Keep original state.
     const {
@@ -6403,11 +6374,11 @@ class Parser {
     // Ignore ignorenewline from outer scope, this rule may contain indentation.
     this.ignoreNewline = false;
 
-    const type = 'index';
+    const type = 'ternaryoperator';
     let condition = null;
     let truebody = null;
     let falsebody = null;
-    let parseData = { success: false, message: { type: 'indexpostfix', parser: this }, ast: null };
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Alternate parsing.
@@ -6560,6 +6531,382 @@ class Parser {
     return parseData;
   }
 
+  // return =
+  //   | 'return' (nameseparator expressionnocontrolptimitive)?
+  //   { type, expression }
+  parseReturn() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'return';
+    let expression = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Check 'return'.
+      if (!this.parseToken('return').success) return;
+
+      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      let optionalParseSuccessful = false;
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Consume nameseparator.
+        if (!this.parseNameSeparator().success) return;
+
+        // Consume expressionnocontrolptimitive.
+        if (!this.parseExpressionNoControlPrimitive().success) return;
+        expression = this.lastParseData.ast;
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // yield =
+  //   | 'yield' ((_ 'from')? nameseparator expressionnocontrolptimitive)?
+  //   { type, expression, redirect }
+  parseYield() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'yield';
+    let expression = null;
+    let redirect = false;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Check 'yield'.
+      if (!this.parseToken('yield').success) return;
+
+      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      let optionalParseSuccessful = false;
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Optional parsing. (_ 'from')?
+        let optionalParseSuccessful2 = false;
+        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume 'from'.
+          if (!this.parseToken('from').success) return;
+          redirect = true;
+
+          // This optional was parsed successfully.
+          optionalParseSuccessful = true;
+        })();
+
+        // If parsing the above optional fails, revert state to what it was before that parsing began.
+        if (!optionalParseSuccessful2) {
+          this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+        }
+
+        // Consume nameseparator.
+        if (!this.parseNameSeparator().success) return;
+
+        // Consume expressionnocontrolptimitive.
+        if (!this.parseExpressionNoControlPrimitive().success) return;
+        expression = this.lastParseData.ast;
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+      }
+
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression, redirect } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // raise =
+  //   | 'raise' (nameseparator expressionnocontrolptimitive)?
+  //   { type, expression }
+  parseRaise() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'raise';
+    let expression = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Check 'raise'.
+      if (!this.parseToken('raise').success) return;
+
+      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      let optionalParseSuccessful = false;
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Consume nameseparator.
+        if (!this.parseNameSeparator().success) return;
+
+        // Consume expressionnocontrolptimitive.
+        if (!this.parseExpressionNoControlPrimitive().success) return;
+        expression = this.lastParseData.ast;
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // continue =
+  //   | 'continue' (_? '@' identifier)?
+  //   { type, label }
+  parseContinue() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'continue';
+    let label = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Check 'continue'.
+      if (!this.parseToken('continue').success) return;
+
+      // Optional parsing. (_? '@' identifier)?
+      let optionalParseSuccessful = false;
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Check _?.
+        this.parse_();
+
+        // Check '@'.
+        if (!this.parseToken('@').success) return;
+
+        // Consume identifier.
+        if (!this.parseIdentifier().success) return;
+        label = this.lastParseData.ast.name;
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, label } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // break =
+  //   | 'break' (nameseparator expressionnocontrolptimitive)?  (_? '@' identifier)?
+  //   { type, expression, label }
+  parseBreak() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'break';
+    let expression = null;
+    let label = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Check 'break'.
+      if (!this.parseToken('break').success) return;
+
+      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      let optionalParseSuccessful = false;
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Consume nameseparator.
+        if (!this.parseNameSeparator().success) return;
+
+        // Consume expressionnocontrolptimitive.
+        if (!this.parseExpressionNoControlPrimitive().success) return;
+        expression = this.lastParseData.ast;
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+      }
+
+      // Optional parsing. (_? '@' identifier)?
+      let optionalParseSuccessful2 = false;
+      const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Check _?.
+        this.parse_();
+
+        // Check '@'.
+        if (!this.parseToken('@').success) return;
+
+        // Consume identifier.
+        if (!this.parseIdentifier().success) return;
+        label = this.lastParseData.ast.name;
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful2 = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful2) {
+        this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression, label } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // spill =
+  //   | 'spill' (_? '@' identifier)?
+  //   { type, label }
+  parseSpill() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'spill';
+    let label = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Check 'spill'.
+      if (!this.parseToken('spill').success) return;
+
+      // Optional parsing. (_? '@' identifier)?
+      let optionalParseSuccessful = false;
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Check _?.
+        this.parse_();
+
+        // Check '@'.
+        if (!this.parseToken('@').success) return;
+
+        // Consume identifier.
+        if (!this.parseIdentifier().success) return;
+        label = this.lastParseData.ast.name;
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+      }
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, label } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
   // lambdaexpression =
   //   | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressiononeinlinenest
   //   | '|' _? functionparameters _comma? _? '|' _? '=>' block
@@ -6570,7 +6917,6 @@ class Parser {
     return { success: false, message: { type, parser: this }, ast: null };
   }
 
-  // infixexpression =
   // infixexpression =
   //   | range
   //   | prefixatom operator infixexpressionrest+
@@ -6592,6 +6938,19 @@ class Parser {
   // expression =
   //   | subexpression (_? ';' _? expression)* (_? ';')?
   parseExpression() { // TODO: incorrect implementation
+    const type = 'expression';
+
+    if (this.parseInfixExpression().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
+  // expressionnocontrolptimitive =
+  //   | subexpressionnocontrolptimitive (_? ';' _? expressionnocontrolptimitive)* (_? ';')?
+  parseExpressionNoControlPrimitive() { // TODO: incorrect implementation
     const type = 'expression';
 
     if (this.parseInfixExpression().success) {
