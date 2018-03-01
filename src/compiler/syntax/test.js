@@ -1349,14 +1349,17 @@ print(new Parser(" : ").parseIndexArgument()); // fail
 print(String.raw`45:name:'hi'`);
 print(new Parser("45:name:'hi'").parseIndexArgument());
 
-// print(String.raw`-1::'hi'`);
-// print(new Parser("-1::'hi'").parseIndexArgument());
+// print(String.raw`-1:'hi'`);
+// print(new Parser("-1:'hi'").parseIndexArgument());
 
 print(String.raw`:name:'hi'`);
 print(new Parser(":name:'hi'").parseIndexArgument());
 
 print(String.raw`:`);
 print(new Parser(":").parseIndexArgument());
+
+print(String.raw`::`);
+print(new Parser("::").parseIndexArgument());
 
 print(String.raw`'name'`);
 print(new Parser("'name'").parseIndexArgument());
@@ -1395,3 +1398,25 @@ print(new Parser('[\n    "Hi"\n]').parseIndexPostfix());
 print(String.raw`[:1,45]`);
 print(new Parser("[:1,45]").parseIndexPostfix());
 
+print(String.raw`[::]`);
+print(new Parser("[::]").parseIndexPostfix());
+
+print('========= RANGE =========');
+
+print(String.raw` .. >>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser(" .. ").parseRange()); // fail
+
+print(String.raw`45..name..'hi'`);
+print(new Parser("45..name..'hi'").parseRange());
+
+// print(String.raw`-1..'hi'`);
+// print(new Parser("-1..'hi'").parseRange());
+
+print(String.raw`..name..'hi'`);
+print(new Parser("..name..'hi'").parseRange());
+
+print(String.raw`45..`);
+print(new Parser("45..").parseRange());
+
+print(String.raw`..45..`);
+print(new Parser("..45..").parseRange());
