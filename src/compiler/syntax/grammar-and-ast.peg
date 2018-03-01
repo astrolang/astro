@@ -133,8 +133,7 @@ space =
   | [ \t]
 
 nameseparator =
-  | !(identifier | numericliteral)
-  | _
+  | !(identifier | numericliteral) _?
 
 indent = // TODO. adding !space
   | ' '+
@@ -362,25 +361,32 @@ range =
 
 ternaryoperator =
   | '(' spaces? infixexpression _? ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
-  | '(' nextcodeline indent infixexpression nextcodeline dedent ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
+  | '(' nextcodeline indent infixexpression nextcodeline dedent ')' _? '?' _? infixexpression _? ':' _? infixexpression
+  { type, condition, truebody, falsebody }
 
 return =
-  | 'return' nameseparator expressionnocontrolptimitive
+  | 'return' (nameseparator expressionnocontrolptimitive)?
+  { type, expression }
 
 yield =
-  | 'yield' (_ 'from')? nameseparator expressionnocontrolptimitive
+  | 'yield' ((_ 'from')? nameseparator expressionnocontrolptimitive)?
+  { type, expression, redirect }
 
 raise =
-  | 'raise' nameseparator expressionnocontrolptimitive
+  | 'raise' (nameseparator expressionnocontrolptimitive)?
+  { type, expression }
 
 continue =
   | 'continue' (_? '@' identifier)?
+  { type, label }
 
 break =
   | 'break' (nameseparator expressionnocontrolptimitive)?  (_? '@' identifier)?
+  { type, expression, label }
 
 spill =
   | 'spill' (_? '@' identifier)?
+  { type, label }
 
 controlprimitive =
   | return
@@ -518,32 +524,32 @@ ifhead =
   | subjectdeclaration (_ 'where' _ infixexpression)?
 
 elifexpression =
-  | 'elif' namesaparation ifhead _? ':' _? expressiononeinlinenest
-  | 'elif' namesaparation ifhead _? ':' block
+  | 'elif' namesparator ifhead _? ':' _? expressiononeinlinenest
+  | 'elif' namesparator ifhead _? ':' block
 
 elseexpression =
   | 'else' _? ':' _? expressiononeinlinenest
   | 'else' _? ':' block
 
 ifexpression =
-  | 'if' namesaparation ifhead _? ':' _? expressiononeinlinenest (_? elifexpression)* (_? elseexpression)?
-  | 'if' namesaparation ifhead _? ':' block (_? elifexpression)* (_? elseexpression)?
+  | 'if' namesparator ifhead _? ':' _? expressiononeinlinenest (_? elifexpression)* (_? elseexpression)?
+  | 'if' namesparator ifhead _? ':' block (_? elifexpression)* (_? elseexpression)?
 
 ifexpressiononeinlinenest =
-  | 'if' namesaparation ifhead _? ':' _? expressionnoblock
-  | 'if' namesaparation ifhead _? ':' block
+  | 'if' namesparator ifhead _? ':' _? expressionnoblock
+  | 'if' namesparator ifhead _? ':' block
 
 whileexpression =
-  | 'while' namesaparation ifhead _? ':' _? expressiononeinlinenest (_? endexpression)?
-  | 'while' namesaparation ifhead _? ':' block endexpression?
+  | 'while' namesparator ifhead _? ':' _? expressiononeinlinenest (_? endexpression)?
+  | 'while' namesparator ifhead _? ':' block endexpression?
 
 whileexpressiononeinlinenest =
-  | 'while' namesaparation ifhead _? ':' _? expressionnoblock
-  | 'while' namesaparation ifhead _? ':' block
+  | 'while' namesparator ifhead _? ':' _? expressionnoblock
+  | 'while' namesparator ifhead _? ':' block
 
 dowhileexpression =
-  | 'do' _? ':'  _? expressiononeinlinenest _? 'while' namesaparation ifhead _?
-  | 'do' _? ':' block 'while' namesaparation ifhead _?
+  | 'do' _? ':'  _? expressiononeinlinenest _? 'while' namesparator ifhead _?
+  | 'do' _? ':' block 'while' namesparator ifhead _?
 
 loopexpression =
   | 'loop' _? ':' _? expressiononeinlinenest (_? endexpression)?
@@ -561,12 +567,12 @@ forhead =
   | 'var'? lhspattern _ 'in' _ infixexpression (_ 'where' _ infixexpression)?
 
 forexpression =
-  | 'for' namesaparation forhead _? ':' _? expressiononeinlinenest (_? endexpression)?
-  | 'for' namesaparation forhead _? ':' block endexpression?
+  | 'for' namesparator forhead _? ':' _? expressiononeinlinenest (_? endexpression)?
+  | 'for' namesparator forhead _? ':' block endexpression?
 
 forexpressiononeinlinenest =
-  | 'for' namesaparation forhead _? ':' _? expressionnoblock
-  | 'for' namesaparation forhead _? ':' block
+  | 'for' namesparator forhead _? ':' _? expressionnoblock
+  | 'for' namesparator forhead _? ':' block
 
 ensureexpression =
   | 'ensure' _? ':' _? expressiononeinlinenest
@@ -579,8 +585,8 @@ exceptexpression =
 tryexpression =
   | 'try' _? ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
   | 'try' _? ':' block (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' 'var'? namesaparation lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' 'var'? namesaparation lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' 'var'? namesparator lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' 'var'? namesparator lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
 
 matchpattern =
   | (identifier _?)? '(' spaces? matchatom (_comma _? matchatom)* _comma? _? ')' // ignorenewline
