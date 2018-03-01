@@ -5488,7 +5488,7 @@ class Parser {
   //   | namedtupleliteral
   //   | symbolliteral
   //   | comprehension
-  parseLiteral() { // TODO: incorrect implementation
+  parseLiteral() {
     const type = 'literal';
 
     if (this.parseNumericLiteral().success) {
@@ -6905,6 +6905,34 @@ class Parser {
     this.reset(lastPosition, null, null, column, line);
 
     return parseData;
+  }
+
+  // controlprimitive =
+  //   | return
+  //   | yield
+  //   | continue
+  //   | break
+  //   | raise
+  //   | spill
+  parseControlPrimitive() {
+    const type = 'controlprimitive';
+
+    if (this.parseReturn().success) {
+      return this.lastParseData;
+    } else if (this.parseYield().success) {
+      return this.lastParseData;
+    } else if (this.parseContinue().success) {
+      return this.lastParseData;
+    } else if (this.parseBreak().success) {
+      return this.lastParseData;
+    } else if (this.parseRaise().success) {
+      return this.lastParseData;
+    } else if (this.parseSpill().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
   }
 
   // lambdaexpression =
