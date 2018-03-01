@@ -1420,3 +1420,17 @@ print(new Parser("45..").parseRange());
 
 print(String.raw`..45..`);
 print(new Parser("..45..").parseRange());
+
+print('========= TERNARYOPERATOR =========');
+
+print(String.raw`(45) ? name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser("(45) ? name").parseTernaryOperator()); // fail
+
+print(String.raw`(name) ? age : cost`);
+print(new Parser("(name) ? age : cost").parseTernaryOperator());
+
+print(String.raw`(  /hello/  )?age:cost`);
+print(new Parser("(  /hello/  )?age:cost").parseTernaryOperator());
+
+// print(String.raw`(/hello/ == regex)?age:cost`);
+// print(new Parser("(/hello/ == regex)?age:cost").parseTernaryOperator());
