@@ -343,9 +343,7 @@ cascadingnotationpostfix =
   { type, expression, mapped, field }
 
 indexargument =
-  | infixexpression _? ':' (_? infixexpression _? ':')? (_? infixexpression)?
-  | ':' (_? infixexpression _? ':')? _? infixexpression
-  | ':'
+  | (infixexpression _?)? ':' (_? infixexpression? _? ':')? _? infixexpression?
   | infixexpression
   { index, begin, step, end }
 
@@ -359,8 +357,7 @@ indexpostfix =
   { type, expression, arguments: [{ key, value }] }
 
 range =
-  | infixexpression _? '..' (_? infixexpression _? '..')? (_? infixexpression)?
-  | '..' (_? infixexpression _? '..')? _? infixexpression
+  | (infixexpression _?)? '..' (_? infixexpression _? '..')? _? infixexpression?
   { type, begin, step, end }
 
 ternaryoperator =
