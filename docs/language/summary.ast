@@ -297,7 +297,7 @@ LISTS
 
 ARRAYS
     # Array is a supertype of List and works a bit differently from List.
-    # Arrays can be used pre-allocate uninitialized uni/multi-dimensional buffers.
+    # Arrays are not preallocated and cannot be resized at runtime.
     # If the type of elements is not specified, the element type will default to F64
     let matrix = 5×5[]
     let matrix = 5*5[] # Alternate syntax
