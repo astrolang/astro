@@ -1168,18 +1168,14 @@ EXPORT
     # Exporting all except some members.
     export {...} except { sin, cos }
 
-PRIVATE ACCESS MODIFIER
-    # The private access punctuator, `'`, is used on members that the export keyword cannot cover
-    # When a function name is exported, every overload of the function is exported. That can be undesirable sometimes.
-    # `'` can be used to mark the overloads we don't want to export
-    fun add(a, b) = a + b
-    fun add'(a, b, c) = a + b + c #'
-    export add # The second add function won't be exported
-
-    # Also, while type names can be exported, sometimes it is necessary to make a field private.
+PRIVATE ACCESS MODIFIER FOR FIELDS
+    # When a type is exported, its fields are made public by default.
+    # To prevent a field from exposure to external modules, it must be marked with `*`.
     type Student:
         var name
-        var scores' #' #`Student.scores` can only be accessed within the module
+        var scores* # field is private to module
+
+    type Student(name, scores*)
 
 OPERATORS
     # Operators are special characters (+-/\&|=%$ ...) and can be combined to form new names.
