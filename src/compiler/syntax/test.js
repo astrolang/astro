@@ -1401,6 +1401,7 @@ print(new Parser("[:1,45]").parseIndexPostfix());
 print(String.raw`[::]`);
 print(new Parser("[::]").parseIndexPostfix());
 
+
 print('========= RANGE =========');
 
 print(String.raw` .. >>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -1574,3 +1575,61 @@ print(new Parser("yield from 45").parseControlPrimitive());
 
 print(String.raw`return 0b100e56`);
 print(new Parser("return 0b100e56").parseControlPrimitive());
+
+print('========= SUBATOMPOSTFIX =========');
+
+print(String.raw` 'hello world'`);
+print(new Parser(" 'hello world'").parseSubAtomPostfix());
+
+print(String.raw`  (greet:"Hi",index:1 ,cost:.2,\n0o23e56,pattern:/regex/,)`);
+print(new Parser('  (greet:"Hi",index:1 ,cost:.2,\n0o23e56,pattern:/regex/,)').parseSubAtomPostfix());
+
+print(String.raw`[\n    "Hi"\n]`);
+print(new Parser('[\n    "Hi"\n]').parseSubAtomPostfix());
+
+print(String.raw`~address45`);
+print(new Parser('~address45').parseSubAtomPostfix());
+
+print(String.raw`[:1,45]`);
+print(new Parser("[:1,45]").parseSubAtomPostfix());
+
+      // Alternate parsing.
+      // | '(' spaces? tupleexpression _? ')' identifier? // ignorenewline
+      // | '(' nextcodeline indent tupleexpression nextcodeline dedent ')' identifier?
+      // | '~' '$'? identifier
+      // | operator callpostfix
+      // | coefficientexpression
+      // | literal
+      // | noname
+      // | identifier
+print('========= SUBATOM =========');
+
+print(String.raw`~ address45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('~ address45').parseSubAtom()); // fail
+
+print(String.raw`( /reggie/\n) regex>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('( /reggie/\n) regex').parseSubAtom()); // mid
+
+print(String.raw`~address45`);
+print(new Parser('~address45').parseSubAtom());
+
+print(String.raw`[1,"Hello", 45]`);
+print(new Parser('[1,"Hello", 45]').parseSubAtom());
+
+print(String.raw`( /reggie/ )`);
+print(new Parser('( /reggie/ )').parseSubAtom());
+
+print(String.raw`( /reggie/\n)regex`);
+print(new Parser('( /reggie/\n)regex').parseSubAtom());
+
+print(String.raw`( \n    (name : $name)\n)`);
+print(new Parser('( \n    (name : $name)\n)').parseSubAtom());
+
+print(String.raw`complex45_name`);
+print(new Parser('complex45_name').parseSubAtom());
+
+print(String.raw`++ (operator, 45, "level")`);
+print(new Parser('++ (operator, 45, "level")').parseSubAtom());
+
+print(String.raw`3.0f`);
+print(new Parser('3.0f').parseSubAtom());
