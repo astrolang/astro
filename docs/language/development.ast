@@ -154,9 +154,11 @@ print
 fun age(a) = set (a.age + 5) get (a.age - 5)
 
 # FIX: SYNTAX HIGHLIGHT
-- highlight `delegate`
-    delegate(name, name)
-    delegate
+- highlight functions with type arguments
+    add{Int}(2, 4)
+
+- remove highlight on old functions with type arguments
+    add[Int](2, 3)
 
 - remove highlight on `del`
     del
