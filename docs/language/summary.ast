@@ -312,7 +312,7 @@ ARRAYS
     ]
 
     # Using a constructor to create an Array.
-    var matrix = Array[Int](2, 2)
+    var matrix = Array{Int}(2, 2)
 
     # Setting the indices of a multi-dimensional Array.
     matrix[,] = [
@@ -595,7 +595,7 @@ NIL
     var program = 'print(\"Hello World\")' #: Str|Nil
     var programList = Str()?
 
-    # Nilable unwrap.
+    # Nillable unwrap.
     let name = dave?.name
 
     # Exceptionable unwrap.
@@ -979,7 +979,7 @@ GENERICS
         return a + b
 
     # Type argument can be ommited if the type argument can be readily inferred.
-    var sum = add[Int](2, 4)
+    var sum = add{Int}(2, 4)
     var sum = add(2, 4) # Type argument inferred
 
     # Getting more expressive generic type annotation with `where` and type relation operators (`::`, `<:`, `>:`)
@@ -998,7 +998,7 @@ GENERICS
     let language #: Str?
 
     # List type annotation.
-    let languages #: List[Str]
+    let languages #: List{Str}
     let languages #: [Str]
 
     # Value contraints allow the programmer to specify certain contraints on the value of a type.
@@ -1321,13 +1321,13 @@ POINTERS
     pointer.addr = 0xFFFE # Invalid!
 
     # Allocating memory on the heap.
-    let memory = malloc[Byte](5) # Allocates 5 bytes on the heap.
+    let memory = malloc{Byte}(5) # Allocates 5 bytes on the heap.
 
     # Freeing memory.
     free(memory) # Compile-time error will be thrown if there is a possible dangling pointer.
 
     # Pointer arithmetic is only allowed on pointers that point to a block of memory and such operations are always bounds-checked.
-    let memory = malloc[Int](20)
+    let memory = malloc{Int}(20)
     let pointer = memory[2]
     pointer.offset(5)
     pointer.offset(500) # Error!
