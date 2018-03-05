@@ -75,7 +75,7 @@ coefficientexpression =
   | integerbinaryliteral identifier
   | integeroctalliteral identifier
   | !('0b' | '0o' | '0x') integerdecimalliteral identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
-  { type, number, identifier }
+  { type, coefficient, identifier }
 
 noname =
   | '_'
