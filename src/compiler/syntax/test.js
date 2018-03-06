@@ -1619,9 +1619,6 @@ print(new Parser('( \n    (name : $name)\n)').parseSubAtom());
 print(String.raw`complex45_name`);
 print(new Parser('complex45_name').parseSubAtom());
 
-print(String.raw`++ (operator, 45, "level")`);
-print(new Parser('++ (operator, 45, "level")').parseSubAtom());
-
 print(String.raw`3.0f`);
 print(new Parser('3.0f').parseSubAtom());
 
@@ -1648,4 +1645,6 @@ print(new Parser("print[0]('hello')").parseAtom());
 print(String.raw`print[0]?('hello')`);
 print(new Parser("print[0]?('hello')").parseAtom());
 
+print(String.raw`++ (operator, 45, "level")`);
+print(new Parser('++ (operator, 45, "level")').parseAtom());
 
