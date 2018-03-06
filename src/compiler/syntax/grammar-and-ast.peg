@@ -407,21 +407,20 @@ subatom =
   | '(' spaces? tupleexpression _? ')' identifier? // ignorenewline
   | '(' nextcodeline indent tupleexpression nextcodeline dedent ')' identifier?
   | '~' '$'? identifier
-  | operator callpostfix
   | coefficientexpression
   | literal
   | noname
-  | identifier
+  | operator
 
 atom =
   | subatom (spaces? [!?])? (subatompostfix (spaces? [!?])?)*
 
 prefixatom =
-  | operator atom
+  | operator !(operator) atom
 
 postfixatom =
   | integralliteral '.'
-  | atom operator
+  | !(operator) atom operator
 
 prepostfixatom =
   | prefixatom
@@ -431,12 +430,12 @@ prepostfixatom =
 infixexpression =
   | range
   | prefixatom operator infixexpressionrest+
-  | atom operator infixexpressionrest+
+  | !(operator) atom operator infixexpressionrest+
   | prepostfixatom _ operator _ infixexpressionrest+
 
 infixexpressionrest =
   | prefixatom operator infixexpressionrest+
-  | atom operator infixexpressionrest+
+  | !(operator) atom operator infixexpressionrest+
   | prepostfixatom _ operator _ infixexpressionrest+
   | prepostfixatom
 
