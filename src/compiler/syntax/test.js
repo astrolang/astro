@@ -1593,15 +1593,6 @@ print(new Parser('~address45').parseSubAtomPostfix());
 print(String.raw`[:1,45]`);
 print(new Parser("[:1,45]").parseSubAtomPostfix());
 
-      // Alternate parsing.
-      // | '(' spaces? tupleexpression _? ')' identifier? // ignorenewline
-      // | '(' nextcodeline indent tupleexpression nextcodeline dedent ')' identifier?
-      // | '~' '$'? identifier
-      // | operator callpostfix
-      // | coefficientexpression
-      // | literal
-      // | noname
-      // | identifier
 print('========= SUBATOM =========');
 
 print(String.raw`~ address45>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -1633,3 +1624,28 @@ print(new Parser('++ (operator, 45, "level")').parseSubAtom());
 
 print(String.raw`3.0f`);
 print(new Parser('3.0f').parseSubAtom());
+
+print('========= SUBATOM =========');
+
+print(String.raw`print?('hello')`);
+print(new Parser("print?('hello')").parseAtom());
+
+print(String.raw`print('hello')`);
+print(new Parser("print('hello')").parseAtom());
+
+print(String.raw`print('hello')?`);
+print(new Parser("print('hello')?").parseAtom());
+
+print(String.raw`print!.name('hello')`);
+print(new Parser("print!.name('hello')?").parseAtom());
+
+print(String.raw`print!.name?.nom('hello')`);
+print(new Parser("print!.name?.nom('hello')?").parseAtom());
+
+print(String.raw`print[0]('hello')`);
+print(new Parser("print[0]('hello')").parseAtom());
+
+print(String.raw`print[0]?('hello')`);
+print(new Parser("print[0]?('hello')").parseAtom());
+
+
