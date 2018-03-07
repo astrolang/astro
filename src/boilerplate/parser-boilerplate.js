@@ -254,3 +254,8 @@ if (!this.parse_Comma().success) {
   if (!this.parseSamedent().success) return;
 }
 this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+
+//------------------------------------
+
+// Check !(newline).
+if (this.parseNewline().success) return;
