@@ -21,7 +21,7 @@ integeroctalliteral  =
   | '0o' digitoctal ('_'? digitoctal)*
   { type, value }
 
-integehexadecimalliteral  =
+integerhexadecimalliteral  =
   | '0x' digithexadecimal ('_'? digithexadecimal)*
   { type, value }
 
@@ -736,13 +736,13 @@ functiondeclaration =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
   | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | functionhead _? ':' block
-  { type, name, parameters: [{ mutable, name, alias, value }], body }
+  { type, name, parameters: [{ mutable, alias, lhs, value }], body }
 
 functiondeclarationoneinlinenest =
   | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
   | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
   | functionhead _? ':' block
-  { type, name, parameters: [{ mutable, name, alias, value }], body }
+  { type, name, parameters: [{ mutable, alias, lhs, value }], body }
 
 subjecthead =
   | ('let' | 'var') nameseparator lhspattern
