@@ -357,7 +357,7 @@ indexpostfix =
   { type, expression, arguments: [{ key, value }] }
 
 range =
-  | (infixexpressionorrange _?)? '..' (_? infixexpressionorrange _? '..')? _? infixexpressionorrange?
+  | (infixexpression _?)? '..' (_? infixexpression _? '..')? _? infixexpression
   { type, begin, step, end }
 
 ternaryoperator =
