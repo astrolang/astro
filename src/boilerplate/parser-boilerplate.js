@@ -243,6 +243,7 @@ if (!alternativeParseSuccessful) return null;
 // Check &(newline | eoi).
 const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
 if (!this.parseNewline().success && !this.parseNewline().success) return null;
+// Reset state.
 this.reset(state.lastPosition, null, null, state.column, state.line);
 
 //------------------------------------
@@ -253,9 +254,33 @@ if (!this.parse_Comma().success) {
   if (!this.parseNextCodeLine().success) return;
   if (!this.parseSamedent().success) return;
 }
+// Reset state.
 this.reset(state2.lastPosition, null, null, state2.column, state2.line);
 
 //------------------------------------
 
 // Check !(newline).
 if (this.parseNewline().success) return;
+
+//------------------------------------
+
+// Check !(_? ('.' | '~')).
+let lookAheadParseSuccessful = false;
+const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
+(() => {
+  // Consume _?.
+  this.parseNewline();
+
+  // Consume ('.' | '~').
+  if (!this.parseToken('.').success && !this.parseToken('~').success) return;
+
+  // This lookahead was parsed successfully.
+  lookAheadParseSuccessful = true;
+});
+
+// Reset state since it's just a lookahead not meant to be consumed.
+this.reset(state.lastPosition, null, null, state.column, state.line);
+
+// lookahead parsing should not be successful.
+if (lookAheadParseSuccessful) return;
+
