@@ -60,6 +60,7 @@ floatliteral =
   | floatbinaryliteral
   | floatoctalliteral
   | floathexadecimalliteral
+  | integerdecimalliteral '.' !(_? ('.' | '~')) | integerdecimalliteral // floatliteral | integerliteral
   | floatdecimalliteral // Can eat others cake
   { type, value }
 
@@ -420,8 +421,7 @@ prefixatom =
   | operator !(operator) atom
 
 postfixatom =
-  | integralliteral '.'
-  | !(operator) atom operator
+  | atom operator
 
 prepostfixatom =
   | prefixatom
