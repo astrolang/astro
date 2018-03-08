@@ -218,7 +218,7 @@ _comma =
   | _? ','
 
 listarguments =
-  | infixexpression (_comma _? infixexpression)* _comma?
+  | infixexpressionorrange (_comma _? infixexpressionorrange)* _comma?
   { expressions }
 
 listargumentsmultiple =
@@ -234,8 +234,8 @@ listliteral =
   { type, expressions }
 
 objectargument =
-  | identifier _? ':' _? objectblock &(infixexpression | '}')
-  | identifier _? ':' _? infixexpression &(_comma | nextcodeline _? | _? '}')
+  | identifier _? ':' _? objectblock &(infixexpressionorrange | '}')
+  | identifier _? ':' _? infixexpressionorrange &(_comma | nextcodeline _? | _? '}')
   | identifier &(_comma | nextcodeline _? | _? '}')
   { key, value }
 
@@ -250,8 +250,8 @@ objectliteral =
   { type, expressions: [{ key, value }] }
 
 dictargument =
-  | infixexpression _? ':' _? objectblock &(infixexpression | '}')
-  | infixexpression _? ':' _? (subdictliteral | infixexpression) &(_comma | nextcodeline _? | _? '}')
+  | infixexpressionorrange _? ':' _? objectblock &(infixexpressionorrange | '}')
+  | infixexpressionorrange _? ':' _? (subdictliteral | infixexpressionorrange) &(_comma | nextcodeline _? | _? '}')
   | identifier &(_comma | nextcodeline _? | _? '}')
   { key, value }
 
@@ -266,8 +266,8 @@ dictliteral =
   { type, expressions: [{ key, value }] }
 
 tuplearguments =
-  | infixexpression (_comma _? infixexpression)+ _comma?
-  | infixexpression _comma
+  | infixexpressionorrange (_comma _? infixexpressionorrange)+ _comma?
+  | infixexpressionorrange _comma
   { expressions }
 
 tupleliteral =
@@ -277,7 +277,7 @@ tupleliteral =
   { type, expressions }
 
 namedtuplearguments =
-  | identifier _? ':' _? infixexpression (_comma _? identifier _? ':' _? infixexpression)* _comma?
+  | identifier _? ':' _? infixexpressionorrange (_comma _? identifier _? ':' _? infixexpressionorrange)* _comma?
   { expressions: [{ key, value }] }
 
 namedtupleliteral =
@@ -293,11 +293,11 @@ symbolliteral =
   { type, expressions }
 
 listcomprehension =
-  | '[' _? infixexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? ']' // ignorenewline
+  | '[' _? infixexpressionorrange _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpressionorrange)? _? ']' // ignorenewline
   { type, expression, iterators:[{ lhs, rhs}], guard }
 
 dictcomprehension =
-  | '{' _? (infixexpression _? ':' _? infixexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpression)? _? '}' // ignorenewline
+  | '{' _? (infixexpressionorrange _? ':' _? infixexpressionorrange | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ infixexpressionorrange)? _? '}' // ignorenewline
   { type, key, value, iterators:[{ lhs, rhs}], guard }
 
 comprehension =
@@ -318,11 +318,12 @@ literal =
   | comprehension
 
 commandnotationpostfix =
-  | spaces &(identifier | stringliteral | numericliteral | lambdaexpression | range | symbolliteral) infixexpression
+  | spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) infixexpressionorrange
+  | spaces *(lambdaexpression) infixexpressionorrange
   { type, expression, arguments: [{ key, value }] }
 
 callarguments =
-  | (identifier _? ':' _?)? infixexpression (_comma _? (identifier _? ':' _?)? infixexpression)* _comma?
+  | (identifier _? ':' _?)? infixexpressionorrange (_comma _? (identifier _? ':' _?)? infixexpressionorrange)* _comma?
   { expressions: [{ key, value }] }
 
 callpostfix =
@@ -342,8 +343,8 @@ cascadingnotationpostfix =
   { type, expression, mapped, field }
 
 indexargument =
-  | (infixexpression _?)? ':' (_? infixexpression? _? ':')? _? infixexpression?
-  | infixexpression
+  | (infixexpressionorrange _?)? ':' (_? infixexpressionorrange? _? ':')? _? infixexpressionorrange?
+  | infixexpressionorrange
   { index, begin, step, end }
 
 indexarguments =
@@ -356,12 +357,12 @@ indexpostfix =
   { type, expression, arguments: [{ key, value }] }
 
 range =
-  | (infixexpression _?)? '..' (_? infixexpression _? '..')? _? infixexpression?
+  | (infixexpressionorrange _?)? '..' (_? infixexpressionorrange _? '..')? _? infixexpressionorrange?
   { type, begin, step, end }
 
 ternaryoperator =
-  | '(' spaces? infixexpression _? ')' _? '?' _? infixexpression _? ':' _? infixexpression  // ignorenewline
-  | '(' nextcodeline indent infixexpression nextcodeline dedent ')' _? '?' _? infixexpression _? ':' _? infixexpression
+  | '(' spaces? infixexpressionorrange _? ')' _? '?' _? infixexpressionorrange _? ':' _? infixexpressionorrange  // ignorenewline
+  | '(' nextcodeline indent infixexpressionorrange nextcodeline dedent ')' _? '?' _? infixexpressionorrange _? ':' _? infixexpressionorrange
   { type, condition, truebody, falsebody }
 
 return =
@@ -428,21 +429,18 @@ prepostfixatom =
   | atom
 
 infixexpression =
-  | range
-  | prefixatom operator infixexpressionrest+
-  | !(operator) atom operator infixexpressionrest+
-  | prepostfixatom _ operator _ infixexpressionrest+
-
-infixexpressionrest =
-  | prefixatom operator infixexpressionrest+
-  | !(operator) atom operator infixexpressionrest+
-  | prepostfixatom _ operator _ infixexpressionrest+
+  | (prefixatom | atom) operator infixexpression
+  | prepostfixatom _ operator _ infixexpression
   | prepostfixatom
+  { type, expressions, operators }
+
+infixexpressionorrange =
+  | range
+  | infixexpression
 
 simpleexpression =
+  | infixexpressionorrange
   | ternaryoperator
-  | infixexpression
-  | prepostfixatom
 
 tupleexpression =
   | simpleexpression (_comma _? simpleexpression)* _comma?
@@ -519,8 +517,8 @@ lhsname
   | '...' identifier?
 
 ifhead =
-  | infixexpression (_ 'where' _ infixexpression)?
-  | subjectdeclaration (_ 'where' _ infixexpression)?
+  | infixexpressionorrange (_ 'where' _ infixexpressionorrange)?
+  | subjectdeclaration (_ 'where' _ infixexpressionorrange)?
 
 elifexpression =
   | 'elif' namesparator ifhead _? ':' _? expressiononeinlinenest
@@ -563,7 +561,7 @@ endexpression =
   | 'end' _? ':' block
 
 forhead =
-  | 'var'? lhspattern _ 'in' _ infixexpression (_ 'where' _ infixexpression)?
+  | 'var'? lhspattern _ 'in' _ infixexpressionorrange (_ 'where' _ infixexpressionorrange)?
 
 forexpression =
   | 'for' namesparator forhead _? ':' _? expressiononeinlinenest (_? endexpression)?
@@ -584,8 +582,8 @@ exceptexpression =
 tryexpression =
   | 'try' _? ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
   | 'try' _? ':' block (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' 'var'? namesparator lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' 'var'? namesparator lhspattern (_ '=' _ infixexpression | '=' !(operator) infixexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' 'var'? namesparator lhspattern (_ '=' _ infixexpressionorrange | '=' !(operator) infixexpressionorrange) ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' 'var'? namesparator lhspattern (_ '=' _ infixexpressionorrange | '=' !(operator) infixexpressionorrange) ':' block (_? exceptexpression)+ (_? ensureexpression)?
 
 matchpattern =
   | (identifier _?)? '(' spaces? matchatom (_comma _? matchatom)* _comma? _? ')' // ignorenewline
@@ -597,7 +595,7 @@ matchpattern =
   |  matchatom (_comma _? matchatom)*
 
 matchatom
-  | infixexpression
+  | infixexpressionorrange
   | noname
   | identifier
   | '...' identifier?
@@ -607,12 +605,12 @@ matchsingleexpression =
   | ('|' | '!') _? matchpattern _? '=>' block
 
 matchexpression =
-  | infixexpression? (_? matchsingleexpression)+
-  | infixexpression? (nextcodeline samedent matchsingleexpression)+
+  | infixexpressionorrange? (_? matchsingleexpression)+
+  | infixexpressionorrange? (nextcodeline samedent matchsingleexpression)+
 
 matchexpressiononeinlinenest =
-  | infixexpression? _? ('|' | '!') _? matchpattern _? '=>' _? expressionnoblock
-  | infixexpression? _? ('|' | '!') _? matchpattern _? '=>' block
+  | infixexpressionorrange? _? ('|' | '!') _? matchpattern _? '=>' _? expressionnoblock
+  | infixexpressionorrange? _? ('|' | '!') _? matchpattern _? '=>' block
 
 iifexpression =
   | callpostfix _? '=>' _? expressiononeinlinenest
@@ -724,7 +722,7 @@ functionparameters =
   | functionparameter (_comma _? functionparameter)* _comma?
 
 functionparameter =
-  | identifier ('.' lhspattern?)? _? ':' _? infixexpression
+  | identifier ('.' lhspattern?)? _? ':' _? infixexpressionorrange
   | lhspattern
   | identifier
 
