@@ -281,6 +281,6 @@ const state = { lastPosition: this.lastPosition, column: this.column, line: this
 // Reset state since it's just a lookahead not meant to be consumed.
 this.reset(state.lastPosition, null, null, state.column, state.line);
 
-// lookahead parsing should not be successful.
+// lookahead parsing should not be successful for a negative lookahead.
 if (lookAheadParseSuccessful) return;
 
