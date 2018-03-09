@@ -60,7 +60,7 @@ floatliteral =
   | floatbinaryliteral
   | floatoctalliteral
   | floathexadecimalliteral
-  | integerdecimalliteral '.' !(_? ('.' | '~')) | integerdecimalliteral // floatliteral | integerliteral
+  | integerdecimalliteral '.' !(_? ('.' | '~')) | integerdecimalliteral // Must not affect range, dotnotation, cascadingnotation // floatliteral | integerliteral
   | floatdecimalliteral // Can eat others cake
   { type, value }
 
@@ -96,7 +96,7 @@ operatorchar =
   | [+\-*/\\^%!><=÷×≠≈¹²³√]// TODO
 
 operator =
-  | operatorchar+
+  | (!(regexliteral) operatorchar)+ // Must not consume regexliteral
   { type, name }
 
 pathnamechar =
@@ -320,7 +320,7 @@ literal =
 
 commandnotationpostfix =
   | spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) infixexpressionorrange
-  | spaces *(lambdaexpression) infixexpressionorrange
+  | spaces? lambdaexpression
   { type, expression, arguments: [{ key, value }] }
 
 callarguments =
@@ -406,8 +406,8 @@ subatompostfix =
   | indexpostfix
 
 subatom =
-  | '(' spaces? tupleexpression _? ')' identifier? // ignorenewline
-  | '(' nextcodeline indent tupleexpression nextcodeline dedent ')' identifier?
+  | '(' spaces? simpleexpression _? ')' identifier? // ignorenewline
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' identifier?
   | '~' '$'? identifier
   | coefficientexpression
   | literal
@@ -415,10 +415,10 @@ subatom =
   | operator
 
 atom =
-  | subatom (spaces? [!?])? (subatompostfix (spaces? [!?])?)*
+  | subatom [!?]? (subatompostfix [!?]?)*
 
 prefixatom =
-  | operator !(operator) atom
+  | operator atom
 
 postfixatom =
   | atom operator
@@ -439,8 +439,8 @@ infixexpressionorrange =
   | infixexpression
 
 simpleexpression =
-  | infixexpressionorrange
   | ternaryoperator
+  | infixexpressionorrange
 
 tupleexpression =
   | simpleexpression (_comma _? simpleexpression)* _comma?

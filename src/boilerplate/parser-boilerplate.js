@@ -259,8 +259,28 @@ this.reset(state2.lastPosition, null, null, state2.column, state2.line);
 
 //------------------------------------
 
+// If u are sure it's gonna get reset anyway after the return.
 // Check !(newline).
 if (this.parseNewline().success) return;
+
+// otherwise
+// Check !(newline).
+let lookAheadParseSuccessful = false;
+const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
+(() => {
+  // Consume newline.
+  if (!this.parseNewline('.').success) return;
+
+  // This lookahead was parsed successfully.
+  lookAheadParseSuccessful = true;
+})();
+
+// Reset state since it's just a lookahead not meant to be consumed.
+this.reset(state.lastPosition, null, null, state.column, state.line);
+
+// lookahead parsing should not be successful for a negative lookahead.
+if (lookAheadParseSuccessful) return;
+
 
 //------------------------------------
 
