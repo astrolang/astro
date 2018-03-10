@@ -1,6 +1,6 @@
 # Astro 0.1.14a
 # 10/03/18
-# USING OBJECT INSTEAD OF NEW # Not to be implemented, just imagining
+# USING OBJECT INSTEAD OF NEW
 type Student <: Person: var score
 
 fun Student(name, age, score):
