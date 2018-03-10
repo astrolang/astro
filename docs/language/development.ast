@@ -1,4 +1,25 @@
 # Astro 0.1.14a
+# 10/03/18
+# USING OBJECT INSTEAD OF NEW # Not to be implemented, just imagining
+type Student <: Person: var score
+
+fun Student(name, age, score):
+    { score }.Person(name, age)
+
+fun Person(firstname, lastname):
+    let obj = { firstname, lastname }
+    obj.fullname = firstname + lastname
+    return obj
+
+fun Student(name, age, score):
+    new(score).Person(name, age)
+
+fun Person(firstname, lastname):
+    let obj = new(firstname, lastname)
+    obj.fullname = firstname + lastname
+    return obj
+
+# Astro 0.1.14a
 # 19/02/18
 # Dict keys using identifiers declared in a parent scope
 # Not using symbols to represent them.
