@@ -217,3 +217,67 @@ fun Student(name, age, score) = new{ name, age, score } # error! initialized `ag
 ```
 
 A `type constructor` can only be defined in the same file as the type.
+
+## Generics
+#### Generic Type Arguments
+It is true that types can be inferred from assignments and passed arguments, and this means generic type arguments are redundant in many cases.
+
+```nim
+fun add(a, b): #: {T}
+    let c = a + b #: T
+    return c
+
+let a = add{Int}(5, 6)
+let b = add{Float}(5.25, 3.6)
+```
+
+In the above example, a generic type parameter is not really needed as the type of `c` can be inferred from the `a + b` operation.
+
+However, buffer functions, like `malloc`, have uninitialized elements, so there is no way inferring what the element type is without explicitly specifying the element type. This is the only reason why type argument may be needed in Astro.
+
+```nim
+type List: #: {T: Any}
+    var buffer*
+    var len = @delegated(len)
+
+fun List(len): #: {T}
+    new { buffer: malloc{T}(len) }
+```
+
+## Indexing
+### 0-Based Indexing vs 1-Based Indexing
+#### Base Pointer
+0-based
+```
+base pointer      [•][a][b][c][d]
+                      ↓
+                     ptr
+
+offset            [•][a][b][c][d]
+                      ↓
+                     ptr[0]
+```
+
+1-based
+```
+base pointer      [•][a][b][c][d]
+                   ↓
+                  ptr
+
+offset            [•][a][b][c][d]
+                      ↓
+                     ptr[1]
+```
+
+#### Bounds Checking
+0-based
+```julia
+    -1 < index < len
+    0 > index ≥ len
+```
+
+1-based
+```julia
+    0 < index ≤ len
+    1 > index > len
+```
