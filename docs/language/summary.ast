@@ -961,8 +961,8 @@ TYPE DEFINITION (2)
     type Car = var make, year
 
     # Types need constructors for object creation. A constructor always has the same name as the type.
-    # The special `new` function creates a new object of the particular type.
-    fun Car(make, year) = new(make, year)
+    # The special `new` syntax creates a new object of the particular type.
+    fun Car(make, year) = new { make, year }
     let ride = Car('Camaro', 2016)
 
     # Constructors containing `new` keyword cannot be defined outside the module the original type is defined in.
@@ -1092,12 +1092,12 @@ CONSTRUCTOR TRAIN
     type Student(course) <: Person
 
     # The initialization of inherited fields should be delegated to the parent's constructor, `super`.
-    fun Teacher(name, subject) = new(subject).super(name)
+    fun Teacher(name, subject) = new { subject }.super(name)
 
-    # In the case of multiple inheritance, the individual parent constructors are called and chained to the `new` function.
+    # In the case of multiple inheritance, the individual parent constructors are called and chained to the `new` syntax.
     type TeachingStudent(schedule) <: Teacher, Student
     fun TeachingStudent(name, subject, course, schedule):
-        new(schedule).Student(name, course).Teacher(_, subject)
+        new { schedule }.Student(name, course).Teacher(_, subject)
 
 ABSTRACT TYPES & FUNCTIONS
     # Abstract types cannot be instantiated.
