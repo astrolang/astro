@@ -1002,6 +1002,15 @@ GENERICS
     fun getItem(list, index):
         list[index]
 
+    # Types and functions can have generic type parameters and the parameters can have default values.
+    type Buffer: #: {T: Any}
+    var buffer
+
+    fun Buffer(len): #: {T} (Int)
+        new { buffer: malloc{T}(len) }
+
+    let buf = Buffer{Int}(50)
+
     # Nillable type annotation.
     let language #: Str|Nil
     let language #: Str?
