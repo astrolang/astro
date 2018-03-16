@@ -602,7 +602,7 @@ NIL
     let name = dave?.name
 
     # Exceptionable unwrap.
-    getAccount("Default")! # If result is nil, NilError is raised.
+    !getAccount("Default") # If result is nil, NilError is raised.
 
     # Nil coalescing.
     let name = getName() ?? "John Doe"
