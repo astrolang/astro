@@ -1,23 +1,131 @@
 # Astro 0.1.14a
+# 18/03/18
+# LIST REVERSING
+let reversed = list[end:-1:]
+
+# RANGE REVERSING
+let reversed = 10..-1..1
+
+# TYPES AS FIRST-CLASS CITIZENS
+# Astro not only specializes based on object type but also on type themselves
+fun one(t) = 1 #: Int
+fun one(t) = 1.i64 #: Int64
+
+one(Int) # 1
+one(Int64) # 1.i64
+
+# the type of any type is `Type`
+typeof(Int64) # Type
+
+# types are their own types and subtype of `Type`
+Int :: Int # true
+Int <: Type # true
+Int <: Real # true
+
+# TYPED OBJECT
+let reversed = { #: List
+    buffer: malloc{list.T}(len)
+    len: @delegated(len)
+}
+
+# REMOVE SUPPORT FOR refs AND vals IN TYPE SIGNATURES
+fun swap(var a, var b) = a, b = b, a;
+
+swap!(a, b)
+swap!(val a, val b)
+swap!(ref a, ref b)
+
+# GENERIC CONSTRAINTS
+#: C, D -> Bool
+#: ~ (C, D)<:Collection, C.Element::D.Element
+#: ~ C.Element<:Equatable
+fun startequal(c, d): c.first == d.first
+
+
+# Astro 0.1.14a
+# 12/03/18
+# NEW VECTORIZATION SYNTAX & Remove Non-standard call literal
+let z = ciel.(M)
+let y = a .+ b
+let x = +.(b)
+let x = b.⁹
+
+# STRING FORMATTING
+let s = "formatted string = ${8}(i)"
+
+# BITWISE OPERATIONS
+var x = !!a
+var x = a || b
+var x = a && b
+var x = a ^^ b
+
+# Astro 0.1.14a
+# 12/03/18
+# PROPERTY DELEGATION
+type List: var len = @delegated(len)
+
+fun len(list) = list.len
+
+# TYPE EXTENSION
+@extend
+type Integer: var f64 = @delegated(float64)
+
+# BITS TYPE
+@bits(Int64) type Number
+fun Number(num): self = num
+
+# TYPED OBJECTS
+let new_list = { #: List
+    buffer: malloc{list.T}(list.len)
+    len: @delegated(len)
+}
+
+# MUTATIVE FUNCTIONS
+fun reverse(iterable):
+    let reversed = { #: List
+        buffer: malloc{list.T}(list.len)
+        len: @delegated(len)
+    }
+    for i, e in enumerate iterable:
+        reversed[iterable.len + 1 - i] = e
+    reversed
+
+fun reverse(var iterable):
+    let copy = val iterable
+    for i, e in enumerate copy:
+        iterable[iterable.len + 1 - i] = e
+    pass
+
+let reversed = list.reverse() # Calls the first `reverse`
+let reversed = list.reverse!() # Calls the second `reverse`
+
+# EXCEPTIONABLE UNWRAP
+fun !(obj) = (not obj) ? raise NilError() : obj
+!john.name
+
+# GENERICS REVAMP
+# no generic value parameter
+# default type in generic type parameter
+# refactor type and function type parameter
+type Buffer: #: {T: Any}
+    var buffer
+
+fun Buffer(len): #: {T}
+    new { buffer: malloc{T}(len) }
+
+let buf = Buffer{Int}(50)
+
+# Astro 0.1.14a
 # 10/03/18
-# USING OBJECT INSTEAD OF NEW
+# THE NEW NEW
 type Student <: Person: var score
 
 fun Student(name, age, score):
-    { score }.Person(name, age)
+    new { score }.Person(name, age)
 
 fun Person(firstname, lastname):
-    let obj = { firstname, lastname }
-    obj.fullname = firstname + lastname
-    return obj
-
-fun Student(name, age, score):
-    new(score).Person(name, age)
-
-fun Person(firstname, lastname):
-    let obj = new(firstname, lastname)
-    obj.fullname = firstname + lastname
-    return obj
+    new { firstname, lastname }
+    self.fullname = firstname + lastname
 
 # Astro 0.1.14a
 # 19/02/18
@@ -26,24 +134,7 @@ fun Person(firstname, lastname):
 { (name): 'John' }
 
 # Changing set literal
-let set = set.{1, 2, 3}
-
-# Function argument mutation. Astro follows of Python's philosophy.
-# imperative for non-mutative functions, reported for mutative functions.
-fun reverse(var iterable):
-    let t = iterable
-    let { len } = iterable
-    for i in reverse indices(iterable):
-        iterable[i] = t[len - (len - i)]
-
-fun reversed(iterable):
-    var t = []
-    for i in reverse indices(iterable):
-        t.push iterable[i]
-    return t
-
-list.reverse() # Mutates list
-list.reversed() # Does not mutate list
+let set = set.{ 1, 2, 3 }
 
 # Astro 0.1.14a
 # 28/01/18
@@ -175,6 +266,30 @@ print
 fun age(a) = set (a.age + 5) get (a.age - 5)
 
 # FIX: SYNTAX HIGHLIGHT
+- remove highlight on typenames
+    type Person
+    Person
+
+- fix highlight on regex literal when around operators
+    let op = 1//i + 1//d
+
+- highlight new vectorized function call syntax and remove highlight on ns call literal
+    ciel.(M)
+
+- highlight mutative function call
+    bogosort!(v)
+
+- highlight new vectorized string format and remove highlight on old format
+    let leftPadding = 'left padding: ${>10}(string)'
+    let rightPadding = 'right padding: ${<10}(string)'
+    let placeholderPadding = 'placeholder padding: ${_<10}(string)'
+    let centering = 'centering: ${^10}(string)'
+
+    let leftPadding = 'left padding: $:>10(string)'
+    let rightPadding = 'right padding: $:<10(string)'
+    let placeholderPadding = 'placeholder padding: $:_<10(string)'
+    let centering = 'centering: $:^10(string)'
+
 - highlight functions with type arguments
     add{Int}(2, 4)
 
