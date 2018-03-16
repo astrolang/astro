@@ -971,11 +971,17 @@ GENERICS
     fun add(a, b): #: (T, T) -> T
         return a + b
 
-    # Getting more expressive generic type annotation with `where` and type relation operators (`::`, `<:`, `>:`)
+    # Specifying generic type constraint with `where` or `~` and type relation operators (`::`, `<:`, `>:`)
     fun anyCommonElements(l, r): #: (T, U) -> Bool where (T, U)<:Sequence
         for x in l: for y in r where x == y:
             return true
         false
+
+    #: C, D -> Bool
+    #: ~ (C, D)<:Collection,
+    #: ~ C.Element::D.Element
+    #: ~ C.Element<:Equatable
+    fun startequal(c, d): c.first == d.first
 
     # `_` is placeholder for type parameters that should be inferred by the compiler.
     #: (Seq, _) -> T where T::Seq.T
