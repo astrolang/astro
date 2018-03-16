@@ -1108,6 +1108,12 @@ ABSTRACT TYPES & FUNCTIONS
     abst Animal = var name
     abst Animal = Dog | Cat | Parrot
 
+TYPE EXTENSION
+    # Existing types can be extended in Astro using the `extend` macro
+    @extend
+    type Integer:
+        let f64 = @delegated(float64)
+
 TYPE CHECKING
     # The `typeof` operator can be used to get an object's type.
     typeof 50 # Int32
