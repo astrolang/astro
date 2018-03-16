@@ -1296,16 +1296,16 @@ COEFFICIENT EXPRESSION
 
 INTEGER BITWISE OPERATORS
     # Bitwise `or` changes the bit to `1` if the corresponding bit in either operand is `1`.
-    var x = 2 | 5
+    var x = 2 || 5
 
     # Bitwise `and` changes the bit to `1` if the corresponding bits in both operands are `1`.
-    var y = 3 & 6
+    var y = 3 && 6
 
     # Bitwise `not` Inverts the bits of its operand.
-    var z = ~6
+    var z = !!6
 
     # Bitwise `xor` changes the bit to `1` if corresponding bits in operands are not both `1`.
-    var a = ^7
+    var a = ^^7
 
     # Bitwise `left shift` moves the bits in `a` to the left `b` times.
     var b = a << b
