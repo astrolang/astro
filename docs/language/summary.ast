@@ -1000,6 +1000,19 @@ GENERICS
     var age #: Int(1..120) # age is an int value that must be between 1 and 120
     var name #: S() where S::Str # S is any value of type Str
 
+TYPES AS FIRST-CLASS CITIZENS
+    # Types can be passed around and specialized on like regular objects in Astro.
+    fun one(t) = 1 #: Int
+    fun one(t) = 1.i64 #: Int64
+
+    one(Int) # 1
+    one(Int64) # 1.i64
+
+    # The type of a type is `Type`.
+    typeof(Int64) # Type
+    Int :: Int # true
+    Int <: Real # true
+
 TYPE CONVERSION
     # In Astro, the lowercase version of type names are usually meant for conversion operations.
     var three = int(3.14159265358) # Converts `3.14159265358` to an Int
