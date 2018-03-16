@@ -860,17 +860,18 @@ MUTATIVE FUNCTIONS
     fun reverse(iterable):
         let reversed = cast{List}({
             buffer: malloc{list.T}(list.len)
-            len: @delegated(len) len
-            capacity: len + 10
+            len: @delegated list.len
+            capacity: @capacity(capacity)
         })
         for i, e in enumerate iterable:
-            reversed[iterable.len + 1 - i] = e
+            reversed[end + 1 - i] = e
         reversed
 
     fun reverse(var iterable):
-        let copy = val iterable
-        for i, e in enumerate copy:
-            iterable[iterable.len + 1 - i] = e
+        let mid = iterable.middleindex
+        for var i, e in iterable[:mid]:
+            let temp = iterable[end + 1 - i]
+            e = temp
         pass
 
     let reversed = list.reverse() # Calls the first `reverse`
