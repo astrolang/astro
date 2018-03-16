@@ -276,8 +276,9 @@ LISTS
     # A slice can have a step value.
     let odds = numbers[1:2:30] # The step value is the `2` in the middle.
 
-    # Negative step can be used to reverse index access.
-    var reversed = contestants[:-1:]
+    # Reversing a list.
+    var reversed = contestants[end:-1:]
+    var reversed = contestants[end:]
 
     # Using a constructor to create a List.
     let number = List(4, 4, '')
@@ -415,19 +416,19 @@ DICTIONARIES & OBJECTS
 
 SET
     # Set is an unordered collection of items with no duplicate elements.
-    let fruits = set.{'orange', 'mango', 'guava', 'apple', 'orange', 'guava', 'pineapple'}
-    let citrus = set.{'lime', 'lemon', 'orange'}
+    let fruits = %{'orange', 'mango', 'guava', 'apple', 'orange', 'guava', 'pineapple'}
+    let citrus = %{'lime', 'lemon', 'orange'}
     fruits.len # 4
 
     # Set operations.
-    let union = citrus | fruits # set.{'lime', 'lemon', 'orange', 'mango', 'guava', 'apple', 'pineapple'}
-    let intersection = citrus & fruits # set.{'orange'}
-    let difference = citrus - fruits # set.{'lime', 'lemon'}
+    let union = citrus | fruits # %{'lime', 'lemon', 'orange', 'mango', 'guava', 'apple', 'pineapple'}
+    let intersection = citrus & fruits # %{'orange'}
+    let difference = citrus - fruits # %{'lime', 'lemon'}
 
 RANGE
     # Range is an iterable that allows iterating through a range of values.
     let days = 1..30 # 1 to 30
-    
+
     # A range can have a step value.
     let evens = 2..2..20 # The step value is the `2` in the middle.
 
@@ -649,7 +650,7 @@ COMPREHENSION
     let list = [x | x in 1..21 where x mod 2 != 0]
 
     # Set comprehension.
-    let set = set.{i | i in random(0, 200)}
+    let set = %{i | i in random(0, 200)}
 
     # Nested loops.
     let dict = @{ x: y | x in 1..30; y in 31..60 where even(y) }
@@ -758,7 +759,7 @@ ASSIGNMENT DESTRUCTURING
 
     # Destructuring patterns for other data structures
     let [name, age, _, ...rest] = [1, 2, 3, 4, 5]
-    let [name, age, _, ...rest] = set.[1, 2, 3, 4, 5]
+    let [name, age, _, ...rest] = %[1, 2, 3, 4, 5]
     let (a, b, _, ...c) = (1, 2, 3, 4, 5)
     let a, b, c = (1, 2, 3, 4, 5)
 
@@ -974,10 +975,6 @@ GENERICS
     # Declaring a generic type T.
     fun add(a, b): #: (T, T) -> T
         return a + b
-
-    # Type argument can be ommited if the type argument can be readily inferred.
-    var sum = add{Int}(2, 4)
-    var sum = add(2, 4) # Type argument inferred
 
     # Getting more expressive generic type annotation with `where` and type relation operators (`::`, `<:`, `>:`)
     fun anyCommonElements(l, r): #: (T, U) -> Bool where (T, U)<:Sequence
@@ -1260,7 +1257,6 @@ NON-STANDARD LITERAL
     var soup = utf32.'😋🍜'
     var numbers = sorted.[2, 4, 3, 5, 1]
     var books = sorted.{ "Harry Potter": "J.K. Rowling", "Ender's Game": "Orsen Scott" }
-    let arguments = set.(2, 4, 5, 4)
     let people = merge.(name: 'Steve', age: 15, name: 'John', age: 24)
 
     # There is no non-standard numeric literals, but property notation are used instead.
