@@ -1025,16 +1025,12 @@ GENERICS
 
 TYPES AS FIRST-CLASS CITIZENS
     # Types can be passed around and specialized on like regular objects in Astro.
-    fun one(t) = 1 #: Int
-    fun one(t) = 1.i64 #: Int64
+    Int64 :: Type{Int64}
+    Int64 :: Type
 
-    one(Int) # 1
-    one(Int64) # 1.i64
-
-    # The type of a type is `Type`.
-    typeof(Int64) # Type
-    Int :: Int # true
-    Int <: Real # true
+    # Having type be objects themselves allows us to overload functions based on the type of a type
+    fun zero(t) = 0.0 #: Type{Float}
+    fun zero(t) = 0 #: Type{Int}
 
 TYPE CONVERSION
     # In Astro, the lowercase version of type names are usually meant for type conversion operations.
