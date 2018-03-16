@@ -491,23 +491,20 @@ STRINGS
 
 STRING FORMATTING
     # Padding.
-    let leftPadding = 'left padding: $:>10(string)'
-    let rightPadding = 'right padding: $:<10(string)'
-    let placeholderPadding = 'placeholder padding: $:_<10(string)'
-    let centering = 'centering: $:^10(string)'
+    let leftPadding = 'left padding: ${>10}(string)'
+    let rightPadding = 'right padding: ${<10}(string)'
+    let placeholderPadding = 'placeholder padding: ${_<10}(string)'
+    let centering = 'centering: ${^10}(string)'
 
     # Truncation.
-    let truncating = 'truncate string: $:.10(string)'
+    let truncating = 'truncate string: ${.10}(string)'
 
     # Numbers.
-    let integer = 'integer: $:d(number)'
-    let float = 'float: $:f(number)'
-    let truncation = 'figure truncation: $:6.2f(number)'
-    let positive = 'positive: $:+d(number)'
-    let negative = 'negative: $:-f(number)'
-
-    # Date-Time | Custom objects.
-    let date = 'date: $:|Y-m-d H:M|(date)'
+    let integer = 'integer: ${d}(number)'
+    let float = 'float: ${f}(number)'
+    let truncation = 'figure truncation: ${6.2f}(number)'
+    let positive = 'positive: ${+d}(number)'
+    let negative = 'negative: ${-f}(number)'
 
 MULTILINE EXPRESSIONS
     # Expressions can be continued on the next line by ending the line with a line-continuation punctuator.
