@@ -1353,6 +1353,7 @@ PREDEFINED TYPE HIERARCHY
         Seq
             List
             Array
+            Set
             Range
             Indexer
             Tuple
