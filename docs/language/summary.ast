@@ -319,10 +319,6 @@ ARRAYS
     # Multi-dimensional array slicing
     let subset = mat4[1:, 1:2]
 
-    # Vectorization syntax.
-    let z = 5 + subset.
-    let y = add(subset., 1)
-
     # Astro's lists are, by default, row-major order.
     let y = [1, 2, 3]
     # [1 2 3]
@@ -348,6 +344,21 @@ ARRAYS
     # Indexed integral numbers clash with array literals, so defining `getIndex` on integral types is not allowed.
     # Also when multiplying by an array literal, the literal needs to be enclosed in parens.
     let result = 3×(4[])
+
+VECTORIZATION
+    # Operations can be vectorized in Astro.
+
+    # Function calls.
+    let y = div.(M, 2)
+
+    # Prefix operators.
+    let x = -.(M)
+
+    # Postfix operators.
+    let x = M.⁹
+
+    # Infix operators.
+    let z = 5 .+ M
 
 DICTIONARIES & OBJECTS
     # Objects and dictionaries are both associative data structures.
