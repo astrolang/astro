@@ -990,11 +990,6 @@ GENERICS
     let languages #: List{Str}
     let languages #: [Str]
 
-    # Value contraints allow the programmer to specify certain contraints on the value of a type.
-    # Note: Value constraints are subject declarations in their own right and can cause name clashes.
-    var age #: Int(1..120) # age is an int value that must be between 1 and 120
-    var name #: S() where S::Str # S is any value of type Str
-
 TYPES AS FIRST-CLASS CITIZENS
     # Types can be passed around and specialized on like regular objects in Astro.
     fun one(t) = 1 #: Int
