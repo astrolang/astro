@@ -114,20 +114,22 @@ TYPE DEFINITION (1)
 
 DELEGATED PROPERTIES
     # Delegated properties are subjects whose assignment and access operations are delegated to specified functions.
-    type Person(var name: '', var age: delegate(age, age))
-    fun age(x, v) = x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
-    fun age(x) = x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
+    type Person(var name: '', var age: @delegated(age, age))
+
+    fun age(x, v): x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
+    fun age(x): x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
+
     john.age = 56
     john.age
 
-    # The `delegate`s call tuple can be left out, if delegate functions have the same names as the delegate properties.
-    type Person(var name: '', var age: delegte)
+    # The delegated property has only a getter, only the getter should be specified.
+    type Person(var name: '', var age: @delegated(age))
 
-    # A function with `@property` macro can be called like a property.
-    fun f64(i): @property
-        return float64(i)
+    # The `delegated`s call tuple can be left out if delegate functions have the same names as the delegated properties.
+    type Person(var name: '', var age: @delegated)
 
-    f64(5) == 5.f64
+    # A delegated property can have a default value
+    type Person(var name: '', var age: @delegated 12)
 
 EXPRESSION-ORIENTED
     # Everything (except the import and export statements) is an expression in Astro!
