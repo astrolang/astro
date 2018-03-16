@@ -649,7 +649,7 @@ FOR LOOP
 
 COMPREHENSION
     # Comprehensions are syntactic sugar for iterator generators.
-    let list = gen.[i | i in random(0, 200)]
+    let gen = {i | i in random(0, 200)}
 
     # Extending a comprehension with `where`.
     let list = [x | x in 1..21 where x mod 2 != 0]
