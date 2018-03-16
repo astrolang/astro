@@ -204,11 +204,6 @@ VALUES & REFERENCES
     fun getAmount():
         return const amount
 
-    # Reference type annotation.
-    fun swap(var a, var b): #: (ref T, ref T) -> None
-        a, b = b, a
-    ..
-
 NUMBER LITERALS
     # Number literals in Astro
     var index = 5 # Int literal.
@@ -1014,7 +1009,7 @@ TYPES AS FIRST-CLASS CITIZENS
     Int <: Real # true
 
 TYPE CONVERSION
-    # In Astro, the lowercase version of type names are usually meant for conversion operations.
+    # In Astro, the lowercase version of type names are usually meant for type conversion operations.
     var three = int(3.14159265358) # Converts `3.14159265358` to an Int
     var five = str(5) # Converts `5` to a Str
 
