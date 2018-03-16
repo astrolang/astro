@@ -1134,7 +1134,7 @@ MODULES & IMPORT
     import nypro/../my-cool-project
 
     # Renaming can help disambiguate imports.
-    import fastmath:nypro/fast-math { cosine:cos, sine:sin, π:pi }
+    import fastmath: nypro/fast-math { cosine: cos, sine: sin, π: pi }
     let b = fastmath.tan(45)
     let d = cosine(30)
 
@@ -1276,7 +1276,6 @@ COEFFICIENT EXPRESSION
     let h = 0x344f # f is not considered a variable here, but part of the hex literal.
     let h = 0x344j # Invalid!
     let h = (0x344)f
-
 
 INTEGER BITWISE OPERATORS
     # Bitwise `or` changes the bit to `1` if the corresponding bit in either operand is `1`.
