@@ -856,7 +856,7 @@ FUNCTION DEFINITION (2)
 
 MUTATIVE FUNCTIONS
     # Mutative functions are functions that mutate the arguments passed to them.
-    # Like Python, Astro follows a convention where function names are used to determine if a function is mutative.
+    # Astro supports overloading of functions based on argument mutation.
     fun reverse(var iterable):
         let t = iterable
         let { len } = iterable
@@ -1137,6 +1137,19 @@ TYPE ALIASES
     type Number = Integer | Float | Complex
     fun add(a, b) = a + b #: (Number, Number) -> Number
 
+CAST FUNCTION
+    # `cast` is a special function in Astro, just like `typeof`, because it can have either static and dynamic behavior.
+    # `cast` turns a typeless object into a typed one. It can also change how a value type is interpreted.
+    let reversed = cast{List}({
+        buffer: malloc{list.T}(list.len)
+        len: @delegated(len)
+    })
+
+    let value = cast{Int64}(1.0)
+
+    # `cast` raises an error if reinterpretation is impossible.
+    let value = cast{Float64}(1.i8)
+    
 REFERENCE EQUALITY
     # `is` operator can be used check if two operands refer to the same object representation.
     let a = 'Hi'
@@ -1356,7 +1369,7 @@ POINTERS
     pointer.offset(500) # Error!
 
 RESERVED KEYWORDS
-    import, export, let, var, const, delegate, fun, type, abst, async,
+    import, export, let, var, const, fun, type, abst, async,
     ref, val, iso, acq,
     if, elif, else, while, for, try, except, ensure, defer, loop, unsafe
     spill, return, raise, break, continue, yield, from, await,
