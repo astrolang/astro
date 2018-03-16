@@ -1114,6 +1114,12 @@ TYPE EXTENSION
     type Integer:
         let f64 = @delegated(float64)
 
+BITSTYPES
+    # Bitstypes are value types that are stored and interpreted as machine-intrinsic types like Int and Float64.
+    # A Bits type can be created using the `bits` macro.
+    @bits(Int64) # the type instance will be stored and interpreted as an Int64
+    type Numeral(num)
+
 TYPE CHECKING
     # The `typeof` operator can be used to get an object's type.
     typeof 50 # Int32
