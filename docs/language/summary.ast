@@ -857,20 +857,24 @@ FUNCTION DEFINITION (2)
 MUTATIVE FUNCTIONS
     # Mutative functions are functions that mutate the arguments passed to them.
     # Astro supports overloading of functions based on argument mutation.
+    fun reverse(iterable):
+        let reversed = cast{List}({
+            buffer: malloc{list.T}(list.len)
+            len: @delegated(len) len
+            capacity: len + 10
+        })
+        for i, e in enumerate iterable:
+            reversed[iterable.len + 1 - i] = e
+        reversed
+
     fun reverse(var iterable):
-        let t = iterable
-        let { len } = iterable
-        for i in reverse indices(iterable):
-            iterable[i] = t[len - (len - i)]
+        let copy = val iterable
+        for i, e in enumerate copy:
+            iterable[iterable.len + 1 - i] = e
+        pass
 
-    fun reversed(iterable):
-        var t = []
-        for i in reverse indices(iterable):
-            t.push iterable[i]
-        return t
-
-    list.reverse() # Mutates list
-    list.reversed() # Does not mutate list
+    let reversed = list.reverse() # Calls the first `reverse`
+    let reversed = list.reverse!() # Calls the second `reverse`
 
 LAMBDAS
     # Functions are first-class objects and can be passed around just like regular objects.
@@ -1149,7 +1153,7 @@ CAST FUNCTION
 
     # `cast` raises an error if reinterpretation is impossible.
     let value = cast{Float64}(1.i8)
-    
+
 REFERENCE EQUALITY
     # `is` operator can be used check if two operands refer to the same object representation.
     let a = 'Hi'
