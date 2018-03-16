@@ -433,7 +433,7 @@ RANGE
     let evens = 2..2..20 # The step value is the `2` in the middle.
 
     # Negative step can be used to reverse the range's iteration.
-    var reversed = ..-1..20
+    var reversed = 20..-1..1
 
     # Using a range in a for loop.
     for i in 1..10:
