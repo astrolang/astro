@@ -1309,17 +1309,6 @@ REGEX
     # Regex operations.
     var = /\d/ + re.'\[a-z]' + /\d/ # Concatenation
 
-NON-STANDARD LITERAL
-    # Non-standard literals allow users to use existing literals to define new literals.
-    var soup = utf32.'😋🍜'
-    var numbers = sorted.[2, 4, 3, 5, 1]
-    var books = sorted.{ "Harry Potter": "J.K. Rowling", "Ender's Game": "Orsen Scott" }
-    let people = merge.(name: 'Steve', age: 15, name: 'John', age: 24)
-
-    # There is no non-standard numeric literals, but property notation are used instead.
-    var price = 35.f64
-    var timeTaken = 160.seconds
-
 COEFFICIENT EXPRESSION
     # Coefficient expression as the name implies allows coefficients to be taken as multiplication.
     let x = 3 * f + 2 * (6 + 1)
