@@ -1127,10 +1127,10 @@ TYPE EXTENSION
     type Integer:
         let f64 = @delegated(float64)
 
-BITSTYPES
-    # Bitstypes are value types that are stored and interpreted as machine-intrinsic types like Int and Float64.
-    # A Bits type can be created using the `bits` macro.
-    @bits(Int64) # the type instance will be stored and interpreted as an Int64
+CUSTOM PRIMITIVE TYPES
+    # Primitive types are value types that are stored and interpreted as machine-intrinsic types like Int and Float64.
+    # A Primitive type can be created using the `primitive` macro.
+    @primitive(Int64) # the type instance will be stored and interpreted as an Int64
     type Numeral(num)
 
 TYPE CHECKING
