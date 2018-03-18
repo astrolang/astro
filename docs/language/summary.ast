@@ -533,23 +533,20 @@ MULTILINE EXPRESSIONS
         .lower()
 
 CASCADING NOTATION
-    # Cascading notation (using '_.') is a variation of dot notation that associates with the initial object instead of on the returned object
-    james~name~print() # Same as `james.name(); james.print()`
+    # Cascading notation can be used to reduce common operand repetition.
+    let fullname = james.firstname + james.middlename + james.lastname
+    let fullname = james.{ firstname + middlename + lastname }
 
-    # It also works with call tuple.
-    print~('hello')~('world') # Same as `print('hello'); print('world')`
+    if john.firstname.len == john.lastname.len: bar()
+    if john.{ firstname == lastname }.len: bar()
 
-    # Just like dot notation, chained cascading notation can be written on subsequent lines.
-    print
-        ~('hello')
-        ~('world')
+    # It also works with call tuple and element access operator.
+    array.push.{ !(x), !(y) }
+    array.{ [x], [y] }
 
-    # Cascading notation can also be used to reduce common operand repetition
-    let james = person.name, person.age
-    let james = person~name, ~age
-
-    let fullname = james.firstname + james.middlename + james.surname
-    let fullname = james~firstname + ~middlename + ~surname
+    # Note: When used as a tuple, the expression is unpacked as an open tuple instead of being packed as a closed one
+    print(john.{ name, age }) # John 40
+    print((john.{ name, age })) # (John, 40)
 
 PASS KEYWORD
     # `pass` keyword can used to represent an empty block.
@@ -794,7 +791,7 @@ MAIN FUNCTION
 FUNCTION DEFINITION (2)
     # If a function returns nothing, it can either be annotated with None or left empty.
     fun show(point): #: (Point) -> None
-        print(point~a, ~b)
+        print(point.{ a, b })
 
     # The normal order of arguments in a function call can be changed if the parameter name is specified.
     fun say(msg, name): #: (Str, Str)
@@ -981,7 +978,7 @@ TYPE DEFINITION (2)
     # On the other hand, a type can have a destructor.
     # Destructor can be used for last-nanosecond cleanups before an object is destroyed.
     # The object can be referenced in the destructor body with `self`
-    fun Car(!) = print('deleting car: ', self~make, ~year)
+    fun Car(!) = print('deleting car: ', self.{ make, year })
 
 GENERICS
     # Uppercase single letter identifier are reserved for generic type annotations.
