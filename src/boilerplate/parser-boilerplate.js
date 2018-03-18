@@ -269,7 +269,7 @@ let lookAheadParseSuccessful = false;
 const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
 (() => {
   // Consume newline.
-  if (!this.parseNewline('.').success) return;
+  if (!this.parseNewline().success) return;
 
   // This lookahead was parsed successfully.
   lookAheadParseSuccessful = true;
@@ -280,7 +280,6 @@ this.reset(state.lastPosition, null, null, state.column, state.line);
 
 // lookahead parsing should not be successful for a negative lookahead.
 if (lookAheadParseSuccessful) return;
-
 
 //------------------------------------
 
