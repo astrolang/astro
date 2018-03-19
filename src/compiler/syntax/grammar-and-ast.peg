@@ -343,12 +343,11 @@ callpostfix =
   { type, expression, mutative, vectorized, arguments: [{ key, value }] }
 
 dotnotationpostfix =
-  | spaces? '.' '$' indexpostfix
-  | spaces? '.' '$'? identifier
-  { type, expression, mapped, field, index }
+  | spaces? '.' identifier
+  { type, expression, field }
 
 cascadenotationargument =
-  | (callpostfix | indexpostfix | dotnotationpostfix) (spaces? '?')? (subatompostfix (spaces? '?')?)*
+  | (callpostfix | indexpostfix | spaces? '.' identifier) (spaces? '?')? (subatompostfix (spaces? '?')?)*
 
 cascadenotationarguments =
   | cascadenotationargument (_comma _? cascadenotationargument)+ _comma?
@@ -419,7 +418,6 @@ subatompostfix =
 subatom =
   | '(' spaces? simpleexpression _? ')' identifier? // ignorenewline
   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' identifier?
-  | '~' '$'? identifier
   | coefficientexpression
   | literal
   | noname

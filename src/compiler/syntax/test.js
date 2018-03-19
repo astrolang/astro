@@ -1376,19 +1376,10 @@ const Parser = require('./parser');
   print(String.raw`  .address45`);
   print(new Parser('  .address45').parseDotNotationPostfix());
 
-  print(String.raw`.$commons`);
-  print(new Parser('.$commons').parseDotNotationPostfix());
-
-  print(String.raw`.$[5, 6]`);
-  print(new Parser('.$[5, 6]').parseDotNotationPostfix());
-
   print('========= CASCADENOTATIONARGUMENT =========');
 
   print(String.raw`[2, 3]`);
   print(new Parser('[2, 3]').parseCascadeNotationArgument());
-
-  print(String.raw`$[2, 3:67]`);
-  print(new Parser('$[2, 3:67]').parseCascadeNotationArgument());
 
   print(String.raw`.(2, 3..67)`);
   print(new Parser('.(2, 3..67)').parseCascadeNotationArgument());
@@ -1401,22 +1392,22 @@ const Parser = require('./parser');
 
   print('========= CASCADENOTATIONARGUMENTS =========');
 
-  print(String.raw`$[2, 3:67]+name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-  print(new Parser('$[2, 3:67]+name').parseCascadeNotationArguments()); // fail
+  print(String.raw`[2, 3:67]+name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+  print(new Parser('[2, 3:67]+name').parseCascadeNotationArguments()); // fail
 
   print(String.raw`[2, 3], ({nom, name})`);
   print(new Parser('[2, 3], ({nom, name})').parseCascadeNotationArguments());
 
-  print(String.raw`$[2, 3:67] + name / age - game`);
-  print(new Parser('$[2, 3:67] + name / age - game').parseCascadeNotationArguments());
+  print(String.raw`[2, 3:67] + name / age - game`);
+  print(new Parser('[2, 3:67] + name / age - game').parseCascadeNotationArguments());
 
   print('========= CASCADENOTATIONPOSTFIX =========');
 
   print(String.raw`.{[2, 3], ({nom, name})}`);
   print(new Parser('.{[2, 3], ({nom, name})}').parseCascadeNotationPostfix());
 
-  print(String.raw`.{ $[2, 3:67] + name / age - game }`);
-  print(new Parser('.{ $[2, 3:67] + name / age - game }').parseCascadeNotationPostfix());
+  print(String.raw`.{ [2, 3:67] + name / age - game }`);
+  print(new Parser('.{ [2, 3:67] + name / age - game }').parseCascadeNotationPostfix());
 
   print('========= INDEXARGUMENT =========');
 
@@ -1740,8 +1731,8 @@ const Parser = require('./parser');
   print(String.raw`5.(+)`);
   print(new Parser('5.(+)').parseAtom());
 
-  print(String.raw`john.{ $[2, 3:67] + name / age - game }.nom`);
-  print(new Parser('john.{ $[2, 3:67] + name / age - game }.nom').parseAtom());
+  print(String.raw`john.{ [2, 3:67] + name / age - game }.nom`);
+  print(new Parser('john.{ [2, 3:67] + name / age - game }.nom').parseAtom());
 
   print(String.raw`name ? ! .(²)`);
   print(new Parser('name ? ! .(²)').parseAtom());
@@ -1988,4 +1979,3 @@ const Parser = require('./parser');
   print(new Parser('4 + (name,),').parseTupleExpression());
 
 }
-
