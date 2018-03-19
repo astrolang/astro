@@ -1,4 +1,17 @@
 # Astro 0.1.14a
+# 18/03/18
+# New Cascading Notation
+john.{ age, name }
+{ firstname, lastname }.len
+john.{ firstname + lastname }.len
+a.push!.{ (x), (y) }
+list.{ [x], [y] }
+john.{
+    print(x),
+    print(y)
+}
+
+# Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
 - remove highlight on typenames
@@ -8,7 +21,14 @@
 - fix highlight on regex literal when around operators
     let op = 1//i + 1//d
 
-- highlight new vectorized function call syntax and remove highlight on ns tuple literal
+- remove highlight on ns literals
+    ns.()
+    ns.{}
+    ns.[]
+    ns.""
+    ns.//
+
+- highlight new vectorized function call syntax
     ciel.(M)
 
 - highlight mutative function call
@@ -71,7 +91,7 @@
 Int64 :: Type{Int64}
 Int64 :: Type
 
-# Having tybe be objects themselves allows us to overload functions based on the type of a type
+# Having type be objects themselves allows us to overload functions based on the type of a type
 fun zero(t) = 0.0 #: Type{Float}
 fun zero(t) = 0 #: Type{Int}
 
