@@ -1,5 +1,12 @@
 # Astro 0.1.14a
 # 18/03/18
+# REMOVED MPPED FIELD AnD INDEX
+array.$name
+array.$[45, 6]
+
+getfield.(array, $name)
+getindex.(array, 45, 6)
+
 # New Cascading Notation
 john.{ age, name }
 { firstname, lastname }.len
@@ -14,6 +21,9 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- remove highlight on mapped fieldnames
+    array.$name
+
 - remove highlight on typenames
     type Person
     Person

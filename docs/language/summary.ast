@@ -280,11 +280,8 @@ LISTS
     # Using a constructor to create a List.
     let number = List(4, 4, '')
 
-    # Field mapping.
-    students.map(|x| => x.gpa)
-    students.$gpa # Same as above
-
-    fun average(students) = sum(students.$gpa) / students.len
+    fun average(students) = sum(getfield.(students, $gpa)) / students.len
+    fun average(students) = students.{ getfield.($gpa).sum / len }
 
     # List operations.
     var concatenate = [1, 2] ++ [3, 4] # [1, 2, 3, 4]
