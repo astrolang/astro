@@ -260,10 +260,20 @@ dictarguments =
   { expressions: [{ key, value }] }
 
 dictliteral =
-  | '@' spaces? '{' _? '}' // ignorenewline
-  | '@' spaces? '{' spaces? dictarguments _? '}' // ignorenewline
-  | '@' spaces? '{' nextcodeline indent dictarguments nextcodeline dedent '}'
+  | '@' '{' _? '}' // ignorenewline
+  | '@' '{' spaces? dictarguments _? '}' // ignorenewline
+  | '@' '{' nextcodeline indent dictarguments nextcodeline dedent '}'
   { type, expressions: [{ key, value }] }
+
+setarguments =
+  | primitiveexpression (_comma _? primitiveexpression)* _comma?
+  { expressions }
+
+setliteral =
+  | '%' '{' _? '}' // ignorenewline
+  | '%' '{' spaces? setarguments _? '}' // ignorenewline
+  | '%' '{' nextcodeline indent setarguments nextcodeline dedent '}'
+  { type, expressions }
 
 tuplearguments =
   | primitiveexpression (_comma _? primitiveexpression)+ _comma?
@@ -312,6 +322,7 @@ literal =
   | listliteral
   | objectliteral
   | dictliteral
+  | setliteral
   | tupleliteral
   | namedtupleliteral
   | symbolliteral
