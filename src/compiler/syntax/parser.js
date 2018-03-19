@@ -5728,7 +5728,7 @@ class Parser {
 
         // Consume '.'?.
         if (this.parseToken('.').success) vectorized = true;
-      
+
 
         // Consume '('.
         if (!this.parseToken('(').success) return;
@@ -5889,8 +5889,9 @@ class Parser {
   }
 
   // dotnotationpostfix =
+  //   | spaces? '.' '$' indexpostfix
   //   | spaces? '.' '$'? identifier
-  //   { type, expression, mapped, field }
+  //   { type, expression, mapped, field, index }
   parseDotNotationPostfix() {
     // Keep original state.
     const {
@@ -5901,24 +5902,69 @@ class Parser {
     const expression = null;
     let mapped = false;
     let name = null;
+    let index = null;
     let parseData = { success: false, message: { type: 'dotnotationpostfix', parser: this }, ast: null };
 
     (() => {
-      // Consume spaces?.
-      this.parseSpaces();
+      // Alternate parsing.
+      // | spaces? '.' '$' indexpostfix
+      // | spaces? '.' '$'? identifier
+      let alternativeParseSuccessful = false;
 
-      // Consume '.'.
-      if (!this.parseToken('.').success) return null;
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { mapped };
 
-      // Consume '$'?.
-      if (this.parseToken('$').success) mapped = true;
+      // [1]. spaces? '.' '$' indexpostfix
+      (() => {
+        // Consume spaces?.
+        this.parseSpaces();
 
-      // Consume identifier.
-      if (!this.parseIdentifier().success) return null;
-      ({ name }  = this.lastParseData.ast);
+        // Consume '.'.
+        if (!this.parseToken('.').success) return;
+
+        // Consume '$'.
+        if (!this.parseToken('$').success) return;
+        mapped = true;
+
+        // Consume indexpostfix.
+        if (!this.parseIndexPostfix().success) return;
+        index = { arguments: this.lastParseData.ast.arguments };
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. spaces? '.' '$'? identifier
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ mapped } = otherState);
+
+        (() => {
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Consume '.'.
+          if (!this.parseToken('.').success) return;
+
+          // Consume '$'?.
+          if (this.parseToken('$').success) mapped = true;
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          ({ name }  = this.lastParseData.ast);
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type, expression, mapped, name } };
+      parseData = { success: true, message: null, ast: { type, expression, mapped, name, index } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -5934,37 +5980,176 @@ class Parser {
     return parseData;
   }
 
-  // cascadingnotationpostfix =
-  //   | spaces? '~' '$'? identifier
-  //   { type, expression, mapped, field }
-  parseCascadingNotationPostfix() {
+  // cascadenotationargument =
+  //   | (callpostfix | indexpostfix | '$' indexpostfix | '$'? identifier) (spaces? '?')? (subatompostfix (spaces? '?')?)*
+  parseCascadeNotationArgument() {
     // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
 
-    const type = 'cascadingnotation';
-    const expression = null;
-    let mapped = false;
-    let name = null;
-    let parseData = { success: false, message: { type: 'cascadingnotationpostfix', parser: this }, ast: null };
+    const type = 'cascadenotationargument';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
-      // Consume spaces?.
-      this.parseSpaces();
+      let expression = null;
+      let nil = null;
 
-      // Consume '~'.
-      if (!this.parseToken('~').success) return null;
+      // Alternate parsing.
+      // | callpostfix
+      // | indexpostfix
+      // | '$' indexpostfix
+      // | '$'? identifier
+      let alternativeParseSuccessful = false;
 
-      // Consume '$'?.
-      if (this.parseToken('$').success) mapped = true;
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { expression };
 
-      // Consume identifier.
-      if (!this.parseIdentifier().success) return null;
-      ({ name }  = this.lastParseData.ast);
+      // [1]. callpostfix
+      (() => {
+        // Consume callpostfix.
+        if (!this.parseCallPostfix().success) return;
+        expression = this.lastParseData.ast;
 
-      // Update parseData.
-      parseData = { success: true, message: null, ast: { type, expression, mapped, name } };
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. indexpostfix
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ expression } = otherState);
+
+        (() => {
+          // Consume indexpostfix.
+          if (!this.parseIndexPostfix().success) return;
+          expression = this.lastParseData.ast;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. '$' indexpostfix
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ expression } = otherState);
+
+        (() => {
+          let mapped = false;
+          let name = null;
+          let index = null;
+
+          // Consume '$'.
+          if (!this.parseToken('$').success) return;
+          mapped = true;
+
+          // Consume indexpostfix.
+          if (!this.parseIndexPostfix().success) return;
+          index = { arguments: this.lastParseData.ast.arguments };
+
+          expression = { type: 'dotnotation', expression: null, mapped, name, index };
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [4]. '$'? identifier
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ expression } = otherState);
+
+        (() => {
+          let mapped = false;
+          let name = null;
+          let index = null;
+
+          // Consume '$'?.
+          if (this.parseToken('$').success) mapped = true;
+
+          // Consume identifier.
+          if (!this.parseIdentifier().success) return;
+          ({ name }  = this.lastParseData.ast);
+
+          expression = { type: 'dotnotation', expression: null, mapped, name, index };
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Optional parsing. (spaces? '?')?
+      let optionalParseSuccessful = false;
+      const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      (() => {
+        // Consume spaces?.
+        this.parseSpaces();
+
+        // Consume '?'.
+        if (!this.parseToken('?').success) return;
+        expression = { type: 'nillable', expression };
+
+        // This optional was parsed successfully.
+        optionalParseSuccessful = true;
+      })();
+
+      // If parsing the above optional fails, revert state to what it was before that parsing began.
+      if (!optionalParseSuccessful) {
+        this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+      }
+
+      // Optional-multiple parsing. (subatompostfix [!?]?)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume subatompostfix.
+          if (!this.parseSubAtomPostfix().success) return;
+          const oldExpression = expression;
+          expression = this.lastParseData.ast;
+
+          expression.expression = oldExpression;
+
+          // Optional parsing. (spaces? '?')?
+          let optionalParseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume spaces?.
+            this.parseSpaces();
+
+            // Consume '?'.
+            if (!this.parseToken('?').success) return;
+            expression = { type: 'nillable', expression };
+
+            // This optional was parsed successfully.
+            optionalParseSuccessful = true;
+          })();
+
+          // If parsing the above optional fails, revert state to what it was before that parsing began.
+          if (!optionalParseSuccessful) {
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+          }
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, null, state.column, state.line);
+          break;
+        }
+      }
+
+      parseData = { success: true, message: null, ast: expression };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -5976,6 +6161,301 @@ class Parser {
 
     // Parsing failed, so revert state.
     this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // cascadenotationarguments =
+  //   | cascadenotationargument (_comma _? cascadenotationargument)+ _comma?
+  //   | cascadenotationargument _ ('.'? operator | keywordoperator) _ (cascadenotationarguments | cascadenotationargument)
+  parseCascadeNotationArguments() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'cascadenotationarguments';
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | cascadenotationargument (_comma _? cascadenotationargument)+ _comma?
+      // | cascadenotationargument _ ('.'? operator | keywordoperator) _ (cascadenotationarguments | cascadenotationargument)
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. cascadenotationargument (_comma _? cascadenotationargument)+ _comma?
+      (() => {
+        let expressions = [];
+
+        // Consume cascadenotationargument.
+        if (!this.parseCascadeNotationArgument().success) return;
+        expressions.push(this.lastParseData.ast);
+
+        // One-multiple parsing. (_comma _? cascadenotationargument)+
+        let loopCount = 0;
+        while (true) {
+          let parseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume comma.
+            if (!this.parse_Comma().success) return;
+
+            // Consume _?.
+            this.parse_();
+
+            // Consume cascadenotationargument.
+            if (!this.parseCascadeNotationArgument().success) return;
+            expressions.push(this.lastParseData.ast);
+
+            parseSuccessful = true;
+
+            // Parsing successful, increment loop count.
+            loopCount += 1;
+          })();
+
+          // If parsing the above fails, revert state to what it was before that parsing began.
+          // And break out of the loop.
+          if (!parseSuccessful) {
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+            break;
+          }
+        }
+
+        // At least one iteration of the above must be parsed successfully.
+        if (loopCount < 1) return;
+
+        // Consume _comma?.
+        this.parse_Comma();
+
+        // Update parseData.
+        parseData = { success: true, message: null, ast: { type: 'opentuple', expressions } };
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. cascadenotationargument _ ('.'? operator | keywordoperator) _ (cascadenotationarguments | cascadenotationargument)
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          let vectorized = false;
+          let expressions = [];
+          let operators = [];
+          let rest = null;
+
+          // Consume cascadenotationargument.
+          if (!this.parseCascadeNotationArgument().success) return;
+          expressions.push(this.lastParseData.ast);
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Alternate parsing.
+          // | '.'? operator
+          // | keywordoperator
+          let alternativeParseSuccessful2 = false;
+
+          // Save state before alternative parsing.
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          const otherState = { operators: [], expressions: [] };
+
+          // [1]. operator
+          (() => {
+            // Consume '.'?.
+            if (this.parseToken('.').success) vectorized = true;
+
+            // Consume operator.
+            if (!this.parseOperator().success) return;
+            operators.push(this.lastParseData.ast);
+
+            // This alternative was parsed successfully.
+            alternativeParseSuccessful2 = true;
+          })();
+
+          // [2]. keywordoperator
+          if (!alternativeParseSuccessful2) {
+            // Revert state to what it was before alternative parsing started.
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+            ({ operators, expressions } = otherState);
+
+            (() => {
+              // Consume keywordoperator.
+              if (!this.parseKeywordOperator().success) return;
+              operators.push(this.lastParseData.ast);
+
+              // This alternative was parsed successfully.
+              alternativeParseSuccessful2 = true;
+            })();
+          }
+
+          // Check if any of the alternatives was parsed successfully
+          if (!alternativeParseSuccessful2) return null;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume (cascadenotationarguments | cascadenotationargument).
+          if (!this.parseCascadeNotationArguments().success && !this.parseCascadeNotationArgument().success) return;
+          rest = this.lastParseData.ast;
+
+          // Merging values from `expressions` and `operators` from `cascadenotationarguments` with the ones in current ast.
+          if (rest.type === 'infixexpression') {
+            expressions = [...expressions, ...rest.expressions];
+            operators = [...operators, ...rest.operators];
+          } else {
+            expressions.push(rest);
+          }
+
+          // Update parseData.
+          parseData = { success: true, message: null, ast: { type: 'infixexpression', vectorized, expressions, operators } };
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // cascadenotationpostfix = // Unfurl
+  //   | spaces? '.' '{' spaces? cascadenotationarguments _? '}' // ignorenewline
+  //   | spaces? '.' '{' nextcodeline indent cascadenotationarguments nextcodeline dedent '}'
+  //   { type, expression, cascadeaccess }
+  parseCascadeNotationPostfix() {
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'cascadenotation';
+    let expression = null;
+    let cascadeaccess = null;
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | spaces? '.' '{' spaces? cascadenotationarguments _? '}' // ignorenewline
+      // | spaces? '.' '{' nextcodeline indent cascadenotationarguments nextcodeline dedent '}'
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = {
+        lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
+      };
+      const otherState = { cascadeaccess };
+
+      // [1]. spaces? '.' '{' spaces? cascadenotationarguments _? '}' // ignorenewline
+      (() => {
+        // Consume spaces?.
+        this.parseSpaces();
+
+        // Consume '.'.
+        if (!this.parseToken('.').success) return;
+
+        // Consume '{'.
+        if (!this.parseToken('{').success) return;
+
+        // Consume spaces?.
+        this.parseSpaces();
+
+        // Ignore newline from this point
+        this.ignoreNewline = true;
+
+        // Consume cascadenotationarguments.
+        if (!this.parseCascadeNotationArguments().success) return;
+        cascadeaccess = this.lastParseData.ast;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume '}'.
+        if (!this.parseToken('}').success) return;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. spaces? '.' '{' nextcodeline indent cascadenotationarguments nextcodeline dedent '}'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ expression } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Consume '.'.
+          if (!this.parseToken('.').success) return;
+
+          // Consume '{'.
+          if (!this.parseToken('{').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume cascadenotationarguments.
+          if (!this.parseCascadeNotationArguments().success) return;
+          cascadeaccess = this.lastParseData.ast;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume '}'.
+          if (!this.parseToken('}').success) return;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression, cascadeaccess } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
 
     return parseData;
   }
@@ -6184,7 +6664,7 @@ class Parser {
   // indexpostfix =
   //   | spaces? '[' spaces? indexarguments _? ']' // ignorenewline
   //   | spaces? '[' nextcodeline indent indexarguments nextcodeline dedent ']'
-  //   { type, arguments: [{ key, value }] }
+  //   { type, expression, arguments: [{ key, value }] }
   parseIndexPostfix() {
     // Keep original state.
     const {
@@ -6281,7 +6761,7 @@ class Parser {
       if (!alternativeParseSuccessful) return null;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type, arguments: args } };
+      parseData = { success: true, message: null, ast: { type, expression, arguments: args } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -6879,7 +7359,7 @@ class Parser {
   // subatompostfix =
   //   | callpostfix
   //   | dotnotationpostfix
-  //   | cascadingnotationpostfix
+  //   | cascadenotationpostfix
   //   | indexpostfix
   parseSubAtomPostfix() {
     const type = 'subatompostfix';
@@ -6888,7 +7368,7 @@ class Parser {
       return this.lastParseData;
     } else if (this.parseDotNotationPostfix().success) {
       return this.lastParseData;
-    } else if (this.parseCascadingNotationPostfix().success) {
+    } else if (this.parseCascadeNotationPostfix().success) {
       return this.lastParseData;
     } else if (this.parseIndexPostfix().success) {
       return this.lastParseData;
@@ -7043,7 +7523,7 @@ class Parser {
           ({ name }  = this.lastParseData.ast);
 
           // Update parseData.
-          parseData = { success: true, message: null, ast: { type: 'cascadingnotation', expression, mapped, name } };
+          parseData = { success: true, message: null, ast: { type: 'cascadenotation', expression, mapped, name } };
 
           // This alternative was parsed successfully.
           alternativeParseSuccessful = true;
@@ -7144,6 +7624,7 @@ class Parser {
           const oldExpression = expression;
           expression = this.lastParseData.ast;
 
+          // Make old expression part of new ast.
           expression.expression = oldExpression;
 
           // Optional parsing. (spaces? '?')?
@@ -7478,10 +7959,10 @@ class Parser {
         if (!this.parseInfixExpression().success) return;
         rest = this.lastParseData.ast;
 
-        // Merging values from `infixexpression` with `expressions` and `operators`
+        // Merging values from `expressions` and `operators` from `infixexpression` with the ones in current ast.
         if (rest.type === type) {
-          expressions = [expressions, ...rest.expressions];
-          operators = [operators, ...rest.operators];
+          expressions = [...expressions, ...rest.expressions];
+          operators = [...operators, ...rest.operators];
         } else {
           expressions.push(rest);
         }
@@ -7559,10 +8040,10 @@ class Parser {
           if (!this.parseInfixExpression().success) return;
           rest = this.lastParseData.ast;
 
-          // Merging values from `infixexpression` with `expressions` and `operators`
+          // Merging values from `expressions` and `operators` from `infixexpression` with the ones in current ast.
           if (rest.type === type) {
-            expressions = [expressions, ...rest.expressions];
-            operators = [operators, ...rest.operators];
+            expressions = [...expressions, ...rest.expressions];
+            operators = [...operators, ...rest.operators];
           } else {
             expressions.push(rest);
           }
@@ -7690,7 +8171,7 @@ class Parser {
       end = this.lastParseData.ast;
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { begin, step, end } };
+      parseData = { success: true, message: null, ast: { type, begin, step, end } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -7929,7 +8410,7 @@ class Parser {
       lastPosition, column, line,
     } = this;
 
-    const type = 'tupleliteral';
+    const type = 'opentuple';
     const expressions = [];
     let parseData = { success: false, message: { type: 'tupleexpression', parser: this }, ast: null };
 
@@ -8010,7 +8491,7 @@ class Parser {
       ({ name }  = this.lastParseData.ast);
 
       // Update parseData.
-      parseData = { success: true, message: null, ast: { type: isDotNotation ? 'dotnotation' : 'cascadingnotation', expression, mapped, name } };
+      parseData = { success: true, message: null, ast: { type: isDotNotation ? 'dotnotation' : 'cascadenotation', expression, mapped, name } };
 
       // Consume subatom.
       if (!this.parseSubAtom().success) return;
