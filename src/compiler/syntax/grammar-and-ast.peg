@@ -68,7 +68,7 @@ numericliteral =
   | integerliteral  // Can eat others cake
   { type, value }
 
-coefficientexpression =
+coefficientexpression = // Unfurl
   | floatbinaryliteral identifier
   | floatoctalliteral identifier
   | floatdecimalliteral identifier
@@ -328,14 +328,21 @@ callpostfix =
   { type, expression, mutative, vectorized, arguments: [{ key, value }] }
 
 dotnotationpostfix =
-  | spaces? '.' '$' listelementpostfix // TODO
+  | spaces? '.' '$' indexpostfix
   | spaces? '.' '$'? identifier
-  { type, expression, mapped, field }
+  { type, expression, mapped, field, index }
 
-cascadingnotationpostfix =
-  | spaces? '~' '$'? identifier
-  | spaces? '~' '$'? listelementpostfix
-  { type, expression, mapped, field }
+cascadenotationargument =
+  | (callpostfix | indexpostfix | dotnotationpostfix) (spaces? '?')? (subatompostfix (spaces? '?')?)*
+
+cascadenotationarguments =
+  | cascadenotationargument (_comma _? cascadenotationargument)+ _comma?
+  | cascadenotationargument _ ('.'? operator | keywordoperator) _ (cascadenotationarguments | cascadenotationargument)
+
+cascadenotationpostfix = // Unfurl
+  | spaces? '.' '{' spaces? cascadenotationarguments _? '}' // ignorenewline
+  | spaces? '.' '{' nextcodeline indent cascadenotationarguments nextcodeline dedent '}'
+  { type, expression, cascadeaccess }
 
 indexargument =
   | (primitiveexpression _?)? ':' (_? primitiveexpression? _? ':')? _? primitiveexpression?
@@ -391,7 +398,7 @@ controlprimitive =
 subatompostfix =
   | callpostfix
   | dotnotationpostfix
-  | cascadingnotationpostfix
+  | cascadenotationpostfix
   | indexpostfix
 
 subatom =
@@ -428,7 +435,7 @@ keywordoperator =
   { type, name }
 
 infixexpression =
-  | (prefixatom | atom) ('.'? operator | keywordoperator) infixexpression
+  | (prefixatom | atom) '.'? operator infixexpression
   | prepostfixatom _ ('.'? operator | keywordoperator) _ infixexpression
   | prepostfixatom
   { type, expressions, operators }
@@ -460,10 +467,10 @@ tupleexpression =
   { type, expressions }
 
 dotnotationline =
-  | ('.' | '~') '$'? identifier (spaces? '?')? (subatompostfix [!?]?)*
+  | dotnotationpostfix (spaces? '?')? (subatompostfix (spaces? '?')?)*
 
 dotnotationblock =
-  | nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) nextcodeline dedent
+  | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) nextcodeline dedent
 
 subexpression =
   | dotnotationblock
