@@ -307,7 +307,11 @@ listcomprehension =
   { type, expression, iterators:[{ lhs, rhs}], guard }
 
 dictcomprehension =
-  | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? '}' // ignorenewline
+  | '@' '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? '}' // ignorenewline
+  { type, key, value, iterators:[{ lhs, rhs}], guard }
+
+setcomprehension =
+  | '%' '{' _? primitiveexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? '}' // ignorenewline
   { type, key, value, iterators:[{ lhs, rhs}], guard }
 
 comprehension =
