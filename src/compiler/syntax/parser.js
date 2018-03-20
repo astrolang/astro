@@ -2602,7 +2602,7 @@ class Parser {
 
   // dedentoreoiend =
   //   | nextcodeline dedent
-  //   | nextcodeline? _? &eoi
+  //   | nextcodeline? _? eoi
   parseDedentOrEoiEnd() {
     // Keeping original state.
     const {
@@ -2628,6 +2628,8 @@ class Parser {
         if (!this.parseNextCodeLine().success) return;
         comments = this.lastParseData.ast;
 
+        print('bark')
+
         // Consume dedent.
         if (!this.parseDedent().success) return;
 
@@ -2635,7 +2637,7 @@ class Parser {
         alternativeParseSuccessful = true;
       })();
 
-      // [2]. nextcodeline? _? &eoi
+      // [2]. nextcodeline? _? eoi
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
@@ -2643,12 +2645,14 @@ class Parser {
         (() => {
           // Consume nextcodeline?.
           if (this.parseNextCodeLine().success) comments = this.lastParseData.ast;
+          print('boom')
 
           // Consume _?.
           this.parse_();
 
-          // Consume &eoi.
+          // Consume eoi.
           if (!this.parseEoi().success) return;
+          print('baam')
 
           // This alternative was parsed successfully.
           alternativeParseSuccessful = true;
@@ -7077,8 +7081,33 @@ class Parser {
     return parseData;
   }
 
+  // controlkeyword =
+  //   | 'return'
+  //   | 'yield'
+  //   | 'raise'
+  //   | 'continue'
+  //   | 'break'
+  //   | 'spill'
+  parseControlKeyword() {
+    const type = 'controlkeyword';
+
+    if (
+      this.parseToken('return').success ||
+      this.parseToken('yield').success ||
+      this.parseToken('raise').success ||
+      this.parseToken('continue').success ||
+      this.parseToken('break').success ||
+      this.parseToken('spill').success
+    ) {
+      return { success: true, message: null, ast: this.lastParseData.ast };
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
   // return =
-  //   | 'return' (nameseparator expressionnocontrolptimitive)?
+  //   | 'return' (!(_ controlkeyword _) nameseparator expression)?
   //   { type, expression }
   parseReturn() {
     // Keep original state.
@@ -7094,15 +7123,38 @@ class Parser {
       // Check 'return'.
       if (!this.parseToken('return').success) return;
 
-      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      // Optional parsing. (!(_ controlkeyword _) nameseparator expression)?
       let optionalParseSuccessful = false;
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
       (() => {
+        // Check !(_ controlkeyword _).
+        let lookAheadParseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
+        (() => {
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume controlkeyword.
+          if (!this.parseControlKeyword().success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // This lookahead was parsed successfully.
+          lookAheadParseSuccessful = true;
+        })();
+
+        // Reset state since it's just a lookahead not meant to be consumed.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        // lookahead parsing should not be successful for a negative lookahead.
+        if (lookAheadParseSuccessful) return;
+
         // Consume nameseparator.
         if (!this.parseNameSeparator().success) return;
 
-        // Consume expressionnocontrolptimitive.
-        if (!this.parseExpressionNoControlPrimitive().success) return;
+        // Consume expression.
+        if (!this.parseExpression().success) return;
         expression = this.lastParseData.ast;
 
         // This optional was parsed successfully.
@@ -7132,7 +7184,7 @@ class Parser {
   }
 
   // yield =
-  //   | 'yield' ((_ 'from')? nameseparator expressionnocontrolptimitive)?
+  //   | 'yield' ((_ 'from')? !(_ controlkeyword _) nameseparator expression)?
   //   { type, expression, redirect }
   parseYield() {
     // Keep original state.
@@ -7149,7 +7201,7 @@ class Parser {
       // Check 'yield'.
       if (!this.parseToken('yield').success) return;
 
-      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      // Optional parsing. ((_ 'from')? !(_ controlkeyword _) nameseparator expression)?
       let optionalParseSuccessful = false;
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
       (() => {
@@ -7173,11 +7225,34 @@ class Parser {
           this.reset(state2.lastPosition, null, null, state2.column, state2.line);
         }
 
+        // Check !(_ controlkeyword _).
+        let lookAheadParseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
+        (() => {
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume controlkeyword.
+          if (!this.parseControlKeyword().success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // This lookahead was parsed successfully.
+          lookAheadParseSuccessful = true;
+        })();
+
+        // Reset state since it's just a lookahead not meant to be consumed.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        // lookahead parsing should not be successful for a negative lookahead.
+        if (lookAheadParseSuccessful) return;
+
         // Consume nameseparator.
         if (!this.parseNameSeparator().success) return;
 
-        // Consume expressionnocontrolptimitive.
-        if (!this.parseExpressionNoControlPrimitive().success) return;
+        // Consume expression.
+        if (!this.parseExpression().success) return;
         expression = this.lastParseData.ast;
 
         // This optional was parsed successfully.
@@ -7208,7 +7283,7 @@ class Parser {
   }
 
   // raise =
-  //   | 'raise' (nameseparator expressionnocontrolptimitive)?
+  //   | 'raise' (!(_ controlkeyword _) nameseparator expression)?
   //   { type, expression }
   parseRaise() {
     // Keep original state.
@@ -7224,15 +7299,38 @@ class Parser {
       // Check 'raise'.
       if (!this.parseToken('raise').success) return;
 
-      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      // Optional parsing. (!(_ controlkeyword _) nameseparator expression)?
       let optionalParseSuccessful = false;
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
       (() => {
+        // Check !(_ controlkeyword _).
+        let lookAheadParseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
+        (() => {
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume controlkeyword.
+          if (!this.parseControlKeyword().success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // This lookahead was parsed successfully.
+          lookAheadParseSuccessful = true;
+        })();
+
+        // Reset state since it's just a lookahead not meant to be consumed.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        // lookahead parsing should not be successful for a negative lookahead.
+        if (lookAheadParseSuccessful) return;
+
         // Consume nameseparator.
         if (!this.parseNameSeparator().success) return;
 
-        // Consume expressionnocontrolptimitive.
-        if (!this.parseExpressionNoControlPrimitive().success) return;
+        // Consume expression.
+        if (!this.parseExpression().success) return;
         expression = this.lastParseData.ast;
 
         // This optional was parsed successfully.
@@ -7319,7 +7417,7 @@ class Parser {
   }
 
   // break =
-  //   | 'break' (nameseparator expressionnocontrolptimitive)?  (_? '@' identifier)?
+  //   | 'break' (!(_ controlkeyword _) nameseparator expression)?  (_? '@' identifier)?
   //   { type, expression, label }
   parseBreak() {
     // Keep original state.
@@ -7336,15 +7434,38 @@ class Parser {
       // Check 'break'.
       if (!this.parseToken('break').success) return;
 
-      // Optional parsing. (nameseparator expressionnocontrolptimitive)?
+      // Optional parsing. (!(_ controlkeyword _) nameseparator expression)?
       let optionalParseSuccessful = false;
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
       (() => {
+        // Check !(_ controlkeyword _).
+        let lookAheadParseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, column: this.column, line: this.line };
+        (() => {
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume controlkeyword.
+          if (!this.parseControlKeyword().success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // This lookahead was parsed successfully.
+          lookAheadParseSuccessful = true;
+        })();
+
+        // Reset state since it's just a lookahead not meant to be consumed.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        // lookahead parsing should not be successful for a negative lookahead.
+        if (lookAheadParseSuccessful) return;
+
         // Consume nameseparator.
         if (!this.parseNameSeparator().success) return;
 
-        // Consume expressionnocontrolptimitive.
-        if (!this.parseExpressionNoControlPrimitive().success) return;
+        // Consume expression.
+        if (!this.parseExpression().success) return;
         expression = this.lastParseData.ast;
 
         // This optional was parsed successfully.
@@ -8686,7 +8807,7 @@ class Parser {
   }
 
   // dotnotationblock =
-  //   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* (nextcodeline dedent | eoi)
+  //   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* dedentoreoiend
   //   { type, expression, lines }
   parseDotNotationBlock() {
      // Keep original state.
@@ -8743,12 +8864,8 @@ class Parser {
         }
       }
 
-      // Consume (nextcodeline dedent | eoi).
-      if (this.parseNextCodeLine().success) {
-        if (this.parseDedent().success) {}
-        else return;
-      } else if (this.parseEoi().success) {}
-      else return;
+      // Consume dedentoreoiend.
+      if (!this.parseDedentOrEoiEnd().success) return;
 
       // Update parseData.
       parseData = { success: true, message: null, ast: { type, expression, lines } };
@@ -8777,7 +8894,7 @@ class Parser {
   //   | controlprimitive
   //   | tupleexpression
   parseSubExpression() {
-    const type = 'primitiveexpression';
+    const type = 'subexpression';
 
     if (this.parseDotNotationBlock().success) {
       return this.lastParseData;

@@ -1479,13 +1479,30 @@ print(new Parser("(name) ? age : cost").parseTernaryOperator());
 print(String.raw`(  /hello/  )?age:cost`);
 print(new Parser("(  /hello/  )?age:cost").parseTernaryOperator());
 
-// print(String.raw`(/hello/ == regex)?age:cost`);
-// print(new Parser("(/hello/ == regex)?age:cost").parseTernaryOperator());
+print(String.raw`(/hello/ == regex)?age:cost`);
+print(new Parser("(/hello/ == regex)?age:cost").parseTernaryOperator());
+
+print('========= CONTROLKEYWORD =========');
+
+print(String.raw`return`);
+print(new Parser('return').parseControlKeyword());
+
+print(String.raw`break`);
+print(new Parser('break').parseControlKeyword());
+
+print(String.raw`spill`);
+print(new Parser('spill').parseControlKeyword());
+
+print(String.raw`continue`);
+print(new Parser('continue').parseControlKeyword());
 
 print('========= RETURN =========');
 
 print(String.raw`returnjohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("returnjohn").parseReturn()); // mid
+
+print(String.raw`return yield john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("return yield john").parseReturn()); // mid
 
 print(String.raw`return 0b100e56`);
 print(new Parser("return 0b100e56").parseReturn());
@@ -1493,23 +1510,20 @@ print(new Parser("return 0b100e56").parseReturn());
 print(String.raw`return john`);
 print(new Parser("return john").parseReturn());
 
-print(String.raw`return 0b100e56`);
-print(new Parser("return 0b100e56").parseReturn());
-
 print(String.raw`return`);
 print(new Parser("return").parseReturn());
 
-// print(String.raw`return john + /regex/`);
-// print(new Parser("return john + /regex/").parseReturn());
+print(String.raw`return john + /regex/`);
+print(new Parser("return john + /regex/").parseReturn());
 
-// print(String.raw`return john,/regex/`);
-// print(new Parser("return john,/regex/").parseReturn());
+print(String.raw`return john,/regex/`);
+print(new Parser("return john,/regex/").parseReturn());
 
-// print(String.raw`return(john)`);
-// print(new Parser("return(john)").parseReturn());
+print(String.raw`return(john)`);
+print(new Parser("return(john)").parseReturn());
 
-// print(String.raw`return+john`);
-// print(new Parser("return+john").parseReturn());
+print(String.raw`return+john`);
+print(new Parser("return+john").parseReturn());
 
 print('========= YIELD =========');
 
@@ -1519,28 +1533,34 @@ print(new Parser("yieldjohn").parseYield()); // mid
 print(String.raw`yield from>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("yield from").parseYield()); // mid
 
+print(String.raw`yield return name>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("yield return name").parseYield()); // mid
+
 print(String.raw`yield john`);
 print(new Parser("yield john").parseYield());
 
 print(String.raw`yield from 45`);
 print(new Parser("yield from 45").parseYield());
 
-// print(String.raw`yield john + /regex/`);
-// print(new Parser("yield john + /regex/").parseYield());
+print(String.raw`yield john + /regex/`);
+print(new Parser("yield john + /regex/").parseYield());
 
-// print(String.raw`yield john,/regex/`);
-// print(new Parser("yield john,/regex/").parseYield());
+print(String.raw`yield john,/regex/`);
+print(new Parser("yield john,/regex/").parseYield());
 
-// print(String.raw`yield(john)`);
-// print(new Parser("yield(john)").parseYield());
+print(String.raw`yield(john)`);
+print(new Parser("yield(john)").parseYield());
 
-// print(String.raw`yield+john`);
-// print(new Parser("yield+john").parseYield());
+print(String.raw`yield+john`);
+print(new Parser("yield+john").parseYield());
 
 print('========= RAISE =========');
 
 print(String.raw`raisejohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("raisejohn").parseRaise()); // mid
+
+print(String.raw`raise break john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("raise break john").parseRaise()); // mid
 
 print(String.raw`raise john`);
 print(new Parser("raise john").parseRaise());
@@ -1548,17 +1568,17 @@ print(new Parser("raise john").parseRaise());
 print(String.raw`raise 0b100e56`);
 print(new Parser("raise 0b100e56").parseRaise());
 
-// print(String.raw`raise john + /regex/`);
-// print(new Parser("raise john + /regex/").parseRaise());
+print(String.raw`raise john + /regex/`);
+print(new Parser("raise john + /regex/").parseRaise());
 
-// print(String.raw`raise john,/regex/`);
-// print(new Parser("raise john,/regex/").parseRaise());
+print(String.raw`raise john,/regex/`);
+print(new Parser("raise john,/regex/").parseRaise());
 
-// print(String.raw`raise(john)`);
-// print(new Parser("raise(john)").parseRaise());
+print(String.raw`raise(john)`);
+print(new Parser("raise(john)").parseRaise());
 
-// print(String.raw`raise+john`);
-// print(new Parser("raise+john").parseRaise());
+print(String.raw`raise+john`);
+print(new Parser("raise+john").parseRaise());
 
 print('========= CONTINUE =========');
 
@@ -1569,6 +1589,9 @@ print(String.raw`continue`);
 print(new Parser("continue").parseContinue());
 
 print('========= BREAK =========');
+
+print(String.raw`break break john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("break break john").parseBreak()); // mid
 
 print(String.raw`break @john`);
 print(new Parser("break @john").parseBreak());
@@ -1584,26 +1607,17 @@ print(new Parser("break name @name").parseBreak());
 
 print('========= SPILL =========');
 
-print(String.raw`spilljohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser("spilljohn").parseSpill()); // mid
+print(String.raw`spill @john`);
+print(new Parser("spill @john").parseSpill());
 
-print(String.raw`spill john`);
-print(new Parser("spill john").parseSpill());
+print(String.raw`spill`);
+print(new Parser("spill").parseSpill());
 
-print(String.raw`spill 0b100e56`);
-print(new Parser("spill 0b100e56").parseSpill());
+print(String.raw`spill name`);
+print(new Parser("spill name").parseSpill());
 
-// print(String.raw`spill john + /regex/`);
-// print(new Parser("spill john + /regex/").parseSpill());
-
-// print(String.raw`spill john,/regex/`);
-// print(new Parser("spill john,/regex/").parseSpill());
-
-// print(String.raw`spill(john)`);
-// print(new Parser("spill(john)").parseSpill());
-
-// print(String.raw`spill+john`);
-// print(new Parser("spill+john").parseSpill());
+print(String.raw`spill name @name`);
+print(new Parser("spill name @name").parseSpill());
 
 print('========= CONTROLPRIMITIVE =========');
 

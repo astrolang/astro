@@ -176,7 +176,7 @@ nextcodeline =
 
 dedentoreoiend =
   | nextcodeline dedent
-  | nextcodeline? _? &eoi
+  | nextcodeline? _? eoi
   { comments }
 
 linecontinuation =
@@ -377,8 +377,16 @@ ternaryoperator =
   | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' _? '?' _? primitiveexpression _? ':' _? primitiveexpression
   { type, condition, truebody, falsebody }
 
+controlkeyword =
+  | 'return'
+  | 'yield'
+  | 'raise'
+  | 'continue'
+  | 'break'
+  | 'spill'
+
 return =
-  | 'return' (nameseparator expressionnocontrolptimitive)?
+  | 'return' (!(_ controlkeyword _) nameseparator expressionnocontrolptimitive)?
   { type, expression }
 
 yield =
@@ -483,7 +491,7 @@ dotnotationline =
   | dotnotationpostfix (spaces? '?')? (subatompostfix (spaces? '?')?)*
 
 dotnotationblock =
-  | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) (nextcodeline dedent | eoi)
+  | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) dedentoreoiend
   { type, expression, lines }
 
 subexpression =
@@ -497,26 +505,15 @@ expression =
   | subexpression (_? ';' _? subexpression)+ (_? ';')?
   | subexpression
 
-// Used in control primitives.
-// makes `return exp, exp` possible
-// but not `return return exp`
-// and not `yield break exp`
-subexpressionnocontrolptimitive =
-  | declaration
-  | conditionalexpression
-  | tupleexpression
-
-expressionnocontrolptimitive =
-  | subexpressionnocontrolptimitive (_? ';' _? expressionnocontrolptimitive)* (_? ';')?
-
-// Used in declarations and condiational expressions.
+// Used in declarations and conditional expressions.
 // makes `if ... : if ... : exp` possible
 subexpressionnoblock =
+  | dotnotationblock
   | tupleexpression
   | controlprimitive
 
 expressionnoblock =
-  | subexpressionnoblock (_? ';' _? expressionnoblock)* (_? ';')?
+  | subexpressionnoblock (_? ';' _? subexpressionnoblock)* (_? ';')?
 
 // Used in declarations and conditional expressions.
 // makes `if ... : if ... : block` possible
@@ -527,13 +524,14 @@ expressionnoblock =
 // and not `if ... : if ... : exp else: exp else: exp`
 // and not `if ... : for ... : exp else: exp`
 subexpressiononeinlinenest =
+  | dotnotationblock
   | declarationoneinlinenest
   | conditionalexpressiononeinlinenest
   | controlprimitive
   | tupleexpression
 
 expressiononeinlinenest =
-  | subexpressiononeinlinenest (_? ';' _? expressiononeinlinenest)* (_? ';')?
+  | subexpressiononeinlinenest (_? ';' _? subexpressiononeinlinenest)* (_? ';')?
 
 block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
