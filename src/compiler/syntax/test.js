@@ -1859,23 +1859,14 @@ print(new Parser("3 .+ m").parseInfixExpression());
 print(String.raw`67 + 6 * 'hello'`);
 print(new Parser("67 + 6 * 'hello'").parseInfixExpression());
 
-print(String.raw`[name, 2.0]`);
-print(new Parser('[name, 2.0]').parseInfixExpression());
-
-print(String.raw`+[name, .2]`);
-print(new Parser('+[name, .2]').parseInfixExpression());
-
-print(String.raw`[name, .2]+`);
-print(new Parser('[name, .2]+').parseInfixExpression());
-
 print(String.raw`4 + 6 * 567 - name`);
 print(new Parser('4 + 6 * 567 - name').parseInfixExpression());
 
 print(String.raw`4 + 6/567 - {age: 4_500}`);
 print(new Parser('4 + 6/567 - {age: 4_500}').parseInfixExpression());
 
-print(String.raw`+/d/`);
-print(new Parser("+/d/").parseInfixExpression());
+print(String.raw`y in array`);
+print(new Parser('y in array').parseInfixExpression());
 
 print('========= RANGE =========');
 
@@ -2009,3 +2000,26 @@ print(new Parser('/reggie/, %{54,89}').parseSubExpression());
 
 print(String.raw`0xfff3445p-23`);
 print(new Parser('0xfff3445p-23').parseSubExpression());
+
+print(String.raw`return 56`);
+print(new Parser('return 56').parseSubExpression());
+
+print('========= EXPRESSION =========');
+
+print(String.raw`print "hello"; print "world"`);
+print(new Parser('print "hello"; print "world"').parseExpression());
+
+print(String.raw`5 .+ name`);
+print(new Parser('5 .+ name').parseExpression());
+
+print(String.raw`/reggie/; %{54,89}`);
+print(new Parser('/reggie/; %{54,89}').parseExpression());
+
+print(String.raw`0xfff3445p-23; return 56`);
+print(new Parser('0xfff3445p-23; return 56').parseExpression());
+
+print(String.raw`print "hello"`);
+print(new Parser('print "hello"').parseExpression());
+
+print(String.raw`print bar in x`);
+print(new Parser('print bar in x').parseExpression());
