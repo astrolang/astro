@@ -1995,3 +1995,17 @@ print(new Parser('james.peter?\n    .nom()?.john\n    .dame()').parseDotNotation
 
 print(String.raw`peter()\n    .nom()?.john\n    .dame()`);
 print(new Parser('peter()\n    .nom()?.john\n    .dame()').parseDotNotationBlock());
+
+print('========= SUBEXPRESSION =========');
+
+print(String.raw`james.peter?\n    .nom()?.john\n    .dame()\nfoo`);
+print(new Parser('james.peter?\n    .nom()?.john\n    .dame()\nfoo').parseSubExpression());
+
+print(String.raw`5 .+ name`);
+print(new Parser('5 .+ name').parseSubExpression());
+
+print(String.raw`/reggie/, %{54,89}`);
+print(new Parser('/reggie/, %{54,89}').parseSubExpression());
+
+print(String.raw`0xfff3445p-23`);
+print(new Parser('0xfff3445p-23').parseSubExpression());
