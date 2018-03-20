@@ -476,15 +476,16 @@ simpleexpression =
   | primitiveexpression
 
 tupleexpression =
-  | simpleexpression (_comma _? simpleexpression)* _comma?
-  { type, expressions }
+  | simpleexpression (_comma _? simpleexpression)+ _comma?
+  | simpleexpression
 
 dotnotationline =
   | dotnotationpostfix (spaces? '?')? (subatompostfix (spaces? '?')?)*
 
 dotnotationblock =
   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) (nextcodeline dedent | eoi)
-
+  { type, expression, lines }
+  
 subexpression =
   | dotnotationblock
   | declaration
