@@ -8008,9 +8008,8 @@ class Parser {
   }
 
   // infixexpression =
-  //   | (prefixatom | atom) '.'? operator infixexpression
-  //   | prepostfixatom _ ('.'? operator | keywordoperator) _ infixexpression
-  //   | prepostfixatom
+  //   | (prefixatom | atom) '.'? operator (infixexpression | prepostfixatom)
+  //   | prepostfixatom _ ('.'? operator | keywordoperator) _ (infixexpression | prepostfixatom)
   //   { type, vectorized, expressions, operators }
   parseInfixExpression() {
     // Keep original state.
@@ -8023,15 +8022,14 @@ class Parser {
 
     (() => {
       // Alternate parsing.
-      // | (prefixatom | atom) operator infixexpression
-      // | prepostfixatom _ (operator | keywordoperator) _ infixexpression
-      // | prepostfixatom
+      // | (prefixatom | atom) operator (infixexpression | prepostfixatom)
+      // | prepostfixatom _ (operator | keywordoperator) _ (infixexpression | prepostfixatom)
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
 
-      // [1]. (prefixatom | atom) operator infixexpression
+      // [1]. (prefixatom | atom) operator (infixexpression | prepostfixatom)
       (() => {
         let vectorized = false;
         let expressions = [];
@@ -8049,8 +8047,8 @@ class Parser {
         if (!this.parseOperator().success) return;
         operators.push(this.lastParseData.ast);
 
-        // Consume infixexpression.
-        if (!this.parseInfixExpression().success) return;
+        // Consume (infixexpression | prepostfixatom).
+        if (!this.parseInfixExpression().success && !this.parsePrepostfixAtom().success) return;
         rest = this.lastParseData.ast;
 
         // Merging values from `expressions` and `operators` from `infixexpression` with the ones in current ast.
@@ -8068,7 +8066,7 @@ class Parser {
         alternativeParseSuccessful = true;
       })();
 
-      // [2]. prepostfixatom _ (operator | keywordoperator) _ infixexpression
+      // [2]. prepostfixatom _ (operator | keywordoperator) _ (infixexpression | prepostfixatom)
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
@@ -8093,7 +8091,7 @@ class Parser {
 
           // Save state before alternative parsing.
           const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-          const otherState = { operators: [], expressions: [] };
+          const otherState = { operators: [], expressions: [...expressions] };
 
           // [1]. operator
           (() => {
@@ -8130,8 +8128,8 @@ class Parser {
           // Consume _.
           if (!this.parse_().success) return;
 
-          // Consume infixexpression.
-          if (!this.parseInfixExpression().success) return;
+          // Consume (infixexpression | prepostfixatom).
+          if (!this.parseInfixExpression().success && !this.parsePrepostfixAtom().success) return;
           rest = this.lastParseData.ast;
 
           // Merging values from `expressions` and `operators` from `infixexpression` with the ones in current ast.
@@ -8150,25 +8148,9 @@ class Parser {
         })();
       }
 
-      // [3]. prepostfixatom
-      if (!alternativeParseSuccessful) {
-        // Revert state to what it was before alternative parsing started.
-        this.reset(state.lastPosition, null, null, state.column, state.line);
-
-        (() => {
-          // Consume prepostfixatom.
-          if (!this.parsePrepostfixAtom().success) return null;
-
-          // Update parseData.
-          parseData = this.lastParseData;
-
-          // This alternative was parsed successfully.
-          alternativeParseSuccessful = true;
-        })();
-      }
-
       // Check if any of the alternatives was parsed successfully
       if (!alternativeParseSuccessful) return null;
+
       // Update lastParseData.
       this.lastParseData = parseData;
       return parseData;
@@ -8464,6 +8446,7 @@ class Parser {
   //   | range
   //   | infixexpression
   //   | commandnotation
+  //   | prepostfixatom
   parsePrimitiveExpression() {
     const type = 'primitiveexpression';
 
@@ -8472,6 +8455,8 @@ class Parser {
     } else if (this.parseInfixExpression().success) {
       return this.lastParseData;
     } else if (this.parseCommandNotation().success) {
+      return this.lastParseData;
+    } else if (this.parsePrepostfixAtom().success) {
       return this.lastParseData;
     }
 
@@ -8810,20 +8795,132 @@ class Parser {
     return { success: false, message: { type, parser: this }, ast: null };
   }
 
-// ----------------------------------------
-
   // expression =
-  //   | subexpression (_? ';' _? expression)* (_? ';')?
-  parseExpression() { // TODO: incorrect implementation
+  //   | subexpression (_? ';' _? subexpression)+ (_? ';')?
+  //   | subexpression
+  parseExpression() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
     const type = 'expression';
+    let parseData = { success: false, message: { type: 'expression', parser: this }, ast: null };
 
-    if (this.parseInfixExpression().success) {
-      return this.lastParseData;
-    }
+    (() => {
+      // Alternate parsing.
+      // | subexpression (_? ';' _? subexpression)+ (_? ';')?
+      // | subexpression
+      let alternativeParseSuccessful = false;
 
-    // Parsing failed.
-    return { success: false, message: { type, parser: this }, ast: null };
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. subexpression (_? ';' _? subexpression)+ (_? ';')?
+      (() => {
+        const expressions = [];
+
+        // Consume subexpression.
+        if (!this.parseSubExpression().success) return null;
+        expressions.push(this.lastParseData.ast);
+
+        // Optional-multiple parsing. (_? ';' _? subexpression)+
+        let loopCount = 0;
+        while (true) {
+          let parseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Check _?.
+            this.parse_();
+
+            // Consume ';'.
+            if (!this.parseToken(';').success) return;
+
+            // Check _?.
+            this.parse_();
+
+            // Consume subexpression.
+            if (!this.parseSubExpression().success) return;
+            expressions.push(this.lastParseData.ast);
+
+            parseSuccessful = true;
+
+            // Parsing successful, increment loop count.
+            loopCount += 1;
+          })();
+
+          // If parsing the above fails, revert state to what it was before that parsing began.
+          // And break out of the loop.
+          if (!parseSuccessful) {
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+            break;
+          }
+        }
+
+        // At least one iteration of the above must be parsed successfully.
+        if (loopCount < 1) return null;
+
+        // Optional parsing. (_? ';')?
+        let optionalParseSuccessful = false;
+        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume _?.
+          this.parse_();
+
+          // Consume ';'.
+          if (!this.parseToken(';').success) return;
+
+          // This optional was parsed successfully.
+          optionalParseSuccessful = true;
+        })();
+
+        // If parsing the above optional fails, revert state to what it was before that parsing began.
+        if (!optionalParseSuccessful) {
+          this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+        }
+
+        // Update parseData.
+        parseData = { success: true, message: null, ast: { type, expressions } };
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. subexpression
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume subexpression.
+          if (!this.parseSubExpression().success) return null;
+
+          // Update parseData.
+          parseData = { success: true, message: null, ast: this.lastParseData.ast };
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return;
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
   }
+
+// ----------------------------------------
 
   // lambdaexpression =
   //   | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressiononeinlinenest
