@@ -8659,77 +8659,80 @@ class Parser {
   }
 
   // dotnotationblock =
-  //   | nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) nextcodeline dedent
+  //   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* (nextcodeline dedent | eoi)
+  //   { type, expression, lines }
   parseDotNotationBlock() {
-    // Keep original state.
-    const {
-      lastPosition, column, line,
+     // Keep original state.
+     const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
     } = this;
 
-    const type = 'call';
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'dotnotationblock';
     let expression = null;
-    let mutative = false;
-    let args = [];
-    let parseData = { success: false, message: { type: 'commandnotation', parser: this }, ast: null };
+    let lines = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
-      // Check !(operator).
-      if (this.parseOperator().success) return;
-
-      // Consume atom.
-      if (!this.parseAtom().success) return;
+      // Consume simpleexpression.
+      if (!this.parseSimpleExpression().success) return;
       expression = this.lastParseData.ast;
 
-      // Optional parsing. (spaces? '?')?
-      let optionalParseSuccessful = false;
-      const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-      (() => {
-        // Consume spaces?.
-        this.parseSpaces();
+      // Consume nextcodeline.
+      if (!this.parseNextCodeLine().success) return;
 
-        // Consume '?'.
-        if (!this.parseToken('?').success) return;
-        expression = { type: 'nillable', expression };
+      // Consume indent.
+      if (!this.parseIndent().success) return;
 
-        // This optional was parsed successfully.
-        optionalParseSuccessful = true;
-      })();
+      // Consume dotnotationline.
+      if (!this.parseDotNotationLine().success) return;
+      lines.push(this.lastParseData.ast);
 
-      // If parsing the above optional fails, revert state to what it was before that parsing began.
-      if (!optionalParseSuccessful) {
-        this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+      // Optional-multiple parsing. (nextcodeline samedent dotnotationline)*
+      while (true) {
+        let parseSuccessful = false;
+        const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume samedent.
+          if (!this.parseSamedent().success) return;
+
+          // Consume dotnotationline.
+          if (!this.parseDotNotationLine().success) return;
+          lines.push(this.lastParseData.ast);
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state.lastPosition, null, null, state.column, state.line);
+          break;
+        }
       }
+      
+      // Consume (nextcodeline dedent | eoi).
+      if (this.parseNextCodeLine().success) {
+        if (this.parseDedent().success) {}
+        else return;
+      } else if (this.parseEoi().success) {}
+      else return;
 
-      // Optional parsing. (spaces? '!')?
-      let optionalParseSuccessful3 = false;
-      const state3 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-      (() => {
-        // Consume spaces?.
-        this.parseSpaces();
-
-        // Consume '!'.
-        if (!this.parseToken('!').success) return;
-        mutative = true;
-
-        // This optional was parsed successfully.
-        optionalParseSuccessful3 = true;
-      })();
-
-      // If parsing the above optional fails, revert state to what it was before that parsing began.
-      if (!optionalParseSuccessful3) {
-        this.reset(state3.lastPosition, null, null, state3.column, state3.line);
-      }
-
-      // Consume commandnotationrest.
-      if (!this.parseCommandNotationRest().success) return;
-      args = this.lastParseData.ast.arguments;
-
-      parseData = { success: true, message: null, ast: { type, expression, mutative, arguments: args } };
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, expression, lines } };
 
       // Update lastParseData.
       this.lastParseData = parseData;
       return parseData;
     })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
 
     // Check if above parsing is successful.
     if (parseData.success) return parseData;
