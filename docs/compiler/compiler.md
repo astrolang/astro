@@ -104,7 +104,55 @@ There are several ways of going about this, each with its own set of problems.
 
     This is similar to the one above but instead of specializing the function, a check is introduced instead. At the point where any parameter is no longer needed, a flag from the enclosing scope is checked to know if the function is permitted to deallocate the argument. If the flag is set to true the parameter will be deallocated.
 
+    In the implementation, each function would have extra bitflag arguments, where each bit represents an object passed as an argument to the function. If a bit for an object is set to one, the function is allowed to deallocate the object, otherwise it cannot delete an object.
+
+    ```nim
+    fun foo(a, b, bitflag):
+        do_something()
+        # Free resources
+        free_locals()
+        if (bitflag bitand 0b1000_0000) == 0b1000_0000: free(a)
+        if (bitflag bitand 0b0100_0000) == 0b0100_0000: free(b)
+
+    fun main():
+        let x, y = "Hi", Car("Camaro", 2009)
+        foo(x, y, heapvars)
+        ...
+    ```
+
     This scheme has runtime execution overhead.
+
+3. *Deallocation Bundle*
+
+    With _Deallocation Checks_ scheme, knowing which object to delete requires checks, which can become expensive when a function has many arguments and is called often. So I discarded this scheme in favor of the first scheme, but after spending more time on it lately, I think I may have found the right solution. There is still runtime overhead, but it should be significantly lesser than the previous scheme.
+
+    This scheme allocates an array on the stack, just before a call to a function. The array holds pointers to arguments the function is allowed to destroy and the array is passed as an argument to the function. At the end of the function, the array is passed to `free_externals` function, which releases the pointers in the array.
+
+    ```nim
+    fun foo(a, b, heapvars):
+        do_something()
+        # Free resources
+        free_locals()
+        free_externals(heapvars)
+
+    fun main():
+        let x, y = "Hi", Car("Camaro", 2009)
+        let heapvars = stackalloc{Int}(2)
+        heapvars[1] = cast{Int}(ptr(x))
+        heapvars[2] = cast{Int}(ptr(y))
+        foo(x, y, heapvars)
+        ...
+
+    @unsafe
+    fun free_externals(heapvars): #: StackArray{Int}?
+        if heapvars: for i in heapvars:
+            free(i)
+    ```
+
+    This is nice because, unlike the _Deallocation Checks_ scheme, it knows what arguments to destroy, so it's not making checks on each argument.
+
+#### Possible Optimizations
+I will have to benchmark each scheme to be sure how they perform under different conditions. A mix of some of the schemes may be the ideal approach.
 
 The first scheme can be classified under `late deallocation schemes`, while the last two can be classified under `early deallocation schemes`.
 
