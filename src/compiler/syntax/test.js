@@ -1977,8 +1977,21 @@ print(new Parser("(name == 'john') ? 4 + (name,) : [1, 2], name + james").parseT
 print(String.raw`4 + (name,),`);
 print(new Parser('4 + (name,),').parseTupleExpression());
 
-
-print('========= DOTNOTATIOLINE =========');
+print('========= DOTNOTATIONLINE =========');
 
 print(String.raw`.nom()?.john`);
 print(new Parser('.nom()?.john').parseDotNotationLine());
+
+print(String.raw`.play[34].nom(+, -)?`);
+print(new Parser('.play[34].nom(+, -)?').parseDotNotationLine());
+
+print('========= DOTNOTATIONBLOCK =========');
+
+print(String.raw`james.peter?\n    .nom()?.john\n    .dame()\nfoo`);
+print(new Parser('james.peter?\n    .nom()?.john\n    .dame()\nfoo').parseDotNotationBlock());
+
+print(String.raw`james.peter?\n    .nom()?.john\n    .dame()`);
+print(new Parser('james.peter?\n    .nom()?.john\n    .dame()').parseDotNotationBlock());
+
+print(String.raw`peter()\n    .nom()?.john\n    .dame()`);
+print(new Parser('peter()\n    .nom()?.john\n    .dame()').parseDotNotationBlock());
