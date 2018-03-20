@@ -1,6 +1,12 @@
 # Astro 0.1.14a
+# 20/03/18
+# Change unsafe block to macro
+@unsafe
+free(657577)
+
+# Astro 0.1.14a
 # 18/03/18
-# REMOVED MPPED FIELD AnD INDEX
+# REMOVED MAPPED FIELD AND INDEX
 array.$name
 array.$[45, 6]
 
@@ -21,6 +27,9 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- remove highlight on unsafe keyword
+    unsafe
+
 - remove highlight on mapped fieldnames
     array.$name
 
@@ -73,14 +82,14 @@ john.{
     x._name | _name() | @_name
     x.name | name() | @name
 
-- remove highlight on `at` kewyord
+- remove highlight on `at` keyword
     break 45 at top
 
-- remove highlight on `do` kewyord
+- remove highlight on `do` keyword
     do: x
     while x > y
 
-- remove highlight on `extend` kewyord
+- remove highlight on `extend` keyword
     extend MyType
 
 - remove highlight on nonstandard numeric literals
@@ -387,7 +396,7 @@ print
 fun age(a) = set (a.age + 5) get (a.age - 5)
 
 # FIX: SYNTAX HIGHLIGHT [MOVED UP]
-- highlight `del` kewyord •
+- highlight `del` keyword •
     del name = 50
 
 - remove highlight on `set` and `get` •
