@@ -506,16 +506,6 @@ expression =
   | subexpression
 
 // Used in declarations and conditional expressions.
-// makes `if ... : if ... : exp` possible
-subexpressionnoblock =
-  | dotnotationblock
-  | tupleexpression
-  | controlprimitive
-
-expressionnoblock =
-  | subexpressionnoblock (_? ';' _? subexpressionnoblock)* (_? ';')?
-
-// Used in declarations and conditional expressions.
 // makes `if ... : if ... : block` possible
 // also makes `if ... : if ... : exp` possible
 // also makes `if ... : exp else: exp` possible
@@ -524,14 +514,15 @@ expressionnoblock =
 // and not `if ... : if ... : exp else: exp else: exp`
 // and not `if ... : for ... : exp else: exp`
 subexpressiononeinlinenest =
-  | dotnotationblock
+  | dotnotationblock // TODO HERE
   | declarationoneinlinenest
   | conditionalexpressiononeinlinenest
   | controlprimitive
   | tupleexpression
 
 expressiononeinlinenest =
-  | subexpressiononeinlinenest (_? ';' _? subexpressiononeinlinenest)* (_? ';')?
+  | subexpressiononeinlinenest (_? ';' _? subexpressiononeinlinenest)+ (_? ';')?
+  | subexpressiononeinlinenest
 
 block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
