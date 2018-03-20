@@ -8497,7 +8497,7 @@ class Parser {
 
   // tupleexpression =
   //   | simpleexpression (_comma _? simpleexpression)* _comma?
-  //   { type, expressions }
+  //   | simpleexpression
   parseTupleExpression() {
     // Keep original state.
     const {
@@ -8505,45 +8505,87 @@ class Parser {
     } = this;
 
     const type = 'opentuple';
-    const expressions = [];
     let parseData = { success: false, message: { type: 'tupleexpression', parser: this }, ast: null };
 
     (() => {
-      // Consume simpleexpression.
-      if (!this.parseSimpleExpression().success) return null;
-      expressions.push(this.lastParseData.ast);
+      // Alternate parsing.
+      // | simpleexpression (_comma _? simpleexpression)* _comma?
+      // | simpleexpression
+      let alternativeParseSuccessful = false;
 
-      // Optional-multiple parsing. (_comma _? simpleexpression)*
-      while (true) {
-        let parseSuccessful = false;
-        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
-        (() => {
-          // Check _comma.
-          if (!this.parse_Comma().success) return;
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
 
-          // Check _?.
-          this.parse_();
+      // [1]. simpleexpression (_comma _? simpleexpression)* _comma?
+      (() => {
+        const expressions = [];
 
-          // Consume simpleexpression.
-          if (!this.parseSimpleExpression().success) return;
-          expressions.push(this.lastParseData.ast);
+        // Consume simpleexpression.
+        if (!this.parseSimpleExpression().success) return null;
+        expressions.push(this.lastParseData.ast);
 
-          parseSuccessful = true;
-        })();
+        // Optional-multiple parsing. (_comma _? simpleexpression)+
+        let loopCount = 0;
+        while (true) {
+          let parseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Check _comma.
+            if (!this.parse_Comma().success) return;
 
-        // If parsing the above fails, revert state to what it was before that parsing began.
-        // And break out of the loop.
-        if (!parseSuccessful) {
-          this.reset(state2.lastPosition, null, null, state2.column, state2.line);
-          break;
+            // Check _?.
+            this.parse_();
+
+            // Consume simpleexpression.
+            if (!this.parseSimpleExpression().success) return;
+            expressions.push(this.lastParseData.ast);
+
+            parseSuccessful = true;
+
+            // Parsing successful, increment loop count.
+            loopCount += 1;
+          })();
+
+          // If parsing the above fails, revert state to what it was before that parsing began.
+          // And break out of the loop.
+          if (!parseSuccessful) {
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+            break;
+          }
         }
+
+        // At least one iteration of the above must be parsed successfully.
+        if (loopCount < 1) return null;
+
+        // Check _comma?.
+        this.parse_Comma();
+
+        // Update parseData.
+        parseData = { success: true, message: null, ast: { type, expressions } };
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. simpleexpression
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume simpleexpression.
+          if (!this.parseSimpleExpression().success) return null;
+
+          // Update parseData.
+          parseData = { success: true, message: null, ast: this.lastParseData.ast };
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
       }
 
-      // Check _comma?.
-      this.parse_Comma();
-
-      // Update parseData.
-      parseData = { success: true, message: null, ast: { type, expressions } };
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return;
 
       // Update lastParseData.
       this.lastParseData = parseData;
@@ -8715,7 +8757,7 @@ class Parser {
           break;
         }
       }
-      
+
       // Consume (nextcodeline dedent | eoi).
       if (this.parseNextCodeLine().success) {
         if (this.parseDedent().success) {}
@@ -8741,6 +8783,31 @@ class Parser {
     this.reset(lastPosition, null, null, column, line);
 
     return parseData;
+  }
+
+  // subexpression =
+  //   | dotnotationblock
+  //   | declaration
+  //   | conditionalexpression
+  //   | controlprimitive
+  //   | tupleexpression
+  parseSubExpression() {
+    const type = 'primitiveexpression';
+
+    if (this.parseDotNotationBlock().success) {
+      return this.lastParseData;
+    } else if (this.parseDeclaration().success) {
+      return this.lastParseData;
+    } else if (this.parseConditionalExpression().success) {
+      return this.lastParseData;
+    } else if (this.parseControlPrimitive().success) {
+      return this.lastParseData;
+    } else if (this.parseTupleExpression().success) {
+      return this.lastParseData;
+    }
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
   }
 
 // ----------------------------------------
@@ -8784,6 +8851,21 @@ class Parser {
     // Parsing failed.
     return { success: false, message: { type, parser: this }, ast: null };
   }
+
+  parseDeclaration() {
+    const type = 'primitiveexpression';
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
+  parseConditionalExpression() {
+    const type = 'primitiveexpression';
+
+    // Parsing failed.
+    return { success: false, message: { type, parser: this }, ast: null };
+  }
+
 
   // block =
   //   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
