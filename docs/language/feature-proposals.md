@@ -113,10 +113,10 @@ type Programmer(name, skills) @struct
 ```
 
 ## UNSAFE BLOCK PROPOSAL
-```rust
-unsafe:
-    let pointer = ptr(object)
-    pointer.offset(-5)
+```python
+@unsafe
+let pointer = ptr(object)
+pointer.offset(-5)
 ```
 
 ## DYNAMIC IMPORT
