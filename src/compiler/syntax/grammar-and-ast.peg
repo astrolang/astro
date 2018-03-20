@@ -448,9 +448,8 @@ keywordoperator =
   { type, name }
 
 infixexpression =
-  | (prefixatom | atom) '.'? operator infixexpression
-  | prepostfixatom _ ('.'? operator | keywordoperator) _ infixexpression
-  | prepostfixatom
+  | (prefixatom | atom) '.'? operator (infixexpression | prepostfixatom)
+  | prepostfixatom _ ('.'? operator | keywordoperator) _ (infixexpression | prepostfixatom)
   { type, expressions, operators }
 
 range =
@@ -470,6 +469,7 @@ primitiveexpression =
   | range
   | infixexpression
   | commandnotation
+  | prepostfixatom
 
 simpleexpression =
   | ternaryoperator
@@ -485,7 +485,7 @@ dotnotationline =
 dotnotationblock =
   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) (nextcodeline dedent | eoi)
   { type, expression, lines }
-  
+
 subexpression =
   | dotnotationblock
   | declaration
@@ -494,7 +494,8 @@ subexpression =
   | tupleexpression
 
 expression =
-  | subexpression (_? ';' _? expression)* (_? ';')?
+  | subexpression (_? ';' _? subexpression)+ (_? ';')?
+  | subexpression
 
 // Used in control primitives.
 // makes `return exp, exp` possible
