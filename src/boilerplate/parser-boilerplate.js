@@ -295,7 +295,7 @@ const state = { lastPosition: this.lastPosition, column: this.column, line: this
 
   // This lookahead was parsed successfully.
   lookAheadParseSuccessful = true;
-});
+})();
 
 // Reset state since it's just a lookahead not meant to be consumed.
 this.reset(state.lastPosition, null, null, state.column, state.line);
