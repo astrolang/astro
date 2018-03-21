@@ -460,8 +460,12 @@ infixexpression =
   | prepostfixatom _ ('.'? operator | keywordoperator) _ (infixexpression | prepostfixatom)
   { type, expressions, operators }
 
+spreadexpression =
+  | '...' atom
+  { type, expression }
+
 range =
-  | (infixexpression _?)? '..' (_? infixexpression _? '..')? _? infixexpression
+  | ((infixexpression | prepostfixatom) _?)? '..' (_? (infixexpression | prepostfixatom) _? '..')? _? (infixexpression | prepostfixatom)
   { type, begin, step, end }
 
 commandnotationrest =
@@ -474,6 +478,7 @@ commandnotation =
   { type, expression, mutative, arguments: [{ key, value }] }
 
 primitiveexpression =
+  | spreadexpression
   | range
   | infixexpression
   | commandnotation
@@ -527,10 +532,15 @@ expressiononeinlinenest =
 block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
 
-lhsargument =
+lhsname
+  | noname
+  | identifier
+  | '...' identifier?
+
+lhsarguments =
   | lhsname (_comma _? lhsname)* _comma?
 
-lhspattern =
+lhspattern = // NEEDS WORK
   | '(' spaces? lhsname (_comma _? lhsname)* _comma? _? ')' // ignorenewline
   | '(' nextcodeline indent  lhsname (_comma _? lhsname)* _comma? nextcodeline dedent ')'
   | '[' spaces? lhsname (_comma _? lhsname)* _comma? _? ']' // ignorenewline
@@ -538,11 +548,6 @@ lhspattern =
   | '{' spaces? lhsname (_comma _? lhsname)* _comma? _? '}' // ignorenewline
   | '{' nextcodeline indent lhsname (_comma _? lhsname)* _comma? nextcodeline dedent '}'
   |  lhsname (_comma _? lhsname)*
-
-lhsname
-  | noname
-  | identifier
-  | '...' identifier?
 
 ifhead =
   | primitiveexpression (_ 'where' _ primitiveexpression)?
