@@ -2101,3 +2101,34 @@ print(new Parser('john').parseLhsName());
 
 print(String.raw`...`);
 print(new Parser('...').parseLhsName());
+
+print('========= LHSARGUMENTS =========');
+
+print(String.raw`peter,_,...john`);
+print(new Parser('peter,_,...john').parseLhsArguments());
+
+print(String.raw`_, ..., peter`);
+print(new Parser('_, ..., peter').parseLhsArguments());
+
+print(String.raw`...,...peter,_`);
+print(new Parser('...,...peter,_').parseLhsArguments());
+
+print(String.raw`...peter`);
+print(new Parser('...peter').parseLhsArguments());
+
+print(String.raw`...`);
+print(new Parser('...').parseLhsArguments());
+
+print('========= LHSPATTERN =========');
+
+print(String.raw`[peter,_,...john]`);
+print(new Parser('[peter,_,...john]').parseLhsPattern());
+
+print(String.raw`(_, ..., peter)`);
+print(new Parser('(_, ..., peter)').parseLhsPattern());
+
+print(String.raw`_, ..., peter`);
+print(new Parser('_, ..., peter').parseLhsPattern());
+
+print(String.raw`{ _, peter,_,...john }`);
+print(new Parser('{ _, peter,_,...john }').parseLhsPattern());
