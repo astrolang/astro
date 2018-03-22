@@ -539,15 +539,17 @@ lhsname
 
 lhsarguments =
   | lhsname (_comma _? lhsname)* _comma?
+  { expressions }
 
-lhspattern = // NEEDS WORK
-  | '(' spaces? lhsname (_comma _? lhsname)* _comma? _? ')' // ignorenewline
-  | '(' nextcodeline indent  lhsname (_comma _? lhsname)* _comma? nextcodeline dedent ')'
-  | '[' spaces? lhsname (_comma _? lhsname)* _comma? _? ']' // ignorenewline
-  | '[' nextcodeline indent  lhsname (_comma _? lhsname)* _comma? nextcodeline dedent ']'
-  | '{' spaces? lhsname (_comma _? lhsname)* _comma? _? '}' // ignorenewline
-  | '{' nextcodeline indent lhsname (_comma _? lhsname)* _comma? nextcodeline dedent '}'
+lhspattern =
+  | '[' spaces? lhsarguments _? ']' // ignorenewline
+  | '[' nextcodeline indent lhsarguments nextcodeline dedent ']'
+  | '{' spaces? lhsarguments _? '}' // ignorenewline
+  | '{' nextcodeline indent lhsarguments nextcodeline dedent '}'
+  | '(' spaces? lhsarguments _? ')' // ignorenewline
+  | '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
   |  lhsname (_comma _? lhsname)*
+  { type, destructuretype, arguments }
 
 ifhead =
   | primitiveexpression (_ 'where' _ primitiveexpression)?
