@@ -103,9 +103,6 @@ john.{
     john~name, ~age
     print~('hello')~('world')
 
-- fix multible binding highlight
-    let a b c = 45
-
 # TYPE
 Int64 :: Type{Int64}
 Int64 :: Type

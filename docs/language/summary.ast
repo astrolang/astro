@@ -36,9 +36,6 @@ SUBJECT BINDING
     var φ =
         arctan(y/x)
 
-    # Declaring and binding multiple subjects to the same value by separating them with spaces.
-    let a b c = 50
-
 SHADOWING
     # Astro allows subjects to be rebound to a different type in the same scope
     let phone = '08074789222'
