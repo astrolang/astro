@@ -2049,36 +2049,73 @@ print(new Parser('print "hello"').parseExpression());
 print(String.raw`print bar in x`);
 print(new Parser('print bar in x').parseExpression());
 
-print('========= SUBEXPRESSIONONEINLINENEST =========');
+print('========= SUBEXPRESSIONOBLOCK =========');
 
 // print(String.raw`if name == "John": print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('if name == "John": print name').parseSubExpressionOneInlineNest()); // fail
+// print(new Parser('if name == "John": print name').parseSubExpressionNoBlock()); // fail
+
+// print(String.raw`if name == "John": print name else: print agename>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if name == "John": print name else: print age').parseSubExpressionNoBlock()); // fail
+
+print(String.raw`james.peter?\n    .nom()?.john\n    .dame()\nfoo>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('james.peter?\n    .nom()?.john\n    .dame()\nfoo').parseSubExpressionNoBlock()); // mid
+
+print(String.raw`return /reggie/, %{54,89}`);
+print(new Parser('return /reggie/, %{54,89}').parseSubExpressionNoBlock());
+
+print('========= EXPRESSIONNOBLOCK =========');
+
+// print(String.raw`if name == "John": print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if name == "John": print name').parseExpressionNoBlock()); // fail
+
+// print(String.raw`if name == "John": print name else: print agename>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if name == "John": print name else: print age').parseExpressionNoBlock()); // fail
+
+print(String.raw`james.peter?\n    .nom()?.john\n    .dame()\nfoo>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('james.peter?\n    .nom()?.john\n    .dame()\nfoo').parseExpressionNoBlock()); // mid
+
+print(String.raw`return /reggie/, %{54,89}`);
+print(new Parser('return /reggie/, %{54,89}').parseExpressionNoBlock());
+
+print('========= SUBEXPRESSIONINLINE =========');
+
+// print(String.raw`if name == "John": if x == y: print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if name == "John": if x == y: print name').parseSubExpressionInline()); // fail
+
+// print(String.raw`if name == "John": print name`);
+// print(new Parser('if name == "John": print name').parseSubExpressionInline());
+
+// print(String.raw`if name == "John": print name else: print age`);
+// print(new Parser('if name == "John": print name else: print age').parseSubExpressionInline());
+
+// print(String.raw`if name == "John":\n    print name`);
+// print(new Parser('if name == "John":\n    print name').parseSubExpressionInline());
 
 print(String.raw`james.peter?\n    .nom()?.john\n    .dame()\nfoo`);
-print(new Parser('james.peter?\n    .nom()?.john\n    .dame()\nfoo').parseSubExpressionOneInlineNest());
-
-print(String.raw`5 .+ name`);
-print(new Parser('5 .+ name').parseSubExpressionOneInlineNest());
+print(new Parser('james.peter?\n    .nom()?.john\n    .dame()\nfoo').parseSubExpressionInline());
 
 print(String.raw`/reggie/, %{54,89}`);
-print(new Parser('/reggie/, %{54,89}').parseSubExpressionOneInlineNest());
+print(new Parser('/reggie/, %{54,89}').parseSubExpressionInline());
+
+print('========= EXPRESSIONINLINE =========');
+
+// print(String.raw`if name == "John": if x == y: print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if name == "John": if x == y: print name').parseExpressionInline()); // fail
+
+// print(String.raw`if name == "John": print name`);
+// print(new Parser('if name == "John": print name').parseExpressionInline());
+
+// print(String.raw`if name == "John": print name else: print age`);
+// print(new Parser('if name == "John": print name else: print age').parseExpressionInline());
 
 // print(String.raw`if name == "John":\n    print name`);
-// print(new Parser('if name == "John":\n    print name').parseSubExpressionOneInlineNest());
+// print(new Parser('if name == "John":\n    print name').parseExpressionInline());
 
-print('========= EXPRESSIONONEINLINENEST =========');
+print(String.raw`james.peter?\n    .nom()?.john\n    .dame()\nfoo`);
+print(new Parser('james.peter?\n    .nom()?.john\n    .dame()\nfoo').parseExpressionInline());
 
-// print(String.raw`if name == "John": print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('if name == "John": print name').parseExpressionOneInlineNest()); // fail
-
-print(String.raw`5 .+ name`);
-print(new Parser('5 .+ name').parseExpressionOneInlineNest());
-
-print(String.raw`/reggie/; %{54,89}`);
-print(new Parser('/reggie/; %{54,89}').parseExpressionOneInlineNest());
-
-// print(String.raw`if name == "John":\n    print name`);
-// print(new Parser('if name == "John":\n    print name').parseExpressionOneInlineNest());
+print(String.raw`/reggie/, %{54,89}`);
+print(new Parser('/reggie/, %{54,89}').parseExpressionInline());
 
 print('========= BLOCK =========');
 
@@ -2132,3 +2169,13 @@ print(new Parser('_, ..., peter').parseLhsPattern());
 
 print(String.raw`{ _, peter,_,...john }`);
 print(new Parser('{ _, peter,_,...john }').parseLhsPattern());
+
+print(String.raw`_`);
+print(new Parser('_').parseLhsPattern());
+
+print(String.raw`james`);
+print(new Parser('james').parseLhsPattern());
+
+print(String.raw`...james`);
+print(new Parser('...james').parseLhsPattern());
+
