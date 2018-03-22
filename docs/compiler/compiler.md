@@ -137,19 +137,20 @@ There are several ways of going about this, each with its own set of problems.
 
     fun main():
         let x, y = "Hi", Car("Camaro", 2009)
-        let heapvars = stackalloc{Int}(2)
-        heapvars[1] = cast{Int}(ptr(x))
-        heapvars[2] = cast{Int}(ptr(y))
+        let heapvars = stackalloc{(UInt, Type)}(2)
+        heapvars[1] = (cast{UInt}(ptr(x)), x.type)
+        heapvars[2] = (cast{UInt}(ptr(y)), t.type)
         foo(x, y, heapvars)
         ...
 
     @unsafe
-    fun free_externals(heapvars): #: StackArray{Int}?
-        if heapvars: for i in heapvars:
+    fun free_externals(heapvars):
+        if heapvars: for i, T in heapvars:
+            destruct(T, i)
             free(i)
     ```
 
-    This is nice because, unlike the _Deallocation Checks_ scheme, it knows what arguments to destroy, so it's not making checks on each argument.
+    This is nice because, unlike the _Deallocation Checks_ scheme, it knows what arguments to destroy, so it's not making checks on each argument. It also doesn't exhibit cache spill problem of traditional ref counting beacuse there is no counting done at runtime (for a non-concurrent program). But it still has the same cascading deallocation problem and it still has some runtime overhead.
 
 #### Possible Optimizations
 I will have to benchmark each scheme to be sure how they perform under different conditions. A mix of some of the schemes may be the ideal approach.
@@ -166,7 +167,8 @@ When there is no concurrency, deallocation points of objects can be entirely det
 
 When concurrency is involved, a count is maintained for concurrent coroutines that share an object and once one of the coroutine no longer needs an object, it decrements the count and checks if it can deallocate the object.
 
-## Subtype Polymorphism
+## Poymorphism
+### Subtype Polymorphism
 Astro supports multiple inheritance, but unlike C++, it doesn't duplicate same-name fields inherited from different parent types. This is enforced through `constructor chaining`.
 
                        [O] { name }
@@ -212,13 +214,60 @@ let b = B("Daniel", 33)
 let c = C("John", 45, 24)
 
 # (B) -> None
-fun foo(objscoreoffset, obj) = obj[objscoreoffset]
+fun foo(obj, objscoreoffset) = obj[objscoreoffset]
 
-foo(2, b) # References b.score
-foo(3, c) # References c.score
+foo(b, 2) # References b.score
+foo(c, 3) # References c.score
 ```
 
-This problem with this technique is that it increases the number of parameters a function takes.
+The problem with this technique is that it increases the number of parameters a function takes.
+
+### Array of Any and Multiple Dispatch
+Like I always say, arrays are blackboxes and their blackbox nature complicates multiple dispatch implementations.
+As a result of this, the compiler keeps a union of an array's element types even if the array has an explicit element type of `Any`.
+This is used among other things to reduce multiple dispatch overhead.
+
+```python
+let a = [Car(name: 'chevrolet'), Person(name: 'John', age: 56), Product(kind: 'drink', name: 'Coke')]
+a :: Array{Any}
+a :: Array{Car|Person|Product}
+```
+
+An `Array{Any}` is a contiguous list of _typed pointers_ that point to the actual elements of the array.
+
+    [typeid, ptr] -> Car(name: 'chevrolet')
+    [typeid, ptr] -> Person(name: 'John', age: 56)
+    [typeid, ptr] -> Product(kind: 'drink', name: 'Coke')
+
+For every `Array{Any}`, each element type of the array is given an id and the id serves as the index
+into a `type witness table` which will be discussed later.
+
+`Astro` is a __statically-typed language__ and even though it allows polymorphic structures like `Array{Any}`,
+it will throw a __compile-time error__ if you try to access a field that is not common to all the array's element types.
+
+```python
+print a.name # Ok. `name` field is common to all of a's element types
+print a.age # Error. `age` field is not common to all of a's element types
+```
+
+A `type witness table` is constructed based on the fields common to all the element types. A witness table simply
+allows one to choose the right _field offset_ at runtime when the type of an element has been determined.
+
+            typeid    name_offset
+    Car     [1]  ->   [1]
+    Person  [2]  ->   [1]
+    Product [3]  ->   [5]
+
+```python
+fun foo(a, b) = a.name, b.name #: Any, Any
+foo(a[1]::Car, a[3]::Product, 1, 5)
+foo(a[1][2], a[3][2], a[1][1][1], a[3][1][1])
+```
+
+#### Possible Optimizations
+A witness table may not include common fields that are not accessed.
+If the types of arguments passed to a functions are known at compile-time, the function may be specialized for that type signature.
+
 
 ## Construction
 A `type constructor` must return a new object. The returned object will be considered an instance of the type.
