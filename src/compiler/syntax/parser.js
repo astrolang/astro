@@ -8666,7 +8666,7 @@ class Parser {
   }
 
   // tupleexpression =
-  //   | simpleexpression (_comma _? simpleexpression)* _comma?
+  //   | simpleexpression (_comma _? simpleexpression)+ _comma?
   //   | simpleexpression
   parseTupleExpression() {
     // Keep original state.
@@ -8679,7 +8679,7 @@ class Parser {
 
     (() => {
       // Alternate parsing.
-      // | simpleexpression (_comma _? simpleexpression)* _comma?
+      // | simpleexpression (_comma _? simpleexpression)+ _comma?
       // | simpleexpression
       let alternativeParseSuccessful = false;
 
@@ -9354,11 +9354,386 @@ class Parser {
     } else if (this.parseToken('...').success) {
       let parseData = { success: true, message: null, ast: { type: 'spread', name: null } };
       if (this.parseIdentifier().success) parseData.ast.name = this.lastParseData.ast.name;
+      // Update lastParseData.
+      this.lastParseData = parseData;
       return parseData;
     }
 
     // Parsing failed.
     return { success: false, message: { type, parser: this }, ast: null };
+  }
+
+  // lhsarguments =
+  //   | lhsname (_comma _? lhsname)* _comma?
+  //   { expressions }
+  parseLhsArguments() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'lhsarguments';
+    let expressions = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Consume lhsname.
+      if (!this.parseLhsName().success) return null;
+      expressions.push(this.lastParseData.ast);
+
+      // Optional-multiple parsing. (_comma _? lhsname)*
+      while (true) {
+        let parseSuccessful = false;
+        const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+        (() => {
+          // Check _comma.
+          if (!this.parse_Comma().success) return;
+
+          // Check _?.
+          this.parse_();
+
+          // Consume lhsname.
+          if (!this.parseLhsName().success) return;
+          expressions.push(this.lastParseData.ast);
+
+          parseSuccessful = true;
+        })();
+
+        // If parsing the above fails, revert state to what it was before that parsing began.
+        // And break out of the loop.
+        if (!parseSuccessful) {
+          this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+          break;
+        }
+      }
+
+      // Check _comma?.
+      this.parse_Comma();
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { expressions } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // lhspattern =
+  //   | '(' spaces? lhsarguments _? ')' // ignorenewline
+  //   | '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
+  //   | '[' spaces? lhsarguments _? ']' // ignorenewline
+  //   | '[' nextcodeline indent lhsarguments nextcodeline dedent ']'
+  //   | '{' spaces? lhsarguments _? '}' // ignorenewline
+  //   | '{' nextcodeline indent lhsarguments nextcodeline dedent '}'
+  //   |  lhsname (_comma _? lhsname)*
+  //   { type, expressions }
+  parseLhsPattern() {
+    // Keep original state.
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
+    // Ignore ignorenewline from outer scope, this rule may contain indentation.
+    this.ignoreNewline = false;
+
+    const type = 'lhs';
+    let args = [];
+    let destructuretype = null;
+    let parseData = { success: false, message: { type: 'lhspattern', parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | '[' spaces? lhsarguments _? ']' // ignorenewline
+      // | '[' nextcodeline indent lhsarguments nextcodeline dedent ']'
+      // | '{' spaces? lhsarguments _? '}' // ignorenewline
+      // | '{' nextcodeline indent lhsarguments nextcodeline dedent '}'
+      // | '(' spaces? lhsarguments _? ')' // ignorenewline
+      // | '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
+      // |  lhsname (_comma _? lhsname)*
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = {
+        lastPosition: this.lastPosition, lastIndentCount: this.lastIndentCount, line: this.line, column: this.column,
+      };
+      const otherState = { args: [...args] };
+
+      // [1]. '[' spaces? lhsarguments _? ']' // ignorenewline
+      (() => {
+        // Consume '['.
+        if (!this.parseToken('[').success) return;
+
+        // Consume spaces?.
+        this.parseSpaces();
+
+        // Ignore newline from this point
+        this.ignoreNewline = true;
+
+        // Consume lhsarguments.
+        if (!this.parseLhsArguments().success) return;
+        args = this.lastParseData.ast.expressions;
+
+        // Consume _?
+        this.parse_();
+
+        // Consume ']'.
+        if (!this.parseToken(']').success) return;
+
+        destructuretype = 'list';
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. '[' nextcodeline indent lhsarguments nextcodeline dedent ']'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ args } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '['.
+          if (!this.parseToken('[').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume lhsarguments.
+          if (!this.parseLhsArguments().success) return;
+          args = this.lastParseData.ast.expressions;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume ']'.
+          if (!this.parseToken(']').success) return;
+
+          destructuretype = 'list';
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. '{' spaces? lhsarguments _? '}' // ignorenewline
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ args } = otherState);
+
+        (() => {
+          // Consume '{'.
+          if (!this.parseToken('{').success) return;
+
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Ignore newline from this point
+          this.ignoreNewline = true;
+
+          // Consume lhsarguments.
+          if (!this.parseLhsArguments().success) return;
+          args = this.lastParseData.ast.expressions;
+
+          // Consume _?
+          this.parse_();
+
+          // Consume '}'.
+          if (!this.parseToken('}').success) return;
+
+          destructuretype = 'object';
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [4]. '{' nextcodeline indent lhsarguments nextcodeline dedent '}'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ args } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '{'.
+          if (!this.parseToken('{').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume lhsarguments.
+          if (!this.parseLhsArguments().success) return;
+          args = this.lastParseData.ast.expressions;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume '}'.
+          if (!this.parseToken('}').success) return;
+
+          destructuretype = 'object';
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [5]. '(' spaces? lhsarguments _? ')' // ignorenewline
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ args } = otherState);
+
+        (() => {
+          // Consume '('.
+          if (!this.parseToken('(').success) return;
+
+          // Consume spaces?.
+          this.parseSpaces();
+
+          // Ignore newline from this point
+          this.ignoreNewline = true;
+
+          // Consume lhsarguments.
+          if (!this.parseLhsArguments().success) return;
+          args = this.lastParseData.ast.expressions;
+
+          // Consume _?
+          this.parse_();
+
+          // Consume ')'.
+          if (!this.parseToken(')').success) return;
+
+          destructuretype = 'tuple';
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [6]. '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ args } = otherState);
+        this.ignoreNewline = false;
+
+        (() => {
+          // Consume '('.
+          if (!this.parseToken('(').success) return;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume indent.
+          if (!this.parseIndent().success) return;
+
+          // Consume lhsarguments.
+          if (!this.parseLhsArguments().success) return;
+          args = this.lastParseData.ast.expressions;
+
+          // Consume nextcodeline.
+          if (!this.parseNextCodeLine().success) return;
+
+          // Consume dedent.
+          if (!this.parseDedent().success) return;
+
+          // Consume ')'.
+          if (!this.parseToken(')').success) return;
+
+          destructuretype = 'tuple';
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [7]. '(' spaces? lhsarguments _? ')' // ignorenewline
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, state.lastIndentCount, state.column, state.line);
+        ({ args } = otherState);
+
+        (() => {
+          // Consume lhsname.
+          if (!this.parseLhsName().success) return null;
+          args.push(this.lastParseData.ast);
+
+          // Optional-multiple parsing. (_comma _? lhsname)*
+          while (true) {
+            let parseSuccessful = false;
+            const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+            (() => {
+              // Check _comma.
+              if (!this.parse_Comma().success) return;
+
+              // Check _?.
+              this.parse_();
+
+              // Consume lhsname.
+              if (!this.parseLhsName().success) return;
+              args.push(this.lastParseData.ast);
+
+              parseSuccessful = true;
+            })();
+
+            // If parsing the above fails, revert state to what it was before that parsing began.
+            // And break out of the loop.
+            if (!parseSuccessful) {
+              this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+              break;
+            }
+          }
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, destructuretype, arguments: args } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Reset ignorenewline back to original state.
+    this.ignoreNewline = ignoreNewline;
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, lastIndentCount, column, line);
+
+    return parseData;
   }
 
 // ----------------------------------------
