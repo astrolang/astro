@@ -514,26 +514,6 @@ print(new Parser('nam:e2*9s)!@\n6%a').parseCharsNoNewlineOrForwardSlash()); // m
 print(String.raw`25fse?w&$3267`);
 print(new Parser('25fse?w&$3267').parseCharsNoNewlineOrForwardSlash());
 
-print('========= NAMESEPARATOR =========');
-
-print(String.raw`name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('name').parseNameSeparator()); // fail
-
-print(String.raw`556>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('556').parseNameSeparator()); // fail
-
-print(String.raw` games`);
-print(new Parser(' games').parseNameSeparator());
-
-print(String.raw`+age`);
-print(new Parser('+age').parseNameSeparator());
-
-print(String.raw`(556`);
-print(new Parser('(556').parseNameSeparator());
-
-print(String.raw`.name`);
-print(new Parser('.name').parseNameSeparator());
-
 print('========= INDENT =========');
 
 print(String.raw`     •>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -1504,6 +1484,12 @@ print(new Parser("returnjohn").parseReturn()); // mid
 print(String.raw`return yield john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("return yield john").parseReturn()); // mid
 
+print(String.raw`return(john)>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("return(john)").parseReturn()); // mid
+
+print(String.raw`return+john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("return+john").parseReturn()); // mid
+
 print(String.raw`return 0b100e56`);
 print(new Parser("return 0b100e56").parseReturn());
 
@@ -1519,12 +1505,6 @@ print(new Parser("return john + /regex/").parseReturn());
 print(String.raw`return john,/regex/`);
 print(new Parser("return john,/regex/").parseReturn());
 
-print(String.raw`return(john)`);
-print(new Parser("return(john)").parseReturn());
-
-print(String.raw`return+john`);
-print(new Parser("return+john").parseReturn());
-
 print('========= YIELD =========');
 
 print(String.raw`yieldjohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
@@ -1535,6 +1515,12 @@ print(new Parser("yield from").parseYield()); // mid
 
 print(String.raw`yield return name>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("yield return name").parseYield()); // mid
+
+print(String.raw`yield(john)>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("yield(john)").parseYield()); // mid
+
+print(String.raw`yield+john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("yield+john").parseYield()); // mid
 
 print(String.raw`yield john`);
 print(new Parser("yield john").parseYield());
@@ -1548,12 +1534,6 @@ print(new Parser("yield john + /regex/").parseYield());
 print(String.raw`yield john,/regex/`);
 print(new Parser("yield john,/regex/").parseYield());
 
-print(String.raw`yield(john)`);
-print(new Parser("yield(john)").parseYield());
-
-print(String.raw`yield+john`);
-print(new Parser("yield+john").parseYield());
-
 print('========= RAISE =========');
 
 print(String.raw`raisejohn>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
@@ -1561,6 +1541,12 @@ print(new Parser("raisejohn").parseRaise()); // mid
 
 print(String.raw`raise break john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser("raise break john").parseRaise()); // mid
+
+print(String.raw`raise(john)>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("raise(john)").parseRaise()); // mid
+
+print(String.raw`raise+john>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser("raise+john").parseRaise()); // mid
 
 print(String.raw`raise john`);
 print(new Parser("raise john").parseRaise());
@@ -1573,12 +1559,6 @@ print(new Parser("raise john + /regex/").parseRaise());
 
 print(String.raw`raise john,/regex/`);
 print(new Parser("raise john,/regex/").parseRaise());
-
-print(String.raw`raise(john)`);
-print(new Parser("raise(john)").parseRaise());
-
-print(String.raw`raise+john`);
-print(new Parser("raise+john").parseRaise());
 
 print('========= CONTINUE =========');
 
@@ -1953,6 +1933,9 @@ print('========= COMMANDNOTATION =========');
 print(String.raw`++ 456>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 print(new Parser("++ 456").parseCommandNotation()); // fail
 
+print(String.raw`name age where same>>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('name age where same').parseCommandNotation()); // mid
+
 print(String.raw`name age`);
 print(new Parser('name age').parseCommandNotation());
 
@@ -2179,3 +2162,44 @@ print(new Parser('james').parseLhsPattern());
 print(String.raw`...james`);
 print(new Parser('...james').parseLhsPattern());
 
+print('========= GUARD =========');
+
+print(String.raw`where x == y>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('where x == y').parseGuard()); // fail
+
+print(String.raw` where x == y`);
+print(new Parser(' where x == y').parseGuard());
+
+print(String.raw` where name > 45`);
+print(new Parser(' where name > 45').parseGuard());
+
+print('========= IFHEADDECLARATION =========');
+
+print(String.raw`let name, peter =500>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('let name, peter =500').parseIfHeadDeclaration()); // fail
+
+print(String.raw`let name, peter = 5, 6`);
+print(new Parser('let name, peter = 5, 6').parseIfHeadDeclaration());
+
+print(String.raw`var some_person=[1, 2]?`);
+print(new Parser('var some_person=[1, 2]?').parseIfHeadDeclaration());
+
+print('========= IFHEAD =========');
+
+print(String.raw`let name, peter =500>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('let name, peter =500').parseIfHead()); // fail
+
+print(String.raw`let name, peter = 5, 6 where name == 7`);
+print(new Parser('let name, peter = 5, 6 where name == 7').parseIfHead());
+
+print(String.raw`var some_person=[1, 2]?`);
+print(new Parser('var some_person=[1, 2]?').parseIfHead());
+
+
+
+
+// print(String.raw`let name, peter`);
+// print(new Parser('let name, peter').parseSubjectHead());
+
+// print(String.raw`var some_person`);
+// print(new Parser('var some_person').parseSubjectHead());
