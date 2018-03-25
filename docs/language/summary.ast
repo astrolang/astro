@@ -1177,12 +1177,11 @@ MODULES & IMPORT
     # Importing multiple modules
     import csv, dataframes
 
-    # Module path can be specified following the Unix style.
-    # Module names also follow Unix style.
-    import nypro/../my-cool-project
+    # Module path can be specified following the Unix style. In that case, they need to be enclosed in quotes.
+    import 'nypro/../my-cool-project'
 
     # Renaming can help disambiguate imports.
-    import fastmath: nypro/fast-math { cosine: cos, sine: sin, π: pi }
+    import fastmath: 'nypro/fast-math' { cosine: cos, sine: sin, π: pi }
     let b = fastmath.tan(45)
     let d = cosine(30)
 
