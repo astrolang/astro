@@ -88,7 +88,7 @@ identifierendchar =
   | digit
 
 identifier =
-  | identifierbeginchar identifierendchar*
+  | !('where') identifierbeginchar identifierendchar*
   { type, name }
 
 operatorchar =
@@ -98,7 +98,7 @@ operator =
   | (!(regexliteral) operatorchar)+ // Must not consume regexliteral
   { type, name }
 
-pathnamechar =
+importnamechar =
   | identifierendchar | [\-] // TODO
 
 charsnonewlineorsinglequote =
@@ -131,9 +131,6 @@ charsnonewlineorforwardslash =
 
 space =
   | [ \t]
-
-nameseparator =
-  | !(identifier | numericliteral) _?
 
 indent = // TODO. adding !space
   | ' '+
@@ -386,27 +383,27 @@ controlkeyword =
   | 'spill'
 
 return =
-  | 'return' (!(_ controlkeyword _) nameseparator expressionnocontrolptimitive)?
+  | 'return' (!(_ controlkeyword _) _ expressionnocontrolptimitive)?
   { type, expression }
 
 yield =
-  | 'yield' ((_ 'from')? nameseparator expressionnocontrolptimitive)?
+  | 'yield' ((_ 'from')? !(_ controlkeyword _) _ expressionnocontrolptimitive)?
   { type, expression, redirect }
 
 raise =
-  | 'raise' (nameseparator expressionnocontrolptimitive)?
+  | 'raise' (_ !(_ controlkeyword _) _ expressionnocontrolptimitive)?
   { type, expression }
 
 continue =
-  | 'continue' (_? '@' identifier)?
+  | 'continue' (_ '@' identifier)?
   { type, label }
 
 break =
-  | 'break' (nameseparator expressionnocontrolptimitive)?  (_? '@' identifier)?
+  | 'break' (!(_ controlkeyword _)_ expressionnocontrolptimitive)?  (_ '@' identifier)?
   { type, expression, label }
 
 spill =
-  | 'spill' (_? '@' identifier)?
+  | 'spill' (_ '@' identifier)?
   { type, label }
 
 controlprimitive =
@@ -469,7 +466,7 @@ range =
   { type, begin, step, end }
 
 commandnotationrest =
-  | spaces &(identifier | stringliteral | numericliteral | range | symbolliteral)  primitiveexpression
+  | spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) primitiveexpression
   | spaces? lambdaexpression
   { arguments: [{ key, value }] }
 
@@ -511,23 +508,37 @@ expression =
   | subexpression
 
 // Used in declarations and conditional expressions.
-// makes `if ... : if ... : block` possible
-// also makes `if ... : if ... : exp` possible
-// also makes `if ... : exp else: exp` possible
-// but not `if ... : if ... : exp else: exp`
-// and not `if ... : if ... : exp for ... : exp`
-// and not `if ... : if ... : exp else: exp else: exp`
-// and not `if ... : for ... : exp else: exp`
-subexpressiononeinlinenest =
-  | dotnotationblock // TODO HERE
-  | declarationoneinlinenest
-  | conditionalexpressiononeinlinenest
+// allows
+// - `primitiveexp`
+// does not allow
+// - `if ... : exp`
+// - `if ... : exp else: exp`
+subexpressionnoblock =
   | controlprimitive
   | tupleexpression
 
-expressiononeinlinenest =
-  | subexpressiononeinlinenest (_? ';' _? subexpressiononeinlinenest)+ (_? ';')?
-  | subexpressiononeinlinenest
+expressionnoblock =
+  | subexpressionnoblock (_? ';' _? subexpressionnoblock)+ (_? ';')?
+  | subexpressionnoblock
+
+// Used in declarations and conditional expressions.
+// allows
+// - `if ... : block`
+// - `if ... : noblock`
+// - `if ... : noblock else: noblock`
+// does not allow
+// - `if ... : for ... : exp`
+// - `if ... : for ... : exp else ... : exp`
+subexpressionsecondinline =
+  | dotnotationblock
+  | declarationsecondinline
+  | conditionalexpressionsecondinline
+  | controlprimitive
+  | tupleexpression
+
+expressionsecondinline =
+  | subexpressionsecondinline (_? ';' _? subexpressionsecondinline)+ (_? ';')?
+  | subexpressionsecondinline
 
 block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
@@ -549,139 +560,198 @@ lhspattern =
   | '(' spaces? lhsarguments _? ')' // ignorenewline
   | '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
   |  lhsname (_comma _? lhsname)*
-  { type, destructuretype, arguments }
+  { destructuretype, arguments }
+
+guard =
+  | _ 'where' _ primitiveexpression
+  { condition }
+
+ifheaddeclaration =
+  | subjecthead (_ '=' _ | '=' !operator) !(controlkeyword) tupleexpression
+  { immutable, lhs, value }
 
 ifhead =
-  | primitiveexpression (_ 'where' _ primitiveexpression)?
-  | subjectdeclaration (_ 'where' _ primitiveexpression)?
-
-elifexpression =
-  | 'elif' namesparator ifhead _? ':' _? expressiononeinlinenest
-  | 'elif' namesparator ifhead _? ':' block
-
-elseexpression =
-  | 'else' _? ':' _? expressiononeinlinenest
-  | 'else' _? ':' block
+  | (ifheaddeclaration | primitiveexpression) guard?
+  { head, guard }
 
 ifexpression =
-  | 'if' namesparator ifhead _? ':' _? expressiononeinlinenest (_? elifexpression)* (_? elseexpression)?
-  | 'if' namesparator ifhead _? ':' block (_? elifexpression)* (_? elseexpression)?
+  | 'if' _ ifhead _? ':' _? subexpressionnoblock elseexpressionsecondinline
+  | 'if' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent elifexpression* elseexpression)?
+  | 'if' _ ifhead _? ':' block (elifexpression* elseexpression)?
+  { type, head, guard, body, elifs, elsebody }
 
-ifexpressiononeinlinenest =
-  | 'if' namesparator ifhead _? ':' _? expressionnoblock
-  | 'if' namesparator ifhead _? ':' block
+ifexpressionsecondinline =
+  | 'if' _ ifhead _? ':' _? subexpressionnoblock
+  | 'if' _ ifhead _? ':' block
+  { type, head, guard, body, elifs, elsebody }
+
+elifexpression =
+  | 'elif' _ ifhead _? ':' _? subexpressionsecondinline nextcodeline samedent
+  | 'elif' _ ifhead _? ':' block
+  { head, guard, body }
+
+elseexpression =
+  | 'else' _? ':' _? subexpressionsecondinline
+  | 'else' _? ':' block
+  { body }
+
+elseexpressionsecondinline =
+  | 'else' _? ':' _? subexpressionnoblock
+  | 'else' _? ':' block
+  { body }
 
 whileexpression =
-  | 'while' namesparator ifhead _? ':' _? expressiononeinlinenest (_? endexpression)?
-  | 'while' namesparator ifhead _? ':' block endexpression?
+  | 'while' _ ifhead _? ':' _? subexpressionnoblock endexpressionsecondinline
+  | 'while' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+  | 'while' _ ifhead _? ':' block endexpression?
+  { type, head, guard, body, endbody }
 
-whileexpressiononeinlinenest =
-  | 'while' namesparator ifhead _? ':' _? expressionnoblock
-  | 'while' namesparator ifhead _? ':' block
-
-dowhileexpression =
-  | 'do' _? ':'  _? expressiononeinlinenest _? 'while' namesparator ifhead _?
-  | 'do' _? ':' block 'while' namesparator ifhead _?
-
-loopexpression =
-  | 'loop' _? ':' _? expressiononeinlinenest (_? endexpression)?
-  | 'loop' _? ':' block endexpression?
-
-loopexpressiononeinlinenest =
-  | 'loop' _? ':' _? expressionnoblock
-  | 'loop' _? ':' block
+whileexpressionsecondinline =
+  | 'while' _ ifhead _? ':' _? expressionnoblock (_ endexpressionnoblock)?
+  | 'while' _ ifhead _? ':' block
+  { type, head, guard, body, endbody }
 
 endexpression =
-  | 'end' _? ':' _? expressiononeinlinenest
+  | 'end' _? ':' _? subexpressionsecondinline
   | 'end' _? ':' block
+  { body }
+
+endexpressionsecondinline =
+  | 'end' _? ':' _? subexpressionnoblock
+  | 'end' _? ':' block
+  { body }
+
+dowhileexpression =
+  | 'do' _? ':'  _? subexpressionsecondinline _? 'while' _ ifhead
+  | 'do' _? ':' block 'while' _ ifhead
+  | 'do' _? ':' subexpressionnoblock 'while' _ ifhead
+  { type, head, guard, body }
+
+loopexpression =
+  | 'loop' _? ':' _? subexpressionnoblock endexpressionsecondinline
+  | 'loop' _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+  | 'loop' _? ':' block endexpression?
+  { type, body }
+
+loopexpressionsecondinline =
+  | 'loop' _? ':' _? expressionnoblock (_ endexpressionnoblock)?
+  | 'loop' _? ':' block
+  { type, body }
 
 forhead =
-  | 'var'? lhspattern _ 'in' _ primitiveexpression (_ 'where' _ primitiveexpression)?
+  | ('var' _)? lhspattern _ 'in' _ primitiveexpression (_ 'where' _ primitiveexpression)?
+  { immutable, lhs, value, guard }
 
 forexpression =
-  | 'for' namesparator forhead _? ':' _? expressiononeinlinenest (_? endexpression)?
-  | 'for' namesparator forhead _? ':' block endexpression?
+  | 'for' _ forhead _? ':' _? subexpressionnoblock endexpressionsecondinline
+  | 'for' _ forhead _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+  | 'for' _ forhead _? ':' block endexpression?
+  { type, head, guard, body, endbody }
 
-forexpressiononeinlinenest =
-  | 'for' namesparator forhead _? ':' _? expressionnoblock
-  | 'for' namesparator forhead _? ':' block
+forexpressionsecondinline =
+  | 'for' _ forhead _? ':' _? expressionnoblock (_ endexpressionnoblock)?
+  | 'for' _ forhead _? ':' block
+  { type, head, guard, body, endbody }
+
+tryexpression =
+  | 'try' _? ':' _? subexpressionnoblock exceptexpressionsecondinline
+  | 'try' _? ':' _? subexpressionsecondinline nextcodeline samedent exceptexpression+ ensureexpression?
+  | 'try' _? ':' block exceptexpression+ ensureexpression?
+  // FOLLOWING NEEDS WORK
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' _? subexpressionnoblock exceptexpressionsecondinline
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' _? subexpressionsecondinline (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
 
 ensureexpression =
-  | 'ensure' _? ':' _? expressiononeinlinenest
+  | 'ensure' _? ':' _? subexpressionsecondinline
   | 'ensure' _? ':' block
 
 exceptexpression =
-  | 'except' _ identifier _? ':' _? expressiononeinlinenest
+  | 'except' _ identifier _? ':' _? subexpressionsecondinline
   | 'except' _ identifier _? ':' block
 
-tryexpression =
-  | 'try' _? ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' _? ':' block (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' 'var'? namesparator lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' _? expressiononeinlinenest (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' 'var'? namesparator lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
+exceptexpressionsecondinline =
+  | 'except' _ identifier _? ':' _? subexpressionnoblock
+  | 'except' _ identifier _? ':' block
 
-matchpattern =
-  | (identifier _?)? '(' spaces? matchatom (_comma _? matchatom)* _comma? _? ')' // ignorenewline
-  | (identifier _?)? '(' nextcodeline indent  matchatom (_comma _? matchatom)* _comma? nextcodeline dedent ')'
-  | '[' spaces? matchatom (_comma _? matchatom)* _comma? _? ']' // ignorenewline
-  | '[' nextcodeline indent  matchatom (_comma _? matchatom)* _comma? nextcodeline dedent ']'
-  | '{' spaces? matchatom (_comma _? matchatom)* _comma? _? '}' // ignorenewline
-  | '{' nextcodeline indent matchatom (_comma _? matchatom)* _comma? nextcodeline dedent '}'
-  |  matchatom (_comma _? matchatom)*
-
-matchatom
-  | primitiveexpression
+matchargument
+  | identifier _? ':' _? primitiveexpression
   | noname
   | identifier
   | '...' identifier?
 
-matchsingleexpression =
-  | ('|' | '!') _? matchpattern _? '=>' _? expressiononeinlinenest
-  | ('|' | '!') _? matchpattern _? '=>' block
+typerelationoperator =
+  | _ ('::' | '<:' | '>:') _
+  | ('::' | '<:' | '>:') !operator
+
+matchpattern =
+  | '[' spaces? matchargument (_comma _? matchargument)* _comma? _? ']' // ignorenewline
+  | '[' nextcodeline indent  matchargument (_comma _? matchargument)* _comma? nextcodeline dedent ']'
+  | '{' spaces? matchargument (_comma _? matchargument)* _comma? _? '}' (typerelationoperator identifier)? // ignorenewline
+  | '{' nextcodeline indent matchargument (_comma _? matchargument)* _comma? nextcodeline dedent '}' (typerelationoperator identifier)?
+  | '%' '{' spaces? matchargument (_comma _? matchargument)* _comma? _? '}' // ignorenewline
+  | '%' '{' nextcodeline indent matchargument (_comma _? matchargument)* _comma? nextcodeline dedent '}'
+  | '@' '{' spaces? matchargument (_comma _? matchargument)* _comma? _? '}' // ignorenewline
+  | '@' '{' nextcodeline indent matchargument (_comma _? matchargument)* _comma? nextcodeline dedent '}'
 
 matchexpression =
-  | primitiveexpression? (_? matchsingleexpression)+
-  | primitiveexpression? (nextcodeline samedent matchsingleexpression)+
+  | ('|' | '!') _? matchpattern (_comma _? matchpattern)* _? '=>' _? subexpressionnoblock nextcodeline samedent (matchexpression | '')
+  | ('|' | '!') _? matchpattern (_comma _? matchpattern)* _? '=>' block (matchexpression | '')
 
-matchexpressiononeinlinenest =
-  | primitiveexpression? _? ('|' | '!') _? matchpattern _? '=>' _? expressionnoblock
-  | primitiveexpression? _? ('|' | '!') _? matchpattern _? '=>' block
-
-iifexpression =
-  | callpostfix _? '=>' _? expressiononeinlinenest
-  | callpostfix _? '=>' block
+callparens =
+  | '(' _? ')' // ignorenewline
+  | '(' spaces? callarguments _? ')' // ignorenewline
+  | '(' nextcodeline indent callarguments nextcodeline dedent ')'
+  { arguments: [{ key, value }] }
 
 iifexpression =
-  | callpostfix _? '=>' _? expressiononeinlinenest
-  | callpostfix _? '=>' block
+  | callparens _? '=>' _? subexpressionsecondinline
+  | callparens _? '=>' block
+  { type, arguments: [{ key, value }] }
 
-iifeexpressiononeinlinenest =
-  | callpostfix _? '=>' _? expressionnoblock
+iifexpressionsecondinline =
+  | callparens _? '=>' _? subexpressionnoblock
+  | callparens _? '=>' block
+  { type, arguments: [{ key, value }] }
 
 lambdaexpression =
-  | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressiononeinlinenest
-  | '|' _? functionparameters _comma? _? '|' _? '=>' block
+  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionsecondinline
+  | '|' _? functionparameters _? '|' _? '=>' block
+  { type, name, parameters: [{ immutable, alias, lhs, value }], body }
 
-lambdaexpressiononeinlinenest =
-  | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressionnoblock
-  | '|' _? functionparameters _comma? _? '|' _? '=>' block
-
-importpathname =
-  | pathnamechar+
-  | '..'
-  | '.'
+lambdaexpressionsecondinline =
+  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionnoblock
+  | '|' _? functionparameters _? '|' _? '=>' block
+  { type, name, parameters: [{ immutable, alias, lhs, value }], body }
 
 importpath =
-  | ('/' _?)? importpathname (_? '/' _? importpathname)*
+  | importnamechar+
   | stringliteral
 
+importargument =
+  | (_? identifier _? ':')? _? (identifier | operator)
+  | '...'
+  { key, value }
+
+importarguments =
+  | importargument (_comma importargument )* _comma?
+  { members: [{ key, value }] }
+
 importdeclaration =
-  | 'import' (_ identifier _? ':') _ importpath  '{' (_? identifier _? ':')? _? (identifier | operator) (_comma (_? identifier _? ':')? _? (identifier | operator) )* _comma? _? '}' // ignorenewline
-  | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent (identifier _? ':' _?)? (identifier | operator) (nextcodeline samedent (identifier _? ':' _?)? (identifier | operator)) _comma? nextcodeline dedent '}'
+  | 'import' (_ identifier _? ':') _ importpath  '{' _? importarguments _? '}' // ignorenewline
+  | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent importarguments nextcodeline dedent '}'
   | 'import' (_ identifier _? ':') _ importpath
+  { type, modulealias, modulename, path, all, members: [{ key, value }] }
+
+exportarguments =
+  | (identifier | operator) (_comma (identifier | operator))* _comma?
+  | '...'
+  { members: [{ key, value }] }
 
 exportdeclaration =
-  | 'export' _? '{' _? (identifier | operator) (_comma _? (identifier | operator))* _comma? _? '}' // ignorenewline
+  | 'export' _ '{' _? exportarguments _? '}' // ignorenewline
+  | 'export' _ '{' nextcodeline indent exportarguments nextcodeline dedent '}'
+  { type, members: [{ key, value }] }
 
 conditionalexpression =
   | matchexpression
@@ -692,12 +762,12 @@ conditionalexpression =
   | forexpression
   | tryexpression
 
-conditionalexpressiononeinlinenest =
-  | matchexpressiononeinlinenest
-  | ifexpressiononeinlinenest
-  | whileexpressiononeinlinenest
-  | loopexpressiononeinlinenest
-  | forexpressiononeinlinenest
+conditionalexpressionsecondinline =
+  | matchexpressionsecondinline
+  | ifexpressionsecondinline
+  | whileexpressionsecondinline
+  | loopexpressionsecondinline
+  | forexpressionsecondinline
 
 declaration =
   | iifeexpression
@@ -709,90 +779,197 @@ declaration =
   | importdeclaration
   | exportdeclaration
 
-declarationoneinlinenest =
-  | iifeexpressiononeinlinenest
-  | lambdaexpressiononeinlinenest
-  | subjectdeclarationoneinlinenest
-  | functiondeclarationonrinlinenest
-  | typedeclarationoneinlinenest
-  | abstdeclarationoneinlinenest
+declarationsecondinline =
+  | iifeexpressionsecondinline
+  | lambdaexpressionsecondinline
+  | subjectdeclarationsecondinline
+  | functiondeclarationonrsecondinlinenest
+  | typedeclarationsecondinline
+  | abstdeclarationsecondinline
+
+fieldlhsname
+  | noname
+  | identifier '*'
+  | '...' identifier? '*'
+  { internal, expression }
+
+fieldlhsarguments =
+  | fieldlhsname (_comma _? fieldlhsname)* _comma?
+  { expressions }
+
+fieldlhspattern =
+  | '[' spaces? fieldlhsarguments _? ']' // ignorenewline
+  | '[' nextcodeline indent fieldlhsarguments nextcodeline dedent ']'
+  | '{' spaces? fieldlhsarguments _? '}' // ignorenewline
+  | '{' nextcodeline indent fieldlhsarguments nextcodeline dedent '}'
+  | '(' spaces? fieldlhsarguments _? ')' // ignorenewline
+  | '(' nextcodeline indent fieldlhsarguments nextcodeline dedent ')'
+  |  fieldlhsname (_comma _? fieldlhsname)*
+  { destructuretype, arguments }
+
+fieldhead =
+  | ('let' | 'var') _ fieldlhspattern
+  { immutable, lhs }
+
+fielddeclaration =
+  | fieldhead (_ '=' _ | '=' !operator) !(controlkeyword) subexpressionsecondinline
+  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent !(controlkeyword) subexpression dedentoreoiend
+  | fieldhead
+  { type, immutable, lhs, value }
+
+fielddeclarationsecondinline =
+  | fieldhead (_ '=' _ | '=' !operator) !(controlkeyword) subexpressionnoblock
+  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent !(controlkeyword) subexpression dedentoreoiend
+  | fieldhead
+  { type, immutable, lhs, value }
+
+typename =
+  | identifier '{' spaces? (typeset | typename) _? '}' '?'? // ignorenewline
+  | identifier '{' nextcodeline indent (typeset | typename) nextcodeline dedent '}' '?'?
+  | identifier '?'?
+
+typesetoperator =
+  | _ ('|' | '&') _
+  | ('|' | '&') !operator
+
+typeset =
+  | typename (typesetoperator typename)+ '?'?
+
+typesignatureargment =
+  | typeset
+  | typename
+  | noname
+
+typesignatureargments =
+  | typesignatureargment (_comma _? typesignatureargment)* _comma?
+
+typeconstraintargument =
+  | (typeset | typename) typerelationoperator (typeset | typename)
+
+typeconstraintarguments =
+  | typeconstraintargument (_comma _? typeconstraintargument)*
+
+typesignature =
+  | '(' spaces? typesignatureargments _? ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments // ignorenewline
+  | '(' nextcodeline indent typesignatureargments nextcodeline dedent ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
+  | typeset
+  | typename
+
+lambdaexpression =
+  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionsecondinline
+  | '|' _? functionparameters _? '|' _? '=>' block
+  { type, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+lambdaexpressionsecondinline =
+  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionnoblock
+  | '|' _? functionparameters _? '|' _? '=>' block
+  { type, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+blockoperator =
+  | _ '=' _
+  | '=' !operator
+  | _? ':' _?
 
 typehead =
-  | ('type' | 'abst') _ identifier
+  | 'type' _ identifier
 
-subtype =
+typeconstructor =
+  | '(' spaces? parameters _?')' // ignorenewline
+  | '(' nextcodeline indent parameters nextcodeline dedent ')'
+
+typeparents =
+  | (_ '<:' _| '<:') identifier (_comma _? identifier)*
+  { parenttypes }
+
+typeblock =
+  | nextcodeline indent fielddeclaration (nextcodeline samedent fielddeclaration)* dedentoreoiend
+
+typedeclaration =
+  | typehead (_ typeconstructor)? typeparents? blockoperator _? fielddeclaration
+  | typehead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { type, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
+
+typedeclarationsecondinline =
+  | typehead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { type, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
+
+typealias = // Also secondinline
+  | typehead blockoperator _? typesignature
+  | typehead blockoperator nextcodeline indent typesignature dedentoreoiend
+  { type, name, typesignature }
+
+absthead =
+  | 'abst' _ identifier
+
+subtypedeclaration =
   | identifier (_? '(' spaces? functionparameters _? ')')? // ignorenewline
   | identifier (_? '(' nextcodeline indent functionparameters nextcodeline dedent ')')?
 
-typebody =
-  | subjectdeclaration
-  | '|'? _? subtype (_? '|' subtype)*
+abstsubtypeinline =
+  | subtypedeclaration ((_ '|' _ | '|' !operator) subtypedeclaration)*
 
-typebodyoneinlinenest =
-  | subjectdeclarationoneinlinenest
-  | '|'? _? subtype (_? '|' subtype)*
+abstsubtypeblock =
+  | nextcodeline indent ('|' _?)? subtypedeclaration (nextcodeline samedent '|' _? subtypedeclaration)* dedentoreoiend
 
-names =
-  | identifier (_comma _? identifier)*
-  { names }
+abstdeclaration =
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? fielddeclaration
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { type, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
 
-typeblock =
-  | nextcodeline indent typebody (nextcodeline samedent typebody)* dedentoreoiend
+abstdeclarationsecondinline =
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { type, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
 
-typedeclaration =
-  | typehead _? '(' spaces? parameters _?')' (_? '<:' _? names)?// ignorenewline
-  | typehead _? '(' nextcodeline indent parameters nextcodeline dedent ')' (_? '<:' _? names)?
-  | typehead (_ '=' _ | '=' !operator | _? ':' _?) typebodyoneinlinenest
-  | typehead (_ '=' _ | '=' !operator) nextcodeline indent typebody dedentoreoiend
-  | typehead _? ':' typeblock
-  { type, name, supertypes, body }
-
-typedeclarationoneinlinenest =
-  | typehead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
-  | typehead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
-  | typehead _? ':' block
-  { type, name, supertypes, body }
-
-functionparameters =
-  | functionparameter (_comma _? functionparameter)* _comma?
+abstsubtypedeclaration = // Also secondinline
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? abstsubtypeinline
+  | absthead (_ typeconstructor)? typeparents? blockoperator abstsubtypeblock
+  { type, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, subtypes }
 
 functionparameter =
   | identifier ('.' lhspattern?)? _? ':' _? primitiveexpression
   | lhspattern
   | identifier
 
+functionparameters =
+  | functionparameter (_comma _? functionparameter)* _comma?
+
 functionhead =
   | 'fun' _ (identifier | operator) _? '(' spaces? functionparameters _?')' // ignorenewline
   | 'fun' _ (identifier | operator) _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
 
 functiondeclaration =
-  | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressiononeinlinenest
-  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
-  | functionhead _? ':' block
-  { type, name, parameters: [{ mutable, alias, lhs, value }], body }
+  | functionhead blockoperator subexpressionsecondinline
+  | functionhead blockoperator block
+  { type, name, parameters: [{ immutable, alias, lhs, value }], body }
 
-functiondeclarationoneinlinenest =
-  | functionhead (_ '=' _ | '=' !operator | _? ':' _?) expressionnoblock
-  | functionhead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
-  | functionhead _? ':' block
-  { type, name, parameters: [{ mutable, alias, lhs, value }], body }
+functiondeclarationsecondinline =
+  | functionhead blockoperator subexpressionnoblock
+  | functionhead blockoperator block
+  { type, name, parameters: [{ immutable, alias, lhs, value }], body }
 
 subjecthead =
-  | ('let' | 'var') nameseparator lhspattern
-  | ('let' | 'var') nameseparator identifier (_ identifier)+
+  | ('let' | 'var') _ lhspattern
+  { immutable, lhs }
 
 subjectdeclaration =
-  | subjecthead (_ '=' _ | '=' !operator) expressiononeinlinenest
-  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
-  { type, mutable, name }
-  { type, lhs, rhs }
+  | subjecthead (_ '=' _ | '=' !operator) subexpressionsecondinline
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
+  | subjecthead
+  { type, immutable, lhs, value }
 
-subjectdeclarationoneinlinenest =
-  | subjecthead (_ '=' _ | '=' !operator) expressionnoblock
-  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent expression dedentoreoiend
-  { type, mutable, name }
-  { type, lhs, rhs }
+subjectdeclarationsecondinline =
+  | subjecthead (_ '=' _ | '=' !operator) !(controlkeyword) subexpressionnoblock
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
+  | subjecthead
+  { type, immutable, lhs, value }
+
+programexpression =
+  | importdeclaration
+  | exportdeclaration
+  | expression
 
 program =
-  | (comment? nextcodeline)? (samedent expression (nextcodeline eoi? | _? eoi))+
-  | (comment? nextcodeline? eoi)?
+  | nextcodeline? (samedent programexpression (nextcodeline eoi? | _? eoi))+
+  | nextcodeline eoi
+  | ''
+
