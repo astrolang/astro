@@ -88,7 +88,7 @@ identifierendchar =
   | digit
 
 identifier =
-  | !('where') identifierbeginchar identifierendchar*
+  | identifierbeginchar identifierendchar* // Contains keyword check
   { type, name }
 
 operatorchar =
@@ -575,7 +575,7 @@ ifhead =
   { head, guard }
 
 ifexpression =
-  | 'if' _ ifhead _? ':' _? subexpressionnoblock elseexpressionsecondinline
+  | 'if' _ ifhead _? ':' _? subexpressionnoblock _ elseexpressionsecondinline
   | 'if' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent elifexpression* elseexpression)?
   | 'if' _ ifhead _? ':' block (elifexpression* elseexpression)?
   { type, head, guard, body, elifs, elsebody }
@@ -601,7 +601,7 @@ elseexpressionsecondinline =
   { body }
 
 whileexpression =
-  | 'while' _ ifhead _? ':' _? subexpressionnoblock endexpressionsecondinline
+  | 'while' _ ifhead _? ':' _? subexpressionnoblock _ endexpressionsecondinline
   | 'while' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
   | 'while' _ ifhead _? ':' block endexpression?
   { type, head, guard, body, endbody }
@@ -628,7 +628,7 @@ dowhileexpression =
   { type, head, guard, body }
 
 loopexpression =
-  | 'loop' _? ':' _? subexpressionnoblock endexpressionsecondinline
+  | 'loop' _? ':' _? subexpressionnoblock _ endexpressionsecondinline
   | 'loop' _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
   | 'loop' _? ':' block endexpression?
   { type, body }
@@ -643,7 +643,7 @@ forhead =
   { immutable, lhs, value, guard }
 
 forexpression =
-  | 'for' _ forhead _? ':' _? subexpressionnoblock endexpressionsecondinline
+  | 'for' _ forhead _? ':' _? subexpressionnoblock _ endexpressionsecondinline
   | 'for' _ forhead _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
   | 'for' _ forhead _? ':' block endexpression?
   { type, head, guard, body, endbody }
@@ -654,10 +654,9 @@ forexpressionsecondinline =
   { type, head, guard, body, endbody }
 
 tryexpression =
-  | 'try' _? ':' _? subexpressionnoblock exceptexpressionsecondinline
+  | 'try' _? ':' _? subexpressionnoblock _ exceptexpressionsecondinline
   | 'try' _? ':' _? subexpressionsecondinline nextcodeline samedent exceptexpression+ ensureexpression?
   | 'try' _? ':' block exceptexpression+ ensureexpression?
-  // FOLLOWING NEEDS WORK
   | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' _? subexpressionnoblock exceptexpressionsecondinline
   | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' _? subexpressionsecondinline (_? exceptexpression)+ (_? ensureexpression)?
   | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
