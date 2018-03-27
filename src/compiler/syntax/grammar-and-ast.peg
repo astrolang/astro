@@ -607,7 +607,7 @@ whileexpression =
   { type, head, guard, body, endbody }
 
 whileexpressionsecondinline =
-  | 'while' _ ifhead _? ':' _? expressionnoblock (_ endexpressionnoblock)?
+  | 'while' _ ifhead _? ':' _? subexpressionnoblock
   | 'while' _ ifhead _? ':' block
   { type, head, guard, body, endbody }
 
@@ -634,7 +634,7 @@ loopexpression =
   { type, body }
 
 loopexpressionsecondinline =
-  | 'loop' _? ':' _? expressionnoblock (_ endexpressionnoblock)?
+  | 'loop' _? ':' _? subexpressionnoblock
   | 'loop' _? ':' block
   { type, body }
 
@@ -649,7 +649,7 @@ forexpression =
   { type, head, guard, body, endbody }
 
 forexpressionsecondinline =
-  | 'for' _ forhead _? ':' _? expressionnoblock (_ endexpressionnoblock)?
+  | 'for' _ forhead _? ':' _? subexpressionnoblock
   | 'for' _ forhead _? ':' block
   { type, head, guard, body, endbody }
 
