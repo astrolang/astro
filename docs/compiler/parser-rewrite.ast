@@ -1,0 +1,40 @@
+# Future Parser Rewrite
+# floatbinaryliteral  =
+#   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+#   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+fun floatBinaryLiteral() =
+    let subState = {...}
+    let parseObject =
+        parse('0b', digitbinary, *('_', digitbinary), '.', digitbinary, ...)?
+        or
+        parse('0b', digitbinary, *('_', digitbinary), '.', digitbinary, ...)?
+    if parseObject: parseObject
+    else:
+        state.revert!(subState)
+        nil
+
+fun parse(...args) =
+    let subState = {...}
+    let arr = []
+    var parseSuccessful = false
+    for arg in args:
+        | {} :: Function =>
+            if let i = arg(): arr.push!(i) else: break
+        | {} :: Str =>
+            if let i = parseToken(arg): arr.push!(i) else: break
+        | {} :: Object =>
+            if let i = arg: arr.push!(i) else: break
+    end: flip!(parseSuccessful)
+    if parseSuccessful: arr
+    else:
+        state.revert!(subState)
+        nil
+
+# Astro has no lexing phase, because of the following
+# Astro infix expressions can only be written in one of two ways
+a + b or a+b # valid
+a+ b or a +b # not valid
+# Because of this, I need to know if two tokens are adjacent without spaces in between
+# But I can't know that if spaces have been stripped out on lexing phase.
+# But Cheery said I can use line/column number from lexing phase to know adjacency of tokens. Brilliant.
+
