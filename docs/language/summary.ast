@@ -722,12 +722,15 @@ MATCH EXPRESSION
     # Match expression is like a chain of if-elif-else expressions.
     # If a match pattern fails, it goes to the next pattern.
     object
-    | Some(x, y) => 0 # Matches if object is of `Some` type.
-    | Some(x: 2, y: 3) => 0 # Matches if object is of `Some` type.
-    | [1, 2, ...s] => 0 # Matches if object is a collection type that has values `1`, and `2` at beginning of list.
+    | { x, y } :: Some => 0 # Matches if object is of `Some` type.
+    | { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
+    | [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
+    | %{1, 2, ...s} => 0 # Matches if object is a set that has values `1`, and `2` at beginning.
+    | @{a, b, ...r} => 0 # Matches if object is a dict that has values `a`, and `b` at beginning.
     | $x => 1 # Matches if object equals an outer `x` subject.
     | 75 | 67 => 2 # Matches if object has value `75` or value `67`
     | 75 & 67 => 3 # Matches if object has value `75` and value `67`
+    | 75 : 67 => 3 # Matches if object has a value between `75` and value `67`
     ! 75 => 5 # Matches if object doesn't have value `75`
     | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
     | n => 6 # Matches. Binds `n` to the object.
