@@ -4,7 +4,7 @@ const { print } = require('../utils');
 
 /**
  * MAINTENANCE NOTES
- * - Code resuse is crucial. There is a lot of duplication in this source file and for good reasons. Clarity and performance.
+ * - Code reuse is crucial. There is a lot of duplication in this source file and for good reasons. Clarity and performance.
  * - You should check `src/boilerplate/parser-boilerplate.js` for reusable code templates.
  *
  * IMPLEMENTATION NOTES
@@ -39,7 +39,7 @@ class Parser {
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
     this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√'; // Unicode?
-    this.pathNameChar = `${this.identifierEndChar}-`; // Unicode?
+    this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.space = ' \t'; // Unicode?
   }
 
@@ -110,6 +110,26 @@ class Parser {
 
     return parseData;
   }
+
+  // Check if argument string is a valid Astro keyword.
+  checkKeyword(string) {
+    let parseData = { success: false };
+
+    if (
+      string === 'if' ||
+      string === 'elif' ||
+      string === 'else' ||
+      string === 'for' ||
+      string === 'while' ||
+      string === 'do' ||
+      string === 'where'
+    ) {
+      parseData = { success: true };
+    }
+
+    return parseData;
+  }
+
 
   // Parse input string.
   // { token }
@@ -1545,6 +1565,7 @@ class Parser {
 
     const type = 'identifier';
     const token = [];
+    let name = '';
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     // Consume the first character. identifierbeginchar
@@ -1556,11 +1577,19 @@ class Parser {
         token.push(this.eatChar());
       }
 
-      // Update parseData.
-      parseData = { success: true, message: null, ast: { type, name: token.join('') } };
+      // Note: `token` holds reference to same set of characters in `this.code`. This causes a circular reference when adding
+      // it to `this.ast` tree. JSON.stringify doesn't allow circular references. For this reason, I'm creating a copy
+      // using spread operator.
+      name = [...token].join('');
 
-      // Update lastParseData.
-      this.lastParseData = parseData;
+      // Check !keyword.
+      if (!this.checkKeyword(name).success) {
+        // Update parseData.
+        parseData = { success: true, message: null, ast: { type, name } };
+
+        // Update lastParseData.
+        this.lastParseData = parseData;
+      }
     }
 
     // Check if above parsing is successful.
@@ -8413,7 +8442,7 @@ class Parser {
   }
 
   // commandnotationrest =
-  //   |  !(_ 'where' _) spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) primitiveexpression
+  //   | spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) primitiveexpression
   //   | spaces? lambdaexpression
   //   { arguments: [{ key, value }] }
   parseCommandNotationRest() {
@@ -8431,38 +8460,15 @@ class Parser {
 
     (() => {
       // Alternate parsing.
-      // | !(_ 'where' _) spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) primitiveexpression
+      // | spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) primitiveexpression
       // | spaces? lambdaexpression
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
 
-      // [1]. !(_ 'where' _) spaces &(identifier | stringliteral | numericliteral | lambdaexpression | range | symbolliteral) primitiveexpression
+      // [1]. spaces &(identifier | stringliteral | numericliteral | lambdaexpression | range | symbolliteral) primitiveexpression
       (() => {
-        // Check !(_ 'where' _).
-        let lookAheadParseSuccessful = false;
-        const state2 = { lastPosition: this.lastPosition, column: this.column, line: this.line };
-        (() => {
-          // Consume _.
-          if (!this.parse_().success) return;
-
-          // Consume 'where'.
-          if (!this.parseToken('where').success) return;
-
-          // Consume _.
-          if (!this.parse_().success) return;
-
-          // This lookahead was parsed successfully.
-          lookAheadParseSuccessful = true;
-        })();
-
-        // Reset state since it's just a lookahead not meant to be consumed.
-        this.reset(state2.lastPosition, null, null, state2.column, state2.line);
-
-        // lookahead parsing should not be successful for a negative lookahead.
-        if (lookAheadParseSuccessful) return;
-
         // Consume spaces.
         if (!this.parseSpaces().success) return null;
 
@@ -9246,20 +9252,20 @@ class Parser {
   // - `if ... : for ... : exp`
   // - `if ... : for ... : exp else ... : exp`
   //
-  // subexpressioninline =
+  // subexpressionsecondinline =
   //   | dotnotationblock
-  //   | declarationinline
-  //   | conditionalexpressioninline
+  //   | declarationsecondinline
+  //   | conditionalexpressionsecondinline
   //   | controlprimitive
   //   | tupleexpression
-  parseSubExpressionInline() {
-    const type = 'subexpressioninline';
+  parseSubExpressionSecondInline() {
+    const type = 'subexpressionsecondinline';
 
     if (this.parseDotNotationBlock().success) {
       return this.lastParseData;
-    } else if (this.parseDeclarationInline().success) {
+    } else if (this.parseDeclarationSecondInline().success) {
       return this.lastParseData;
-    } else if (this.parseConditionalExpressionInline().success) {
+    } else if (this.parseConditionalExpressionSecondInline().success) {
       return this.lastParseData;
     } else if (this.parseControlPrimitive().success) {
       return this.lastParseData;
@@ -9271,36 +9277,36 @@ class Parser {
     return { success: false, message: { type, parser: this }, ast: null };
   }
 
-  // expressioninline =
-  //   | subexpressioninline (_? ';' _? subexpressioninline)+ (_? ';')?
-  //   | subexpressioninline
-  parseExpressionInline() {
+  // expressionsecondinline =
+  //   | subexpressionsecondinline (_? ';' _? subexpressionsecondinline)+ (_? ';')?
+  //   | subexpressionsecondinline
+  parseExpressionSecondInline() {
     // Keep original state.
     const {
       lastPosition, column, line,
     } = this;
 
     const type = 'expression';
-    let parseData = { success: false, message: { type: 'expressiononeinlinenest', parser: this }, ast: null };
+    let parseData = { success: false, message: { type: 'expressiononesecondinlinenest', parser: this }, ast: null };
 
     (() => {
       // Alternate parsing.
-      // | subexpressioninline (_? ';' _? subexpressioninline)+ (_? ';')?
-      // | subexpressioninline
+      // | subexpressionsecondinline (_? ';' _? subexpressionsecondinline)+ (_? ';')?
+      // | subexpressionsecondinline
       let alternativeParseSuccessful = false;
 
       // Save state before alternative parsing.
       const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
 
-      // [1]. subexpressioninline (_? ';' _? subexpressioninline)+ (_? ';')?
+      // [1]. subexpressionsecondinline (_? ';' _? subexpressionsecondinline)+ (_? ';')?
       (() => {
         const expressions = [];
 
-        // Consume subexpressioninline.
-        if (!this.parseSubExpressionInline().success) return null;
+        // Consume subexpressionsecondinline.
+        if (!this.parseSubExpressionSecondInline().success) return null;
         expressions.push(this.lastParseData.ast);
 
-        // Optional-multiple parsing. (_? ';' _? subexpressioninline)+
+        // Optional-multiple parsing. (_? ';' _? subexpressionsecondinline)+
         let loopCount = 0;
         while (true) {
           let parseSuccessful = false;
@@ -9315,8 +9321,8 @@ class Parser {
             // Check _?.
             this.parse_();
 
-            // Consume subexpressioninline.
-            if (!this.parseSubExpressionInline().success) return;
+            // Consume subexpressionsecondinline.
+            if (!this.parseSubExpressionSecondInline().success) return;
             expressions.push(this.lastParseData.ast);
 
             parseSuccessful = true;
@@ -9362,14 +9368,14 @@ class Parser {
         alternativeParseSuccessful = true;
       })();
 
-      // [2]. subexpressioninline
+      // [2]. subexpressionsecondinline
       if (!alternativeParseSuccessful) {
         // Revert state to what it was before alternative parsing started.
         this.reset(state.lastPosition, null, null, state.column, state.line);
 
         (() => {
-          // Consume subexpressioninline.
-          if (!this.parseSubExpressionInline().success) return null;
+          // Consume subexpressionsecondinline.
+          if (!this.parseSubExpressionSecondInline().success) return null;
 
           // Update parseData.
           parseData = { success: true, message: null, ast: this.lastParseData.ast };
@@ -9481,7 +9487,7 @@ class Parser {
   //   | identifier
   //   | '...' identifier?
   parseLhsName() {
-    const type = 'subexpressioninline';
+    const type = 'subexpressionsecondinline';
 
     if (this.parseNoName().success) {
       return this.lastParseData;
@@ -10087,6 +10093,639 @@ class Parser {
     return parseData;
   }
 
+  // ifexpression =
+  //   | 'if' _ ifhead _? ':' _? subexpressionnoblock _ elseexpressionsecondinline
+  //   | 'if' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent elifexpression* elseexpression)?
+  //   | 'if' _ ifhead _? ':' block (elifexpression* elseexpression)?
+  //   { type, head, guard, body, elifs, elsebody }
+  parseIfExpression() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'ifexpression';
+    let head = null;
+    let guard = null;
+    let body = [];
+    let elifs = [];
+    let elsebody = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | 'if' _ ifhead _? ':' _? subexpressionnoblock _ elseexpressionsecondinline
+      // | 'if' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent elifexpression* elseexpression)?
+      // | 'if' _ ifhead _? ':' block (elifexpression* elseexpression)?
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { head, guard, body: [], elifs: [], elsebody: [] };
+
+      // [1]. 'if' _ ifhead _? ':' _? subexpressionnoblock _ elseexpressionsecondinline
+      (() => {
+        // Consume 'if'.
+        if (!this.parseToken('if').success) return;
+
+        // Consume _.
+        if (!this.parse_().success) return;
+
+        // Consume ifhead.
+        if (!this.parseIfHead().success) return;
+        ({ head, guard } = this.lastParseData.ast);
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume subexpressionnoblock.
+        if (!this.parseSubExpressionNoBlock().success) return;
+        body.push(this.lastParseData.ast);
+
+        // Consume _.
+        if (!this.parse_().success) return;
+
+        // Consume elseexpressionsecondinline .
+        if (!this.parseElseExpressionSecondInline().success) return;
+        elsebody = this.lastParseData.ast.body;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'if' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent elifexpression* elseexpression)?
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ head, guard, body, elifs, elsebody } = otherState);
+
+        (() => {
+          // Consume 'if'.
+          if (!this.parseToken('if').success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume ifhead.
+          if (!this.parseIfHead().success) return;
+          ({ head, guard } = this.lastParseData.ast);
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume subexpressionsecondinline.
+          if (!this.parseSubExpressionSecondInline().success) return;
+          body.push(this.lastParseData.ast);
+
+          // Optional parsing. (nextcodeline samedent elifexpression* elseexpression)?
+          let optionalParseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume nextcodeline .
+            if (!this.parseNextCodeLine().success) return;
+
+            // Consume samedent.
+            if (!this.parseSamedent().success) return;
+
+            // Optional-multiple parsing. elifexpression*
+            while (true) {
+              let parseSuccessful = false;
+              const state3 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+              (() => {
+                // Consume elifexpression.
+                if (!this.parseElifExpression().success) return;
+                elifs.push(this.lastParseData.ast);
+
+                parseSuccessful = true;
+              })();
+
+              // If parsing the above fails, revert state to what it was before that parsing began.
+              // And break out of the loop.
+              if (!parseSuccessful) {
+                this.reset(state3.lastPosition, null, null, state3.column, state3.line);
+                break;
+              }
+            }
+
+            // Consume elseexpression.
+            if (!this.parseElseExpression().success) return;
+            elsebody = this.lastParseData.ast.body;
+
+            // This optional was parsed successfully.
+            optionalParseSuccessful = true;
+          })();
+
+          // If parsing the above optional fails, revert state to what it was before that parsing began.
+          if (!optionalParseSuccessful) {
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+          }
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. 'if' _ ifhead _? ':' block (elifexpression* elseexpression)?
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ head, guard, body, elifs, elsebody } = otherState);
+
+        (() => {
+          // Consume 'if'.
+          if (!this.parseToken('if').success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume ifhead.
+          if (!this.parseIfHead().success) return;
+          ({ head, guard } = this.lastParseData.ast);
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume block.
+          if (!this.parseBlock().success) return;
+          body = this.lastParseData.ast.expressions;
+
+          // Optional parsing. (elifexpression* elseexpression)?
+          let optionalParseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Optional-multiple parsing. elifexpression*
+            while (true) {
+              let parseSuccessful = false;
+              const state3 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+              (() => {
+                // Consume elifexpression.
+                if (!this.parseElifExpression().success) return;
+                elifs.push(this.lastParseData.ast);
+
+                parseSuccessful = true;
+              })();
+
+              // If parsing the above fails, revert state to what it was before that parsing began.
+              // And break out of the loop.
+              if (!parseSuccessful) {
+                this.reset(state3.lastPosition, null, null, state3.column, state3.line);
+                break;
+              }
+            }
+
+            // Consume elseexpression.
+            if (!this.parseElseExpression().success) return;
+            elsebody = this.lastParseData.ast.body;
+
+            // This optional was parsed successfully.
+            optionalParseSuccessful = true;
+          })();
+
+          // If parsing the above optional fails, revert state to what it was before that parsing began.
+          if (!optionalParseSuccessful) {
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+          }
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, head, guard, body, elifs, elsebody } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // ifexpressionsecondinline =
+  //   | 'if' _ ifhead _? ':' _? subexpressionnoblock
+  //   | 'if' _ ifhead _? ':' block
+  //   { type, head, guard, body, elifs, elsebody }
+  parseIfExpressionSecondInline() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'ifexpression';
+    let head = null;
+    let guard = null;
+    let body = [];
+    let elifs = [];
+    let elsebody = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | 'if' _ ifhead _? ':' _? subexpressionnoblock
+      // | 'if' _ ifhead _? ':' block
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { head, guard, body: [], elifs: [], elsebody: [] };
+
+      // [1]. 'if' _ ifhead _? ':' _? subexpressionnoblock
+      (() => {
+        // Consume 'if'.
+        if (!this.parseToken('if').success) return;
+
+        // Consume _.
+        if (!this.parse_().success) return;
+
+        // Consume ifhead.
+        if (!this.parseIfHead().success) return;
+        ({ head, guard } = this.lastParseData.ast);
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume subexpressionnoblock.
+        if (!this.parseSubExpressionNoBlock().success) return;
+        body.push(this.lastParseData.ast);
+        
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [3]. 'if' _ ifhead _? ':' block
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ head, guard, body, elifs, elsebody } = otherState);
+
+        (() => {
+          // Consume 'if'.
+          if (!this.parseToken('if').success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume ifhead.
+          if (!this.parseIfHead().success) return;
+          ({ head, guard } = this.lastParseData.ast);
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume block.
+          if (!this.parseBlock().success) return;
+          body = this.lastParseData.ast.expressions;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, head, guard, body, elifs, elsebody } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // elifexpression =
+  //   | 'elif' _ ifhead _? ':' _? subexpressionsecondinline nextcodeline samedent
+  //   | 'elif' _ ifhead _? ':' block
+  //   { head, guard, body }
+  parseElifExpression() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'elifexpression';
+    let head = null;
+    let guard = null;
+    let body = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | 'elif' _ ifhead _? ':' _? subexpressionsecondinline nextcodeline samedent
+      // | 'elif' _ ifhead _? ':' block
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { head, guard };
+
+      // [1]. 'elif' _ ifhead _? ':' _? subexpressionsecondinline
+      (() => {
+        // Consume 'elif'.
+        if (!this.parseToken('elif').success) return;
+
+        // Consume _.
+        if (!this.parse_().success) return;
+
+        // Consume ifhead.
+        if (!this.parseIfHead().success) return;
+        ({ head, guard } = this.lastParseData.ast);
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume subexpressionsecondinline.
+        if (!this.parseSubExpressionSecondInline().success) return;
+        body.push(this.lastParseData.ast);
+
+        // Consume nextcodeline .
+        if (!this.parseNextCodeLine().success) return;
+
+        // Consume samedent.
+        if (!this.parseSamedent().success) return;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'elif' _ ifhead _? ':' block
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ head, guard } = otherState);
+
+        (() => {
+          // Consume 'elif'.
+          if (!this.parseToken('elif').success) return;
+
+          // Consume _.
+          if (!this.parse_().success) return;
+
+          // Consume ifhead.
+          if (!this.parseIfHead().success) return;
+          ({ head, guard } = this.lastParseData.ast);
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume block.
+          if (!this.parseBlock().success) return;
+          body = this.lastParseData.ast.expressions;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { head, guard, body } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // elseexpression =
+  //   | 'else' _? ':' _? subexpressionsecondinline
+  //   | 'else' _? ':' block
+  //   { body }
+  parseElseExpression() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'elseexpression';
+    let body = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | 'else' _? ':' _? subexpressionsecondinline
+      // | 'else' _? ':' block
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. 'else' _? ':' _? subexpressionsecondinline
+      (() => {
+        // Consume 'else'.
+        if (!this.parseToken('else').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume subexpressionsecondinline.
+        if (!this.parseSubExpressionSecondInline().success) return;
+        body.push(this.lastParseData.ast);
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'else' _? ':' block
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume 'else'.
+          if (!this.parseToken('else').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume block.
+          if (!this.parseBlock().success) return;
+          body = this.lastParseData.ast.expressions;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { body } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // elseexpressionsecondinline =
+  //   | 'else' _? ':' _? subexpressionnoblock
+  //   | 'else' _? ':' block
+  //   { body }
+  parseElseExpressionSecondInline() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'elseexpression';
+    let body = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | 'else' _? ':' _? subexpressionsecondinline
+      // | 'else' _? ':' block
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+
+      // [1]. 'else' _? ':' _? subexpressionsecondinline
+      (() => {
+        // Consume 'else'.
+        if (!this.parseToken('else').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume subexpressionnoblock.
+        if (!this.parseSubExpressionNoBlock().success) return;
+        body.push(this.lastParseData.ast);
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'else' _? ':' block
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+
+        (() => {
+          // Consume 'else'.
+          if (!this.parseToken('else').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume block.
+          if (!this.parseBlock().success) return;
+          body = this.lastParseData.ast.expressions;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { body } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
 // ----------------------------------------
 
   // subjecthead =
@@ -10138,7 +10777,7 @@ class Parser {
     return parseData;
   }
 
-  parseDeclarationInline() { // TODO: incorrect implementation
+  parseDeclarationSecondInline() { // TODO: incorrect implementation
     const type = 'expression';
 
     if (this.parseInfixExpression().success) {
@@ -10149,7 +10788,7 @@ class Parser {
     return { success: false, message: { type, parser: this }, ast: null };
   }
 
-  parseConditionalExpressionInline() { // TODO: incorrect implementation
+  parseConditionalExpressionSecondInline() { // TODO: incorrect implementation
     const type = 'expression';
 
     if (this.parseInfixExpression().success) {
@@ -10161,7 +10800,7 @@ class Parser {
   }
 
   // lambdaexpression =
-  //   | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressiononeinlinenest
+  //   | '|' _? functionparameters _comma? _? '|' _? '=>' _? expressiononesecondinlinenest
   //   | '|' _? functionparameters _comma? _? '|' _? '=>' block
   parseLambdaExpression() { // TODO: incorrect implementation
     const type = 'expression';
