@@ -7,7 +7,7 @@ fun floatBinaryLiteral() =
     let parseObject =
         parse('0b', digitbinary, *('_', digitbinary), '.', digitbinary, ...)?
         or
-        parse('0b', digitbinary, *('_', digitbinary), '.', digitbinary, ...)?
+        parse('0b', digitbinary, *('_', digitbinary), 'e', digitbinary, ...)?
     if parseObject: parseObject
     else:
         state.revert!(subState)
