@@ -36,5 +36,5 @@ a + b or a+b # valid
 a+ b or a +b # not valid
 # Because of this, I need to know if two tokens are adjacent without spaces in between
 # But I can't know that if spaces have been stripped out on lexing phase.
-# But Cheery said I can use line/column number from lexing phase to know adjacency of tokens. Brilliant.
+# But Cheery on proglangdesign:matrix.org irc said I can use line/column number from lexing phase to know adjacency of tokens. Brilliant.
 
