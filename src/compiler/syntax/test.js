@@ -2204,6 +2204,43 @@ print(new Parser('let name, peter = 5, 6 where name == 7').parseIfHead());
 print(String.raw`var some_person=[1, 2]?`);
 print(new Parser('var some_person=[1, 2]?').parseIfHead());
 
+print('========= IFEXPRESSION =========');
+
+// print(String.raw`if foo(): if x > 4 : if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if foo(): if x > 4 : if foo(): print name').parseIfExpression()); // fail
+
+// print(String.raw`if x > n:\n    print name else:\n    return "hello">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if x > n:\n    print name else:\n    return "hello"').parseIfExpression()); // fail
+
+print(String.raw`if x > n: print name else: return "hello"`);
+print(new Parser('if x > n: print name else: return "hello"').parseIfExpression());
+
+print(String.raw`if x > n: print name else:\n    return "hello"`);
+print(new Parser('if x > n: print name else:\n    return "hello"').parseIfExpression());
+
+print(String.raw`if x > n:\n    print name\nelse:\n    return "hello"`);
+print(new Parser('if x > n:\n    print name\nelse:\n    return "hello"').parseIfExpression());
+
+print(String.raw`if let a = b:\n    print name\nelse: return "hello"`);
+print(new Parser('if let a = b:\n    print name\nelse: return "hello"').parseIfExpression());
+
+print(String.raw`if x > y where hello():\n    bar()\nelif let a = b where hi(): foo()\nelse: bar()`);
+print(new Parser('if x > y where hello():\n    bar()\nelif let a = b where hi(): foo()\nelse: bar()').parseIfExpression());
+
+print(String.raw`if x > n where foo(): bar(x) \nelif foo(): \n    yield name\nelif let a = b: print(name)\nelse:\n    return "hello"`);
+print(new Parser('if x > n where foo(): bar(x) \nelif foo(): \n    yield name\nelif let a = b: print(name)\nelse:\n    return "hello"').parseIfExpression());
+
+print('========= IFEXPRESSIONSECONDINLINE =========');
+
+// print(String.raw`if foo(): if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('if foo(): if foo(): print name').parseIfExpressionSecondInline()); // fail
+
+print(String.raw`if x > n: print name else: return "hello">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('if x > n: print name else: return "hello"').parseIfExpressionSecondInline()); // mid
+
+print(String.raw`if let x = foo():\n    print name`);
+print(new Parser('if let x = foo():\n    print name').parseIfExpressionSecondInline());
+
 print('========= ELIFEXPRESSION =========');
 
 // print(String.raw`elif name.age <= 500: if foo(): bar() else: print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
@@ -2240,55 +2277,82 @@ print('========= ELSEEXPRESSIONSECONDINLINE =========');
 // print(String.raw`else: if foo():\n    print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
 // print(new Parser('else: if foo():\n    print name').parseElseExpressionSecondInline()); // fail
 
-print(String.raw`else:\n    print name\n    return "hello">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-print(new Parser('else:\n    print name\n    return "hello"').parseElseExpressionSecondInline()); // fail
+print(String.raw`else:\n    print name\n    return "hello"`);
+print(new Parser('else:\n    print name\n    return "hello"').parseElseExpressionSecondInline());
 
 print(String.raw`else : print name`);
 print(new Parser('else : print name').parseElseExpressionSecondInline());
 
-print('========= IFEXPRESSION =========');
+print('========= WHILEEXPRESSION =========');
 
-// print(String.raw`if foo(): if x > 4 : if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('if foo(): if x > 4 : if foo(): print name').parseIfExpression()); // fail
+// print(String.raw`while foo(): for x in 4 : while foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('while foo(): for x in 4 : while foo(): print name').parseWhileExpression()); // fail
 
-// print(String.raw`if x > n:\n    print name else:\n    return "hello">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('if x > n:\n    print name else:\n    return "hello"').parseIfExpression()); // fail
+// print(String.raw`while x > n:\n    print name end:\n    return "hello">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('while x > n:\n    print name end:\n    return "hello"').parseWhileExpression()); // fail
 
-print(String.raw`if x > n: print name else: return "hello"`);
-print(new Parser('if x > n: print name else: return "hello"').parseIfExpression());
+print(String.raw`while x > n: print name end: return "hello"`);
+print(new Parser('while x > n: print name end: return "hello"').parseWhileExpression());
 
-print(String.raw`if x > n: print name else:\n    return "hello"`);
-print(new Parser('if x > n: print name else:\n    return "hello"').parseIfExpression());
+print(String.raw`while x > n: print name end:\n    return "hello"`);
+print(new Parser('while x > n: print name end:\n    return "hello"').parseWhileExpression());
 
-print(String.raw`if x > n:\n    print name\nelse:\n    return "hello"`);
-print(new Parser('if x > n:\n    print name\nelse:\n    return "hello"').parseIfExpression());
+print(String.raw`while let a = foo():\n    print name\nend:\n    return "hello"`);
+print(new Parser('while let a = foo():\n    print name\nend:\n    return "hello"').parseWhileExpression());
 
-print(String.raw`if let a = b:\n    print name\nelse: return "hello"`);
-print(new Parser('if let a = b:\n    print name\nelse: return "hello"').parseIfExpression());
+print(String.raw`while let a = b:\n    print name\nend: return "hello"`);
+print(new Parser('while let a = b:\n    print name\nend: return "hello"').parseWhileExpression());
 
-print(String.raw`if x > y where hello():\n    bar()\nelif let a = b where hi(): foo()\nelse: bar()`);
-print(new Parser('if x > y where hello():\n    bar()\nelif let a = b where hi(): foo()\nelse: bar()').parseIfExpression());
+print(String.raw`while x > n where foo(): bar(x) \nend:\n    return "hello"`);
+print(new Parser('while x > n where foo(): bar(x) \nend:\n    return "hello"').parseWhileExpression());
 
-print(String.raw`if x > n where foo(): bar(x) \nelif foo(): \n    yield name\nelif let a = b: print(name)\nelse:\n    return "hello"`);
-print(new Parser('if x > n where foo(): bar(x) \nelif foo(): \n    yield name\nelif let a = b: print(name)\nelse:\n    return "hello"').parseIfExpression());
-
-print('========= IFEXPRESSIONSECONDINLINE =========');
+print('========= WHILEEXPRESSIONSECONDINLINE =========');
 
 // print(String.raw`if foo(): if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('if foo(): if foo(): print name').parseIfExpression()); // fail
+// print(new Parser('if foo(): if foo(): print name').parseIfExpressionSecondInline()); // fail
 
-print(String.raw`if x > n: print name else: return "hello">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
-print(new Parser('if x > n: print name else: return "hello"').parseIfExpressionSecondInline()); // mid
+print(String.raw`while x > n: print name else: return "hello">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('while x > n: print name else: return "hello"').parseWhileExpressionSecondInline()); // mid
 
-print(String.raw`if let x = foo():\n    print name`);
-print(new Parser('if let x = foo():\n    print name').parseIfExpressionSecondInline());
+print(String.raw`while let x = foo():\n    print name`);
+print(new Parser('while let x = foo():\n    print name').parseWhileExpressionSecondInline());
+
+print('========= ENDEXPRESSION =========');
+
+// print(String.raw`end name.age <= 500: if foo(): bar() end: print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('end name.age <= 500: if foo(): bar() end: print name').parseEndExpression()); // fail
+
+// print(String.raw`end: if foo():\n    print name`);
+// print(new Parser('end: if foo():\n    print name').parseEndExpression());
+
+print(String.raw`end : print name`);
+print(new Parser('end : print name').parseEndExpression());
+
+print(String.raw`end:\n    print name\n    return "hello"`);
+print(new Parser('end:\n    print name\n    return "hello"').parseEndExpression());
+
+print('========= ENDEXPRESSIONSECONDINLINE =========');
+
+print(String.raw`end : if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('end : if foo(): print name').parseEndExpressionSecondInline()); // fail
+
+print(String.raw`end: if foo():\n    print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+print(new Parser('end: if foo():\n    print name').parseEndExpressionSecondInline()); // fail
+
+print(String.raw`end:\n    print name\n    return "hello"`);
+print(new Parser('end:\n    print name\n    return "hello"').parseEndExpressionSecondInline());
+
+print(String.raw`end : print name`);
+print(new Parser('end : print name').parseEndExpressionSecondInline());
 
 
 
-// // print('========= SUBJECTHEAD =========');
 
-// // print(String.raw`let name, peter`);
-// // print(new Parser('let name, peter').parseSubjectHead());
 
-// // print(String.raw`var some_person`);
-// // print(new Parser('var some_person').parseSubjectHead());
+// print('========= SUBJECTHEAD =========');
+
+// print(String.raw`let name, peter`);
+// print(new Parser('let name, peter').parseSubjectHead());
+
+// print(String.raw`var some_person`);
+// print(new Parser('var some_person').parseSubjectHead());
