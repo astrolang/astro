@@ -11012,7 +11012,6 @@ class Parser {
     return parseData;
   }
 
-
   // endexpression =
   //   | 'end' _? ':' _? subexpressionsecondinline
   //   | 'end' _? ':' block
@@ -11190,6 +11189,254 @@ class Parser {
 
     return parseData;
   }
+
+  // loopexpression =
+  //   | 'loop' _? ':' _? subexpressionnoblock _ endexpressionsecondinline
+  //   | 'loop' _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+  //   | 'loop' _? ':' block endexpression?
+  //   { type, body, endbody }
+  parseLoopExpression() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'loopexpression';
+    let body = [];
+    let endbody = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | 'loop' _? ':' _? subexpressionnoblock _ endexpressionsecondinline
+      // | 'loop' _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+      // | 'loop' _? ':' block endexpression?
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { body: [], endbody: [] };
+
+      // [1]. 'loop' _? ':' _? subexpressionnoblock _ endexpressionsecondinline
+      (() => {
+        // Consume 'loop'.
+        if (!this.parseToken('loop').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume subexpressionnoblock.
+        if (!this.parseSubExpressionNoBlock().success) return;
+        body.push(this.lastParseData.ast);
+
+        // Consume _.
+        if (!this.parse_().success) return;
+
+        // Consume endexpressionsecondinline .
+        if (!this.parseEndExpressionSecondInline().success) return;
+        endbody = this.lastParseData.ast.body;
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'loop' _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ body, endbody } = otherState);
+
+        (() => {
+          // Consume 'loop'.
+          if (!this.parseToken('loop').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume subexpressionsecondinline.
+          if (!this.parseSubExpressionSecondInline().success) return;
+          body.push(this.lastParseData.ast);
+
+          // Optional parsing. (nextcodeline samedent endexpression)?
+          let optionalParseSuccessful = false;
+          const state2 = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+          (() => {
+            // Consume nextcodeline .
+            if (!this.parseNextCodeLine().success) return;
+
+            // Consume samedent.
+            if (!this.parseSamedent().success) return;
+
+            // Consume endexpression.
+            if (!this.parseEndExpression().success) return;
+            endbody = this.lastParseData.ast.body;
+
+            // This optional was parsed successfully.
+            optionalParseSuccessful = true;
+          })();
+
+          // If parsing the above optional fails, revert state to what it was before that parsing began.
+          if (!optionalParseSuccessful) {
+            this.reset(state2.lastPosition, null, null, state2.column, state2.line);
+          }
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // [3]. 'loop' _? ':' block endexpression?
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ body, endbody } = otherState);
+
+        (() => {
+          // Consume 'loop'.
+          if (!this.parseToken('loop').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume block.
+          if (!this.parseBlock().success) return;
+          body = this.lastParseData.ast.expressions;
+
+          // Consume endexpression?.
+          if (this.parseEndExpression().success) endbody = this.lastParseData.ast.body;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, body, endbody } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
+  // loopexpressionsecondinline =
+  //   | 'loop' _? ':' _? subexpressionnoblock
+  //   | 'loop' _? ':' block
+  //   { type, body, endbody }
+  parseLoopExpressionSecondInline() {
+    // Keep original state.
+    const {
+      lastPosition, column, line,
+    } = this;
+
+    const type = 'loopexpression';
+    let body = [];
+    let endbody = [];
+    let parseData = { success: false, message: { type, parser: this }, ast: null };
+
+    (() => {
+      // Alternate parsing.
+      // | 'loop' _? ':' _? subexpressionnoblock
+      // | 'loop' _? ':' block
+      let alternativeParseSuccessful = false;
+
+      // Save state before alternative parsing.
+      const state = { lastPosition: this.lastPosition, line: this.line, column: this.column };
+      const otherState = { body: [] };
+
+      // [1]. 'loop' _? ':' _? subexpressionnoblock
+      (() => {
+        // Consume 'loop'.
+        if (!this.parseToken('loop').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume ':'.
+        if (!this.parseToken(':').success) return;
+
+        // Consume _?.
+        this.parse_();
+
+        // Consume subexpressionnoblock.
+        if (!this.parseSubExpressionNoBlock().success) return;
+        body.push(this.lastParseData.ast);
+
+        // This alternative was parsed successfully.
+        alternativeParseSuccessful = true;
+      })();
+
+      // [2]. 'loop' _? ':' block
+      if (!alternativeParseSuccessful) {
+        // Revert state to what it was before alternative parsing started.
+        this.reset(state.lastPosition, null, null, state.column, state.line);
+        ({ body } = otherState);
+
+        (() => {
+          // Consume 'loop'.
+          if (!this.parseToken('loop').success) return;
+
+          // Consume _?.
+          this.parse_();
+
+          // Consume ':'.
+          if (!this.parseToken(':').success) return;
+
+          // Consume block.
+          if (!this.parseBlock().success) return;
+          body = this.lastParseData.ast.expressions;
+
+          // This alternative was parsed successfully.
+          alternativeParseSuccessful = true;
+        })();
+      }
+
+      // Check if any of the alternatives was parsed successfully
+      if (!alternativeParseSuccessful) return null;
+
+      // Update parseData.
+      parseData = { success: true, message: null, ast: { type, body, endbody } };
+
+      // Update lastParseData.
+      this.lastParseData = parseData;
+      return parseData;
+    })();
+
+    // Check if above parsing is successful.
+    if (parseData.success) return parseData;
+
+    // Parsing failed, so revert state.
+    this.reset(lastPosition, null, null, column, line);
+
+    return parseData;
+  }
+
 
 // ----------------------------------------
 
