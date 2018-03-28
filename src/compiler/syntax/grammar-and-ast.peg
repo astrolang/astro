@@ -631,12 +631,12 @@ loopexpression =
   | 'loop' _? ':' _? subexpressionnoblock _ endexpressionsecondinline
   | 'loop' _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
   | 'loop' _? ':' block endexpression?
-  { type, body }
+  { type, body, endbody }
 
 loopexpressionsecondinline =
   | 'loop' _? ':' _? subexpressionnoblock
   | 'loop' _? ':' block
-  { type, body }
+  { type, body, endbody }
 
 forhead =
   | ('var' _)? lhspattern _ 'in' _ primitiveexpression (_ 'where' _ primitiveexpression)?
