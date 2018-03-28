@@ -2308,8 +2308,8 @@ print(new Parser('while x > n where foo(): bar(x) \nend:\n    return "hello"').p
 
 print('========= WHILEEXPRESSIONSECONDINLINE =========');
 
-// print(String.raw`if foo(): if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
-// print(new Parser('if foo(): if foo(): print name').parseIfExpressionSecondInline()); // fail
+// print(String.raw`while foo(): if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('while foo(): if foo(): print name').parseWhileExpressionSecondInline()); // fail
 
 print(String.raw`while x > n: print name else: return "hello">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
 print(new Parser('while x > n: print name else: return "hello"').parseWhileExpressionSecondInline()); // mid
@@ -2344,6 +2344,40 @@ print(new Parser('end:\n    print name\n    return "hello"').parseEndExpressionS
 
 print(String.raw`end : print name`);
 print(new Parser('end : print name').parseEndExpressionSecondInline());
+
+print('========= LOOPEXPRESSION =========');
+
+// print(String.raw`loop: for x in 4 : while foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('loop: for x in 4 : while foo(): print name').parseLoopExpression()); // fail
+
+// print(String.raw`while x > n:\n    print name end:\n    return "hello">>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('while x > n:\n    print name end:\n    return "hello"').parseLoopExpression()); // fail
+
+print(String.raw`loop : print name end: return "hello"`);
+print(new Parser('loop : print name end: return "hello"').parseLoopExpression());
+
+print(String.raw`loop: print name end:\n    return "hello"`);
+print(new Parser('loop: print name end:\n    return "hello"').parseLoopExpression());
+
+print(String.raw`loop :\n    print name\nend:\n    return "hello"`);
+print(new Parser('loop :\n    print name\nend:\n    return "hello"').parseLoopExpression());
+
+print(String.raw`loop:\n    print name\nend: return "hello"`);
+print(new Parser('loop:\n    print name\nend: return "hello"').parseLoopExpression());
+
+print(String.raw`loop: bar(x) \nend:\n    return "hello"`);
+print(new Parser('loop: bar(x) \nend:\n    return "hello"').parseLoopExpression());
+
+print('========= LOOPEXPRESSIONSECONDINLINE =========');
+
+// print(String.raw`loop: if foo(): print name>>>>>>>>>>>>>>>>>>>>>>>>FAIL`); // fail
+// print(new Parser('loop: if foo(): print name').parseLoopExpressionSecondInline()); // fail
+
+print(String.raw`loop: print name else: return "hello">>>>>>>>>>>>>>>>>>>>>>>>MID`); // mid
+print(new Parser('loop: print name else: return "hello"').parseLoopExpressionSecondInline()); // mid
+
+print(String.raw`loop:\n    print name`);
+print(new Parser('loop:\n    print name').parseLoopExpressionSecondInline());
 
 
 
