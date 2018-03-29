@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "capture-console": "^1.0.1",
-    "fast-deep-equal": "^1.1.0",
+    "deep-equal": "^1.0.1",
     "nyc": "^11.3.0",
     "wast2wasm": "0.0.1"
   }
