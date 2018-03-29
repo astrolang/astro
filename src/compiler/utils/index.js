@@ -38,7 +38,7 @@ const createTest = () => {
 
     // `gotten` must be strictly deep-equal `expected`.
     if (equal(gotten, expected, { strict: true })) {
-      print('Test: ', message, '\nTest passed!', '\nGot: ', gotten, '\n');
+      print('Test: ', message, '\nTest passed!', '\nExp: ', gotten, '\n');
       // Increment test count state
       testCount += 1;
       passedCount += 1;
