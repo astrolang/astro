@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const equal = require('fast-deep-equal');
+const equal = require('deep-equal');
 
 // Stringifies and pretty prints all kinds of values including arrays and objects.
 const print = (...s) => {
@@ -20,9 +20,8 @@ const print = (...s) => {
 };
 
 // This test function is written explicitly for testing the compiler only.
-// TODO: Need strict equal implementation.
 const test = (gotten, expected) => {
-  if (equal(gotten, expected)) {
+  if (equal(gotten, expected, { strict: true })) {
     print('Test passed!', '\nGot:      ', gotten, '\n');
     return;
   }
