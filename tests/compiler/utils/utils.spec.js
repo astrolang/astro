@@ -2,7 +2,6 @@ const chai = require('chai');
 const cap = require('capture-console');
 const {
   print,
-  removeNulls,
 } = require('../../../src/compiler/utils');
 
 chai.should();
@@ -41,15 +40,6 @@ describe('COMPILER::UTILS', () => {
         print('person = ', { name: 'John', age: 45 });
       });
       result.should.equal('person = {"name":"John","age":45}\n');
-      done();
-    });
-  });
-
-  describe('removeNulls', () => {
-    it('should remove nulls and undefined values from array', (done) => {
-      const sampleArray = [1, 2, null, 3, undefined, 4, 5];
-      const result = removeNulls(sampleArray);
-      result.should.deep.equal([1, 2, 3, 4, 5]);
       done();
     });
   });
