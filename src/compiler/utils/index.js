@@ -21,8 +21,8 @@ const print = (...s) => {
 
 // This test function is written explicitly for testing the compiler only.
 // TODO: Need strict equal implementation.
-const test = (gotten, expected, passFailed = false) => {
-  if (equal(gotten, expected) && !passFailed) {
+const test = (gotten, expected) => {
+  if (equal(gotten, expected)) {
     print('Test passed!', '\nGot:      ', gotten, '\n');
     return;
   }
