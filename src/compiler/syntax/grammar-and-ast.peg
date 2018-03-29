@@ -3,8 +3,11 @@ eoi =
 
 /*************** LEXER ***************/
 
-space =
-  | [ \t]
+spacechar =
+  | [ \t] // Unicode?
+
+spaces =
+  | space+
 
 noname =
   | '_'
