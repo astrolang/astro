@@ -20,15 +20,43 @@ const print = (...s) => {
 };
 
 // This test function is written explicitly for testing the compiler only.
-const test = (gotten, expected) => {
-  if (equal(gotten, expected, { strict: true })) {
-    print('Test passed!', '\nGot:      ', gotten, '\n');
-    return;
-  }
-  print('Test failed!', '\nExpected: ', expected, '\nGot:      ', gotten, '\n');
+const createTest = () => {
+  // States to be used by the lambda for count.
+  let testCount = 0;
+  let passedCount = 0;
+  let failedCount = 0;
+
+  // This lambda contains the actual test.
+  const lambda = (message, gotten, expected) => {
+    // If no arguments are passed, return information about test calls of this particular lambda.
+    if (message === undefined || gotten === undefined || expected === undefined) {
+      print('Number of Total Tests: ', testCount);
+      print('Number of Passed Tests: ', passedCount);
+      print('Number of Failed Tests: ', failedCount);
+      return { testCount, passedCount, failedCount };
+    }
+
+    // `gotten` must be strictly deep-equal `expected`.
+    if (equal(gotten, expected, { strict: true })) {
+      print('Test: ', message, '\nTest passed!', '\nGot: ', gotten, '\n');
+      // Increment test count state
+      testCount += 1;
+      passedCount += 1;
+      return { testCount, passedCount, failedCount };
+    }
+
+    // Otherwise test failed.
+    print('Test: ', message, '\nTest failed!', '\nExp: ', expected, '\nGot: ', gotten, '\n');
+    // Increment test count state
+    testCount += 1;
+    failedCount += 1;
+    return { testCount, passedCount, failedCount };
+  };
+  // The function returns the lambda.
+  return lambda;
 };
 
 module.exports = {
   print,
-  test,
+  createTest,
 };
