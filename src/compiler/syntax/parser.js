@@ -1,5 +1,12 @@
 const { print } = require('../utils');
 
+/**
+ * The Lexer.
+ * identifier, keywords, binint, octint, decint, hexint, binfloat, octfloat, decfloat, hexfloat,
+ * singlelinestr, multilinetestr, regex
+ * singlelinecomment, multilinecomment, punctuator, operator, boolean
+ * result = [{ token, kind, line, column }]
+ */
 class Lexer {
   constructor(code) {
     // Input code
@@ -7,16 +14,22 @@ class Lexer {
     // Location information
     this.lastPosition = -1;
     this.column = 0;
-    this.line = 1;  
+    this.line = 1;
+    // Characters.
+    this.digitBinary = '01';
+    this.digitOctal = '01234567';
+    this.digitDecimal = '0123456789';
+    this.digitHexadecimal = '0123456789ABCDEFabcdef';
+    this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
+    this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
+    this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√'; // Unicode?
+    this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
+    this.space = ' \t'; // Unicode?
   }
-  
+
   lex() {
   }
 }
-
-identifier, keywords, binint, octint, decint, hexint, binfloat, octfloat, decfloat, hexfloat, 
-singlequotestr, doubquotestr, singlequomultilinetestr, doubquotemultilinestr, 
-singlelinecomment, multilinecomment, regex, punctuator, operator. 
 
 /**
  * A Packrat Parser.
@@ -32,18 +45,8 @@ class Parser {
     this.column = 0;
     this.line = 1;
     this.ignoreNewline = false;
-    // Characters.
-    this.digitBinary = '01';
-    this.digitOctal = '01234567';
-    this.digitDecimal = '0123456789';
-    this.digitHexadecimal = '0123456789ABCDEFabcdef';
-    this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
-    this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
-    this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√'; // Unicode?
-    this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
-    this.space = ' \t'; // Unicode?
   }
-  
+
   parse(...args) {
     let { } = this; // State before parsing.
     let result = [];
@@ -75,11 +78,11 @@ class Parser {
       // None of the above.
       } else throw new Error('Got the wrong argument type');
     }
-    if (result) { return result } 
+    // Check if parsing failed.
+    if (result) { return result }
     else {
       this.revert({ });
       return null;
     }
   }
-
 }
