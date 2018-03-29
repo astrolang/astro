@@ -1,40 +1,60 @@
 # Future Parser Rewrite
-# floatbinaryliteral  =
-#   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
-#   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
-fun floatBinaryLiteral() =
-    let subState = {...}
-    let parseObject =
-        parse('0b', digitbinary, *('_', digitbinary), '.', digitbinary, ...)?
-        or
-        parse('0b', digitbinary, *('_', digitbinary), 'e', digitbinary, ...)?
-    if parseObject: parseObject
-    else:
-        state.revert!(subState)
-        nil
+# 27/03/18
+# Right now the parser implementation is terrible!
 
-fun parse(...args) =
-    let subState = {...}
+# rule =
+#     | (identifier '.')* listliteral (arguments comma?)+
+#     | (identifier '_')+
+let parser = {...}
+
+fun identifier(parser) =
+    let {...} = parser
+    let token = parser.eatToken()?
+    if token?.kind == $token:
+        return { kind: 'identifier', name: token.value }
+    else:
+        parser.revert!({...})
+        return nil
+
+fun rule() =
+    let {...} = parser
+    let parserObject =
+        parse(*(identifier, '.'), listLiteral, +(arguments, ?(comma))() ...
+        or ...
+        parse(+(identifier, '_'))()
+    if parserObject =
+        return parserObject
+    else:
+        parser.revert!({...})
+        return nil
+
+fun parse(...args): =>
+    let {...} = parser
+    var success = false
     let arr = []
-    var parseSuccessful = false
     for arg in args:
         | {} :: Function =>
-            if let i = arg(): arr.push!(i) else: break
+            if let x = arg(): arr.push!(x) else: break
         | {} :: Str =>
-            if let i = parseToken(arg): arr.push!(i) else: break
-        | {} :: Object =>
-            if let i = arg: arr.push!(i) else: break
-    end: flip!(parseSuccessful)
-    if parseSuccessful: arr
+            if let x = token(arg): arr.push!(x) else: break
+    end: success.flip!
+    if success:
+        return arr
     else:
-        state.revert!(subState)
-        nil
+        parser.revert!({...})
+        return nil
 
-# Astro has no lexing phase, because of the following
+
+# Astro parser has no lexing phase, because of the following
 # Astro infix expressions can only be written in one of two ways
 a + b or a+b # valid
 a+ b or a +b # not valid
-# Because of this, I need to know if two tokens are adjacent without spaces in between
-# But I can't know that if spaces have been stripped out on lexing phase.
+# I need to know if two tokens are adjacent without spaces in between
+# But I can't know that if spaces have been stripped out at lexing phase.
 # But Cheery on proglangdesign:matrix.org irc said I can use line/column number from lexing phase to know adjacency of tokens. Brilliant.
+# In addition, I'm going to rewrite it as a packrat parser.
 
+# TODO
+# 1. Lexer
+# 2. Packrat Parser
+# 3. Abstraction of Reusable Code Pattern
