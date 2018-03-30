@@ -58,7 +58,8 @@ class Lexer {
   spaces() {
     const token = '';
     const kind = 'spaces';
-    const { line, column } = this;
+    const startLine = this.line;
+    const startColumn = this.column;
     let spaceCount = 0;
 
     // Check if subsequent chars in input code are valid space character.
@@ -69,8 +70,13 @@ class Lexer {
 
     // Check if lexing failed.
     if (spaceCount === 0) return null;
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
     return {
-      token, kind, line, column,
+      token, kind, startLine, stopLine, startColumn, stopColumn,
     };
   }
 
@@ -79,7 +85,8 @@ class Lexer {
   noName() {
     let token = '';
     const kind = 'noname';
-    const { line, column } = this;
+    const startLine = this.line;
+    const startColumn = this.column;
 
     // Check if next char in input code is a '_' character.
     if (this.peekChar() === '_') {
@@ -88,8 +95,13 @@ class Lexer {
 
     // Check if lexing failed.
     if (token === '') return null;
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
     return {
-      token, kind, line, column,
+      token, kind, startLine, stopLine, startColumn, stopColumn,
     };
   }
 
@@ -105,7 +117,8 @@ class Lexer {
   identifier() {
     let token = '';
     const kind = 'identifier';
-    const { line, column } = this;
+    const startLine = this.line;
+    const startColumn = this.column;
 
     // Check if next char in input code is a valid identifier start character.
     if (this.identifierBeginChar.indexOf(this.peekChar()) > -1) {
@@ -125,8 +138,13 @@ class Lexer {
         token, kind: 'keyword', line, column,
       };
     }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
     return {
-      token, kind, line, column,
+      token, kind, startLine, stopLine, startColumn, stopColumn,
     };
   }
 
