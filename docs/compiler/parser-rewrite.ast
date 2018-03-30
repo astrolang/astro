@@ -5,44 +5,41 @@
 # rule =
 #     | (identifier '.')* listliteral (arguments comma?)+
 #     | (identifier '_')+
-let parser = {...}
+type Parser = ...
 
 fun identifier(parser) =
     let {...} = parser
     let token = parser.eatToken()?
     if token?.kind == $token:
         return { kind: 'identifier', name: token.value }
-    else:
-        parser.revert!({...})
-        return nil
+    parser.revert({...})
+    return nil
 
-fun rule() =
+fun rule(parser) =
     let {...} = parser
     let parserObject =
-        parse(*(identifier, '.'), listLiteral, +(arguments, ?(comma))() ...
+        parser.parse(*(identifier, '.'), listLiteral, +(arguments, ?(comma)) ...
         or ...
-        parse(+(identifier, '_'))()
+        parser.parse(+(identifier, '_'))
     if parserObject =
         return parserObject
-    else:
-        parser.revert!({...})
-        return nil
+    parser.revert({...})
+    return nil
 
-fun parse(...args): =>
+fun parse(parser, ...args): =>
     let {...} = parser
     var success = false
     let arr = []
     for arg in args:
         | {} :: Function =>
-            if let x = arg(): arr.push!(x) else: break
+            if let x = arg(parser): arr.push!(x) else: break
         | {} :: Str =>
-            if let x = token(arg): arr.push!(x) else: break
+            if let x = token(parser, arg): arr.push!(x) else: break
     end: success.flip!
     if success:
         return arr
-    else:
-        parser.revert!({...})
-        return nil
+    parser.revert({...})
+    return nil
 
 
 # Astro parser has no lexing phase, because of the following

@@ -233,6 +233,8 @@ a :: Array{Any}
 a :: Array{Car|Person|Product}
 ```
 
+While the Array type instantiation above has a type of `Array{Car|Person|Product}`, note that the element type is actually `Car&Person&Product`.
+
 An `Array{Any}` is a contiguous list of _typed pointers_ that point to the actual elements of the array.
 
     [typeid, ptr] -> Car(name: 'chevrolet')
@@ -250,7 +252,7 @@ print a.name # Ok. `name` field is common to all of a's element types
 print a.age # Error. `age` field is not common to all of a's element types
 ```
 
-A `type witness table` is constructed based on the fields common to all the element types. A witness table simply
+A `type witness table` is constructed based on the fields common to all the element types. This can be written as `Car&Person&Product` for the example above. A witness table simply
 allows one to choose the right _field offset_ at runtime when the type of an element has been determined.
 
             typeid    name_offset
