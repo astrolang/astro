@@ -21,14 +21,14 @@ identifierendchar =
 
 identifier =
   | identifierbeginchar identifierendchar* // Contains keyword check
-  { kind, name }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 operatorchar =
   | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
 
 operator =
   | operatorchar+
-  { kind, name }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 punctuator =
   | [(){}[\],.~] // TODO: Incomplete
@@ -47,78 +47,73 @@ digithexadecimal =
 
 integerbinaryliteral =
   | '0b' digitbinary ('_'? digitbinary)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 integeroctalliteral  =
   | '0o' digitoctal ('_'? digitoctal)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 integerhexadecimalliteral  =
   | '0x' digithexadecimal ('_'? digithexadecimal)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 integerdecimalliteral  =
   | digitdecimal ('_'? digitdecimal)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floatbinaryliteral  =
   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floatoctalliteral  =
   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floathexadecimalliteral  =
   | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floatdecimalliteral  =
   | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 singlequotestringchars =
   | (!(newline | "'") .)+ // TODO
-  { token }
 
 doublequotestringchars =
   | (!(newline | '"') .)+ // TODO
-  { token }
 
 singlelinestringliteral =
   | "'" singlequotestringchars? "'"
   | '"' doublequotestringchars? '"'
-  { kind, token }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 triplesinglequotestringchars =
   | (!(newline | "'''") .)+ // TODO
-  { token }
 
 tripledoublequotestringchars =
   | (!(newline | '"""') .)+ // TODO
-  { token }
 
 multilinestringliteral =
   | "'''" triplesinglequotestringchars? (nextline samedent triplesinglequotestringchars?)* "'''"
   | '"""' tripledoublequotestringchars? (nextline samedent tripledoublequotestringchars?)* '"""'
-  { kind, token }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 regexchars =
   | (!(newline | '/') .)+ // TODO
-  { token }
 
 regexliteral =
   | '/' regexchars? '/'
-  { kind, token }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 booleanliteral =
   | 'true'
   | 'false'
-  { kind, value }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 singlelinecommentchars =
   | (!(newline) .)+ // TODO
@@ -126,19 +121,18 @@ singlelinecommentchars =
 
 singlelinecomment =
   | "#" singlelinecommentchars? &(newline | eoi)
-  { kind, token }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecommentchars =
   | (!('#=' | '=#') .)+ // TODO
-  { token }
 
 innermultilinecomment =
   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#'
-  { kind, token }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecomment =
   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' _? &(newline | eoi)
-  { kind, token }
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 /*************** PARSER ***************/
 
