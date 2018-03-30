@@ -132,13 +132,12 @@ class Lexer {
 
   // operatorchar =
   //   | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
-
   // operator =
   //   | operatorchar+
   //   { kind, name }
 
-  // punctuatorchar =
-  //   | [(){}[\],.~] // TDO: Incomplete
+  // punctuator =
+  //   | [(){}[\],.~] // TODO: Incomplete
 
   // digitbinary =
   //   | [0-1]
