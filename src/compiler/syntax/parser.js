@@ -17,6 +17,9 @@ class Parser {
     this.ignoreNewline = false;
   }
 
+  // cached.pos.ruleName = { result: {...}, skipTo: 55 };
+  // cached.pos.ruleName = undefined;
+
   parse(...args) {
     let {...} = this; // State before parsing.
     let result = [];
