@@ -15,8 +15,10 @@ test(
   {
     token: '',
     kind: 'spaces',
-    line: 1,
-    column: 0,
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 5,
   },
 );
 
@@ -38,8 +40,10 @@ test(
   {
     token: '_',
     kind: 'noname',
-    line: 1,
-    column: 0,
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
   },
 );
 
@@ -52,8 +56,10 @@ test(
   {
     token: 'some_name678',
     kind: 'identifier',
-    line: 1,
-    column: 0,
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 12,
   },
 );
 
@@ -73,8 +79,10 @@ test(
   {
     token: 'where',
     kind: 'keyword',
-    line: 1,
-    column: 0,
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 5,
   },
 );
 
@@ -86,8 +94,10 @@ test(
   {
     token: 'else',
     kind: 'keyword',
-    line: 1,
-    column: 0,
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 4,
   },
 );
 
@@ -99,10 +109,76 @@ test(
   {
     token: 'elseif',
     kind: 'identifier',
-    line: 1,
-    column: 0,
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 6,
   },
 );
+
+print('============== OPERATOR ==============');
+lexer = new Lexer('+');
+result = lexer.operator();
+test(
+  String.raw`+`,
+  result,
+  {
+    token: '+',
+    kind: 'operator',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
+  },
+);
+
+lexer = new Lexer('/-/');
+result = lexer.operator();
+test(
+  String.raw`/-/`,
+  result,
+  {
+    token: '/-/',
+    kind: 'operator',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 3,
+  },
+);
+
+print('============== PUNCTUATOR ==============');
+lexer = new Lexer('~');
+result = lexer.punctuator();
+test(
+  String.raw`~`,
+  result,
+  {
+    token: '~',
+    kind: 'punctuator',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
+  },
+);
+
+lexer = new Lexer('..');
+result = lexer.punctuator();
+test(
+  String.raw`..`,
+  result,
+  {
+    token: '.',
+    kind: 'punctuator',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
+  },
+);
+
+print('============== TEST RESULTS ==============');
 
 // Print details of test.
 test();
