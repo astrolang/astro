@@ -112,8 +112,8 @@ class Lexer {
   //   | digit
   // identifier =
   //   | identifierbeginchar identifierendchar* // Contains keyword check
-  //   { kind, name } :: identifier
-  //   { kind, name } :: keyword
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: identifier
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: keyword
   identifier() {
     let token = '';
     const kind = 'identifier';
@@ -132,16 +132,16 @@ class Lexer {
     // Check if lexing failed.
     if (token === '') return null;
 
-    // Check if lexed identifier is a keyword.
-    if (this.keywords.indexOf(token) > -1) {
-      return {
-        token, kind: 'keyword', line, column,
-      };
-    }
-
     // Add stop line and column.
     const stopLine = this.line;
     const stopColumn = this.column;
+
+    // Check if lexed identifier is a keyword.
+    if (this.keywords.indexOf(token) > -1) {
+      return {
+        token, kind: 'keyword', startLine, stopLine, startColumn, stopColumn,
+      };
+    }
 
     return {
       token, kind, startLine, stopLine, startColumn, stopColumn,
@@ -152,97 +152,127 @@ class Lexer {
   //   | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
   // operator =
   //   | operatorchar+
-  //   { kind, name }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  operator() {
+    let token = '';
+    const kind = 'operator';
+    const startLine = this.line;
+    const startColumn = this.column;
+
+    // Check if subsequent chars in input code are valid operator character.
+    while (this.operatorChar.indexOf(this.peekChar()) > -1) {
+      token += this.eatChar();
+    }
+
+    // Check if lexing failed.
+    if (token === '') return null;
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // punctuator =
   //   | [(){}[\],.~] // TODO: Incomplete
+  punctuator() {
+    let token = '';
+    const kind = 'punctuator';
+    const startLine = this.line;
+    const startColumn = this.column;
+
+    // Check if subsequent chars in input code are valid operator character.
+    if ('(){}[],.~;'.indexOf(this.peekChar()) > -1) {
+      token += this.eatChar();
+    }
+
+    // Check if lexing failed.
+    if (token === '') return null;
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // digitbinary =
   //   | [0-1]
-
   // digitoctal =
   //   | [0-7]
-
   // digitdecimal =
   //   | [0-9]
-
   // digithexadecimal =
   //   | [0-9a-fA-F]
-
   // integerbinaryliteral =
   //   | '0b' digitbinary ('_'? digitbinary)*
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // integeroctalliteral  =
   //   | '0o' digitoctal ('_'? digitoctal)*
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // integerhexadecimalliteral  =
   //   | '0x' digithexadecimal ('_'? digithexadecimal)*
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // integerdecimalliteral  =
   //   | digitdecimal ('_'? digitdecimal)*
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // floatbinaryliteral  =
   //   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   //   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // floatoctalliteral  =
   //   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
   //   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // floathexadecimalliteral  =
   //   | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   //   | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // floatdecimalliteral  =
   //   | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   //   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
-  //   { kind, value }
-
-  // singlequotestringchars =
-  //   | (!(newline | "'") .)+ // TODO
-  //   { token }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // doublequotestringchars =
   //   | (!(newline | '"') .)+ // TODO
-  //   { token }
-
+  // singlequotestringchars =
+  //   | (!(newline | "'") .)+ // TODO
   // singlelinestringliteral =
   //   | "'" singlequotestringchars? "'"
   //   | '"' doublequotestringchars? '"'
-  //   { kind, token }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // triplesinglequotestringchars =
   //   | (!(newline | "'''") .)+ // TODO
-  //   { token }
-
   // tripledoublequotestringchars =
   //   | (!(newline | '"""') .)+ // TODO
-  //   { token }
-
   // multilinestringliteral =
   //   | "'''" triplesinglequotestringchars? (nextline samedent triplesinglequotestringchars?)* "'''"
   //   | '"""' tripledoublequotestringchars? (nextline samedent tripledoublequotestringchars?)* '"""'
-  //   { kind, token }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // regexchars =
   //   | (!(newline | '/') .)+ // TODO
-  //   { token }
-
   // regexliteral =
   //   | '/' regexchars? '/'
-  //   { kind, token }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // booleanliteral =
   //   | 'true'
   //   | 'false'
-  //   { kind, value }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // singlelinecommentchars =
   //   | (!(newline) .)+ // TODO
@@ -250,7 +280,7 @@ class Lexer {
 
   // singlelinecomment =
   //   | "#" singlelinecommentchars? &(newline | eoi)
-  //   { kind, token }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // multilinecommentchars =
   //   | (!('#=' | '=#') .)+ // TODO
@@ -258,11 +288,11 @@ class Lexer {
 
   // innermultilinecomment =
   //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#'
-  //   { kind, token }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
   // multilinecomment =
   //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' _? &(newline | eoi)
-  //   { kind, token }
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 
   lex() {
