@@ -166,7 +166,7 @@ test(
 lexer = new Lexer('..');
 result = lexer.punctuator();
 test(
-  String.raw`..`,
+  String.raw`..¡MID¡`,
   result,
   {
     token: '.',
