@@ -4,6 +4,8 @@ const { print } = require('../utils');
 /**
  * The Lexer.
  * result = [{ token, kind, line, column }]
+ * TODO:
+ *  * Add backtracking into lexer functions without using IIFE.
  */
 class Lexer {
   constructor(code) {
