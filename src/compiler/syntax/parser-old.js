@@ -4608,12 +4608,12 @@ class Parser {
     } = this;
 
     const type = 'setarguments';
-    let expressions = [];
+    const expressions = [];
     let parseData = { success: false, message: { type, parser: this }, ast: null };
 
     (() => {
       // Consume primitiveexpression.
-      if (!this.parsePrimitiveExpression().success) return;
+      if (!this.parsePrimitiveExpression().success) return null;
       expressions.push(this.lastParseData.ast);
 
       // Optional-multiple parsing. (_comma _? primitiveexpression)*
