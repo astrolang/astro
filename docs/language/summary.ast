@@ -1254,7 +1254,7 @@ OPERATORS
 OPERATOR OVERLOADING & CUSTOM OPERATOR
     # Existing operators can be overloaded just like regular functions.
     fun +(x, y): #: (Dual, Dual) -> Dual
-        Dual(|x + y|.vl, |x + y|.adj)
+        Dual({ x + y }.vl, { x + y }.adj)
 
     # New operators can also be created by combining operators as a name.
     fun ++(x): #: (Real, Real) -> Real
@@ -1276,7 +1276,7 @@ TRY, EXCEPT & ENSURE
     try:
         process bigData
     except IncompleteDataError:
-        print error.message # the error object can alwasy accessed in `except` block.
+        print error.message # the error object can always accessed in `except` block.
     ensure:
         restore bigData
 
