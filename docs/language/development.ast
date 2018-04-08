@@ -27,6 +27,9 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- highlight multiple assignment
+    cost price total = 4_000
+
 - remove highlight on unsafe keyword
     unsafe
 
