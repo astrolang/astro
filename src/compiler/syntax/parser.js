@@ -8,7 +8,7 @@ class Parser {
   constructor(tokens) {
     // Lexed token list.
     this.tokens = tokens;
-    // Parser information.
+    // Parser state information.
     this.lastPosition = -1;
     this.lastParseData = null;
     this.lastIndentCount = 0;
@@ -21,16 +21,17 @@ class Parser {
   // cached.pos.ruleName = undefined;
 
   // Reverts the state of the lexer object using arguments provided.
-  revert(lastPosition, lastIndentCount, column, line) {
+  revert(lastPosition, lastIndentCount, column, line, ignoreNewline) {
     this.lastPosition = lastPosition;
     this.lastIndentCount = lastIndentCount;
     this.column = column;
     this.line = line;
+    this.ignoreNewline = ignoreNewline;
   }
   
   parse(...args) {
     // Get state before parsing.
-    let { lastPosition, lastIndentCount, column, line } = this;
+    let { lastPosition, lastIndentCount, column, line, ignoreNewline } = this;
     // Array where parsed data is stored.
     let result = [];
     // Parse each argument.
@@ -67,7 +68,7 @@ class Parser {
     }
     // Check if parsing failed.
     if (result) return result;
-    this.revert(lastPosition, lastIndentCount, column, line);
+    this.revert(lastPosition, lastIndentCount, column, line, ignoreNewline);
     return null;
   }
 }
