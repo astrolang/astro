@@ -1284,6 +1284,10 @@ TRY, EXCEPT & ENSURE
     try: process bigData
     except IncompleteDataError
 
+    # A single except can catch mutiple error types.
+    try: process bigData
+    except IncompleteDataError, CorruptDataError
+
     # An object defined in the try's header always has it's at the end of the try block.
     try file = open('dancing-masquerade.txt'):
         for line in file: print line
