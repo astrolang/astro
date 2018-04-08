@@ -7,6 +7,5 @@
       "node": true,
       "browser": true,
       "mocha": true
-    },
-    "parser": "babel-eslint"
+    }
 }
