@@ -1,12 +1,10 @@
+/* eslint-disable max-len, no-constant-condition */
 // eslint-disable-next-line no-unused-vars
 const { print } = require('../utils');
 
 /**
  * The Lexer.
  * result = [{ token, kind, line, column }]
- * TODO:
- *  * Add backtracking into lexer functions without using IIFE.
- *  * lastPosition, column, line
  */
 class Lexer {
   constructor(code) {
@@ -54,6 +52,41 @@ class Lexer {
     return null;
   }
 
+  // Consume string specified if it matches the subsequent chars in code.
+  // NOTE: Should not be passed strings with newlines. It won't update line count.
+  eatToken(str) {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'eatToken';
+    const startLine = line;
+    const startColumn = column;
+    const { length } = str;
+
+    // Check if input string matches the subsequent chars in code.
+    if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + length + 1)) {
+      // Update lastPosition and column.
+      this.lastPosition += length;
+      this.column += length;
+
+      // update token.
+      token = str;
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
+
   // Reverts the state of the lexer object using arguments provided.
   revert(lastPosition, column, line) {
     this.lastPosition = lastPosition;
@@ -66,7 +99,7 @@ class Lexer {
   // spaces =
   //   | space+
   spaces() {
-    let { lastPosition, column, line } = this;
+    const { lastPosition, column, line } = this;
     const token = '';
     const kind = 'spaces';
     const startLine = line;
@@ -97,7 +130,7 @@ class Lexer {
   // noname =
   //   | '_'
   noName() {
-    let { lastPosition, column, line } = this;
+    const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'noname';
     const startLine = line;
@@ -132,8 +165,9 @@ class Lexer {
   //   | identifierbeginchar identifierendchar* // Contains keyword check
   //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: identifier
   //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: keyword
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: booleanliteral
   identifier() {
-    let { lastPosition, column, line } = this;
+    const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'identifier';
     const startLine = line;
@@ -158,8 +192,13 @@ class Lexer {
     const stopLine = this.line;
     const stopColumn = this.column;
 
-    // Check if lexed identifier is a keyword.
-    if (this.keywords.indexOf(token) > -1) {
+    // Check if lexed identifier is a boolean literal.
+    if (token === 'true' || token === 'false') {
+      return {
+        token, kind: 'booleanliteral', startLine, stopLine, startColumn, stopColumn,
+      };
+    // Otherwise check if lexed identifier is a keyword.
+    } else if (this.keywords.indexOf(token) > -1) {
       return {
         token, kind: 'keyword', startLine, stopLine, startColumn, stopColumn,
       };
@@ -176,7 +215,7 @@ class Lexer {
   //   | operatorchar+
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   operator() {
-    let { lastPosition, column, line } = this;
+    const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'operator';
     const startLine = line;
@@ -205,7 +244,7 @@ class Lexer {
   // punctuator =
   //   | [(){}[\],.~] // TODO: Incomplete
   punctuator() {
-    let { lastPosition, column, line } = this;
+    const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'punctuator';
     const startLine = line;
@@ -242,23 +281,288 @@ class Lexer {
   // integerbinaryliteral =
   //   | '0b' digitbinary ('_'? digitbinary)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  integerBinaryLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'integerbinaryliteral';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume '0b'.
+    if (this.eatToken('0b')) {
+      // Conume digitbinary.
+      if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+        token += this.eatChar();
+
+        // Consume ('_'? digitbinary)*.
+        while (true) {
+          const char = this.peekChar();
+
+          // Try consume '_' digitbinary.
+          if (char === '_') {
+            // Consume '_'.
+            this.eatChar();
+
+            // If '_' is consumed, a digitbinary must follow.
+            if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+            // Otherwise spit out '_' and break.
+            } else {
+              this.lastPosition -= 1;
+              this.column -= 1;
+              break;
+            }
+
+          // Otherwise consume digitbinary.
+          } else if (this.digitBinary.indexOf(char) > -1) {
+            token += this.eatChar();
+          } else break;
+        }
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // integeroctalliteral  =
   //   | '0o' digitoctal ('_'? digitoctal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  integerOctalLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'integeroctalliteral';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume '0o'.
+    if (this.eatToken('0o')) {
+      // Conume digitoctal.
+      if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+        token += this.eatChar();
+
+        // Consume ('_'? digitoctal)*.
+        while (true) {
+          const char = this.peekChar();
+
+          // Try consume '_' digitoctal.
+          if (char === '_') {
+            // Consume '_'.
+            this.eatChar();
+
+            // If '_' is consumed, a digitoctal must follow.
+            if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+            // Otherwise spit out '_' and break.
+            } else {
+              this.lastPosition -= 1;
+              this.column -= 1;
+              break;
+            }
+
+          // Otherwise consume digitoctal.
+          } else if (this.digitOctal.indexOf(char) > -1) {
+            token += this.eatChar();
+          } else break;
+        }
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // integerhexadecimalliteral  =
   //   | '0x' digithexadecimal ('_'? digithexadecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  integerHexadecimalLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'integerhexadecimalliteral';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume '0x'.
+    if (this.eatToken('0x')) {
+      // Conume digithexadecimal.
+      if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+        token += this.eatChar();
+
+        // Consume ('_'? digithexadecimal)*.
+        while (true) {
+          const char = this.peekChar();
+
+          // Try consume '_' digithexadecimal.
+          if (char === '_') {
+            // Consume '_'.
+            this.eatChar();
+
+            // If '_' is consumed, a digithexadecimal must follow.
+            if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+            // Otherwise spit out '_' and break.
+            } else {
+              this.lastPosition -= 1;
+              this.column -= 1;
+              break;
+            }
+
+          // Otherwise consume digithexadecimal.
+          } else if (this.digitHexadecimal.indexOf(char) > -1) {
+            token += this.eatChar();
+          } else break;
+        }
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // integerdecimalliteral  =
   //   | digitdecimal ('_'? digitdecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  integerDecimalLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'integerdecimalliteral';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume digitdecimal.
+    if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+      token += this.eatChar();
+
+      // Consume ('_'? digitdecimal)*.
+      while (true) {
+        const char = this.peekChar();
+
+        // Try consume '_' digitdecimal.
+        if (char === '_') {
+          // Consume '_'.
+          this.eatChar();
+
+          // If '_' is consumed, a digitdecimal must follow.
+          if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+            token += this.eatChar();
+          // Otherwise spit out '_' and break.
+          } else {
+            this.lastPosition -= 1;
+            this.column -= 1;
+            break;
+          }
+
+        // Otherwise consume digitdecimal.
+        } else if (this.digitDecimal.indexOf(char) > -1) {
+          token += this.eatChar();
+        } else break;
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // floatbinaryliteral  =
   //   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   //   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  floatBinaryLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'floatbinaryliteral';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume '0b' digitbinary ('_'? digitbinary)*.
+    const integerPart = this.integerBinaryLiteral();
+    if (integerPart) {
+      token += integerPart.token;
+
+      // Consume ('_'? digitdecimal)*.
+      while (true) {
+        const char = this.peekChar();
+
+        // Try consume '_' digitdecimal.
+        if (char === '_') {
+          // Consume '_'.
+          this.eatChar();
+
+          // If '_' is consumed, a digitdecimal must follow.
+          if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+            token += this.eatChar();
+          // Otherwise spit out '_' and break.
+          } else {
+            this.lastPosition -= 1;
+            this.column -= 1;
+            break;
+          }
+
+        // Otherwise consume digitdecimal.
+        } else if (this.digitDecimal.indexOf(char) > -1) {
+          token += this.eatChar();
+        } else break;
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // floatoctalliteral  =
   //   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
@@ -323,9 +627,9 @@ class Lexer {
   // multilinecomment =
   //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' _? &(newline | eoi)
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
-
-
-  lex() {
+  static lex() {
+    // ...
+    print('test')
   }
 }
 
