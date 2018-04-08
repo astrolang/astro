@@ -36,6 +36,10 @@ SUBJECT BINDING
     var φ =
         arctan(y/x)
 
+    # Multiple subjects can be assigned the same value in a single expression.
+    let name id title = 'Janitor'
+    cost price total = 45
+
 SHADOWING
     # Astro allows subjects to be rebound to a different type in the same scope
     let phone = '08074789222'
