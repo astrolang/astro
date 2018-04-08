@@ -203,9 +203,9 @@ VALUES & REFERENCES
 
     let player = team.player
 
-    # An immutable reference to an object can be returned from afunction using the `const` keyword.
-    fun getAmount():
-        return const amount
+    # An immutable reference to an object can be returned from a function using the `const` keyword.
+    fun getAmount(account):
+        return const account.amount
 
 NUMBER LITERALS
     # Number literals in Astro
