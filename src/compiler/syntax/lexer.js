@@ -6,6 +6,7 @@ const { print } = require('../utils');
  * result = [{ token, kind, line, column }]
  * TODO:
  *  * Add backtracking into lexer functions without using IIFE.
+ *  * lastPosition, column, line
  */
 class Lexer {
   constructor(code) {
@@ -53,15 +54,23 @@ class Lexer {
     return null;
   }
 
+  // Reverts the state of the lexer object using arguments provided.
+  revert(lastPosition, column, line) {
+    this.lastPosition = lastPosition;
+    this.column = column;
+    this.line = line;
+  }
+
   // spacechar =
   //   | [ \t] // Unicode?
   // spaces =
   //   | space+
   spaces() {
+    let { lastPosition, column, line } = this;
     const token = '';
     const kind = 'spaces';
-    const startLine = this.line;
-    const startColumn = this.column;
+    const startLine = line;
+    const startColumn = column;
     let spaceCount = 0;
 
     // Check if subsequent chars in input code are valid space character.
@@ -71,7 +80,10 @@ class Lexer {
     }
 
     // Check if lexing failed.
-    if (spaceCount === 0) return null;
+    if (spaceCount === 0) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
 
     // Add stop line and column.
     const stopLine = this.line;
@@ -85,10 +97,11 @@ class Lexer {
   // noname =
   //   | '_'
   noName() {
+    let { lastPosition, column, line } = this;
     let token = '';
     const kind = 'noname';
-    const startLine = this.line;
-    const startColumn = this.column;
+    const startLine = line;
+    const startColumn = column;
 
     // Check if next char in input code is a '_' character.
     if (this.peekChar() === '_') {
@@ -96,7 +109,10 @@ class Lexer {
     }
 
     // Check if lexing failed.
-    if (token === '') return null;
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
 
     // Add stop line and column.
     const stopLine = this.line;
@@ -117,10 +133,11 @@ class Lexer {
   //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: identifier
   //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: keyword
   identifier() {
+    let { lastPosition, column, line } = this;
     let token = '';
     const kind = 'identifier';
-    const startLine = this.line;
-    const startColumn = this.column;
+    const startLine = line;
+    const startColumn = column;
 
     // Check if next char in input code is a valid identifier start character.
     if (this.identifierBeginChar.indexOf(this.peekChar()) > -1) {
@@ -132,7 +149,10 @@ class Lexer {
     }
 
     // Check if lexing failed.
-    if (token === '') return null;
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
 
     // Add stop line and column.
     const stopLine = this.line;
@@ -156,10 +176,11 @@ class Lexer {
   //   | operatorchar+
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   operator() {
+    let { lastPosition, column, line } = this;
     let token = '';
     const kind = 'operator';
-    const startLine = this.line;
-    const startColumn = this.column;
+    const startLine = line;
+    const startColumn = column;
 
     // Check if subsequent chars in input code are valid operator character.
     while (this.operatorChar.indexOf(this.peekChar()) > -1) {
@@ -167,7 +188,10 @@ class Lexer {
     }
 
     // Check if lexing failed.
-    if (token === '') return null;
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
 
     // Add stop line and column.
     const stopLine = this.line;
@@ -181,10 +205,11 @@ class Lexer {
   // punctuator =
   //   | [(){}[\],.~] // TODO: Incomplete
   punctuator() {
+    let { lastPosition, column, line } = this;
     let token = '';
     const kind = 'punctuator';
-    const startLine = this.line;
-    const startColumn = this.column;
+    const startLine = line;
+    const startColumn = column;
 
     // Check if subsequent chars in input code are valid operator character.
     if ('(){}[],.~;'.indexOf(this.peekChar()) > -1) {
@@ -192,7 +217,10 @@ class Lexer {
     }
 
     // Check if lexing failed.
-    if (token === '') return null;
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
 
     // Add stop line and column.
     const stopLine = this.line;

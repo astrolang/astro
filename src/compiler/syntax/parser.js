@@ -17,11 +17,21 @@ class Parser {
     this.ignoreNewline = false;
   }
 
-  // cached.pos.ruleName = { result: {...}, skipTo: 55 };
+  // cached.pos.ruleName = { result: {...}, skipToPosition: 55 };
   // cached.pos.ruleName = undefined;
 
+  // Reverts the state of the lexer object using arguments provided.
+  revert(lastPosition, lastIndentCount, column, line) {
+    this.lastPosition = lastPosition;
+    this.lastIndentCount = lastIndentCount;
+    this.column = column;
+    this.line = line;
+  }
+  
   parse(...args) {
-    let {...} = this; // State before parsing.
+    // Get state before parsing.
+    let { lastPosition, lastIndentCount, column, line } = this;
+    // Array where parsed data is stored.
     let result = [];
     // Parse each argument.
     for (let i = 0; i < args.length; i += 1) {
@@ -57,7 +67,7 @@ class Parser {
     }
     // Check if parsing failed.
     if (result) return result;
-    this.revert({...});
+    this.revert(lastPosition, lastIndentCount, column, line);
     return null;
   }
 }
