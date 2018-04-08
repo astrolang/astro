@@ -1,3 +1,5 @@
+**DEPRECATED!**
+
 This directory contains smaller projects that supplement the usage of the language in certain environments.
 
-When any of the projects gets large enough, it will be moved to its own repo.
+**This directory has now been deprecated**, they are being mainteined in their wseparate repos now.
