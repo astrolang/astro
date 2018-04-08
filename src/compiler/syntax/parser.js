@@ -28,15 +28,21 @@ class Parser {
     this.line = line;
     this.ignoreNewline = ignoreNewline;
   }
-  
+
+  // ...
   parse(...args) {
     // Get state before parsing.
-    let { lastPosition, lastIndentCount, column, line, ignoreNewline } = this;
+    const {
+      lastPosition, lastIndentCount, column, line, ignoreNewline,
+    } = this;
+
     // Array where parsed data is stored.
     let result = [];
+
     // Parse each argument.
     for (let i = 0; i < args.length; i += 1) {
       const arg = args[i];
+
       // Function.
       if (typeof (arg) === 'function') {
         const x = arg();
@@ -48,8 +54,8 @@ class Parser {
         }
       // String.
       } else if (typeof (arg) === 'string') {
-        const x = token(arg);
-        if (x) {
+        const x = this.nextToken();
+        if (x && x.token === arg) {
           result.push(x);
         } else {
           result = null;
