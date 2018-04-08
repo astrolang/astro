@@ -21,7 +21,9 @@ identifierendchar =
 
 identifier =
   | identifierbeginchar identifierendchar* // Contains keyword check
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startLine, stopLine, startColumn, stopColumn } :: identifier
+  { token, kind, startLine, stopLine, startColumn, stopColumn } :: keyword
+  { token, kind, startLine, stopLine, startColumn, stopColumn } :: booleanliteral
 
 operatorchar =
   | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
