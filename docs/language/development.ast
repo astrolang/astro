@@ -73,11 +73,11 @@ john.{
 - remove highlight on old functions with type arguments
     add[Int](2, 3)
 
-- remove highlight on `del`
-    del
+- remove highlight on `del` and `super`
+    del super
 
 - highlight imported filename
-    import foo/my-new-project
+    import my-new-project
 
 - change name pattern, can have trailing underscores
     x._name_ | _name_() | @_name_
