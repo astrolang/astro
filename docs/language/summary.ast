@@ -1059,10 +1059,7 @@ MULTIPLE DISPATCH
     foo(4, 5) # specific
 
     # The compiler can be made to call a less specific version of a function using the `as` keyword.
-    foo(4, 5) as (_, Real) # generic
-
-    # `super` can be used in this case. It calls a version with a parent type.
-    foo(4, 5) as (_, super) # generic
+    foo(4, 5 as Real) # generic
 
 METHOD AMBIGUITIES
     # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
@@ -1089,8 +1086,8 @@ CONSTRUCTOR TRAIN
     type Teacher(subject) <: Person
     type Student(course) <: Person
 
-    # The initialization of inherited fields should be delegated to the parent's constructor, `super`.
-    fun Teacher(name, subject) = new { subject }.super(name)
+    # The initialization of inherited fields should be delegated to the parent's constructor.
+    fun Teacher(name, subject) = new { subject }.Person(name)
 
     # In the case of multiple inheritance, the individual parent constructors are called and chained to the `new` syntax.
     type TeachingStudent(schedule) <: Teacher, Student
@@ -1378,7 +1375,7 @@ RESERVED KEYWORDS
     spill, return, raise, break, continue, yield, from, await,
     where, at,
     is, not, in, as, mod, typeof,
-    new, super,
+    new,
 
 PREDEFINED TYPE HIERARCHY
     Type
