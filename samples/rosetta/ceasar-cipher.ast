@@ -5,4 +5,4 @@ fun caesar(s, k, decode: false):
 let msg = "The quick brown fox jumped over the lazy dogs"
 print msg
 let enc = caesar(msg, 11)
-print~(enc)~(caesar(enc, 11, decode: true))
+print.{(enc), (caesar(enc, 11, decode: true))}

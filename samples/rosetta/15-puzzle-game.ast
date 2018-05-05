@@ -45,7 +45,7 @@ fun buildBoard(puz, difficulty):
         let lst = puz.validMoves()
         let lst1 = []
         for j in lst:
-            lst1.append(j.trim().int())
+            lst1.push(j.trim().int())
         puz.change(lst1[random(1, lst1.len - 1)])
 
 fun validMoves(puz):
@@ -89,7 +89,7 @@ loop:
     var lst = game.validMoves()
     var lst1 = []
     for i in lst:
-        lst1.append(i.trim().int())
+        lst1.push(i.trim().int())
         print(i.strip(), '\t', last: '')
     print()
     let value = int(input())

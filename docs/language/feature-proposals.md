@@ -72,15 +72,15 @@ Astro macros are resolved at parse time.
 Macros take asts as argument.
 ```julia
 fun @sorted(string): #: RawString
-    $(SortedStr('\(string.literal)'))
+    ${SortedStr('\(string.literal)')}
 ```
 
 > Note: Macro functions cannot use subjects from outer scope
 ```julia
 fun @typify(abstract): #: AbstractType
     let els = abstract.elements
-    let types = els.map |a| => $(type \a)
-    $(\abstract; \types)
+    let types = els.map |a| => ${type \a)}
+    ${\abstract; \types}
 ```
 
 Inline macro calls
@@ -97,7 +97,7 @@ Block macro calls
 Macros can be called like regular functions.
 ```julia
 fun @where(cond, none): #: BinaryExpression, None
-    return $(filter|cond.lhs| => cond)
+    return ${filter|cond.lhs| => cond}
 
 array.where(x > 5)
 ```
