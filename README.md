@@ -63,7 +63,7 @@ More importantly Astro introduces some concepts that Python doesn't have and pro
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
 Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting) (ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
-It's also unlike Rust memory management model as it puts lesser restrictions on how references are moved around while still being memory safe.
+It's also unlike Rust current memory management model as it puts lesser restrictions on how references are moved around while still being memory safe.
 
 Astro simply, stays out of your way, lets you write your code like you would in any other garbage-collected language.
 
@@ -110,7 +110,16 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 
 ### Project folder structure
 ```
-.├── CHANGELOG.md
+.
+├── .codeclimate.yml
+├── .coveralls.yml
+├── .eslintignore
+├── .eslintrc.json
+├── .gitattributes
+├── .gitignore
+├── .hound.yml
+├── .travis.yml
+├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -120,8 +129,11 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 │   ├── README.md
 │   ├── compiler
 │   │   ├── README.md
-│   │   ├── asts.md
-│   │   └── compiler-notes.ast
+│   │   ├── asts-old.md
+│   │   ├── compiler.md
+│   │   ├── old-compiler-notes.ast
+│   │   ├── parser-rewrite.ast
+│   │   └── semantic-analysis.md
 │   └── language
 │       ├── README.md
 │       ├── development.ast
@@ -150,9 +162,22 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 │   │   ├── 100-doors.ast
 │   │   ├── 15-puzzle-game.ast
 │   │   ├── 99-bottles.ast
-│   │           •
-│   │           •
-│   │           •
+│   │   ├── abc-problem.ast
+│   │   ├── accumulator-factory.ast
+│   │   ├── address-of-a-variable.ast
+│   │   ├── averages-root-mean-square.ast
+│   │   ├── ceasar-cipher.ast
+│   │   ├── comma-quibbling.ast
+│   │   ├── concurrent-computing.ast
+│   │   ├── conditional-structures.ast
+│   │   ├── integer-comparison.ast
+│   │   ├── maximum-triangle-path-sum.ast
+│   │   ├── mean.ast
+│   │   ├── number-reversal.ast
+│   │   ├── queue-usage.ast
+│   │   ├── read-a-file-line-by-line.ast
+│   │   ├── sha-1.ast
+│   │   ├── sorting-algorithms-merge-sort.ast
 │   │   ├── string-comparison.ast
 │   │   ├── sum-of-squares.ast
 │   │   └── tokenize-a-string.ast
@@ -163,6 +188,8 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 │   └── wordcount
 │       └── wordcount.ast
 ├── src
+│   ├── boilerplate
+│   │   └── parser-boilerplate.js
 │   ├── compiler
 │   │   ├── README.md
 │   │   ├── codegen
@@ -172,9 +199,12 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 │   │   │   └── scope.js
 │   │   ├── syntax
 │   │   │   ├── grammar-and-ast.peg
+│   │   │   ├── lexer-test.js
+│   │   │   ├── lexer.js
+│   │   │   ├── parser-old.js
+│   │   │   ├── parser-test.js
 │   │   │   ├── parser.js
-│   │   │   └── test.js
-│   │   ├── test.ast
+│   │   │   └── test-old.js
 │   │   └── utils
 │   │       └── index.js
 │   ├── stdlib
@@ -203,13 +233,11 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 └── tests
     ├── README.md
     ├── compiler
-    │   ├── codegen
-    │   ├── semantics
     │   ├── syntax
     │   │   ├── declarations.spec.js
     │   │   └── misc.spec.js
     │   └── utils
     │       └── utils.spec.js
     └── samples
-        └── fibonacci.spec.js
+        └── fibonacci.spec.js
 ```
