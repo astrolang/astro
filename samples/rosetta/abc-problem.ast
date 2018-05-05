@@ -9,4 +9,4 @@ let list = ["BO","XK","DQ","CP","NA","GT","RE","TG","QD","FS",
 "JW","HU","VI","AN","OB","ER","FS","LY","PC","ZM"]
 
 for str in test:
-    print "$:>8(s) | $(abc(s, list))"
+    print "$(>8){s} | ${abc(s, list)}"

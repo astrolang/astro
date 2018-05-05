@@ -1,5 +1,5 @@
 fun compare(a, b):
-    print("\n$a is of type $(typeof(a)) and $b is of type $(typeof(b))")
+    print("\n$a is of type ${typeof(a)} and $b is of type ${typeof(b)}")
     if a < b: print("$a is strictly less than $b")
     if a <= b: print("$a is less than or equal to $b")
     if a >  b: print("$a is strictly greater than $b")

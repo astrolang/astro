@@ -5,8 +5,8 @@ fun bottles(n):
 
 for n in !99..1:
     print """
-    $(bottles n) of beer on the wall
-    $(bottles n) of beer
+    ${bottles n} of beer on the wall
+    ${bottles n} of beer
     Take one down, pass it around
-    $(bottles n-1) of beer on the wall\n
+    ${bottles n-1} of beer on the wall\n
     """
