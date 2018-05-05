@@ -466,7 +466,7 @@ STRINGS
     var story = "$language was started in the $year"
 
     # Both single and double quotes can be used to represent a string literal.
-    let calc = '5 * 50 = $(5 * 50)'
+    let calc = '5 * 50 = ${5 * 50}'
 
     # Non-standard string literals don't have escape sequences nor interpolation.
     var verbatimStr = r."Use '\t' to represent tab"
@@ -1291,10 +1291,10 @@ TRY, EXCEPT & ENSURE
 
 SYMBOL
     # Symbols are static data types that hold their content as-is.
-    let symbol = $(2 + 3)
+    let symbol = ${2 + 3}
 
     # A symbol can be interpolated with another symbol using '\'.
-    let addition = $(let five = \symbol)
+    let addition = ${let five = \symbol}
 
     # A symbol can be evaluated with the 'eval' keyword.
     eval addition
