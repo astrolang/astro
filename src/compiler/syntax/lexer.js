@@ -290,7 +290,7 @@ class Lexer {
 
     // Consume '0b'.
     if (this.eatToken('0b')) {
-      // Conume digitbinary.
+      // Consume digitbinary.
       if (this.digitBinary.indexOf(this.peekChar()) > -1) {
         token += this.eatChar();
 
@@ -336,7 +336,7 @@ class Lexer {
     };
   }
 
-  // integeroctalliteral  =
+  // integeroctalliteral =
   //   | '0o' digitoctal ('_'? digitoctal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   integerOctalLiteral() {
@@ -348,7 +348,7 @@ class Lexer {
 
     // Consume '0o'.
     if (this.eatToken('0o')) {
-      // Conume digitoctal.
+      // Consume digitoctal.
       if (this.digitOctal.indexOf(this.peekChar()) > -1) {
         token += this.eatChar();
 
@@ -394,7 +394,7 @@ class Lexer {
     };
   }
 
-  // integerhexadecimalliteral  =
+  // integerhexadecimalliteral =
   //   | '0x' digithexadecimal ('_'? digithexadecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   integerHexadecimalLiteral() {
@@ -406,7 +406,7 @@ class Lexer {
 
     // Consume '0x'.
     if (this.eatToken('0x')) {
-      // Conume digithexadecimal.
+      // Consume digithexadecimal.
       if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
         token += this.eatChar();
 
@@ -452,7 +452,7 @@ class Lexer {
     };
   }
 
-  // integerdecimalliteral  =
+  // integerdecimalliteral =
   //   | digitdecimal ('_'? digitdecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   integerDecimalLiteral() {
@@ -507,7 +507,7 @@ class Lexer {
     };
   }
 
-  // floatbinaryliteral  =
+  // floatbinaryliteral =
   //   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   //   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
@@ -518,34 +518,138 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Consume '0b' digitbinary ('_'? digitbinary)*.
+    // Consume integerpart: ('0b' digitbinary) ('_'? digitbinary)*.
     const integerPart = this.integerBinaryLiteral();
     if (integerPart) {
       token += integerPart.token;
 
-      // Consume ('_'? digitdecimal)*.
-      while (true) {
-        const char = this.peekChar();
+      // Consume '.'.
+      if (this.peekChar() === '.') {
+        token += this.eatChar();
 
-        // Try consume '_' digitdecimal.
-        if (char === '_') {
-          // Consume '_'.
-          this.eatChar();
+        // Consume digitbinary.
+        if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+          token += this.eatChar();
 
-          // If '_' is consumed, a digitdecimal must follow.
-          if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
-            token += this.eatChar();
-          // Otherwise spit out '_' and break.
-          } else {
-            this.lastPosition -= 1;
-            this.column -= 1;
-            break;
+          // Consume ('_'? digitbinary)*.
+          while (true) {
+            const char1 = this.peekChar();
+
+            // Try consume '_' digitbinary.
+            if (char1 === '_') {
+              // Consume '_'.
+              this.eatChar();
+
+              // If '_' is consumed, a digitbinary must follow.
+              if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+                token += this.eatChar();
+              // Otherwise spit out '_' and break.
+              } else {
+                this.lastPosition -= 1;
+                this.column -= 1;
+                break;
+              }
+
+            // Otherwise consume digitbinary.
+            } else if (this.digitBinary.indexOf(char1) > -1) {
+              token += this.eatChar();
+            } else break;
           }
 
-        // Otherwise consume digitdecimal.
-        } else if (this.digitDecimal.indexOf(char) > -1) {
+          // Consume ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+          if (this.peekChar() === 'e') {
+            token += this.eatChar();
+
+            const sign = this.peekChar();
+            if (sign === '-' || sign === '+') {
+              token += this.eatChar();
+            }
+
+            // Consume digitbinary.
+            if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+
+              // Consume ('_'? digitbinary)*.
+              while (true) {
+                const char2 = this.peekChar();
+
+                // Try consume '_' digitbinary.
+                if (char2 === '_') {
+                  // Consume '_'.
+                  this.eatChar();
+
+                  // If '_' is consumed, a digitbinary must follow.
+                  if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+                    token += this.eatChar();
+                  // Otherwise spit out '_' and break.
+                  } else {
+                    this.lastPosition -= 1;
+                    this.column -= 1;
+                    break;
+                  }
+
+                // Otherwise consume digitbinary.
+                } else if (this.digitBinary.indexOf(char2) > -1) {
+                  token += this.eatChar();
+                } else break;
+              }
+
+            // Failed if can't consume digitbinary.
+            } else {
+              token = '';
+            }
+          }
+
+        // Failed if can't consume digitbinary.
+        } else {
+          token = '';
+        }
+
+      // Otherwise consume 'e'.
+      } else if (this.peekChar() === 'e') {
+        token += this.eatChar();
+
+        const sign = this.peekChar();
+        if (sign === '-' || sign === '+') {
           token += this.eatChar();
-        } else break;
+        }
+
+        // Consume digitbinary.
+        if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+          token += this.eatChar();
+
+          // Consume ('_'? digitbinary)*.
+          while (true) {
+            const char1 = this.peekChar();
+
+            // Try consume '_' digitbinary.
+            if (char1 === '_') {
+              // Consume '_'.
+              this.eatChar();
+
+              // If '_' is consumed, a digitbinary must follow.
+              if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+                token += this.eatChar();
+              // Otherwise spit out '_' and break.
+              } else {
+                this.lastPosition -= 1;
+                this.column -= 1;
+                break;
+              }
+
+            // Otherwise consume digitbinary.
+            } else if (this.digitBinary.indexOf(char1) > -1) {
+              token += this.eatChar();
+            } else break;
+          }
+
+        // Failed if can't consume digitbinary.
+        } else {
+          token = '';
+        }
+      // Can't consume '.' or 'e'.
+      } else {
+        token = '';
       }
     }
 
@@ -564,20 +668,534 @@ class Lexer {
     };
   }
 
-  // floatoctalliteral  =
+  // floatoctalliteral =
   //   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
   //   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  floatOctalLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'floatoctalliteral';
+    const startLine = line;
+    const startColumn = column;
 
-  // floathexadecimalliteral  =
+    // Consume integerpart: ('0o' digitoctal) ('_'? digitoctal)*.
+    const integerPart = this.integerOctalLiteral();
+    if (integerPart) {
+      token += integerPart.token;
+
+      // Consume '.'.
+      if (this.peekChar() === '.') {
+        token += this.eatChar();
+
+        // Consume digitoctal.
+        if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+          token += this.eatChar();
+
+          // Consume ('_'? digitoctal)*.
+          while (true) {
+            const char1 = this.peekChar();
+
+            // Try consume '_' digitoctal.
+            if (char1 === '_') {
+              // Consume '_'.
+              this.eatChar();
+
+              // If '_' is consumed, a digitoctal must follow.
+              if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+                token += this.eatChar();
+              // Otherwise spit out '_' and break.
+              } else {
+                this.lastPosition -= 1;
+                this.column -= 1;
+                break;
+              }
+
+            // Otherwise consume digitoctal.
+            } else if (this.digitOctal.indexOf(char1) > -1) {
+              token += this.eatChar();
+            } else break;
+          }
+
+          // Consume ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+          if (this.peekChar() === 'e') {
+            token += this.eatChar();
+
+            const sign = this.peekChar();
+            if (sign === '-' || sign === '+') {
+              token += this.eatChar();
+            }
+
+            // Consume digitoctal.
+            if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+
+              // Consume ('_'? digitoctal)*.
+              while (true) {
+                const char2 = this.peekChar();
+
+                // Try consume '_' digitoctal.
+                if (char2 === '_') {
+                  // Consume '_'.
+                  this.eatChar();
+
+                  // If '_' is consumed, a digitoctal must follow.
+                  if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+                    token += this.eatChar();
+                  // Otherwise spit out '_' and break.
+                  } else {
+                    this.lastPosition -= 1;
+                    this.column -= 1;
+                    break;
+                  }
+
+                // Otherwise consume digitoctal.
+                } else if (this.digitOctal.indexOf(char2) > -1) {
+                  token += this.eatChar();
+                } else break;
+              }
+
+            // Failed if can't consume digitoctal.
+            } else {
+              token = '';
+            }
+          }
+
+        // Failed if can't consume digitoctal.
+        } else {
+          token = '';
+        }
+
+      // Otherwise consume 'e'.
+      } else if (this.peekChar() === 'e') {
+        token += this.eatChar();
+
+        const sign = this.peekChar();
+        if (sign === '-' || sign === '+') {
+          token += this.eatChar();
+        }
+
+        // Consume digitoctal.
+        if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+          token += this.eatChar();
+
+          // Consume ('_'? digitoctal)*.
+          while (true) {
+            const char1 = this.peekChar();
+
+            // Try consume '_' digitoctal.
+            if (char1 === '_') {
+              // Consume '_'.
+              this.eatChar();
+
+              // If '_' is consumed, a digitoctal must follow.
+              if (this.digitOctal.indexOf(this.peekChar()) > -1) {
+                token += this.eatChar();
+              // Otherwise spit out '_' and break.
+              } else {
+                this.lastPosition -= 1;
+                this.column -= 1;
+                break;
+              }
+
+            // Otherwise consume digitoctal.
+            } else if (this.digitOctal.indexOf(char1) > -1) {
+              token += this.eatChar();
+            } else break;
+          }
+
+        // Failed if can't consume digitoctal.
+        } else {
+          token = '';
+        }
+      // Can't consume '.' or 'e'.
+      } else {
+        token = '';
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
+
+  // floathexadecimalliteral =
   //   | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   //   | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  floatHexadecimalLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'floathexadecimalliteral';
+    const startLine = line;
+    const startColumn = column;
 
-  // floatdecimalliteral  =
+    // Consume integerpart: ('0x' digithexadecimal) ('_'? digithexadecimal)*.
+    const integerPart = this.integerHexadecimalLiteral();
+
+    if (integerPart) {
+      token += integerPart.token;
+
+      // Consume '.'.
+      if (this.peekChar() === '.') {
+        token += this.eatChar();
+
+        // Consume digithexadecimal.
+        if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+          token += this.eatChar();
+
+          // Consume ('_'? digithexadecimal)*.
+          while (true) {
+            const char1 = this.peekChar();
+
+            // Try consume '_' digithexadecimal.
+            if (char1 === '_') {
+              // Consume '_'.
+              this.eatChar();
+
+              // If '_' is consumed, a digithexadecimal must follow.
+              if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+                token += this.eatChar();
+              // Otherwise spit out '_' and break.
+              } else {
+                this.lastPosition -= 1;
+                this.column -= 1;
+                break;
+              }
+
+            // Otherwise consume digithexadecimal.
+            } else if (this.digitHexadecimal.indexOf(char1) > -1) {
+              token += this.eatChar();
+            } else break;
+          }
+
+          // Consume ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+          if (this.peekChar() === 'p') {
+            token += this.eatChar();
+
+            const sign = this.peekChar();
+            if (sign === '-' || sign === '+') {
+              token += this.eatChar();
+            }
+
+            // Consume digithexadecimal.
+            if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+
+              // Consume ('_'? digithexadecimal)*.
+              while (true) {
+                const char2 = this.peekChar();
+
+                // Try consume '_' digithexadecimal.
+                if (char2 === '_') {
+                  // Consume '_'.
+                  this.eatChar();
+
+                  // If '_' is consumed, a digithexadecimal must follow.
+                  if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+                    token += this.eatChar();
+                  // Otherwise spit out '_' and break.
+                  } else {
+                    this.lastPosition -= 1;
+                    this.column -= 1;
+                    break;
+                  }
+
+                // Otherwise consume digithexadecimal.
+                } else if (this.digitHexadecimal.indexOf(char2) > -1) {
+                  token += this.eatChar();
+                } else break;
+              }
+
+            // Failed if can't consume digithexadecimal.
+            } else {
+              token = '';
+            }
+          }
+
+        // Failed if can't consume digithexadecimal.
+        } else {
+          token = '';
+        }
+
+      // Otherwise consume 'p'.
+      } else if (this.peekChar() === 'p') {
+        token += this.eatChar();
+
+        const sign = this.peekChar();
+        if (sign === '-' || sign === '+') {
+          token += this.eatChar();
+        }
+
+        // Consume digithexadecimal.
+        if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+          token += this.eatChar();
+
+          // Consume ('_'? digithexadecimal)*.
+          while (true) {
+            const char1 = this.peekChar();
+
+            // Try consume '_' digithexadecimal.
+            if (char1 === '_') {
+              // Consume '_'.
+              this.eatChar();
+
+              // If '_' is consumed, a digithexadecimal must follow.
+              if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
+                token += this.eatChar();
+              // Otherwise spit out '_' and break.
+              } else {
+                this.lastPosition -= 1;
+                this.column -= 1;
+                break;
+              }
+
+            // Otherwise consume digithexadecimal.
+            } else if (this.digitHexadecimal.indexOf(char1) > -1) {
+              token += this.eatChar();
+            } else break;
+          }
+
+        // Failed if can't consume digithexadecimal.
+        } else {
+          token = '';
+        }
+      // Can't consume '.' or 'e'.
+      } else {
+        token = '';
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
+
+  // floatdecimalliteral =
   //   | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   //   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  floatDecimalLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'floatdecimalliteral';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume integerpart: digitdecimal ('_'? digitdecimal)*.
+    const integerPart = this.integerDecimalLiteral();
+    if (integerPart) {
+      token += integerPart.token;
+    }
+
+    // Consume '.'.
+    if (this.peekChar() === '.') {
+      if (!integerPart) token += '0';
+
+      token += this.eatChar();
+
+      // Consume digitdecimal.
+      if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+        token += this.eatChar();
+
+        // Consume ('_'? digitdecimal)*.
+        while (true) {
+          const char1 = this.peekChar();
+
+          // Try consume '_' digitdecimal.
+          if (char1 === '_') {
+            // Consume '_'.
+            this.eatChar();
+
+            // If '_' is consumed, a digitdecimal must follow.
+            if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+            // Otherwise spit out '_' and break.
+            } else {
+              this.lastPosition -= 1;
+              this.column -= 1;
+              break;
+            }
+
+          // Otherwise consume digitdecimal.
+          } else if (this.digitDecimal.indexOf(char1) > -1) {
+            token += this.eatChar();
+          } else break;
+        }
+
+        // Consume ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
+        if (this.peekChar() === 'e') {
+          token += this.eatChar();
+
+          const sign = this.peekChar();
+          if (sign === '-' || sign === '+') {
+            token += this.eatChar();
+          }
+
+          // Consume digitdecimal.
+          if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+            token += this.eatChar();
+
+            // Consume ('_'? digitdecimal)*.
+            while (true) {
+              const char2 = this.peekChar();
+
+              // Try consume '_' digitdecimal.
+              if (char2 === '_') {
+                // Consume '_'.
+                this.eatChar();
+
+                // If '_' is consumed, a digitdecimal must follow.
+                if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+                  token += this.eatChar();
+                // Otherwise spit out '_' and break.
+                } else {
+                  this.lastPosition -= 1;
+                  this.column -= 1;
+                  break;
+                }
+
+              // Otherwise consume digitdecimal.
+              } else if (this.digitDecimal.indexOf(char2) > -1) {
+                token += this.eatChar();
+              } else break;
+            }
+
+          // Failed if can't consume digitdecimal.
+          } else {
+            token = '';
+          }
+        }
+
+      // Failed if can't consume digitdecimal.
+      } else {
+        token = '';
+      }
+
+    // Otherwise consume 'e'.
+    } else if (this.peekChar() === 'e') {
+      token += this.eatChar();
+
+      const sign = this.peekChar();
+      if (sign === '-' || sign === '+') {
+        token += this.eatChar();
+      }
+
+      // Consume digitdecimal.
+      if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+        token += this.eatChar();
+
+        // Consume ('_'? digitdecimal)*.
+        while (true) {
+          const char1 = this.peekChar();
+
+          // Try consume '_' digitdecimal.
+          if (char1 === '_') {
+            // Consume '_'.
+            this.eatChar();
+
+            // If '_' is consumed, a digitdecimal must follow.
+            if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+              token += this.eatChar();
+            // Otherwise spit out '_' and break.
+            } else {
+              this.lastPosition -= 1;
+              this.column -= 1;
+              break;
+            }
+
+          // Otherwise consume digitdecimal.
+          } else if (this.digitDecimal.indexOf(char1) > -1) {
+            token += this.eatChar();
+          } else break;
+        }
+
+      // Failed if can't consume digitdecimal.
+      } else {
+        token = '';
+      }
+    // Can't consume '.' or 'e'.
+    } else {
+      token = '';
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
+
+  // floatLiteralnomantissa =
+  //   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator)
+  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  floatLiteralNoMantissa() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    let kind = '';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral).
+    const integerPart = this.integerBinaryLiteral() || this.integerOctalLiteral() || this.integerHexadecimalLiteral() || this.integerDecimalLiteral();
+    if (integerPart) {
+      token += integerPart.token;
+      kind = `float${integerPart.kind.slice(7)}`;
+
+      // Consume '.'.
+      if (this.peekChar() === '.') {
+        this.eatChar();
+        token += '.0';
+
+        // Check !(operator).
+        if (this.operator()) { token = ''; }
+      } else {
+        token = '';
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // doublequotestringchars =
   //   | (!(newline | '"') .)+ // TODO

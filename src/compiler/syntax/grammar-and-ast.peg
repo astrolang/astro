@@ -83,6 +83,10 @@ floatdecimalliteral  =
   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
+floatLiteralnomantissa =
+  | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator)
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
+
 singlequotestringchars =
   | (!(newline | "'") .)+ // TODO
 
@@ -299,8 +303,8 @@ namedtupleliteral =
 
 symbolliteral =
   | '$' identifier
-  | '$' '(' _? expression _? ')' // ignorenewline
-  | '$' '(' block ')'
+  | '$' '{' _? expression _? '}' // ignorenewline
+  | '$' '{' block '}'
   { kind, expressions }
 
 listcomprehension =
