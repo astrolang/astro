@@ -52,6 +52,14 @@ class Lexer {
     return null;
   }
 
+  // Check if lexer has reached last position.
+  lastReached() {
+    if (this.lastPosition + 1 >= this.code.length) {
+      return true;
+    }
+    return false;
+  }
+
   // Consume string specified if it matches the subsequent chars in code.
   // NOTE: Should not be passed strings with newlines. It won't update line count.
   eatToken(str) {
@@ -1205,15 +1213,164 @@ class Lexer {
   //   | "'" singlequotestringchars? "'"
   //   | '"' doublequotestringchars? '"'
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  singleLineStringLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = null;
+    const kind = 'singlelinestringliteral';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume "'".
+    if (this.peekChar() === "'") {
+      this.eatChar();
+      token = ''; // Make token a string.
+
+      // Consume (singlequotestringchars: (!(newline | "'") .)+)?.
+      while (
+        this.peekChar() !== '\n' &&
+        this.peekChar() !== '\r' &&
+        this.peekChar() !== "'" &&
+        this.peekChar() !== null
+      ) {
+        token += this.eatChar();
+      }
+
+      // Consume "'".
+      if (this.peekChar() === "'") {
+        this.eatChar();
+      } else { token = null; }
+
+    // Consume '"'.
+    } else if (this.peekChar() === '"') {
+      this.eatChar();
+      token = ''; // Make token a string.
+
+      // Consume (doublequotestringchars: (!(newline | '"') .)+)?.
+      while (
+        this.peekChar() !== '\n' &&
+        this.peekChar() !== '\r' &&
+        this.peekChar() !== '"' &&
+        this.peekChar() !== null
+      ) {
+        token += this.eatChar();
+      }
+
+      // Consume '"'.
+      if (this.peekChar() === '"') {
+        this.eatChar();
+      } else { token = null; }
+    }
+
+    // Check if lexing failed.
+    if (token === null) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // triplesinglequotestringchars =
-  //   | (!(newline | "'''") .)+ // TODO
+  //   | (!"'''" .)+ // TODO
   // tripledoublequotestringchars =
-  //   | (!(newline | '"""') .)+ // TODO
+  //   | (!'"""' .)+ // TODO
   // multilinestringliteral =
-  //   | "'''" triplesinglequotestringchars? (nextline samedent triplesinglequotestringchars?)* "'''"
-  //   | '"""' tripledoublequotestringchars? (nextline samedent tripledoublequotestringchars?)* '"""'
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   | "'''" triplesinglequotestringchars? "'''"
+  //   | '"""' tripledoublequotestringchars? '"""'
+  //   { token, kind, indentations, startLine, stopLine, startColumn, stopColumn }
+  // NOTE: Saves space-count of indentations in the string. These indentations are later checked at the
+  // parsing stage to see if each is greater or equal to the indentation of the line of the opening quote.
+  multiLineStringLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = null;
+    const kind = 'multilinestringliteral';
+    const indentations = [];
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume "'''".
+    if (this.eatToken("'''")) {
+      token = ''; // Make token a string.
+
+      // Consume (singlequotestringchars: (!"'''" .)+)?.
+      let triplequote = this.eatToken("'''");
+      while (true) {
+        if (this.lastReached()) break;
+        if (triplequote) break;
+
+        const char = this.eatChar();
+        token += char;
+
+        if (char === '\n') {
+          let position = this.lastPosition + 1;
+          let spaceCount = 0;
+
+          while (this.code[position] === ' ') {
+            spaceCount += 1;
+            position += 1;
+          }
+
+          if (spaceCount > 0) indentations.push(spaceCount);
+        }
+
+        triplequote = this.eatToken("'''");
+      }
+
+      // Check if "'''" was consumed.
+      if (!triplequote) token = null;
+
+    // Consume '"""'.
+    } else if (this.peekChar() === '"""') {
+      token = ''; // Make token a string.
+
+      // Consume (singlequotestringchars: (!'"""' .)+)?.
+      let triplequote = this.eatToken('"""');
+      while (true) {
+        if (this.lastReached()) break;
+        if (triplequote) break;
+
+        const char = this.eatChar();
+        token += char;
+
+        if (char === '\n') {
+          let position = this.lastPosition + 1;
+          let spaceCount = 0;
+
+          while (this.code[position] === ' ') {
+            spaceCount += 1;
+            position += 1;
+          }
+
+          if (spaceCount > 0) indentations.push(spaceCount);
+        }
+
+        triplequote = this.eatToken('"""');
+      }
+
+      // Check if '"""' was consumed.
+      if (!triplequote) token = null;
+    }
+
+    // Check if lexing failed.
+    if (token === null) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, indentations, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // regexchars =
   //   | (!(newline | '/') .)+ // TODO

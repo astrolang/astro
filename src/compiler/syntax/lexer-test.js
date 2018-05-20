@@ -1096,6 +1096,212 @@ test(
   },
 );
 
+print('============== SINGLELINESTRINGLITERAL ==============');
+lexer = new Lexer("'hello\"");
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`'hello"--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer("'");
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`'--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer("'\n'");
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`'\n'--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('"hello\'');
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`"hello\'--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('"');
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`"--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('"\n"');
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`"\n"--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer("'hello world'");
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`'hello world'`,
+  result,
+  {
+    token: 'hello world',
+    kind: 'singlelinestringliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 13,
+  },
+);
+
+lexer = new Lexer("''");
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`''`,
+  result,
+  {
+    token: '',
+    kind: 'singlelinestringliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 2,
+  },
+);
+
+lexer = new Lexer('"Wanna eat Π 😂😍😘"');
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`"Wanna eat Π 😂😍😘"`,
+  result,
+  {
+    token: 'Wanna eat Π 😂😍😘',
+    kind: 'singlelinestringliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 20,
+  },
+);
+
+lexer = new Lexer('""');
+result = lexer.singleLineStringLiteral();
+test(
+  String.raw`""`,
+  result,
+  {
+    token: '',
+    kind: 'singlelinestringliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 2,
+  },
+);
+
+print('============== MULTILINESTRINGLITERAL ==============');
+lexer = new Lexer("'''");
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`'''--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('"""');
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`"""--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer("'''name");
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`'''name--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('"""name');
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`"""name--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('\'\'\'name"""');
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`'''name"""--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('"""name\'\'\'');
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`"""name'''--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer("'''return \n{ 1, 2, 3 }'''");
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`'''return \n{ 1, 2, 3 }'''`,
+  result,
+  {
+    token: 'return \n{ 1, 2, 3 }',
+    kind: 'multilinestringliteral',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 25,
+  },
+);
+
+lexer = new Lexer("'''return \r\n{ 1, 2, 3 }'''");
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`'''return \r\n{ 1, 2, 3 }'''`,
+  result,
+  {
+    token: 'return \r\n{ 1, 2, 3 }',
+    kind: 'multilinestringliteral',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 26,
+  },
+);
+
+lexer = new Lexer("'''return \n{ 1, \n    2, \n        3 }\n    '''");
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`'''return \n{ 1, \n    2, \n        3 }\n    '''`,
+  result,
+  {
+    token: 'return \n{ 1, \n    2, \n        3 }\n    ',
+    kind: 'multilinestringliteral',
+    indentations: [4, 8, 4],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 44,
+  },
+);
+
 print('============== TEST RESULTS ==============');
 
 // Print details of test.

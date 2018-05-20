@@ -99,10 +99,10 @@ singlelinestringliteral =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 triplesinglequotestringchars =
-  | (!(newline | "'''") .)+ // TODO
+  | (!"'''" .)+ // TODO
 
 tripledoublequotestringchars =
-  | (!(newline | '"""') .)+ // TODO
+  | (!'"""' .)+ // TODO
 
 multilinestringliteral =
   | "'''" triplesinglequotestringchars? (nextline samedent triplesinglequotestringchars?)* "'''"
@@ -141,6 +141,9 @@ multilinecomment =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 /*************** PARSER ***************/
+
+// NOTE: multilinestringliteral has a special parsing stage
+multilinestringliteral
 
 integerliteral =
   | integerbinaryliteral
