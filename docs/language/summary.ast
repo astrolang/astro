@@ -103,7 +103,7 @@ COMMAND NOTATION
 
     print [9] # Invalid!
     print {9} # Invalid!
-    print /9/ # Invalid!
+    print //9// # Invalid!
     print +5 # Invalid!
 
 TYPE DEFINITION (1)
@@ -636,7 +636,7 @@ FOR LOOP
         return i
 
     # The `end` block executes when a loop completes without interruption from `break`, `return` or `throw`.
-    for line in file where /lagbaja/ in line:
+    for line in file where //lagbaja// in line:
         print "name found!"
         break
     end:
@@ -671,8 +671,8 @@ IN
         print 'Aaargh! Everyone hates me'
 
     # Regex matching.
-    if /dollar[s]?/ in sentence:
-        sentence.replace(/dollar[s]?/, 'pounds')
+    if //dollar[s]?// in sentence:
+        sentence.replace(//dollar[s]?//, 'pounds')
 
 MOD
     # `mod` is a keyword-based infix operator alias of `%` operator.
@@ -718,7 +718,7 @@ WHILE LOOP & LOOP
     ..
 
     # Like `for` loops, `while` and `loop` can have a closing `end` block.
-    while file.hasNext() where /\t+/ in file.next():
+    while file.hasNext() where //\t+// in file.next():
         break 'File contains tabs!'
     end: 'File is clean!'
 
@@ -1304,11 +1304,11 @@ SYMBOL
 
 REGEX
     # Regex are used to find and/or capture patterns in strings.
-    var numberPattern = /\d+(.\d+)?/
+    var numberPattern = //\d+(.\d+)?//
     numberPattern in 'π = 3.14159265' # true
 
     # Regex operations.
-    var = /\d/ + re.'\[a-z]' + /\d/ # Concatenation
+    var = //\d// + //[a-z]// + //\d// # Concatenation
 
 COEFFICIENT EXPRESSION
     # Coefficient expression as the name implies allows coefficients to be taken as multiplication.
