@@ -110,10 +110,10 @@ multilinestringliteral =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 regexchars =
-  | (!(newline | '/') .)+ // TODO
+  | (!(newline | '//') .)+ // TODO
 
 regexliteral =
-  | '/' regexchars? '/'
+  | '//' regexchars? '//'
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 booleanliteral =

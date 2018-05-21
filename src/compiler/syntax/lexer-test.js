@@ -176,6 +176,14 @@ test(
 );
 
 print('============== OPERATOR ==============');
+lexer = new Lexer('=//');
+result = lexer.operator();
+test(
+  String.raw`=//--------->FAIL`,
+  result,
+  null,
+);
+
 lexer = new Lexer('+');
 result = lexer.operator();
 test(
@@ -203,6 +211,21 @@ test(
     stopLine: 1,
     startColumn: 0,
     stopColumn: 3,
+  },
+);
+
+lexer = new Lexer('//');
+result = lexer.operator();
+test(
+  String.raw`//`,
+  result,
+  {
+    token: '//',
+    kind: 'operator',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 2,
   },
 );
 
@@ -1299,6 +1322,61 @@ test(
     stopLine: 1,
     startColumn: 0,
     stopColumn: 44,
+  },
+);
+
+print('============== REGEXLITERAL ==============');
+lexer = new Lexer('//');
+result = lexer.regexLiteral();
+test(
+  String.raw`//--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('//hello\nworld//');
+result = lexer.regexLiteral();
+test(
+  String.raw`//hello\nworld//--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('//hello\\\\');
+result = lexer.regexLiteral();
+test(
+  String.raw`//hello\\--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('////');
+result = lexer.regexLiteral();
+test(
+  String.raw`////`,
+  result,
+  {
+    token: '',
+    kind: 'regexliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 4,
+  },
+);
+
+lexer = new Lexer('//Wanna (eat){3} Π*//');
+result = lexer.regexLiteral();
+test(
+  String.raw`//Wanna (eat){3} Π*//`,
+  result,
+  {
+    token: 'Wanna (eat){3} Π*',
+    kind: 'regexliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 21,
   },
 );
 

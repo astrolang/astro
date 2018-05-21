@@ -234,6 +234,12 @@ class Lexer {
       token += this.eatChar();
     }
 
+    // NOTE: Only these infix operators with '//' in themn are allowed: a // b, a //= b
+    // Other operator names with '//' in them are invalid: a +// b, a //+ b
+    if (token.indexOf('//') > -1 && (token !== '//' && token !== '//=')) {
+      token = '';
+    }
+
     // Check if lexing failed.
     if (token === '') {
       this.revert(lastPosition, column, line);
@@ -1373,15 +1379,54 @@ class Lexer {
   }
 
   // regexchars =
-  //   | (!(newline | '/') .)+ // TODO
+  //   | (!(newline | '//') .)+ // TODO
   // regexliteral =
-  //   | '/' regexchars? '/'
+  //   | '//' regexchars? '//'
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  // NOTE: Only these infix operators with '//' in themn are allowed: a // b, a //= b
+  // Other operator names with '//' in them are invalid: a +// b, a //+ b
+  regexLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = null;
+    const kind = 'regexliteral';
+    const startLine = line;
+    const startColumn = column;
 
-  // booleanliteral =
-  //   | 'true'
-  //   | 'false'
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+    // Consume "//".
+    if (this.eatToken('//')) {
+      token = ''; // Make token a string.
+
+      // Consume (singlequotestringchars: (!(newline | "/") .)+)?.
+      let regexQuote = this.eatToken('//');
+      while (true) {
+        if (this.lastReached() || regexQuote) break;
+        if (this.peekChar() === '\n' || this.peekChar() === '\r') {
+          break;
+        }
+        token += this.eatChar();
+        regexQuote = this.eatToken('//');
+      }
+
+      // Check if '//' was consumed.
+      if (!regexQuote) {
+        token = null;
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === null) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // singlelinecommentchars =
   //   | (!(newline) .)+ // TODO
