@@ -367,8 +367,7 @@ DICTIONARIES & OBJECTS
     let game = { title: 'BioShock Infinite', year: 2014 }
 
     # Dictonaries are dynamic data structures and will return nil where expected key is not present
-    # Dictonary literals are marked `@`.
-    let game = @{ title: 'BioShock Infinite', year: 2014 } # Dictionary.
+    let game = dict.{ title: 'BioShock Infinite', year: 2014 } # Dictionary.
 
     # Object keys must be valid identifiers.
     let parents = {
@@ -379,7 +378,7 @@ DICTIONARIES & OBJECTS
     }
 
     # Dictionary keys can be any valid expression.
-    let parents = @{
+    let parents = dict.{
         'mum': {
             'name': 'Esther Williams'
             'age': 42
@@ -418,18 +417,18 @@ DICTIONARIES & OBJECTS
     var emptyObj = {}
 
     # Empty dictionary.
-    var emptyDict = @{}
+    var emptyDict = dict.{}
 
 SET
     # Set is an unordered collection of items with no duplicate elements.
-    let fruits = %{'orange', 'mango', 'guava', 'apple', 'orange', 'guava', 'pineapple'}
-    let citrus = %{'lime', 'lemon', 'orange'}
+    let fruits = set.{'orange', 'mango', 'guava', 'apple', 'orange', 'guava', 'pineapple'}
+    let citrus = set.{'lime', 'lemon', 'orange'}
     fruits.len # 4
 
     # Set operations.
-    let union = citrus | fruits # %{'lime', 'lemon', 'orange', 'mango', 'guava', 'apple', 'pineapple'}
-    let intersection = citrus & fruits # %{'orange'}
-    let difference = citrus - fruits # %{'lime', 'lemon'}
+    let union = citrus | fruits # set.{'lime', 'lemon', 'orange', 'mango', 'guava', 'apple', 'pineapple'}
+    let intersection = citrus & fruits # set.{'orange'}
+    let difference = citrus - fruits # set.{'lime', 'lemon'}
 
 RANGE
     # Range is an iterable that allows iterating through a range of values.
@@ -650,10 +649,10 @@ COMPREHENSION
     let list = [x | x in 1..21 where x mod 2 != 0]
 
     # Set comprehension.
-    let set = %{i | i in random(0, 200)}
+    let set = set.{i | i in random(0, 200)}
 
     # Nested loops.
-    let dict = @{ x: y | x in 1..30; y in 31..60 where even(y) }
+    let dict = dict.{ x: y | x in 1..30; y in 31..60 where even(y) }
 
 BREAK WITH
     # Break-with breaks a loop and returns a value.
@@ -729,8 +728,8 @@ MATCH EXPRESSION
     | { x, y } :: Some => 0 # Matches if object is of `Some` type.
     | { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
     | [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
-    | %{1, 2, ...s} => 0 # Matches if object is a set that has values `1`, and `2` at beginning.
-    | @{a, b, ...r} => 0 # Matches if object is a dict that has values `a`, and `b` at beginning.
+    | {1, 2, ...s} :: Dict => 0 # Matches if object is a set that has values `1`, and `2` at beginning.
+    | {a, b, ...r} :: Set => 0 # Matches if object is a dict that has values `a`, and `b` at beginning.
     | $x => 1 # Matches if object equals an outer `x` subject.
     | 75 | 67 => 2 # Matches if object has value `75` or value `67`
     | 75 & 67 => 3 # Matches if object has value `75` and value `67`
