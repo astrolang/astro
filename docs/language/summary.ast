@@ -728,24 +728,15 @@ MATCH EXPRESSION
     | { x, y } :: Some => 0 # Matches if object is of `Some` type.
     | { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
     | [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
-    | {1, 2, ...s} :: Dict => 0 # Matches if object is a set that has values `1`, and `2` at beginning.
-    | {a, b, ...r} :: Set => 0 # Matches if object is a dict that has values `a`, and `b` at beginning.
-    | $x => 1 # Matches if object equals an outer `x` subject.
+    | {1, 2, ...s} :: Set => 0 # Matches if object is a set that has values `1`, and `2` at beginning.
+    | {a, b, ...r} :: Dict => 0 # Matches if object is a dict that has values `a`, and `b` at beginning.
+    | val x => 1 # Matches if object equals an outer `x` subject.
     | 75 | 67 => 2 # Matches if object has value `75` or value `67`
     | 75 & 67 => 3 # Matches if object has value `75` and value `67`
-    | 75 : 67 => 3 # Matches if object has a value between `75` and value `67`
-    ! 75 => 5 # Matches if object doesn't have value `75`
+    | 75 : 90 => 3 # Matches if object has a value between `75` and value `67`
     | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
     | n => 6 # Matches. Binds `n` to the object.
     | _ => 7 # Matches.
-
-    # A match block can be written on a single line but it is not advised.
-    fun whatNumber(n) = | 1 => 'One' | 2 => 'Two' | _ => 'Other'
-
-    # A do-match expression passes its result as an argument to a preceding function call
-    print _ where fruit
-    | 'grape' => 'They\'re Berries! Yes, grapes are a kind of berry.'
-    | 'apple' => 'Apple trees take four to five years to produce their first fruit.'
 
     # A match expression can also be used to match against the arguments of a function, if, for, loop or while expressions.
     fun isChosen(option):
@@ -761,7 +752,6 @@ ASSIGNMENT DESTRUCTURING
 
     # Destructuring patterns for other data structures
     let [name, age, _, ...rest] = [1, 2, 3, 4, 5]
-    let [name, age, _, ...rest] = %[1, 2, 3, 4, 5]
     let (a, b, _, ...c) = (1, 2, 3, 4, 5)
     let a, b, c = (1, 2, 3, 4, 5)
 
