@@ -9,6 +9,9 @@ spacechar =
 spaces =
   | space+
 
+newline =
+  | '\r'? '\n'
+
 noname =
   | '_'
 
@@ -83,6 +86,10 @@ floatdecimalliteral  =
   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
+floatLiteralnomantissa =
+  | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator)
+  { token, kind, startLine, stopLine, startColumn, stopColumn }
+
 singlequotestringchars =
   | (!(newline | "'") .)+ // TODO
 
@@ -95,10 +102,10 @@ singlelinestringliteral =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 triplesinglequotestringchars =
-  | (!(newline | "'''") .)+ // TODO
+  | (!"'''" .)+ // TODO
 
 tripledoublequotestringchars =
-  | (!(newline | '"""') .)+ // TODO
+  | (!'"""' .)+ // TODO
 
 multilinestringliteral =
   | "'''" triplesinglequotestringchars? (nextline samedent triplesinglequotestringchars?)* "'''"
@@ -106,10 +113,10 @@ multilinestringliteral =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 regexchars =
-  | (!(newline | '/') .)+ // TODO
+  | (!(newline | '//') .)+ // TODO
 
 regexliteral =
-  | '/' regexchars? '/'
+  | '//' regexchars? '//'
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 booleanliteral =
@@ -137,6 +144,9 @@ multilinecomment =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 /*************** PARSER ***************/
+
+// NOTE: multilinestringliteral has a special parsing stage
+multilinestringliteral
 
 integerliteral =
   | integerbinaryliteral
@@ -188,9 +198,6 @@ samedent = // TODO. adding !space
 dedent = // TODO. adding !space
   | ' '+
   { level }
-
-newline =
-  | '\r'? '\n'
 
 nextline =
   | newline (_? newline)*
@@ -299,8 +306,8 @@ namedtupleliteral =
 
 symbolliteral =
   | '$' identifier
-  | '$' '(' _? expression _? ')' // ignorenewline
-  | '$' '(' block ')'
+  | '$' '{' _? expression _? '}' // ignorenewline
+  | '$' '{' block '}'
   { kind, expressions }
 
 listcomprehension =

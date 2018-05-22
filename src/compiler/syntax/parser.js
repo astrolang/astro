@@ -1,6 +1,3 @@
-// eslint-disable-next-line no-unused-vars
-const { print } = require('../utils');
-
 /**
  * A Packrat Parser.
  */
