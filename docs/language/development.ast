@@ -30,6 +30,16 @@ john.{
 - highlight multiple assignment
     cost price total = 4_000
 
+- highlight new regex syntax properly, discrad former
+    var regex = //regex//
+    var regex =
+        //regex//
+    print(//regex//)
+
+    a // b // c
+    a //= b
+
+
 - remove highlight on unsafe keyword
     unsafe
 
