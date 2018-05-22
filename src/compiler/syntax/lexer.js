@@ -138,12 +138,11 @@ class Lexer {
   // newline =
   //   | '\r'? '\n'
   newline() {
-    const { lastPosition, column, line } = this;
+    const { column, line } = this;
     const token = '';
     const kind = 'newline';
     const startLine = line;
     const startColumn = column;
-    let spaceCount = 0;
 
     // Check if subsequent chars in input code are valid space character.
     if (this.code[this.lastPosition + 1] === '\n') {
