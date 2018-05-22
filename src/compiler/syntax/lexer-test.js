@@ -1814,6 +1814,47 @@ test(
   ],
 );
 
+lexer = new Lexer('hello \n 45 \r\n');
+result = lexer.lex();
+test(
+  String.raw`hello \n 45 \r\n`,
+  result,
+  [
+    {
+      token: 'hello',
+      kind: 'identifier',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 0,
+      stopColumn: 5,
+    },
+    {
+      token: '',
+      kind: 'newline',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 6,
+      stopColumn: 7,
+    },
+    {
+      token: '45',
+      kind: 'integerdecimalliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 8,
+      stopColumn: 10,
+    },
+    {
+      token: '',
+      kind: 'newline',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 11,
+      stopColumn: 13,
+    },
+  ],
+);
+
 print('============== TEST RESULTS ==============');
 
 // Print details of test.

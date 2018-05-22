@@ -1672,6 +1672,7 @@ class Lexer {
     while (!this.lastReached()) {
       const token =
         this.spaces() ||
+        this.newline() ||
         this.noName() ||
         this.identifier() ||
         this.floatBinaryLiteral() ||
