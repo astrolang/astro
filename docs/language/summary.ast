@@ -762,17 +762,6 @@ SCOPE LABELLING
             break @outer # breaks the outer loop
     ..
 
-EXT KEYWORD
-    # `ext` can be used to refer to the parent scope.
-    let state = 'Idle'
-
-    fun change(state): #: T?
-        if state != nil:
-            enable state
-        else:
-            enable ext.state # `ext.state` refers to `state` of the outer scope
-    ..
-
 MAIN FUNCTION
     # If a module contains a main function, it will be the module's entry point.
     fun main():
