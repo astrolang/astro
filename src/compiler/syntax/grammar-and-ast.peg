@@ -9,6 +9,9 @@ spacechar =
 spaces =
   | space+
 
+newline =
+  | '\r'? '\n'
+
 noname =
   | '_'
 
@@ -195,9 +198,6 @@ samedent = // TODO. adding !space
 dedent = // TODO. adding !space
   | ' '+
   { level }
-
-newline =
-  | '\r'? '\n'
 
 nextline =
   | newline (_? newline)*

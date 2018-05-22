@@ -135,6 +135,37 @@ class Lexer {
     };
   }
 
+  // newline =
+  //   | '\r'? '\n'
+  newline() {
+    const { lastPosition, column, line } = this;
+    const token = '';
+    const kind = 'newline';
+    const startLine = line;
+    const startColumn = column;
+    let spaceCount = 0;
+
+    // Check if subsequent chars in input code are valid space character.
+    if (this.code[this.lastPosition + 1] === '\n') {
+      this.lastPosition += 1;
+      this.column += 1;
+    } else if (this.code[this.lastPosition + 1] === '\r' && this.code[this.lastPosition + 2] === '\n') {
+      this.lastPosition += 2;
+      this.column += 2;
+    } else {
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
+
+
   // noname =
   //   | '_'
   noName() {
@@ -1313,6 +1344,7 @@ class Lexer {
         const char = this.eatChar();
         token += char;
 
+        // Check for indentation.
         if (char === '\n') {
           let position = this.lastPosition + 1;
           let spaceCount = 0;
@@ -1332,7 +1364,7 @@ class Lexer {
       if (!triplequote) token = null;
 
     // Consume '"""'.
-    } else if (this.peekChar() === '"""') {
+    } else if (this.eatToken('"""')) {
       token = ''; // Make token a string.
 
       // Consume (singlequotestringchars: (!'"""' .)+)?.
@@ -1344,6 +1376,7 @@ class Lexer {
         const char = this.eatChar();
         token += char;
 
+        // Check for indentation.
         if (char === '\n') {
           let position = this.lastPosition + 1;
           let spaceCount = 0;
@@ -1429,27 +1462,246 @@ class Lexer {
   }
 
   // singlelinecommentchars =
-  //   | (!(newline) .)+ // TODO
-  //   { token }
-
+  //   | (!(newline | eoi) .)+ // TODO
   // singlelinecomment =
   //   | "#" singlelinecommentchars? &(newline | eoi)
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  singleLineComment() {
+    const { lastPosition, column, line } = this;
+    let token = null;
+    const kind = 'singlelinecomment';
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume "#".
+    if (this.peekChar() === '#') {
+      this.eatChar();
+      token = ''; // Make token a string.
+
+      // Consume (singlelinecommentchars: (!(newline | eoi) .)+)?.
+      while (
+        this.peekChar() !== '\n' &&
+        this.peekChar() !== '\r' &&
+        this.peekChar() !== null
+      ) {
+        token += this.eatChar();
+      }
+    }
+
+    // Check if lexing failed.
+    if (token === null) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // multilinecommentchars =
   //   | (!('#=' | '=#') .)+ // TODO
-  //   { token }
-
   // innermultilinecomment =
   //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#'
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  innerMultiLineComment() {
+    const { lastPosition, column, line } = this;
+    let token = null;
+    const kind = 'innermultilinecomment';
+    const indentations = [];
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume "#=".
+    if (this.eatToken('#=')) {
+      token = ''; // Make token a string.
+
+      // Consume (multilinecommentchars: (!('#=' | '=#') .)+)?.
+      let closeTag = this.eatToken('=#');
+      let openTag = this.eatToken('#=');
+      while (true) {
+        if (this.lastReached()) break;
+        if (closeTag) break;
+
+        // Check innermultilinecomment?.
+        if (openTag) {
+          // Vomit eaten openTag.
+          this.revert(this.lastPosition - 2, this.column - 2, line);
+          const lexedInnerMultiLineComment = this.innerMultiLineComment();
+          if (lexedInnerMultiLineComment) {
+            token += lexedInnerMultiLineComment.token;
+            indentations.push(...lexedInnerMultiLineComment.indentations);
+          } else {
+            token = null;
+            break;
+          }
+        }
+
+        const char = this.eatChar();
+        token += char;
+
+        // Check for indentation.
+        if (char === '\n') {
+          let position = this.lastPosition + 1;
+          let spaceCount = 0;
+
+          while (this.code[position] === ' ') {
+            spaceCount += 1;
+            position += 1;
+          }
+
+          if (spaceCount > 0) {
+            indentations.push(spaceCount);
+          }
+        }
+
+        closeTag = this.eatToken('=#');
+        openTag = this.eatToken('#=');
+      }
+
+      // Check if '=#' was consumed.
+      if (!closeTag) token = null;
+    }
+
+    // Check if lexing failed.
+    if (token === null) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    token = `#=${token}=#`;
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, indentations, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
 
   // multilinecomment =
-  //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' _? &(newline | eoi)
+  //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' spaces? &(newline | eoi)
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
-  static lex() {
-    // ...
-    print('test')
+  multiLineComment() {
+    const { lastPosition, column, line } = this;
+    let token = null;
+    const kind = 'multilinecomment';
+    const indentations = [];
+    const startLine = line;
+    const startColumn = column;
+
+    // Consume "#=".
+    if (this.eatToken('#=')) {
+      token = ''; // Make token a string.
+
+      // Consume (multilinecommentchars: (!('#=' | '=#') .)+)?.
+      let closeTag = this.eatToken('=#');
+      let openTag = this.eatToken('#=');
+      while (true) {
+        if (this.lastReached()) break;
+        if (closeTag) break;
+
+        // Check innermultilinecomment?.
+        if (openTag) {
+          // Vomit eaten openTag.
+          this.revert(this.lastPosition - 2, this.column - 2, line);
+          const lexedInnerMultiLineComment = this.innerMultiLineComment();
+          if (lexedInnerMultiLineComment) {
+            token += lexedInnerMultiLineComment.token;
+            indentations.push(...lexedInnerMultiLineComment.indentations);
+          } else {
+            token = null;
+            break;
+          }
+        }
+
+        const char = this.eatChar();
+        token += char;
+
+        // Check for indentation.
+        if (char === '\n') {
+          let position = this.lastPosition + 1;
+          let spaceCount = 0;
+
+          while (this.code[position] === ' ') {
+            spaceCount += 1;
+            position += 1;
+          }
+
+          if (spaceCount > 0) {
+            indentations.push(spaceCount);
+          }
+        }
+
+        closeTag = this.eatToken('=#');
+        openTag = this.eatToken('#=');
+      }
+
+
+      // Check if '=#' was consumed.
+      if (closeTag) {
+        // Consume spaces?
+        this.spaces();
+
+        // Check &(newline | eoi)
+        if (this.peekChar() !== '\n' && this.peekChar() !== '\r' && !this.lastReached()) token = null;
+      } else token = null;
+    }
+
+    // Check if lexing failed.
+    if (token === null) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop line and column.
+    const stopLine = this.line;
+    const stopColumn = this.column;
+
+    return {
+      token, kind, indentations, startLine, stopLine, startColumn, stopColumn,
+    };
+  }
+
+  lex() {
+    const tokens = [];
+    while (!this.lastReached()) {
+      const token =
+        this.spaces() ||
+        this.noName() ||
+        this.identifier() ||
+        this.floatBinaryLiteral() ||
+        this.floatOctalLiteral() ||
+        this.floatHexadecimalLiteral() ||
+        this.floatDecimalLiteral() ||
+        this.floatLiteralNoMantissa() ||
+        this.integerBinaryLiteral() ||
+        this.integerOctalLiteral() ||
+        this.integerHexadecimalLiteral() ||
+        this.integerDecimalLiteral() ||
+        this.singleLineStringLiteral() ||
+        this.multiLineStringLiteral() ||
+        this.regexLiteral() ||
+        this.singleLineComment() ||
+        this.multiLineComment() ||
+        this.operator() ||
+        this.punctuator();
+
+      if (token) {
+        // Ignore spaces
+        if (token.kind !== 'spaces') tokens.push(token);
+      } else {
+        print('lex error, unkown character > line: ', this.line, 'column: ', this.column);
+        break;
+      }
+    }
+
+    return tokens;
   }
 }
 

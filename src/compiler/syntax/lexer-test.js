@@ -60,6 +60,45 @@ test(
   },
 );
 
+print('============== NEWLINE ==============');
+lexer = new Lexer('\r');
+result = lexer.newline();
+test(
+  String.raw`\r--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('\n');
+result = lexer.newline();
+test(
+  String.raw`\n`,
+  result,
+  {
+    token: '',
+    kind: 'newline',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
+  },
+);
+
+lexer = new Lexer('\r\n');
+result = lexer.newline();
+test(
+  String.raw`\r\n`,
+  result,
+  {
+    token: '',
+    kind: 'newline',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 2,
+  },
+);
+
 print('============== NONAME ==============');
 lexer = new Lexer('_');
 result = lexer.noName();
@@ -1325,6 +1364,55 @@ test(
   },
 );
 
+
+lexer = new Lexer('"""return \n{ 1, 2, 3 }"""');
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`"""return \n{ 1, 2, 3 }"""`,
+  result,
+  {
+    token: 'return \n{ 1, 2, 3 }',
+    kind: 'multilinestringliteral',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 25,
+  },
+);
+
+lexer = new Lexer('"""return \r\n{ 1, 2, 3 }"""');
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`"""return \r\n{ 1, 2, 3 }"""`,
+  result,
+  {
+    token: 'return \r\n{ 1, 2, 3 }',
+    kind: 'multilinestringliteral',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 26,
+  },
+);
+
+lexer = new Lexer('"""return \n{ 1, \n    2, \n        3 }\n    """');
+result = lexer.multiLineStringLiteral();
+test(
+  String.raw`"""return \n{ 1, \n    2, \n        3 }\n    """`,
+  result,
+  {
+    token: 'return \n{ 1, \n    2, \n        3 }\n    ',
+    kind: 'multilinestringliteral',
+    indentations: [4, 8, 4],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 44,
+  },
+);
+
 print('============== REGEXLITERAL ==============');
 lexer = new Lexer('//');
 result = lexer.regexLiteral();
@@ -1378,6 +1466,352 @@ test(
     startColumn: 0,
     stopColumn: 21,
   },
+);
+
+print('============== SINGLELINECOMMENT ==============');
+lexer = new Lexer('# Hello World\nHi World');
+result = lexer.singleLineComment();
+test(
+  String.raw`# Hello World\nHi World--------->MID`,
+  result,
+  {
+    token: ' Hello World',
+    kind: 'singlelinecomment',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 13,
+  },
+);
+
+lexer = new Lexer('#');
+result = lexer.singleLineComment();
+test(
+  String.raw`#`,
+  result,
+  {
+    token: '',
+    kind: 'singlelinecomment',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
+  },
+);
+
+lexer = new Lexer('# Wanna eat Π?');
+result = lexer.singleLineComment();
+test(
+  String.raw`# Wanna eat Π?`,
+  result,
+  {
+    token: ' Wanna eat Π?',
+    kind: 'singlelinecomment',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 14,
+  },
+);
+
+lexer = new Lexer('#: Int, Str -> Int');
+result = lexer.singleLineComment();
+test(
+  String.raw`#: Int, Str -> Int`,
+  result,
+  {
+    token: ': Int, Str -> Int',
+    kind: 'singlelinecomment',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 18,
+  },
+);
+
+print('============== INNERMULTILINECOMMENT ==============');
+lexer = new Lexer('#=');
+result = lexer.innerMultiLineComment();
+test(
+  String.raw`#--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('#= name');
+result = lexer.innerMultiLineComment();
+test(
+  String.raw`#= name--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('#= outer\n#= inner =# #');
+result = lexer.innerMultiLineComment();
+test(
+  String.raw`#= outer\n#= inner =# #--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('#==#');
+result = lexer.innerMultiLineComment();
+test(
+  String.raw`#==#`,
+  result,
+  {
+    token: '#==#',
+    kind: 'innermultilinecomment',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 4,
+  },
+);
+
+lexer = new Lexer('#= hello # world =#');
+result = lexer.innerMultiLineComment();
+test(
+  String.raw`#= hello # world =#`,
+  result,
+  {
+    token: '#= hello # world =#',
+    kind: 'innermultilinecomment',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 19,
+  },
+);
+
+lexer = new Lexer('#= hello #= inner hello =# world =#');
+result = lexer.innerMultiLineComment();
+test(
+  String.raw`#= hello #= inner hello =# world =#`,
+  result,
+  {
+    token: '#= hello #= inner hello =# world =#',
+    kind: 'innermultilinecomment',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 35,
+  },
+);
+
+lexer = new Lexer('#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#');
+result = lexer.innerMultiLineComment();
+test(
+  String.raw`#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#`,
+  result,
+  {
+    token: '#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#',
+    kind: 'innermultilinecomment',
+    indentations: [4, 1, 3],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 73,
+  },
+);
+
+print('============== MULTILINECOMMENT ==============');
+lexer = new Lexer('#=');
+result = lexer.multiLineComment();
+test(
+  String.raw`#--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('#= name');
+result = lexer.multiLineComment();
+test(
+  String.raw`#= name--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('#= name =# hello');
+result = lexer.multiLineComment();
+test(
+  String.raw`#= name =# hello--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('#= outer\n#= inner =# #');
+result = lexer.multiLineComment();
+test(
+  String.raw`#= outer\n#= inner =# #--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('#==#');
+result = lexer.multiLineComment();
+test(
+  String.raw`#==#`,
+  result,
+  {
+    token: '',
+    kind: 'multilinecomment',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 4,
+  },
+);
+
+lexer = new Lexer('#= hello # world =#');
+result = lexer.multiLineComment();
+test(
+  String.raw`#= hello # world =#`,
+  result,
+  {
+    token: ' hello # world ',
+    kind: 'multilinecomment',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 19,
+  },
+);
+
+lexer = new Lexer('#= hello #= inner hello =# world =#');
+result = lexer.multiLineComment();
+test(
+  String.raw`#= hello #= inner hello =# world =#`,
+  result,
+  {
+    token: ' hello #= inner hello =# world ',
+    kind: 'multilinecomment',
+    indentations: [],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 35,
+  },
+);
+
+lexer = new Lexer('#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#');
+result = lexer.multiLineComment();
+test(
+  String.raw`#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#`,
+  result,
+  {
+    token: ' hello \n    #= inner hello \r\n #= \n   another nest =#        =# world ',
+    kind: 'multilinecomment',
+    indentations: [4, 1, 3],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 73,
+  },
+);
+
+lexer = new Lexer('#= hello #=\n   inner hello\n =# world =#   \r\n');
+result = lexer.multiLineComment();
+test(
+  String.raw`#= hello #=\n   inner hello\n =# world =#   \r\n`,
+  result,
+  {
+    token: ' hello #=\n   inner hello\n =# world ',
+    kind: 'multilinecomment',
+    indentations: [3, 1],
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 42,
+  },
+);
+
+print('============== LEX ==============');
+lexer = new Lexer("45 46. .56 0x5F.0p+F 'hello' \"world\"");
+result = lexer.lex();
+test(
+  String.raw`45 46. .56 0x5F.e+F 'hello' "world"`,
+  result,
+  [
+    {
+      token: '45',
+      kind: 'integerdecimalliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 0,
+      stopColumn: 2,
+    },
+    {
+      token: '46.0',
+      kind: 'floatdecimalliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 3,
+      stopColumn: 6,
+    },
+    {
+      token: '0.56',
+      kind: 'floatdecimalliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 7,
+      stopColumn: 10,
+    },
+    {
+      token: '5F.0p+F',
+      kind: 'floathexadecimalliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 11,
+      stopColumn: 20,
+    },
+    {
+      token: 'hello',
+      kind: 'singlelinestringliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 21,
+      stopColumn: 28,
+    },
+    {
+      token: 'world',
+      kind: 'singlelinestringliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 29,
+      stopColumn: 36,
+    },
+  ],
+);
+
+lexer = new Lexer('hello 45');
+result = lexer.lex();
+test(
+  String.raw`hello 45`,
+  result,
+  [
+    {
+      token: 'hello',
+      kind: 'identifier',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 0,
+      stopColumn: 5,
+    },
+    {
+      token: '45',
+      kind: 'integerdecimalliteral',
+      startLine: 1,
+      stopLine: 1,
+      startColumn: 6,
+      stopColumn: 8,
+    },
+  ],
 );
 
 print('============== TEST RESULTS ==============');
