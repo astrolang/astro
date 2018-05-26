@@ -343,6 +343,49 @@ fun List(len): #: {T}
     new { buffer: malloc{T}(len) }
 ```
 
+## GENERATOR
+In Astro, generators are passed around by value.
+```nim
+let gen = {i | i in 1..500}
+next(gen) # 1
+next(gen) # 2
+
+let another_gen = gen
+next(another_gen) # 1
+next(gen) # 3
+```
+
+#### Implementation
+```nim
+fun foo():
+    let a, b, c = 1, 'Hello', 5.0
+    do_something()
+    yield
+    do_another_thing()
+    yield
+```
+
+If Astro had a jmp control primitive, the above generator function can be desugared into the following.
+```nim
+foo_global = { label: 0, vars: { a: 1, b: 'Hello', c: 5.0 } }
+
+fun foo():
+    let { label, vars: { a, b, c } } = foo_global
+    jmp cont:
+        @(0):
+            do_something()
+            foo_global.label += 1
+            return
+        @(1):
+            do_another_thing()
+            foo_global.label = 0
+            return
+```
+
+If the generator is instantiated multiple times, an array of teh different instances are kept.
+foo_global_array = [  { ... }, ... ]
+
+
 ## Indexing
 ### 0-Based Indexing vs 1-Based Indexing
 #### Base Pointer
