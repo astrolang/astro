@@ -54,34 +54,34 @@ integerbinaryliteral =
   | '0b' digitbinary ('_'? digitbinary)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
-integeroctalliteral  =
+integeroctalliteral =
   | '0o' digitoctal ('_'? digitoctal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
-integerhexadecimalliteral  =
+integerhexadecimalliteral =
   | '0x' digithexadecimal ('_'? digithexadecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
-integerdecimalliteral  =
+integerdecimalliteral =
   | digitdecimal ('_'? digitdecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
-floatbinaryliteral  =
+floatbinaryliteral =
   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
-floatoctalliteral  =
+floatoctalliteral =
   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
-floathexadecimalliteral  =
+floathexadecimalliteral =
   | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
-floatdecimalliteral  =
+floatdecimalliteral =
   | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
@@ -144,9 +144,57 @@ multilinecomment =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 /*************** PARSER ***************/
+operator =
+  { kind, value }
+
+punctuator =
+  { kind, value }
+
+integerbinaryliteral =
+  { kind, value }
+
+integeroctalliteral =
+  { kind, value }
+
+integerhexadecimalliteral =
+  { kind, value }
+
+integerdecimalliteral =
+  { kind, value }
+
+floatbinaryliteral =
+  { kind, value }
+
+floatoctalliteral =
+  { kind, value }
+
+floathexadecimalliteral =
+  { kind, value }
+
+floatdecimalliteral =
+  { kind, value }
+
+floatLiteralnomantissa =
+  { kind, value }
+
+singlelinestringliteral =
+  { kind, value }
 
 // NOTE: multilinestringliteral has a special parsing stage
 multilinestringliteral
+
+regexliteral =
+  { kind, value }
+
+booleanliteral =
+  { kind, value }
+
+singlelinecomment =
+  { kind, value }
+
+// NOTE: multilinestringliteral has a special parsing stage
+multilinecomment =
+  { kind, value }
 
 integerliteral =
   | integerbinaryliteral
@@ -170,7 +218,7 @@ numericliteral =
 stringliteral =
   | multilinestringliteral
   | singlelinestringliteral // Can eat others cake
-  { kind, token }
+  { kind, value }
 
 coefficientexpression = // Unfurl
   | floatbinaryliteral identifier
@@ -184,7 +232,7 @@ coefficientexpression = // Unfurl
 comment =
   | multilinecomment
   | !('#=') singlelinecomment // Accepts others failed cake. Rectified with predicate.
-  { kind, token }
+  { kind, value }
 
 indent = // TODO. adding !space
   | ' '+
