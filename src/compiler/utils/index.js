@@ -1,5 +1,45 @@
 /* eslint-disable no-console */
-const equal = require('deep-equal');
+// Refactored, custom version of fast-deep-equal
+const equal = (a, b) => {
+  const { isArray } = Array;
+  const keyList = Object.keys;
+  const hasProp = Object.prototype.hasOwnProperty;
+
+  if (a == null || b == null) return a === b;
+
+  if (typeof a === 'object' && typeof b === 'object') {
+    // Array
+    if (isArray(a) && isArray(b)) {
+      const { length } = a;
+      if (length !== b.length) return false;
+      for (let i = 0; i < length; i += 1) if (!equal(a[i], b[i])) return false;
+      return true;
+    }
+
+    // Object
+    const keys = keyList(a);
+    const { length } = keys;
+
+    if (length !== keyList(b).length) return false;
+
+    // Key Check.
+    for (let i = 0; i < length; i += 1) {
+      if (!hasProp.call(b, keys[i])) {
+        return false;
+      }
+    }
+
+    // Value Check.
+    for (let i = 0; i < length; i += 1) {
+      const key = keys[i];
+      if (!equal(a[key], b[key])) return false;
+    }
+
+    return true;
+  }
+
+  return a === b;
+};
 
 // Stringifies and pretty prints all kinds of values including arrays and objects.
 const print = (...s) => {
@@ -38,8 +78,8 @@ const createTest = () => {
       return { testCount, passedCount, failedCount };
     }
 
-    // `gotten` must be strictly deep-equal `expected`.
-    if (equal(gotten, expected, { strict: true })) {
+    // `gotten` must be strictly deep-equal to `expected`.
+    if (equal(gotten, expected)) {
       print('Test: ', message, '\nTest passed!', '\nExp: ', gotten, '\n');
       // Increment test count state
       testCount += 1;
@@ -61,5 +101,6 @@ const createTest = () => {
 
 module.exports = {
   print,
+  equal,
   createTest,
 };
