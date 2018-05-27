@@ -313,11 +313,6 @@ result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'world'
 // The `* 1e-6` converts the nanosecond to millisecond
 const diff2 = process.hrtime(start2)[1] * 1e-6;
 print('With Caching: ', diff2, 'ms');
-test(
-  String.raw`time: with cache < without cache`,
-  diff2 < diff1,
-  true,
-);
 
 lexer = new Lexer('5.034 hello 0.567 world');
 parser = new Parser(lexer.lex());
