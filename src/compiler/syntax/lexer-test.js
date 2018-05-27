@@ -1855,7 +1855,4 @@ test(
   ],
 );
 
-print('============== TEST RESULTS ==============');
-
-// Print details of test.
-test();
+module.exports = test;

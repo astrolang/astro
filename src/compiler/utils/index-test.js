@@ -63,9 +63,4 @@ test(
   true,
 );
 
-
-print('============== TEST RESULTS ==============');
-
-// Print details of test.
-test();
-
+module.exports = test;
