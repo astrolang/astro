@@ -22,6 +22,7 @@ const print = (...s) => {
 // This test function is written explicitly for testing the compiler only.
 const createTest = () => {
   // States to be used by the lambda for count.
+  const start = process.hrtime();
   let testCount = 0;
   let passedCount = 0;
   let failedCount = 0;
@@ -33,6 +34,7 @@ const createTest = () => {
       print('Number of Total Tests: ', testCount);
       print('Number of Passed Tests: ', passedCount);
       print('Number of Failed Tests: ', failedCount);
+      print('Time taken: ', process.hrtime(start)[1] * 1e-6, 'ms');
       return { testCount, passedCount, failedCount };
     }
 
@@ -52,6 +54,7 @@ const createTest = () => {
     failedCount += 1;
     return { testCount, passedCount, failedCount };
   };
+
   // The function returns the lambda.
   return lambda;
 };
