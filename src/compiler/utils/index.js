@@ -73,10 +73,10 @@ const createTest = () => {
   const lambda = (message, gotten, expected) => {
     // If no arguments are passed, return information about test calls of this particular lambda.
     if (message === undefined && (gotten === undefined || expected === undefined)) {
-      print('Number of Total Tests: ', testCount);
-      print('Number of Passed Tests: ', passedCount);
-      print('Number of Failed Tests: ', failedCount);
-      print('Time taken: ', elapsed, 'ms');
+      print('\x1b[4m', 'Number of Total Tests: ', '\x1b[1m\x1b[33m', testCount, '\x1b[0m');
+      print('\x1b[4m', 'Number of Passed Tests: ', '\x1b[1m\x1b[32m', passedCount, '\x1b[0m');
+      print('\x1b[4m', 'Number of Failed Tests: ', '\x1b[31m', failedCount, '\x1b[0m');
+      print('\x1b[4m', 'Time taken: ', '\x1b[35m', elapsed.toFixed(3), 'ms', '\x1b[0m');
       return { testCount, passedCount, failedCount, elapsed, failedTests };
     }
 
@@ -86,7 +86,7 @@ const createTest = () => {
 
     // `gotten` must be strictly deep-equal to `expected`.
     if (equal(gotten, expected)) {
-      print('Test: ', message, '\nTest passed!', '\nExp: ', gotten, '\n');
+      print('Test: ', message, '\x1b[32m', '\nTest passed!', '\x1b[0m', '\nExp: ', gotten, '\n');
       // Increment test count state
       testCount += 1;
       passedCount += 1;
@@ -95,7 +95,7 @@ const createTest = () => {
     }
 
     // Otherwise test failed.
-    print('Test: ', message, '\nTest failed!', '\nExp: ', expected, '\nGot: ', gotten, '\n');
+    print('Test: ', message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\nExp: ', expected, '\nGot: ', gotten, '\n');
     // Increment test count state
     failedTests.push({ message, expected, gotten });
     testCount += 1;
@@ -127,14 +127,14 @@ const showTestInfo = (...args) => {
   if (failedCount > 0) {
     print("******** FAILED TESTS ********")
     for (let failed of failedTests) {
-      print('Test: ', failed.message, '\nTest failed!', '\nExp: ', failed.expected, '\nGot: ', failed.gotten, '\n');
+      print('Test: ', failed.message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\nExp: ', failed.expected, '\nGot: ', failed.gotten, '\n');
     }
   }
 
-  print('Number of Total Tests: ', testCount);
-  print('Number of Passed Tests: ', passedCount);
-  print('Number of Failed Tests: ', failedCount);
-  print('Time taken: ', elapsed, 'ms');
+  print('\x1b[4m', 'Number of Total Tests: ', '\x1b[1m\x1b[33m', testCount, '\x1b[0m');
+  print('\x1b[4m', 'Number of Passed Tests: ', '\x1b[1m\x1b[32m', passedCount, '\x1b[0m');
+  print('\x1b[4m', 'Number of Failed Tests: ', '\x1b[31m', failedCount, '\x1b[0m');
+  print('\x1b[4m', 'Time taken: ', '\x1b[35m', elapsed.toFixed(3), 'ms', '\x1b[0m');
 
   if (failedCount > 0) process.exit(1);
 }
