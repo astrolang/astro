@@ -515,7 +515,7 @@ test(
   },
 );
 
-lexer = new Lexer('world world world none');
+lexer = new Lexer('world   world   world none');
 parser = new Parser(lexer.lex());
 const ruleMore1 = p => parseNonTerminalRule(p, 'ruleMore1', more('world'));
 result = ruleMore1(parser);
@@ -533,7 +533,7 @@ test(
     parser: {
       tokenPosition: 2,
       line: 1,
-      column: 17,
+      column: 21,
     },
     result: {
       success: true,
@@ -549,8 +549,5 @@ test(
   },
 );
 
-print('============== TEST RESULTS ==============');
-
-// Print details of test.
-test();
+module.exports = test;
 
