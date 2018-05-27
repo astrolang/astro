@@ -1696,8 +1696,7 @@ class Lexer {
         // Ignore spaces
         if (token.kind !== 'spaces') tokens.push(token);
       } else {
-        print('lex error, unkown character > line: ', this.line, 'column: ', this.column);
-        break;
+        throw new Error('Lex error! unexpected character at line: ', this.line, 'column: ', this.column);
       }
     }
 
