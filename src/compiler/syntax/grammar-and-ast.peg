@@ -552,7 +552,7 @@ dotnotationline =
   | dotnotationpostfix (spaces? '?')? (subatompostfix (spaces? '?')?)*
 
 dotnotationblock =
-  | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline) dedentoreoiend
+  | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* dedentoreoiend
   { kind, expression, lines }
 
 subexpression =
