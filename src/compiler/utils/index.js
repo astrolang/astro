@@ -67,7 +67,7 @@ const createTest = () => {
   let testCount = 0;
   let passedCount = 0;
   let failedCount = 0;
-  let failedTests = [];
+  const failedTests = [];
 
   // This lambda contains the actual test.
   const lambda = (message, gotten, expected) => {
@@ -77,21 +77,27 @@ const createTest = () => {
       print('\x1b[4m', 'Number of Passed Tests: ', '\x1b[1m\x1b[32m', passedCount, '\x1b[0m');
       print('\x1b[4m', 'Number of Failed Tests: ', '\x1b[31m', failedCount, '\x1b[0m');
       print('\x1b[4m', 'Time taken: ', '\x1b[35m', elapsed.toFixed(3), 'ms', '\x1b[0m');
-      return { testCount, passedCount, failedCount, elapsed, failedTests };
+      return {
+        testCount, passedCount, failedCount, elapsed, failedTests,
+      };
     }
 
     if (message === 0) {
-      return { testCount, passedCount, failedCount, elapsed, failedTests };
+      return {
+        testCount, passedCount, failedCount, elapsed, failedTests,
+      };
     }
 
     // `gotten` must be strictly deep-equal to `expected`.
     if (equal(gotten, expected)) {
       print('Test: ', message, '\x1b[32m', '\nTest passed!', '\x1b[0m', '\nExp: ', gotten, '\n');
-      // Increment test count state
+      // Increment test count state.
       testCount += 1;
       passedCount += 1;
       elapsed = process.hrtime(start)[1] * 1e-6;
-      return { testCount, passedCount, failedCount, elapsed, failedTests };
+      return {
+        testCount, passedCount, failedCount, elapsed, failedTests,
+      };
     }
 
     // Otherwise test failed.
@@ -101,7 +107,9 @@ const createTest = () => {
     testCount += 1;
     failedCount += 1;
     elapsed = process.hrtime(start)[1] * 1e-6;
-    return { testCount, passedCount, failedCount, elapsed, failedTests };
+    return {
+      testCount, passedCount, failedCount, elapsed, failedTests,
+    };
   };
 
   // The function returns the lambda.
@@ -115,8 +123,8 @@ const showTestInfo = (...args) => {
   let failedTests = [];
   let elapsed = 0;
 
-  for (let arg of args) {
-    let result = arg(0);
+  for (let i = 0; i < args.length; i += 1) {
+    const result = args[i](0);
     testCount += result.testCount;
     passedCount += result.passedCount;
     failedCount += result.failedCount;
@@ -125,9 +133,9 @@ const showTestInfo = (...args) => {
   }
 
   if (failedCount > 0) {
-    print("******** FAILED TESTS ********")
-    for (let failed of failedTests) {
-      print('Test: ', failed.message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\nExp: ', failed.expected, '\nGot: ', failed.gotten, '\n');
+    print('******** FAILED TESTS ********');
+    for (let i = 0; i < failedTests.length; i += 1) {
+      print('Test: ', failedTests[i].message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\nExp: ', failedTests[i].expected, '\nGot: ', failedTests[i].gotten, '\n');
     }
   }
 
@@ -139,9 +147,24 @@ const showTestInfo = (...args) => {
   if (failedCount > 0) process.exit(1);
 }
 
+
+const keyToUnicode = (theString) => {
+  let unicodeString = '';
+  for (let i = 0; i < theString.length; i += 1) {
+    let theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+    while (theUnicode.length < 4) {
+      theUnicode = `0${theUnicode}`;
+    }
+    theUnicode = `\\u${theUnicode}`;
+    unicodeString += theUnicode;
+  }
+  return unicodeString;
+};
+
 module.exports = {
   print,
   equal,
   createTest,
   showTestInfo,
+  keyToUnicode,
 };
