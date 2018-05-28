@@ -5,12 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test:compiler": "nyc --reporter=lcov --reporter=text node src/compiler/all-test.js",
-    "test:all": "nyc --reporter=lcov --reporter=text mocha --timeout 250000 \"./tests/**/*.spec.js\" --exit",
-    "test:compiler:codegen": "mocha --timeout 250000 \"./tests/compiler/codegen/*.spec.js\" --exit",
-    "test:compiler:semantics": "mocha --timeout 250000 \"./tests/compiler/semantics/*.spec.js\" --exit",
-    "test:compiler:syntax": "mocha --timeout 250000 \"./tests/compiler/syntax/*.spec.js\" --exit",
-    "test:compiler:utils": "mocha --timeout 250000 \"./tests/compiler/utils/*.spec.js\" --exit",
-    "test:samples": "mocha --timeout 250000 \"./tests/samples/*.spec.js\" --exit",
+    "lex": "node bin/astro.js",
     "lint": "eslint --config .eslintrc.json ./src ./tests"
   },
   "repository": {
