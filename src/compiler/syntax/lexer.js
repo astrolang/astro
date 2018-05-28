@@ -23,6 +23,7 @@ class Lexer {
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
     this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√'; // Unicode?
+    this.punctuatorChar = '(){}[],.~;:'; // Unicode?
     this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.keywords = [
       'import', 'export', 'let', 'var', 'const', 'fun', 'type', 'abst', 'async',
@@ -295,7 +296,7 @@ class Lexer {
     const startColumn = column;
 
     // Check if subsequent chars in input code are valid operator character.
-    if ('(){}[],.~;'.indexOf(this.peekChar()) > -1) {
+    if (this.punctuatorChar.indexOf(this.peekChar()) > -1) {
       token += this.eatChar();
     }
 
