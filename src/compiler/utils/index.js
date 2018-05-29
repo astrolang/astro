@@ -73,10 +73,17 @@ const createTest = () => {
   const lambda = (message, gotten, expected) => {
     // If no arguments are passed, return information about test calls of this particular lambda.
     if (message === undefined && (gotten === undefined || expected === undefined)) {
+      if (failedCount > 0) {
+        print('******** FAILED TESTS ********');
+        for (let i = 0; i < failedTests.length; i += 1) {
+          print('Test: ', failedTests[i].message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\nExp: ', failedTests[i].expected, '\nGot: ', failedTests[i].gotten, '\n');
+        }
+      }
+
       print('\x1b[4m', 'Number of Total Tests: ', '\x1b[1m\x1b[33m', testCount, '\x1b[0m');
       print('\x1b[4m', 'Number of Passed Tests: ', '\x1b[1m\x1b[32m', passedCount, '\x1b[0m');
       print('\x1b[4m', 'Number of Failed Tests: ', '\x1b[31m', failedCount, '\x1b[0m');
-      print('\x1b[4m', 'Time taken: ', '\x1b[35m', elapsed.toFixed(3), 'ms', '\x1b[0m');
+      print('\x1b[4m', 'Time taken: ', '\x1b[35m', elapsed.toFixed(3), 'ms', '\x1b[0m\n');
       return {
         testCount, passedCount, failedCount, elapsed, failedTests,
       };
@@ -120,7 +127,7 @@ const showTestInfo = (...args) => {
   let testCount = 0;
   let passedCount = 0;
   let failedCount = 0;
-  let failedTests = [];
+  const failedTests = [];
   let elapsed = 0;
 
   for (let i = 0; i < args.length; i += 1) {
@@ -132,6 +139,8 @@ const showTestInfo = (...args) => {
     elapsed += result.elapsed;
   }
 
+  print('===================== ALL TESTS =====================')
+
   if (failedCount > 0) {
     print('******** FAILED TESTS ********');
     for (let i = 0; i < failedTests.length; i += 1) {
@@ -142,10 +151,10 @@ const showTestInfo = (...args) => {
   print('\x1b[4m', 'Number of Total Tests: ', '\x1b[1m\x1b[33m', testCount, '\x1b[0m');
   print('\x1b[4m', 'Number of Passed Tests: ', '\x1b[1m\x1b[32m', passedCount, '\x1b[0m');
   print('\x1b[4m', 'Number of Failed Tests: ', '\x1b[31m', failedCount, '\x1b[0m');
-  print('\x1b[4m', 'Time taken: ', '\x1b[35m', elapsed.toFixed(3), 'ms', '\x1b[0m');
+  print('\x1b[4m', 'Time taken: ', '\x1b[35m', elapsed.toFixed(3), 'ms', '\x1b[0m\n');
 
   if (failedCount > 0) process.exit(1);
-}
+};
 
 
 const keyToUnicode = (theString) => {
