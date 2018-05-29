@@ -22,7 +22,7 @@ class Lexer {
     this.digitHexadecimal = '0123456789ABCDEFabcdef';
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
-    this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√'; // Unicode?
+    this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√?'; // Unicode?
     this.punctuatorChar = '(){}[],.~;:'; // Unicode?
     this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.keywords = [
@@ -165,7 +165,6 @@ class Lexer {
     };
   }
 
-
   // noname =
   //   | '_'
   noName() {
@@ -254,7 +253,7 @@ class Lexer {
   //   | operatorchar+
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   operator() {
-    const { lastPosition, column, line } = this;
+    let { lastPosition, column, line } = this;
     let token = '';
     const kind = 'operator';
     const startLine = line;
@@ -263,12 +262,16 @@ class Lexer {
     // Check if subsequent chars in input code are valid operator character.
     while (this.operatorChar.indexOf(this.peekChar()) > -1) {
       token += this.eatChar();
-    }
 
-    // NOTE: Only these infix operators with '//' in themn are allowed: a // b, a //= b
-    // Other operator names with '//' in them are invalid: a +// b, a //+ b
-    if (token.indexOf('//') > -1 && (token !== '//' && token !== '//=')) {
-      token = '';
+      // NOTE: Only these infix operators with '//' in them are allowed: a // b, a //= b
+      // Other operator names with '//' in them are invalid: a +// b, a //+ b
+      lastPosition = this.lastPosition;
+      column = this.column;
+      line = this.line;
+      if (this.eatToken('//') || this.eatToken('//=')) {
+        this.revert(lastPosition, column, line);
+        break;
+      }
     }
 
     // Check if lexing failed.
@@ -1685,11 +1688,11 @@ class Lexer {
         this.integerOctalLiteral() ||
         this.integerHexadecimalLiteral() ||
         this.integerDecimalLiteral() ||
-        this.singleLineStringLiteral() ||
         this.multiLineStringLiteral() ||
+        this.singleLineStringLiteral() ||
         this.regexLiteral() ||
-        this.singleLineComment() ||
         this.multiLineComment() ||
+        this.singleLineComment() ||
         this.operator() ||
         this.punctuator();
 

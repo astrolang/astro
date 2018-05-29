@@ -215,12 +215,34 @@ test(
 );
 
 print('============== OPERATOR ==============');
-lexer = new Lexer('=//');
+lexer = new Lexer('+//');
 result = lexer.operator();
 test(
-  String.raw`=//--------->FAIL`,
+  String.raw`+//--------->MID`,
   result,
-  null,
+  {
+    token: '+',
+    kind: 'operator',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
+  },
+);
+
+lexer = new Lexer('+//=');
+result = lexer.operator();
+test(
+  String.raw`+//=--------->MID`,
+  result,
+  {
+    token: '+',
+    kind: 'operator',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 1,
+  },
 );
 
 lexer = new Lexer('+');
@@ -1854,5 +1876,7 @@ test(
     },
   ],
 );
+
+test();
 
 module.exports = test;
