@@ -8,13 +8,16 @@
 ![Maintained](https://img.shields.io/maintenance/yes/2018.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 #### Work in Progress :construction:
-Current Version: 0.1.13
-![astro screenshot](https://github.com/AppCypher/Astro/blob/dev/media/images/astro-syntax.png)
+Current Version: 0.1.14
+![astro screenshot](https://github.com/appcypher/astro/blob/dev/media/images/astro-syntax.png)
+
+### Installation
+* If you don't have node installed already, download and install it [here](https://nodejs.org/en/download/).
+* Install astro by typing ```npm i -g astrolang``` in the terminal.
+* You can now use astro interpreter by typing ```astro``` in the terminal.
 
 ### What is Astro?
 Astro is a fullstack multi-paradigm programming language designed for high-performance numerical-computing applications.
-
-Astro is a
 - statically-typed language that
 - compiles to native code and WebAssembly,
 - has no GC,
@@ -125,6 +128,10 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 ├── LICENSE
 ├── MVP.md
 ├── README.md
+├── bin
+│   └── astro.js
+├── designs
+│   └── astro-prompt-design.txt
 ├── docs
 │   ├── README.md
 │   ├── compiler
@@ -192,6 +199,7 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 │   │   └── parser-boilerplate.js
 │   ├── compiler
 │   │   ├── README.md
+│   │   ├── all-test.js
 │   │   ├── codegen
 │   │   │   ├── ast2llvm.js
 │   │   │   └── ast2wast.js
@@ -203,9 +211,9 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 │   │   │   ├── lexer.js
 │   │   │   ├── parser-old.js
 │   │   │   ├── parser-test.js
-│   │   │   ├── parser.js
-│   │   │   └── test-old.js
+│   │   │   └── parser.js
 │   │   └── utils
+│   │       ├── index-test.js
 │   │       └── index.js
 │   ├── stdlib
 │   │   └── README.md
