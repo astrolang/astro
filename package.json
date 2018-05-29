@@ -1,19 +1,26 @@
 {
-  "name": "astro",
-  "version": "0.1.12",
-  "description": "Astro is a high-performance statically-typed programming language for the web (it compiles to WebAssembly), with Python-like syntax and technical-computing orientation similar to Julia.",
-  "main": "index.js",
+  "name": "astrolang",
+  "version": "0.1.14-1",
+  "description": "Astro is a high-performance statically-typed programming language with Python-like syntax and technical-computing orientation similar to Julia.",
   "scripts": {
     "test:compiler": "nyc --reporter=lcov --reporter=text node src/compiler/all-test.js",
     "lex": "node bin/astro.js",
     "lint": "eslint --config .eslintrc.json ./src ./tests"
   },
+  "bin": {
+    "astro": "bin/astro.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AppCypher/Astro.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+      "astro",
+      "appcypher",
+      "nigeria",
+      "language"
+  ],
+  "author": "appcypher",
   "license": "Apache 2.0",
   "bugs": {
     "url": "https://github.com/AppCypher/Astro/issues"
