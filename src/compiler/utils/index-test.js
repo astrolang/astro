@@ -63,4 +63,6 @@ test(
   true,
 );
 
+test();
+
 module.exports = test;
