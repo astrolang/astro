@@ -48,7 +48,7 @@ SHADOWING
 IDENTIFIERS
     # Name of subjects must start with a character and can be followed by characters, digits or underscore.
     var my_name
-    fun doNothing(): pass
+    fun do_nothing(): pass
 
     # Astro supports wide range of unicode characters for identifiers.
     var φ = arctan(y/x)
@@ -59,16 +59,14 @@ IDENTIFIERS
     let T = 5 # Invalid!
 
     # Naming convention.
-    # Camel case for variables, constants, function names and module names.
-    let bookTitle = "Ender's Game"
-    fun addNumbers(a, b): a + b
+    # Snake case for variables, constants, function names and module names.
+    let book_title = "Ender's Game"
+    fun add_numbers(a, b): a + b
 
     # Pascal case for concrete and abstract type names.
     type InventoryManager(name, id)
     abst LightSource: SpotLight | Directional | Ambient
-
-    # For acronyms, only the first charcater should be upper case.
-    type XmlParser <: Parser
+    type XMLParser <: Parser
 
 VARIABLE/CONSTANT OBJECTS
     # Objects are variable by default but can be made immutable with the const keyword.
