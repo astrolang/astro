@@ -593,10 +593,15 @@ NIL
     var programList = Str()?
 
     # Nillable unwrap.
-    let name = dave?.name
+    let name = dave.name?
 
     # Exceptionable unwrap.
     !getAccount("Default") # If result is nil, NilError is raised.
+
+    # Examples
+    james.relative.sister?
+    !james.relative.sister
+    (!james.relative).sister?
 
     # Nil coalescing.
     let name = getName() ?? "John Doe"
