@@ -2,6 +2,7 @@
 
 const { print, keyToUnicode } = require('../src/compiler/utils');
 const Lexer = require('../src/compiler/syntax/lexer');
+const { Parser } = require('../src/compiler/syntax/parser');
 
 // PROBLEM
 // Bug when left is pressed two or more times and backspace is pressed
@@ -47,22 +48,18 @@ const commandlineInfo = {
     -p, --phase:{lexer|parser}
                               Show the output of a chosen compilation phase
     -t, --target:{wasm|x86|arm|llvmir}
-                              Compile an astro file to the specified target
-                              representation
+                              Compile an astro file to the specified target representation
 
   \x1b[47m\x1b[30m EXAMPLES \x1b[0m
     astro                     Starts the REPL
     astro -h                  Shows this help message
     astro --version           Shows the astro version you are running
     astro \x1b[36msample.ast\x1b[0m          Compiles the file \`sample.ast\` to native code and runs it
-    astro -e \x1b[36m'print "hello"'\x1b[0m  Evaluates the string as astro code and prints the
-                              result out
+    astro -e \x1b[36m'print "hello"'\x1b[0m  Evaluates the string as astro code and prints the result out
     astro \x1b[36msample.ast\x1b[0m --target:wasm
-                              Compiles the file \`sample.ast\` to webassembly
-                              code
+                              Compiles the file \`sample.ast\` to webassembly code
     astro \x1b[36msample.ast\x1b[0m --optimize:3
-                              Compiles the file \`sample.ast\` using the highest
-                              level of optimization\n\n`,
+                              Compiles the file \`sample.ast\` using the highest level of optimization\n\n`,
   version: `Astro ${astroVersion}\n`,
   notSupported: `
   Those commandline arguments are currently not supported.
@@ -134,7 +131,14 @@ class AstroPrompt {
         // Check for exit input.
         this.exited(this.lineBuffer);
         stdout.write('\n');
-        this.showLexedInput(); // Do something with line content.
+
+        // Show relevant output based on chosen phase.
+        if (phase === 'lexer') {
+          this.showLexedInput();
+        } else if (phase === 'parser') {
+          this.showParsedInput();
+        }
+
         this.resetPrompt(); // Reset prompt.
         this.lineBuffer = '';
       //== Backspace key pressed.
@@ -257,6 +261,15 @@ class AstroPrompt {
   showLexedInput() {
     if (this.lineBuffer !== '') {
       print(new Lexer(this.lineBuffer).lex());
+      stdout.write('\n');
+    }
+  };
+
+
+  showParsedInput() {
+    if (this.lineBuffer !== '') {
+      const tokens = new Lexer(this.lineBuffer).lex();
+      print(new Parser(tokens).parse());
       stdout.write('\n');
     }
   };
