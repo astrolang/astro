@@ -118,8 +118,11 @@ class Parser {
           // Run the function.
           const parseResult = arg(this);
 
-          // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
-          result.asts.push(parseResult.ast || parseResult.asts);
+          // If the parser fucntion is not `and` or `not`
+          if (!parseResult.justPeeking) {
+            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
+            result.asts.push(parseResult.asts || parseResult.ast);
+          }
 
           // Parsing failed.
           if (!parseResult.success) {
@@ -193,6 +196,7 @@ const parseTerminalRule = (parser, kind) => {
   return result;
 };
 
+/* ast = Object | Array | String */
 const parseNonTerminalRule = (parser, kind, f, modifier) => {
   const { tokenPosition } = parser;
   let result = { success: false, kind, ast: null };
@@ -205,10 +209,11 @@ const parseNonTerminalRule = (parser, kind, f, modifier) => {
     parseResult = f(parser);
   }
 
+
   // If parse successful.
   if (parseResult.success) {
     // Grab needed asts, etc.
-    result = { success: true, ast: { kind, ast: (parseResult.ast || parseResult.asts) } };
+    result = { success: true, ast: { kind, ast: (parseResult.asts || parseResult.ast) } };
   }
 
   // Cache parse result if not already cached.
@@ -288,8 +293,13 @@ const alt = (...args) => (parser) => {
         if (parseResult.success) {
           result.success = true;
           result.alternative = i + 1;
-          // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
-          result.ast = parseResult.ast || parseResult.asts;
+
+          // If the parser fucntion is not `and` or `not`
+          if (!parseResult.justPeeking) {
+            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
+            result.ast = parseResult.asts || parseResult.ast;
+          }
+
           break;
         }
       }
@@ -362,8 +372,11 @@ const more = arg => (parser) => {
           break;
         } else {
           result.success = true;
-          // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
-          result.asts.push(parseResult.ast || parseResult.asts);
+          // If the parser fucntion is not `and` or `not`
+          if (!parseResult.justPeeking) {
+            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
+            result.asts.push(parseResult.asts || parseResult.ast);
+          }
         }
       }
 
@@ -391,12 +404,39 @@ const more = arg => (parser) => {
   return result;
 };
 
-const optmore = arg => parser => ({ success: true, asts: (more(arg)(parser)).ast });
+const optmore = arg => parser => ({ success: true, asts: more(arg)(parser).asts });
 
-const opt = arg => parser => ({ success: true, ast: (parse(arg)(parser)).asts[0] });
+const opt = arg => parser => ({ success: true, ast: parse(arg)(parser).asts[0] });
 
-const and = 0;
-const not = 0;
+const and = arg => (parser) => {
+  // Get state before parsing.
+  const {
+    tokenPosition, lastIndentCount, column, line, ignoreNewline,
+  } = parser;
+
+  // Parse tokens.
+  const parseResult = { success: parse(arg)(parser).success, justPeeking: true, ast: null };
+
+  // Revert parser state.
+  parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+
+  return parseResult;
+};
+
+const not = arg => (parser) => {
+  // Get state before parsing.
+  const {
+    tokenPosition, lastIndentCount, column, line, ignoreNewline,
+  } = parser;
+
+  // Parse tokens.
+  const parseResult = { success: !parse(arg)(parser).success, justPeeking: true, ast: null };
+
+  // Revert parser state.
+  parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+
+  return parseResult;
+};
 
 module.exports = {
   Parser,
