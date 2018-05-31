@@ -1699,6 +1699,9 @@ class Lexer {
       if (token) {
         // Ignore spaces
         if (token.kind !== 'spaces') tokens.push(token);
+      // TODO: this catch-all error handler is bad!
+      // Return an error object instead of throwing
+      // Enclosures should be much more clever. `'xyz` expects a closing '
       } else {
         throw new Error(`Lex error! unexpected character at line: ${this.line}, column: ${this.column}`);
       }
