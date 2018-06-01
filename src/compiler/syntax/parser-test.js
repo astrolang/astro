@@ -9,6 +9,7 @@ const {
   opt,
   and,
   not,
+  eoi,
   identifier,
   operator,
   punctuator,
@@ -26,6 +27,8 @@ const {
   // regexLiteral,
   // singleLineComment,
   // multiLineComment,
+  integerLiteral,
+  floatLiteral,
 } = require('./parser');
 const { print, createTest } = require('../utils');
 
@@ -564,8 +567,9 @@ test(
     },
     result: {
       success: false,
-      kind: 'ruleMore1',
-      ast: null,
+      ast: {
+        kind: 'ruleMore1',
+      },
     },
   },
 );
@@ -670,36 +674,6 @@ test(
 );
 
 print('============== OPT ==============');
-lexer = new Lexer('');
-parser = new Parser(lexer.lex());
-const ruleOpt1 = p => parseNonTerminalRule(p, 'ruleOpt1', opt('world'));
-result = ruleOpt1(parser);
-test(
-  String.raw``,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: -1,
-      line: 1,
-      column: 0,
-    },
-    result: {
-      success: true,
-      ast: {
-        kind: 'ruleOpt1',
-        ast: null,
-      },
-    },
-  },
-);
-
 lexer = new Lexer('world   world   world   world  none');
 parser = new Parser(lexer.lex());
 const ruleOpt2 = p => parseNonTerminalRule(p, 'ruleOpt2', opt('world'));
@@ -730,7 +704,95 @@ test(
   },
 );
 
+lexer = new Lexer('');
+parser = new Parser(lexer.lex());
+const ruleOpt1 = p => parseNonTerminalRule(p, 'ruleOpt1', opt('world'));
+result = ruleOpt1(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'ruleOpt1',
+        ast: null,
+      },
+    },
+  },
+);
+
 print('============== AND ==============');
+lexer = new Lexer('678');
+parser = new Parser(lexer.lex());
+const ruleAnd2 = p => parseNonTerminalRule(p, 'ruleAnd2', and(identifier));
+result = ruleAnd2(parser);
+test(
+  String.raw`678--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'ruleAnd2',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('');
+parser = new Parser(lexer.lex());
+const ruleAnd3 = p => parseNonTerminalRule(p, 'ruleAnd3', and(identifier));
+result = ruleAnd3(parser);
+test(
+  String.raw`--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'ruleAnd3',
+      },
+    },
+  },
+);
+
 lexer = new Lexer('0x45abcdef79');
 parser = new Parser(lexer.lex());
 const ruleAnd1 = p => parseNonTerminalRule(p, 'ruleAnd1', and(integerHexadecimalLiteral));
@@ -761,12 +823,13 @@ test(
   },
 );
 
+print('============== EOI ==============');
 lexer = new Lexer('678');
 parser = new Parser(lexer.lex());
-const ruleAnd2 = p => parseNonTerminalRule(p, 'ruleAnd2', and(identifier));
-result = ruleAnd2(parser);
+const ruleEOI2 = p => parseNonTerminalRule(p, 'ruleEOI2', eoi);
+result = ruleEOI2(parser);
 test(
-  String.raw`678`,
+  String.raw`678--------->FAIL`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -783,94 +846,8 @@ test(
     },
     result: {
       success: false,
-      kind: 'ruleAnd2',
-      ast: null,
-    },
-  },
-);
-
-lexer = new Lexer('');
-parser = new Parser(lexer.lex());
-const ruleAnd3 = p => parseNonTerminalRule(p, 'ruleAnd3', and(identifier));
-result = ruleAnd3(parser);
-test(
-  String.raw``,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: -1,
-      line: 1,
-      column: 0,
-    },
-    result: {
-      success: false,
-      kind: 'ruleAnd3',
-      ast: null,
-    },
-  },
-);
-
-print('============== NOT ==============');
-lexer = new Lexer('0x45abcdef79');
-parser = new Parser(lexer.lex());
-const ruleNot1 = p => parseNonTerminalRule(p, 'ruleNot1', not(integerHexadecimalLiteral));
-result = ruleNot1(parser);
-test(
-  String.raw`0x45abcdef79`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: -1,
-      line: 1,
-      column: 0,
-    },
-    result: {
-      success: false,
-      kind: 'ruleNot1',
-      ast: null,
-    },
-  },
-);
-
-lexer = new Lexer('678');
-parser = new Parser(lexer.lex());
-const ruleNot2 = p => parseNonTerminalRule(p, 'ruleNot2', not(identifier));
-result = ruleNot2(parser);
-test(
-  String.raw`678`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: -1,
-      line: 1,
-      column: 0,
-    },
-    result: {
-      success: true,
       ast: {
-        kind: 'ruleNot2',
-        ast: null,
+        kind: 'ruleEOI2',
       },
     },
   },
@@ -878,8 +855,8 @@ test(
 
 lexer = new Lexer('');
 parser = new Parser(lexer.lex());
-const ruleNot3 = p => parseNonTerminalRule(p, 'ruleNot3', not(identifier));
-result = ruleNot3(parser);
+const ruleEOI1 = p => parseNonTerminalRule(p, 'ruleEOI1', eoi);
+result = ruleEOI1(parser);
 test(
   String.raw``,
   {
@@ -899,8 +876,298 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'ruleNot3',
+        kind: 'ruleEOI1',
         ast: null,
+      },
+    },
+  },
+);
+
+print('============== INTEGERLITERAL ==============');
+lexer = new Lexer('a99');
+parser = new Parser(lexer.lex());
+result = integerLiteral(parser);
+test(
+  String.raw`a99--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'integerliteral',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('678');
+parser = new Parser(lexer.lex());
+result = integerLiteral(parser);
+test(
+  String.raw`678`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integerdecimalliteral',
+        value: '678',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0b11_0011');
+parser = new Parser(lexer.lex());
+result = integerLiteral(parser);
+test(
+  String.raw`0b11_0011`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 9,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integerbinaryliteral',
+        value: '110011',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0x_ff_0e11');
+parser = new Parser(lexer.lex());
+result = integerLiteral(parser);
+test(
+  String.raw`0x_ff_0e11`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 10,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integerhexadecimalliteral',
+        value: 'ff0e11',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0o_776_122');
+parser = new Parser(lexer.lex());
+result = integerLiteral(parser);
+test(
+  String.raw`0o_776_122`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 10,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integeroctalliteral',
+        value: '776122',
+      },
+    },
+  },
+);
+
+print('============== FLOATLITERAL ==============');
+lexer = new Lexer('a99');
+parser = new Parser(lexer.lex());
+result = floatLiteral(parser);
+test(
+  String.raw`a99--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'floatliteral',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('.678');
+parser = new Parser(lexer.lex());
+result = floatLiteral(parser);
+test(
+  String.raw`.678`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'floatdecimalliteral',
+        value: '0.678',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0b11_0011e-11_01');
+parser = new Parser(lexer.lex());
+result = floatLiteral(parser);
+test(
+  String.raw`0b11_0011e-11_01`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 16,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'floatbinaryliteral',
+        value: '110011e-1101',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0x_ff.6_0e11');
+parser = new Parser(lexer.lex());
+result = floatLiteral(parser);
+test(
+  String.raw`0x_ff.6_0e11`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 12,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'floathexadecimalliteral',
+        value: 'ff.60e11',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0o_77.6_122');
+parser = new Parser(lexer.lex());
+result = floatLiteral(parser);
+test(
+  String.raw`0o_77.6_122`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      line: 1,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'floatoctalliteral',
+        value: '77.6122',
       },
     },
   },

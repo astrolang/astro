@@ -38,9 +38,8 @@ class Parser {
     this.ignoreNewline = ignoreNewline;
   }
 
-
   /**
-   * Checks if parser has reached last token.
+   * Checks if parser has already reached last token.
    * @return{Boolean} result.
    */
   lastReached() {
@@ -182,7 +181,7 @@ class Parser {
 
 const parseTerminalRule = (parser, kind) => {
   const { tokenPosition } = parser;
-  let result = { success: false, kind, ast: null };
+  let result = { success: false, ast: { kind } };
 
   if (!parser.lastReached() && parser.tokens[tokenPosition + 1].kind === kind) {
     result = { success: true, ast: { kind, value: parser.tokens[tokenPosition + 1].token } };
@@ -199,7 +198,7 @@ const parseTerminalRule = (parser, kind) => {
 /* ast = Object | Array | String */
 const parseNonTerminalRule = (parser, kind, f, modifier) => {
   const { tokenPosition } = parser;
-  let result = { success: false, kind, ast: null };
+  let result = { success: false, ast: { kind } };
   let parseResult;
 
   // Apply modifier function on parse result if it exists.
@@ -438,6 +437,70 @@ const not = arg => (parser) => {
   return parseResult;
 };
 
+const eoi = (parser) => {
+  // Get state before parsing.
+  const {
+    tokenPosition, lastIndentCount, column, line, ignoreNewline,
+  } = parser;
+
+  // Parse tokens.
+  const parseResult = { success: parser.lastReached(), justPeeking: true, ast: null };
+
+  // Revert parser state.
+  parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+
+  return parseResult;
+};
+
+/* ---------------  ASTRO PARSE FUNCTIONS ---------------------- */
+
+// integerliteral =
+//   | integerbinaryliteral
+//   | integeroctalliteral
+//   | integerhexadecimalliteral
+//   | integerdecimalliteral // Can eat others cake
+//   { kind, value }
+const integerLiteral = (parser) => {
+  const kind = 'integerliteral';
+  const parseResult = parseNonTerminalRule(
+    parser,
+    'integerliteral',
+    alt(
+      integerBinaryLiteral,
+      integerOctalLiteral,
+      integerHexadecimalLiteral,
+      integerDecimalLiteral,
+    ),
+  );
+
+  return { success: parseResult.success, ast: parseResult.ast.ast || { kind } };
+};
+
+
+// floatliteral =
+//   | floatliteralnomantissa
+//   | floatbinaryliteral
+//   | floatoctalliteral
+//   | floathexadecimalliteral
+//   | floatdecimalliteral // Can eat others cake
+//   { kind, value }
+const floatLiteral = (parser) => {
+  const kind = 'floatliteral';
+  const parseResult = parseNonTerminalRule(
+    parser,
+    'floatliteral',
+    alt(
+      floatLiteralNoMantissa,
+      floatBinaryLiteral,
+      floatOctalLiteral,
+      floatHexadecimalLiteral,
+      floatDecimalLiteral,
+    ),
+  );
+
+  return { success: parseResult.success, ast: parseResult.ast.ast || { kind } };
+};
+
 module.exports = {
   Parser,
   parseNonTerminalRule,
@@ -448,6 +511,7 @@ module.exports = {
   opt,
   and,
   not,
+  eoi,
   identifier,
   operator,
   punctuator,
@@ -465,4 +529,6 @@ module.exports = {
   regexLiteral,
   singleLineComment,
   // multiLineComment,
+  integerLiteral,
+  floatLiteral,
 };
