@@ -265,9 +265,7 @@ class Lexer {
 
       // NOTE: Only these infix operators with '//' in them are allowed: a // b, a //= b
       // Other operator names with '//' in them are invalid: a +// b, a //+ b
-      lastPosition = this.lastPosition;
-      column = this.column;
-      line = this.line;
+      ({ lastPosition, column, line } = this);
       if (this.eatToken('//') || this.eatToken('//=')) {
         this.revert(lastPosition, column, line);
         break;
@@ -327,7 +325,7 @@ class Lexer {
   // digithexadecimal =
   //   | [0-9a-fA-F]
   // integerbinaryliteral =
-  //   | '0b' digitbinary ('_'? digitbinary)*
+  //   | '0b' '_'? digitbinary ('_'? digitbinary)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   integerBinaryLiteral() {
     const { lastPosition, column, line } = this;
@@ -338,6 +336,9 @@ class Lexer {
 
     // Consume '0b'.
     if (this.eatToken('0b')) {
+      // Consume '_'?.
+      if (this.peekChar() === '_') this.eatChar();
+
       // Consume digitbinary.
       if (this.digitBinary.indexOf(this.peekChar()) > -1) {
         token += this.eatChar();
@@ -385,7 +386,7 @@ class Lexer {
   }
 
   // integeroctalliteral =
-  //   | '0o' digitoctal ('_'? digitoctal)*
+  //   | '0o' '_'? digitoctal ('_'? digitoctal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   integerOctalLiteral() {
     const { lastPosition, column, line } = this;
@@ -396,6 +397,9 @@ class Lexer {
 
     // Consume '0o'.
     if (this.eatToken('0o')) {
+      // Consume '_'?.
+      if (this.peekChar() === '_') this.eatChar();
+
       // Consume digitoctal.
       if (this.digitOctal.indexOf(this.peekChar()) > -1) {
         token += this.eatChar();
@@ -443,7 +447,7 @@ class Lexer {
   }
 
   // integerhexadecimalliteral =
-  //   | '0x' digithexadecimal ('_'? digithexadecimal)*
+  //   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   integerHexadecimalLiteral() {
     const { lastPosition, column, line } = this;
@@ -454,6 +458,9 @@ class Lexer {
 
     // Consume '0x'.
     if (this.eatToken('0x')) {
+      // Consume '_'?.
+      if (this.peekChar() === '_') this.eatChar();
+
       // Consume digithexadecimal.
       if (this.digitHexadecimal.indexOf(this.peekChar()) > -1) {
         token += this.eatChar();
@@ -556,8 +563,8 @@ class Lexer {
   }
 
   // floatbinaryliteral =
-  //   | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
-  //   | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+  //   | '0b' '_'? digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+  //   | '0b' '_'? digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   floatBinaryLiteral() {
     const { lastPosition, column, line } = this;
@@ -566,7 +573,7 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Consume integerpart: ('0b' digitbinary) ('_'? digitbinary)*.
+    // Consume integerpart: ('0b' '_'? digitbinary) ('_'? digitbinary)*.
     const integerPart = this.integerBinaryLiteral();
     if (integerPart) {
       token += integerPart.token;
@@ -717,8 +724,8 @@ class Lexer {
   }
 
   // floatoctalliteral =
-  //   | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
-  //   | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+  //   | '0o' '_'? digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+  //   | '0o' '_'? digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   floatOctalLiteral() {
     const { lastPosition, column, line } = this;
@@ -727,7 +734,7 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Consume integerpart: ('0o' digitoctal) ('_'? digitoctal)*.
+    // Consume integerpart: ('0o' '_'? digitoctal) ('_'? digitoctal)*.
     const integerPart = this.integerOctalLiteral();
     if (integerPart) {
       token += integerPart.token;
@@ -878,8 +885,8 @@ class Lexer {
   }
 
   // floathexadecimalliteral =
-  //   | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
-  //   | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
+  //   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+  //   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   floatHexadecimalLiteral() {
     const { lastPosition, column, line } = this;
@@ -888,7 +895,7 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Consume integerpart: ('0x' digithexadecimal) ('_'? digithexadecimal)*.
+    // Consume integerpart: ('0x' '_'? digithexadecimal) ('_'? digithexadecimal)*.
     const integerPart = this.integerHexadecimalLiteral();
 
     if (integerPart) {

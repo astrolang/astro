@@ -390,6 +390,21 @@ test(
   },
 );
 
+lexer = new Lexer('0b_1011_1000_1110');
+result = lexer.integerBinaryLiteral();
+test(
+  String.raw`0b_1011_1000_1110`,
+  result,
+  {
+    token: '101110001110',
+    kind: 'integerbinaryliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 17,
+  },
+);
+
 print('============== INTEGEROCTALLITERAL ==============');
 lexer = new Lexer('0o856');
 result = lexer.integerOctalLiteral();
@@ -459,6 +474,21 @@ test(
   },
 );
 
+lexer = new Lexer('0o_6655_1466');
+result = lexer.integerOctalLiteral();
+test(
+  String.raw`0o_)6655_1466`,
+  result,
+  {
+    token: '66551466',
+    kind: 'integeroctalliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 12,
+  },
+);
+
 print('============== INTEGERHEXADECIMALLITERAL ==============');
 lexer = new Lexer('0xgffe');
 result = lexer.integerHexadecimalLiteral();
@@ -525,6 +555,21 @@ test(
     stopLine: 1,
     startColumn: 0,
     stopColumn: 13,
+  },
+);
+
+lexer = new Lexer('0x_6C_5F_14_e6');
+result = lexer.integerHexadecimalLiteral();
+test(
+  String.raw`0x_6C_5F_14_e6`,
+  result,
+  {
+    token: '6C5F14e6',
+    kind: 'integerhexadecimalliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 14,
   },
 );
 
@@ -711,6 +756,21 @@ test(
   },
 );
 
+lexer = new Lexer('0b_11_01e-10_01');
+result = lexer.floatBinaryLiteral();
+test(
+  String.raw`0b_11_01e-10_01`,
+  result,
+  {
+    token: '1101e-1001',
+    kind: 'floatbinaryliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 15,
+  },
+);
+
 print('============== FLOATOCTALLITERAL ==============');
 lexer = new Lexer('0o7756_5461');
 result = lexer.floatOctalLiteral();
@@ -826,6 +886,21 @@ test(
   },
 );
 
+lexer = new Lexer('0o_57_01e-32_01');
+result = lexer.floatOctalLiteral();
+test(
+  String.raw`0o_57_01e-32_01`,
+  result,
+  {
+    token: '5701e-3201',
+    kind: 'floatoctalliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 15,
+  },
+);
+
 print('============== FLOATHEXADECIMALLITERAL ==============');
 lexer = new Lexer('0x7ae6_54Ff');
 result = lexer.floatHexadecimalLiteral();
@@ -938,6 +1013,21 @@ test(
     stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
+  },
+);
+
+lexer = new Lexer('0x_5f_EEp-32_A1');
+result = lexer.floatHexadecimalLiteral();
+test(
+  String.raw`0x_5f_EEp-32_A1`,
+  result,
+  {
+    token: '5fEEp-32A1',
+    kind: 'floathexadecimalliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 15,
   },
 );
 
