@@ -2,7 +2,7 @@
 
 const { print, keyToUnicode } = require('../src/compiler/utils');
 const Lexer = require('../src/compiler/syntax/lexer');
-const { Parser } = require('../src/compiler/syntax/parser');
+const { Parser, operator } = require('../src/compiler/syntax/parser');
 
 // PROBLEM
 // Bug when left is pressed two or more times and backspace is pressed
@@ -265,11 +265,10 @@ class AstroPrompt {
     }
   };
 
-
   showParsedInput() {
     if (this.lineBuffer !== '') {
       const tokens = new Lexer(this.lineBuffer).lex();
-      print(new Parser(tokens).parse());
+      print(new Parser(tokens).parse(operator));
       stdout.write('\n');
     }
   };
