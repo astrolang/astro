@@ -1,6 +1,3 @@
-eoi =
-  | !.
-
 /*************** LEXER ***************/
 
 spacechar =
@@ -51,15 +48,15 @@ digithexadecimal =
   | [0-9a-fA-F]
 
 integerbinaryliteral =
-  | '0b' digitbinary ('_'? digitbinary)*
+  | '0b' '_'? digitbinary ('_'? digitbinary)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 integeroctalliteral =
-  | '0o' digitoctal ('_'? digitoctal)*
+  | '0o' '_'? digitoctal ('_'? digitoctal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 integerhexadecimalliteral =
-  | '0x' digithexadecimal ('_'? digithexadecimal)*
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 integerdecimalliteral =
@@ -67,18 +64,18 @@ integerdecimalliteral =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floatbinaryliteral =
-  | '0b' digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
-  | '0b' digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+  | '0b' '_'? digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+  | '0b' '_'? digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floatoctalliteral =
-  | '0o' digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
-  | '0o' digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+  | '0o' '_'? digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+  | '0o' '_'? digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floathexadecimalliteral =
-  | '0x' digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
-  | '0x' digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floatdecimalliteral =
@@ -143,7 +140,11 @@ multilinecomment =
   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' _? &(newline | eoi)
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
+
 /*************** PARSER ***************/
+eoi =
+  | !.
+
 operator =
   { kind, value }
 
@@ -174,7 +175,7 @@ floathexadecimalliteral =
 floatdecimalliteral =
   { kind, value }
 
-floatLiteralnomantissa =
+floatliteralnomantissa =
   { kind, value }
 
 singlelinestringliteral =
@@ -204,6 +205,7 @@ integerliteral =
   { kind, value }
 
 floatliteral =
+  | floatliteralnomantissa
   | floatbinaryliteral
   | floatoctalliteral
   | floathexadecimalliteral
