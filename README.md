@@ -17,7 +17,7 @@ Current Version: 0.1.14
 * You can now use astro interpreter by typing ```astro``` in the terminal.
 
 ### What is Astro?
-Astro is a fullstack multi-paradigm programming language designed for high-performance numerical-computing applications.
+Astro is a fullstack multi-paradigm programming language designed for high-performance numerical-computing and web applications.
 - statically-typed language that
 - compiles to native code and WebAssembly,
 - has no GC,
@@ -28,13 +28,13 @@ Astro is a fullstack multi-paradigm programming language designed for high-perfo
 ### Why create yet another programming language?
 The language creator had a set of requirements (listed above) not met by any single language. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
-SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing high-performance apps for web and/or desktop seamless, easier and less frustrating.
+SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing high-performance web and native apps seamless, easier and less frustrating.
 
-Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, scientific simulations and other real-time software. This also makes it suitable for embedded software development even though it's not a goal.
+Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, scientific simulations and other real-time software. This can make it suitable for embedded software development even though it's not a goal.
 
-In addition, Astro makes some design decisions that are intuitive for numerical computing applications. For example, it has builtin support for vectors, matrices, vectorization, unicode identifiers, etc.
+In addition, Astro makes several design decisions that benefit numerical computing applications. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc.
 
-In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
+In order to match up with the expressiveness and productivity level of dynamic programming languages, Astro adds full type inference, and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
 
 #### Python
 ```python
