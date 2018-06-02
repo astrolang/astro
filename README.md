@@ -34,7 +34,7 @@ Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage
 
 In addition, Astro makes several design decisions that benefit numerical computing applications. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc.
 
-In order to match up with the expressiveness and productivity level of dynamic programming languages, Astro adds full type inference, and several other high-level language features that increase productivity. A typical Astro program looks very much like its Python translation.
+In order to match up with the expressiveness and productivity level of dynamic programming languages, Astro adds full type inference, and several other high-level language features that increase productivity. It feels like a scripting language for the most part. A typical Astro program looks very much like its Python translation.
 
 #### Python
 ```python
