@@ -12,9 +12,9 @@ Current Version: 0.1.14
 ![astro screenshot](https://github.com/appcypher/astro/blob/dev/media/images/astro-syntax.png)
 
 ### Installation
-* If you don't have node installed already, download and install it [here](https://nodejs.org/en/download/).
+* If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
 * Install astro by typing ```npm i -g astrolang``` in the terminal.
-* You can now use astro interpreter by typing ```astro``` in the terminal.
+* You can start using astro with ```astro -h```.
 
 ### What is Astro?
 Astro is a fullstack multi-paradigm programming language designed for high-performance numerical-computing and web applications.
