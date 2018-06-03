@@ -2,7 +2,7 @@
 fun prod(a, start: 1):
     var result = start
     for i in a:
-        result *= i
+        result ×= i
     result
 
 # Using fold function

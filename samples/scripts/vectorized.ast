@@ -7,3 +7,6 @@ a .+ b
 
 # Vectorized function call
 +.(a)
+
+# Vectorized postfix operation
+a.²
