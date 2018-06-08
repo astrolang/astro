@@ -12,12 +12,19 @@ Current Version: 0.1.14
 ![astro screenshot](https://github.com/appcypher/astro/blob/dev/media/images/astro-syntax.png)
 
 ### Installation
-* If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
+If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
+#### USERS
 * Install astro by typing ```npm i -g astrolang``` in the terminal.
 * You can start using astro with ```astro -h```.
 
+#### DEVELOPERS
+* Clone repository ➡ ```git clone https://github.com/appcypher/astro.git```.
+* Move to astro directory ➡ ```cd astro```.
+* Install necessary dependencies ➡ ```npm i```.
+* Run tests ➡ ```npm run test:compiler```.
+
 ### What is Astro?
-Astro is a fullstack multi-paradigm programming language designed for high-performance numerical-computing and web applications.
+Astro is a _fullstack_ multi-paradigm programming language designed for high-performance numerical-computing and web applications.
 - statically-typed language that
 - compiles to native code and WebAssembly,
 - has no GC,
@@ -28,7 +35,7 @@ Astro is a fullstack multi-paradigm programming language designed for high-perfo
 ### Why create yet another programming language?
 The language creator had a set of requirements (listed above) not met by any single language. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
-SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro fullstack nature makes developing high-performance web and native apps seamless, easier and less frustrating.
+SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro makes developing high-performance web and native apps seamless, easier and less frustrating.
 
 Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, scientific simulations and other real-time software. This can make it suitable for embedded software development even though it's not a goal.
 
@@ -111,141 +118,6 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 - [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem.
 - [WAlt](https://github.com/ballercat/walt) - an alternative syntax for WebAssembly text format. It's an experiment for using JavaScript syntax to write to as 'close to the metal' as possible.
 
-### Project folder structure
-```
-.
-├── .codeclimate.yml
-├── .coveralls.yml
-├── .eslintignore
-├── .eslintrc.json
-├── .gitattributes
-├── .gitignore
-├── .hound.yml
-├── .travis.yml
-├── CHANGELOG.md
-├── CODE_OF_CONDUCT.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── MVP.md
-├── README.md
-├── bin
-│   └── astro.js
-├── designs
-│   └── astro-prompt-design.txt
-├── docs
-│   ├── README.md
-│   ├── compiler
-│   │   ├── README.md
-│   │   ├── asts-old.md
-│   │   ├── compiler.md
-│   │   ├── old-compiler-notes.ast
-│   │   ├── parser-rewrite.ast
-│   │   └── semantic-analysis.md
-│   └── language
-│       ├── README.md
-│       ├── development.ast
-│       ├── feature-proposals.md
-│       └── summary.ast
-├── media
-│   └── images
-│       └── astro-syntax.png
-├── package-lock.json
-├── package.json
-├── samples
-│   ├── README.md
-│   ├── fibonacci
-│   │   └── fibonacci.ast
-│   ├── fizzbuzz
-│   │   └── fizzbuzz.ast
-│   ├── hello-world
-│   │   └── hello-world.ast
-│   ├── miscellaneous
-│   │   └── preview.ast
-│   ├── normalize
-│   │   └── normalize.ast
-│   ├── product
-│   │   └── product.ast
-│   ├── rosetta
-│   │   ├── 100-doors.ast
-│   │   ├── 15-puzzle-game.ast
-│   │   ├── 99-bottles.ast
-│   │   ├── abc-problem.ast
-│   │   ├── accumulator-factory.ast
-│   │   ├── address-of-a-variable.ast
-│   │   ├── averages-root-mean-square.ast
-│   │   ├── ceasar-cipher.ast
-│   │   ├── comma-quibbling.ast
-│   │   ├── concurrent-computing.ast
-│   │   ├── conditional-structures.ast
-│   │   ├── integer-comparison.ast
-│   │   ├── maximum-triangle-path-sum.ast
-│   │   ├── mean.ast
-│   │   ├── number-reversal.ast
-│   │   ├── queue-usage.ast
-│   │   ├── read-a-file-line-by-line.ast
-│   │   ├── sha-1.ast
-│   │   ├── sorting-algorithms-merge-sort.ast
-│   │   ├── string-comparison.ast
-│   │   ├── sum-of-squares.ast
-│   │   └── tokenize-a-string.ast
-│   ├── sum
-│   │   └── sum.ast
-│   ├── vectorized
-│   │   └── vectorized.ast
-│   └── wordcount
-│       └── wordcount.ast
-├── src
-│   ├── boilerplate
-│   │   └── parser-boilerplate.js
-│   ├── compiler
-│   │   ├── README.md
-│   │   ├── all-test.js
-│   │   ├── codegen
-│   │   │   ├── ast2llvm.js
-│   │   │   └── ast2wast.js
-│   │   ├── semantics
-│   │   │   └── scope.js
-│   │   ├── syntax
-│   │   │   ├── grammar-and-ast.peg
-│   │   │   ├── lexer-test.js
-│   │   │   ├── lexer.js
-│   │   │   ├── parser-old.js
-│   │   │   ├── parser-test.js
-│   │   │   └── parser.js
-│   │   └── utils
-│   │       ├── index-test.js
-│   │       └── index.js
-│   ├── stdlib
-│   │   └── README.md
-│   └── support
-│       ├── README.md
-│       └── editors
-│           ├── atom
-│           │   ├── README.md
-│           │   ├── grammars
-│           │   │   └── astro.cson
-│           │   ├── package.json
-│           │   └── snippets
-│           │       └── snippets.cson
-│           ├── sublime-text
-│           │   └── astro.sublime-syntax
-│           └── vscode
-│               ├── CHANGELOG.md
-│               ├── README.md
-│               ├── language-configuration.json
-│               ├── package.json
-│               ├── syntaxes
-│               │   └── astro.tmLanguage.json
-│               ├── tsconfig.json
-│               └── vsc-extension-quickstart.md
-└── tests
-    ├── README.md
-    ├── compiler
-    │   ├── syntax
-    │   │   ├── declarations.spec.js
-    │   │   └── misc.spec.js
-    │   └── utils
-    │       └── utils.spec.js
-    └── samples
-        └── fibonacci.spec.js
-```
+
+### Attributions
+- Astro logo made by [Freepik](https://www.freepik.com/)
