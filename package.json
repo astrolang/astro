@@ -1,6 +1,6 @@
 {
   "name": "astrolang",
-  "version": "0.1.14-4",
+  "version": "0.1.14-5",
   "description": "Astro is a high-performance statically-typed programming language with Python-like syntax and technical-computing orientation similar to Julia.",
   "scripts": {
     "test:compiler": "nyc --reporter=lcov --reporter=text node src/compiler/all-test.js",
