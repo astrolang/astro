@@ -84,7 +84,7 @@ floatdecimalliteral =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 floatLiteralnomantissa =
-  | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator)
+  | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier)
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 singlequotestringchars =
@@ -126,7 +126,7 @@ singlelinecommentchars =
   { token }
 
 singlelinecomment =
-  | "#" singlelinecommentchars? &(newline | eoi)
+  | "#" !('=') singlelinecommentchars? &(newline | eoi)
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecommentchars =
@@ -142,9 +142,6 @@ multilinecomment =
 
 
 /*************** PARSER ***************/
-eoi =
-  | !.
-
 operator =
   { kind, value }
 
@@ -233,47 +230,59 @@ coefficientexpression = // Unfurl
 
 comment =
   | multilinecomment
-  | !('#=') singlelinecomment // Accepts others failed cake. Rectified with predicate.
+  | singlelinecomment // Accepts others failed cake. Rectified with predicate.
   { kind, value }
 
-indent = // TODO. adding !space
+// >>>>> DIRECTIVES >>>>>
+
+eoi =
+  | !.
+
+indent = // TODO. adding !space <- Dunno what this is about. May remove
   | ' '+
   { level }
 
-samedent = // TODO. adding !space
+samedent = // TODO. adding !space <- Dunno what this is about. May remove
   | ' '+
   | ''
   { level }
 
-dedent = // TODO. adding !space
+dedent = // TODO. adding !space <- Dunno what this is about. May remove
   | ' '+
+  | ''
   { level }
 
+spaces =
+  | space+
+
+nospace
+  | !spaces
+
 nextline =
-  | newline (_? newline)*
+  | newline (spaces? newline)*
+
+linecontinuation =
+  | spaces? '.' '.' '.' spaces? nextline samedent
+
+_ =
+  | linecontinuation
+  | nextcodeline samedent // Checks if ignoreNewline is true first
+  | spaces // Can eat others cake
+
+
+_comma =
+  | _? ','
+
+// <<<<< DIRECTIVES <<<<<
 
 nextcodeline =
-  | space* nextline (samedent comment (nextline | &eoi))*
+  | spaces? nextline (samedent comment (nextline | &eoi))*
   { comments }
 
 dedentoreoiend =
   | nextcodeline dedent
   | nextcodeline? _? eoi
   { comments }
-
-linecontinuation =
-  | space* '...' space* nextline samedent
-
-spaces =
-  | space+
-
-_ =
-  | linecontinuation
-  | &{ignorenewline} nextcodeline samedent
-  | space+ // Can eat others cake
-
-_comma =
-  | _? ','
 
 listarguments =
   | primitiveexpression (_comma _? primitiveexpression)* _comma?
