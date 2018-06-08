@@ -12,6 +12,7 @@ const astroVersion = '0.1.14';
 
 const astroCodePrompt = '\x1b[1m\x1b[35m•••• \x1b[0m';
 const astroHelpPrompt = '\x1b[1m\x1b[32m?••• \x1b[0m';
+const astroShellPrompt = '\x1b[1m\x1b[33m$••• \x1b[0m';
 
 const commandlineInfo = {
   banner: (mode) => {
@@ -64,6 +65,34 @@ const commandlineInfo = {
   notSupported: `
   Those commandline arguments are currently not supported.
   Astro is still under development. You can check on it later.\n\n`,
+  helpModeNotAvailable: `
+  +-----------------------------------------+
+  |  \x1b[1m\x1b[32mHelp Mode\x1b[0m is currently not available!  |
+  |           Check again later.            |
+  +-----------------------------------------+
+                          \\  \x1b[1m\x1b[32m.        .\x1b[0m
+                           \\\x1b[1m\x1b[32m  \\\`-"'"-'/
+                               } O O {
+                              =.  Y  ,=
+                                /^^^\\  .
+                               /     \\  )
+                              (  )-(  )/
+                              """  """
+  \x1b[0m`,
+  shellModeNotAvailable: `
+  +-------------------------------------------+
+  |  \x1b[1m\x1b[33mShell Mode\x1b[0m is currently not available!   |
+  |           Check again later.              |
+  +-------------------------------------------+
+                         \\   \x1b[1m\x1b[33m.        .\x1b[0m
+                          \\\x1b[1m\x1b[33m   \\\`-"'"-'/
+                               } O O {
+                              =.  Y  ,=
+                                /^^^\\  .
+                               /     \\  )
+                              (  )-(  )/
+                              """  """
+  \x1b[0m`,
 };
 
 // LOGIC
@@ -78,6 +107,9 @@ class AstroPrompt {
   constructor() {
     // Current prompt mode.
     this.currentPrompt = astroCodePrompt;
+
+    // Prompt mode.
+    this.mode = 'code';
 
     // This keeps the data on each line in a buffer.
     this.lineBuffer = '';
@@ -132,11 +164,22 @@ class AstroPrompt {
         this.exited(this.lineBuffer);
         stdout.write('\n');
 
-        // Show relevant output based on chosen phase.
-        if (phase === 'lexer') {
-          this.showLexedInput();
-        } else if (phase === 'parser') {
-          this.showParsedInput();
+        // Check if prompt is in mode.
+        if (this.mode === 'help') {
+          this.showHelpResult();
+          this.mode = 'code';
+        // Check if prompt is in mode.
+        } else if (this.mode === 'shell') {
+          this.showShellResult();
+          this.mode = 'code';
+        // Otherwise prompt is in code mode.
+        } else {
+          // Show relevant output based on chosen phase.
+          if (phase === 'lexer') {
+            this.showLexerResult();
+          } else if (phase === 'parser') {
+            this.showParserResult();
+          }
         }
 
         this.resetPrompt(); // Reset prompt.
@@ -236,10 +279,8 @@ class AstroPrompt {
         } else {
           this.lineBuffer += data; // Keep data in lineBuffer.
           // Check for mode switch.
-          if (!this.modeSwitch(this.lineBuffer)) {
+          if (!this.modeSwitch()) {
             stdout.write(`${data}`); // Write current data out.
-          } else {
-            this.lineBuffer = '';
           }
         }
       }
@@ -256,39 +297,62 @@ class AstroPrompt {
     // Show the prompt.
     stdout.write(`${astroCodePrompt}`);
 
-  };
+  }
 
-  showLexedInput() {
+  showLexerResult() {
     if (this.lineBuffer !== '') {
       print(new Lexer(this.lineBuffer).lex());
       stdout.write('\n');
     }
-  };
+  }
 
-  showParsedInput() {
+  showParserResult() {
     if (this.lineBuffer !== '') {
       const tokens = new Lexer(this.lineBuffer).lex();
       print(new Parser(tokens).parse(operator));
       stdout.write('\n');
     }
-  };
+  }
+
+  showHelpResult() {
+    if (this.lineBuffer !== '') {
+      stdout.write(commandlineInfo.helpModeNotAvailable);
+      stdout.write('\n');
+    }
+  }
+
+  showShellResult() {
+    if (this.lineBuffer !== '') {
+      stdout.write(commandlineInfo.shellModeNotAvailable);
+      stdout.write('\n');
+    }
+  }
 
   exited() {
     if (this.lineBuffer.trim() === 'exit') {
       stdout.write('\n');
       process.exit();
     }
-  };
+  }
 
   modeSwitch() {
     if (this.lineBuffer === '?') {
+      this.lineBuffer = '';
       stdout.clearLine();  // Clear current text.
       stdout.cursorTo(0);  // Move cursor to beginning of line.
       stdout.write(astroHelpPrompt);
+      this.mode = 'help';
+      return true;
+    } else if (this.lineBuffer === ';') {
+      this.lineBuffer = '';
+      stdout.clearLine();  // Clear current text.
+      stdout.cursorTo(0);  // Move cursor to beginning of line.
+      stdout.write(astroShellPrompt);
+      this.mode = 'shell';
       return true;
     }
     return false;
-  };
+  }
 }
 
 new AstroPrompt().startCommandline();
