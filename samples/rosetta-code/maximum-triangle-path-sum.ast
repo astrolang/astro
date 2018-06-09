@@ -1,9 +1,9 @@
 fun solve(tri):
     var tri = tri
-    while tri.len > 1:
+    while tri.length > 1:
         let t0 = tri.pop()
-        for i, t in enumerate(tri[!1]):
-            tri[!1, i] = max(t0[i], t0[i]) + t
+        for i, t in enumerate(tri[end]):
+            tri[end, i] = max(t0[i], t0[i]) + t
     tri[1, 1]
 
 let data = """
@@ -27,4 +27,4 @@ let data = """
 27 02 92 23 08 71 76 84 15 52 92 63 81 10 44 10 69 93
 """
 
-print solve data.lines.map|x| => x.split().map(int)
+print solve data.lines.map(x => x.split().map(int))

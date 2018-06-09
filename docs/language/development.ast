@@ -27,18 +27,29 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- highlight command notation
+    print /9/
+    print @dict{x, y}
+    print $name
+    print { x: y | x in z }
+    print [x | y in z]
+
+-
+
+- remove highlight on prev lambda syntax
+    |a, b| => print a + b
+
 - highlight multiple assignment
     cost price total = 4_000
 
-- highlight new regex syntax properly, discrad former
-    var regex = //regex//
+- highlight regex syntax properly
+    var regex = /regex/
     var regex =
-        //regex//
-    print(//regex//)
+        /regex/
+    print(/regex/)
 
-    a // b // c
-    a //= b
-
+    a / b / c
+    a /= b
 
 - remove highlight on unsafe keyword
     unsafe
@@ -49,9 +60,6 @@ john.{
 - remove highlight on typenames
     type Person
     Person
-
-- fix highlight on regex literal when around operators
-    let op = 1//i + 1//d
 
 - remove highlight on ns literals
     ns.()
@@ -67,10 +75,11 @@ john.{
     bogosort!(v)
 
 - highlight new vectorized string format and remove highlight on old format
-    let leftPadding = 'left padding: ${>10}(string)'
-    let rightPadding = 'right padding: ${<10}(string)'
-    let placeholderPadding = 'placeholder padding: ${_<10}(string)'
-    let centering = 'centering: ${^10}(string)'
+    let left_padding = 'left padding: $|>10|{string}'
+    let right_padding = 'right padding: $|<10|{string}'
+    let placeholder_padding = 'placeholder padding: $|_<10|{string}'
+    let centering = 'centering: $|^10|{string}'
+    let no_format = 'centering: ${string}'
 
     let leftPadding = 'left padding: $:>10(string)'
     let rightPadding = 'right padding: $:<10(string)'
@@ -98,10 +107,6 @@ john.{
 - remove highlight on `at` keyword
     break 45 at top
 
-- remove highlight on `do` keyword
-    do: x
-    while x > y
-
 - remove highlight on `extend` keyword
     extend MyType
 
@@ -112,9 +117,6 @@ john.{
 - fix regex highlight (/[^/]+/)
     let x = /\d/ + re.'\[a-z]' + /\d/
 
-- highlight dot n0tation member call and function call.
-    john~name, ~age
-    print~('hello')~('world')
 
 # TYPE
 Int64 :: Type{Int64}

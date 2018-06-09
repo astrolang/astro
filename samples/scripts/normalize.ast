@@ -6,7 +6,7 @@ fun norm(a):
     √(result)
 
 # Using map function
-fun norm(a) = √sum(a.map|x| => x²)
+fun norm(a) = √sum a.map(x => x²)
 
 # Using vectorization
 fun norm(a) = √sum(a.²)

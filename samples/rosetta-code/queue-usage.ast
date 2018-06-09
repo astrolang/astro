@@ -1,7 +1,7 @@
-let myQueue = Queue[Str]()
-myQueue.push 'foo'
-myQueue.push 'bar'
-myQueue.push 'baz'
-print myQueue.pop() # 'foo'
-print myQueue.pop() # 'bar'
-print myQueue.pop() # 'baz'
+let my_queue = Queue[Str]()
+my_queue.push 'foo'
+my_queue.push 'bar'
+my_queue.push 'baz'
+print my_queue.pop() # 'foo'
+print my_queue.pop() # 'bar'
+print my_queue.pop() # 'baz'

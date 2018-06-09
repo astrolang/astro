@@ -3,7 +3,7 @@ fun bottles(n):
     | 1 => "1 bottle"
     | _ => "$n bottles"
 
-for n in !99..1:
+for n in 99..-1..1:
     print """
     ${bottles n} of beer on the wall
     ${bottles n} of beer

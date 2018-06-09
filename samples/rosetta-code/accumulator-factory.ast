@@ -1,4 +1,4 @@
-fun accumulator(sum) = |n| => sum += n
+fun accumulator(sum) = n => sum += n
 let f = accumulator(5.)
 print f(5)   # 10.0
 print f(10)  # 20.0

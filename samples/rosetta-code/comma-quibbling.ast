@@ -1,5 +1,5 @@
 fun quibble(s):
-    let result = " and ".join(s).replace(/ and /, ", ", len(s) - 1)
+    let result = " and ".join(s).replace(/ and /, ", ", length(s) - 1)
     "{ $result }"
 
 let s = [

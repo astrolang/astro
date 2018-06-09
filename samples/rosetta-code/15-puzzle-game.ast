@@ -1,6 +1,6 @@
-type Puzzle(var items: @{}, var position: -1)
+type Puzzle(var items: @dict{}, var position: -1)
 
-fun mainFrame(puz):
+fun mainframe(puz):
     let d = puz.items
     print.{
         ('+-----+-----+-----+-----+'),
@@ -15,7 +15,7 @@ fun mainFrame(puz):
     }
 
 fun format(puz, ch):
-    ch.trim().len
+    ch.trim().length
     | 1 => '  $ch  '
     | 2 => '  $ch '
     | 0 => '     '
@@ -28,7 +28,7 @@ fun change(puz, to):
     swap(puz.items[fro], [to])
     puz.position = to;
 
-fun buildBoard(puz, difficulty):
+fun buildboard(puz, difficulty):
     for i in 1..16:
         puz.items[i] = puz.format(str i)
     var tmp = a
@@ -42,23 +42,23 @@ fun buildBoard(puz, difficulty):
         | 1 => 50
         | _ => 100
     for i in 1..diff:
-        let lst = puz.validMoves()
+        let lst = puz.validmoves()
         let lst1 = []
         for j in lst:
             lst1.push(j.trim().int())
-        puz.change(lst1[random(1, lst1.len - 1)])
+        puz.change(lst1[random(1, lst1.length - 1)])
 
-fun validMoves(puz):
+fun validmoves(puz):
     let pos = puz.position
-    | 6 | 7 | 10 | 11 =>
+    | 6 or 7 or 10 or 11 =>
         puz.items.{ [pos - 4], [pos - 1], [pos + 1], [pos + 4] }
-    | 5 | 9 =>
+    | 5 or 9 =>
         puz.items.{ [pos - 4], [pos + 4], [pos + 1] }
-    | 8 | 12 =>
+    | 8 or 12 =>
         puz.items.{ [pos - 4], [pos + 4], [pos - 1] }
-    | 2 | 3 =>
+    | 2 or 3 =>
         puz.items.{ [pos - 1], [pos + 1], [pos + 4] }
-    | 14 | 15 =>
+    | 14 or 15 =>
         puz.items.{ [pos - 1], [pos + 1], [pos - 4] }
     | 1 =>
         puz.items.{ [pos + 1], [pos + 4] }
@@ -69,7 +69,7 @@ fun validMoves(puz):
     | 16 =>
         puz.items.{ [pos - 1], [pos - 4] }
 
-fun gameOver(puz):
+fun mainframe(puz):
     var flag = false
     for a, b in puz.items:
         if b == '     ':
@@ -79,14 +79,14 @@ fun gameOver(puz):
     return flag
 
 let game = Puzzle()
-game.buildBoard(
+game.buildboard(
     int(input('Enter the difficulty : 0 1 2\n2 => highest 0=> lowest\n'))
 )
-game.mainFrame()
+game.mainframe()
 print 'Enter 0 to exit'
 loop:
     print 'Hello user:\nTo change the position just enter the no. near it'
-    var lst = game.validMoves()
+    var lst = game.validmoves()
     var lst1 = []
     for i in lst:
         lst1.push(i.trim().int())
@@ -99,7 +99,7 @@ loop:
         print('Wrong move')
     else:
         game.change(x)
-    game.mainFrame()
-    if g.gameOver():
+    game.mainframe()
+    if g.gameover():
         print 'You WON'
         break
