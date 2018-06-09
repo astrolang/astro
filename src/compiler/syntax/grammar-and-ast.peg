@@ -266,9 +266,8 @@ linecontinuation =
 
 _ =
   | linecontinuation
-  | nextcodeline samedent // Checks if ignoreNewline is true first
+  | nextcodeline samedent // Checks if ignoreNewline is true first // Comments here can be ignored because they are in enclosures.
   | spaces // Can eat others cake
-
 
 _comma =
   | _? ','
@@ -276,17 +275,17 @@ _comma =
 // <<<<< DIRECTIVES <<<<<
 
 nextcodeline =
-  | spaces? nextline (samedent comment (nextline | &eoi))*
-  { comments }
+  | spaces? nextline (samedent comment (nextline | eoi))*
+  { kind, comments }
 
 dedentoreoiend =
   | nextcodeline dedent
   | nextcodeline? _? eoi
-  { comments }
+  { kind, comments }
 
 listarguments =
   | primitiveexpression (_comma _? primitiveexpression)* _comma?
-  { expressions }
+  { kind, expressions }
 
 listargumentsmultiple =
   | listliteral (nextcodeline samedent listliteral)+
