@@ -1,11 +1,15 @@
-/* eslint-disable no-param-reassign, no-constant-condition */
+/* eslint-disable no-param-reassign, no-constant-condition, no-underscore-dangle */
+// eslint-disable-next-line no-unused-vars
+const { print } = require('../utils');
 
 /**
  * A Custom Packrat Parser Combinator for Astro extended-PEG grammar.
  *
  * NOTES ON SPECIAL RULES:
- * `IGNORE_NEWLINES` is needed in brackets where the first element isn't indented, it is
- * used to signal that the elements of the bracket are to be parsed as being on a single line.
+ * * `ignoreNewlines` is needed in brackets where the first element isn't indented, it is
+ *   used to signal that the elements of the bracket are to be parsed as being on a single line.
+ * * Some directive rules do not return an ast and they don't consume tokens. This means even if the
+ *   rule fails, it won't advance tokenPosition. So rules like ```more(spaces)``` will be recursive.
  */
 class Parser {
   constructor(tokens) {
@@ -78,9 +82,27 @@ class Parser {
   }
 
   /**
+   * Compares the starting characters or the entire token with argument string.
+   * @param{String} str.
+   * @return{{ success: Boolean, token: String }} result.
+   */
+  eatTokenStart(str) {
+    const { tokenPosition } = this;
+    let result = { success: false, token: null };
+
+    if (!this.lastReached() && this.tokens[tokenPosition + 1].token.startsWith(str)) {
+      result = { success: true, token: str };
+      // Update parser positional information.
+      this.updateState(tokenPosition + 1);
+    }
+
+    return result;
+  }
+
+  /**
    * Parses string and function arguments passed to it.
    * @param{...*} args - string and rules/intermediate functions to parse.
-   * @return{{ success: Boolean, asts: Array }} result
+   * @return{{ success: Boolean, ast: Array }} result
    */
   parse(...args) {
     // Get state before parsing.
@@ -88,7 +110,7 @@ class Parser {
       tokenPosition, lastIndentCount, column, line, ignoreNewline,
     } = this;
 
-    const result = { success: true, asts: [] };
+    const result = { success: true, ast: [] };
 
     // Parse each argument.
     for (let i = 0; i < args.length; i += 1) {
@@ -96,11 +118,15 @@ class Parser {
 
       // Function.
       if (typeof (arg) === 'function') {
+        const argName = arg.name.toLowerCase();
         // Check if rule has already been cached for that position.
         // This will apply to rules only, since intermediates, parse, opt, etc. won't be cached.
-        if (this.cache[this.tokenPosition] && this.cache[this.tokenPosition][arg.name]) {
-          const parseResult = this.cache[this.tokenPosition][arg.name];
-          result.asts.push(parseResult.ast);
+        if (this.cache[this.tokenPosition] && this.cache[this.tokenPosition][argName]) {
+          const parseResult = this.cache[this.tokenPosition][argName];
+
+          if (!parseResult.directive) {
+            result.ast.push(parseResult.ast);
+          }
 
           // If cached rule result shows failed attempt.
           if (!parseResult.success) {
@@ -109,7 +135,7 @@ class Parser {
 
           // Otherwise skip forward
           } else {
-            this.tokenPosition = this.cache[this.tokenPosition].skip;
+            this.tokenPosition = this.cache[this.tokenPosition][argName].skip;
           }
 
         // If rule isn't already cached or if it is not a rule but an intermediate.
@@ -118,9 +144,9 @@ class Parser {
           const parseResult = arg(this);
 
           // If the parser fucntion is not `and` or `not`
-          if (!parseResult.justPeeking) {
-            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
-            result.asts.push(parseResult.asts || parseResult.ast);
+          if (!parseResult.directive) {
+            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
+            result.ast.push(parseResult.ast);
           }
 
           // Parsing failed.
@@ -132,9 +158,16 @@ class Parser {
 
       // String.
       } else if (typeof (arg) === 'string') {
-        // Compare token.
-        const parseResult = this.eatToken(arg);
-        result.asts.push(parseResult.token);
+        let parseResult = null;
+
+        if (arg[0] === '§') {
+          // Compare start of token.
+          parseResult = this.eatTokenStart(arg.slice(1));
+        } else {
+          // Compare token.
+          parseResult = this.eatToken(arg);
+        }
+        result.ast.push(parseResult.token);
 
         // Parsing failed.
         if (!parseResult.success) {
@@ -163,18 +196,26 @@ class Parser {
    * @param{Number} tokenPosition - start position of rule.
    * @param{{ success: Boolean, ast: Object, skip: Number }} result - result of parse.
    */
-  cacheRule(kind, tokenPosition, result) {
+  cacheRule(kind, tokenPosition, result, isDirective) {
     // If that tokenPosition doesn't already exist in the cache.
     if (!this.cache[tokenPosition]) {
       this.cache[tokenPosition] = {};
       this.cache[tokenPosition][kind] = {
         success: result.success, ast: result.ast, skip: this.tokenPosition - tokenPosition,
       };
+      // Check if is a directive
+      if (isDirective) {
+        this.cache[tokenPosition][kind].directive = true;
+      }
     // If tokenPosition exists in the cache, but the rule doesn't exist for the position.
     } else if (!this.cache[tokenPosition][kind]) {
       this.cache[tokenPosition][kind] = {
         success: result.success, ast: result.ast, skip: this.tokenPosition - tokenPosition,
       };
+      // Check if is a directive
+      if (isDirective) {
+        this.cache[tokenPosition][kind].directive = true;
+      }
     }
   }
 }
@@ -195,32 +236,7 @@ const parseTerminalRule = (parser, kind) => {
   return result;
 };
 
-/* ast = Object | Array | String */
-const parseNonTerminalRule = (parser, kind, f, modifier) => {
-  const { tokenPosition } = parser;
-  let result = { success: false, ast: { kind } };
-  let parseResult;
-
-  // Apply modifier function on parse result if it exists.
-  if (modifier) {
-    parseResult = modifier(f(parser));
-  } else {
-    parseResult = f(parser);
-  }
-
-
-  // If parse successful.
-  if (parseResult.success) {
-    // Grab needed asts, etc.
-    result = { success: true, ast: { kind, ast: (parseResult.asts || parseResult.ast) } };
-  }
-
-  // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
-
-  return result;
-};
-
+const newline = parser => parseTerminalRule(parser, 'newline');
 const identifier = parser => parseTerminalRule(parser, 'identifier');
 const operator = parser => parseTerminalRule(parser, 'operator');
 const punctuator = parser => parseTerminalRule(parser, 'punctuator');
@@ -234,15 +250,17 @@ const floatHexadecimalLiteral = parser => parseTerminalRule(parser, 'floathexade
 const floatDecimalLiteral = parser => parseTerminalRule(parser, 'floatdecimalliteral');
 const floatLiteralNoMantissa = parser => parseTerminalRule(parser, 'floatLiteralnomantissa');
 const singleLineStringLiteral = parser => parseTerminalRule(parser, 'singlelinestringliteral');
-// TODO: multiLineStringLiteral parsing
+// TODO: Proper multiLineStringLiteral parsing
+const multiLineStringLiteral = parser => parseTerminalRule(parser, 'multilinestringliteral');
 const regexLiteral = parser => parseTerminalRule(parser, 'regexliteral');
 const singleLineComment = parser => parseTerminalRule(parser, 'singlelinecomment');
-// TODO: multiLineComment parsing
+// TODO: Proper multiLineComment parsing. Mutilinecomment should also be inilineable
+const multiLineComment = parser => parseTerminalRule(parser, 'multilinecomment');
 
 /**
  * Redirects to parser.parse.
  * @param{...*} args - string and rules/intermediate functions to parse.
- * @return{{ success: Boolean, asts: Array }} result
+ * @return{{ success: Boolean, ast: Array }} result
  */
 const parse = (...args) => parser => parser.parse(...args);
 
@@ -266,21 +284,22 @@ const alt = (...args) => (parser) => {
 
     // Function.
     if (typeof (arg) === 'function') {
+      const argName = arg.name.toLowerCase();
       // Check if rule has already been cached for that position.
       // This will apply to rules only, since intermediates, parse, opt, etc. won't be cached.
-      if (parser.cache[parser.tokenPosition] && parser.cache[parser.tokenPosition][arg.name]) {
-        const parseResult = parser.cache[parser.tokenPosition][arg.name];
+      if (parser.cache[parser.tokenPosition] && parser.cache[parser.tokenPosition][argName]) {
+        const parseResult = parser.cache[parser.tokenPosition][argName];
 
         // If cached rule result shows success.
         if (parseResult.success) {
           result.success = true;
           result.alternative = i + 1;
-          result.ast = parseResult.ast;
-          break;
 
-        // Otherwise skip forward
-        } else {
-          parser.tokenPosition = parser.cache[parser.tokenPosition].skip;
+          if (!parseResult.directive) {
+            result.ast = parseResult.ast;
+          }
+
+          break;
         }
 
       // If rule isn't already cached or if it is not a rule but an intermediate.
@@ -294,9 +313,9 @@ const alt = (...args) => (parser) => {
           result.alternative = i + 1;
 
           // If the parser fucntion is not `and` or `not`
-          if (!parseResult.justPeeking) {
-            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
-            result.ast = parseResult.asts || parseResult.ast;
+          if (!parseResult.directive) {
+            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
+            result.ast = parseResult.ast;
           }
 
           break;
@@ -317,7 +336,9 @@ const alt = (...args) => (parser) => {
       }
 
     // None of the above.
-    } else throw new TypeError('Got the wrong argument type');
+    } else {
+      throw new TypeError('Got the wrong argument type');
+    }
   }
 
   // Update lastParseData.
@@ -331,8 +352,12 @@ const alt = (...args) => (parser) => {
   return result;
 };
 
+// NOTE: more cannot take more than one argument. For multiple arguments use format
+// more(parse(x, y, z))
+// CAREFUL: Some directive rules don't consume tokens, so they don't advance tokenPosition and if
+// not careful you may end up with an infinite loop if you do sth like more(spaces)
 const more = arg => (parser) => {
-  const result = { success: false, asts: [] };
+  const result = { success: false, ast: [] };
 
   // Parse each argument.
   while (true) {
@@ -343,10 +368,11 @@ const more = arg => (parser) => {
 
     // Function.
     if (typeof (arg) === 'function') {
+      const argName = arg.name.toLowerCase();
       // Check if rule has already been cached for that position.
       // This will apply to rules only, since intermediates, parse, opt, etc. won't be cached.
-      if (parser.cache[parser.tokenPosition] && parser.cache[parser.tokenPosition][arg.name]) {
-        const parseResult = parser.cache[parser.tokenPosition][arg.name];
+      if (parser.cache[parser.tokenPosition] && parser.cache[parser.tokenPosition][argName]) {
+        const parseResult = parser.cache[parser.tokenPosition][argName];
 
         // If cached rule result shows failed attempt.
         if (!parseResult.success) {
@@ -356,8 +382,12 @@ const more = arg => (parser) => {
         // Otherwise skip forward
         } else {
           result.success = true;
-          result.asts.push(parseResult.ast);
-          parser.tokenPosition = parser.cache[parser.tokenPosition].skip;
+
+          if (!parseResult.directive) {
+            result.ast.push(parseResult.ast);
+          }
+
+          parser.tokenPosition = parser.cache[parser.tokenPosition][argName].skip;
         }
 
       // If rule isn't already cached or if it is not a rule but an intermediate.
@@ -372,9 +402,9 @@ const more = arg => (parser) => {
         } else {
           result.success = true;
           // If the parser fucntion is not `and` or `not`
-          if (!parseResult.justPeeking) {
-            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "asts" key.
-            result.asts.push(parseResult.asts || parseResult.ast);
+          if (!parseResult.directive) {
+            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
+            result.ast.push(parseResult.ast);
           }
         }
       }
@@ -390,7 +420,7 @@ const more = arg => (parser) => {
         break;
       } else {
         result.success = true;
-        result.asts.push(parseResult.token);
+        result.ast.push(parseResult.token);
       }
 
     // None of the above.
@@ -403,9 +433,13 @@ const more = arg => (parser) => {
   return result;
 };
 
-const optmore = arg => parser => ({ success: true, asts: more(arg)(parser).asts });
+// NOTE: more cannot take more than one argument. For multiple arguments use format
+// more(parse(x, y, z))
+// CAREFUL: Some directive rules don't consume tokens, so they don't advance tokenPosition and if
+// not careful you may end up with an infinite loop if you do sth like optmore(spaces)
+const optmore = arg => parser => ({ success: true, ast: more(arg)(parser).ast });
 
-const opt = arg => parser => ({ success: true, ast: parse(arg)(parser).asts[0] });
+const opt = arg => parser => ({ success: true, ast: parse(arg)(parser).ast[0] || null });
 
 const and = arg => (parser) => {
   // Get state before parsing.
@@ -414,7 +448,7 @@ const and = arg => (parser) => {
   } = parser;
 
   // Parse tokens.
-  const parseResult = { success: parse(arg)(parser).success, justPeeking: true, ast: null };
+  const parseResult = { success: parse(arg)(parser).success, directive: true };
 
   // Revert parser state.
   parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
@@ -429,7 +463,7 @@ const not = arg => (parser) => {
   } = parser;
 
   // Parse tokens.
-  const parseResult = { success: !parse(arg)(parser).success, justPeeking: true, ast: null };
+  const parseResult = { success: !parse(arg)(parser).success, directive: true };
 
   // Revert parser state.
   parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
@@ -444,7 +478,7 @@ const eoi = (parser) => {
   } = parser;
 
   // Parse tokens.
-  const parseResult = { success: parser.lastReached(), justPeeking: true, ast: null };
+  const parseResult = { success: parser.lastReached(), directive: true };
 
   // Revert parser state.
   parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
@@ -461,21 +495,26 @@ const eoi = (parser) => {
 //   | integerdecimalliteral // Can eat others cake
 //   { kind, value }
 const integerLiteral = (parser) => {
+  const { tokenPosition } = parser;
   const kind = 'integerliteral';
-  const parseResult = parseNonTerminalRule(
-    parser,
-    'integerliteral',
-    alt(
-      integerBinaryLiteral,
-      integerOctalLiteral,
-      integerHexadecimalLiteral,
-      integerDecimalLiteral,
-    ),
-  );
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    integerBinaryLiteral,
+    integerOctalLiteral,
+    integerHexadecimalLiteral,
+    integerDecimalLiteral,
+  )(parser);
 
-  return { success: parseResult.success, ast: parseResult.ast.ast || { kind } };
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result);
+
+  return result;
 };
-
 
 // floatliteral =
 //   | floatliteralnomantissa
@@ -485,25 +524,439 @@ const integerLiteral = (parser) => {
 //   | floatdecimalliteral // Can eat others cake
 //   { kind, value }
 const floatLiteral = (parser) => {
+  const { tokenPosition } = parser;
   const kind = 'floatliteral';
-  const parseResult = parseNonTerminalRule(
-    parser,
-    'floatliteral',
-    alt(
-      floatLiteralNoMantissa,
-      floatBinaryLiteral,
-      floatOctalLiteral,
-      floatHexadecimalLiteral,
-      floatDecimalLiteral,
-    ),
-  );
+  const result = { success: false, ast: { kind } };
 
-  return { success: parseResult.success, ast: parseResult.ast.ast || { kind } };
+  const parseResult = alt(
+    floatLiteralNoMantissa,
+    floatBinaryLiteral,
+    floatOctalLiteral,
+    floatHexadecimalLiteral,
+    floatDecimalLiteral,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result);
+
+  return result;
 };
+
+// numericliteral =
+//   | floatliteral
+//   | integerliteral  // Can eat others cake
+//   { kind, value }
+const numericLiteral = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'numericliteral';
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    floatLiteral,
+    integerLiteral,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result);
+
+  return result;
+};
+
+// stringliteral =
+//   | multilinestringliteral
+//   | singlelinestringliteral // Can eat others cake
+//   { kind, value }
+const stringLiteral = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'stringliteral';
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    multiLineStringLiteral,
+    singleLineStringLiteral,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result);
+
+  return result;
+};
+
+// coefficientexpression = // Unfurl
+//   | floatbinaryliteral identifier
+//   | floatoctalliteral identifier
+//   | floatdecimalliteral identifier
+//   | integerbinaryliteral identifier
+//   | integeroctalliteral identifier
+//   | !('§0b' | '§0o' | '§0x') integerdecimalliteral identifier // Accepts others failed cake, e.g.
+//   will parse 0b01 as '0' and 'b01'. Rectified with predicate.
+//   { kind, coefficient, identifier }
+const coefficientExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'coefficientexpression';
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    parse(floatBinaryLiteral, identifier),
+    parse(floatOctalLiteral, identifier),
+    parse(floatDecimalLiteral, identifier),
+    parse(integerBinaryLiteral, identifier),
+    parse(integerOctalLiteral, identifier),
+    // parse(integerDecimalLiteral, identifier),
+    parse(not(alt('§0b', '§0o', '§0x')), integerDecimalLiteral, identifier),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    const coefficient = parseResult.ast[0];
+    const ident = parseResult.ast[1];
+    result.ast = { kind, coefficient, identifier: ident };
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result);
+
+  return result;
+};
+
+// comment =
+//   | multilinecomment
+//   | singlelinecomment // Accepts others failed cake. Rectified with predicate.
+//   { kind, value }
+const comment = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'comment';
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    multiLineComment,
+    singleLineComment,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result);
+
+  return result;
+};
+
+// >>>>> DIRECTIVES >>>>>
+
+// indent = // TODO. adding !space <- Dunno what this is about. May remove
+//   | ' '+
+const indent = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'indent';
+  const result = { success: false, directive: true };
+  let indentCount = 0;
+
+  let diff = 0;
+
+  // If at the end of token list.
+  if (parser.lastReached()) {
+  // If at the beginning of token list.
+  } else if (tokenPosition === -1) {
+    diff = parser.tokens[tokenPosition + 1].startColumn;
+  // If in the middle of token list.
+  } else {
+    const spaceStart = parser.tokens[tokenPosition].stopColumn;
+    const spaceEnd = parser.tokens[tokenPosition + 1].startColumn;
+    diff = spaceEnd - spaceStart;
+  }
+
+  indentCount = diff / 4;
+
+  if (indentCount === parser.lastIndentCount + 1) {
+    result.success = true;
+    parser.lastIndentCount += 1;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// samedent = // TODO. adding !space <- Dunno what this is about. May remove
+//   | ' '+
+//   | ''
+const samedent = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'samedent';
+  const result = { success: false, directive: true };
+  let indentCount = 0;
+
+  let diff = 0;
+
+  // If at the end of token list.
+  if (parser.lastReached()) {
+  // If at the beginning of token list.
+  } else if (tokenPosition === -1) {
+    diff = parser.tokens[tokenPosition + 1].startColumn;
+  // If in the middle of token list.
+  } else {
+    const spaceStart = parser.tokens[tokenPosition].stopColumn;
+    const spaceEnd = parser.tokens[tokenPosition + 1].startColumn;
+    diff = spaceEnd - spaceStart;
+  }
+
+  indentCount = diff / 4;
+
+  if (indentCount === parser.lastIndentCount) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// dedent = // TODO. adding !space <- Dunno what this is about. May remove
+//   | ' '+
+//   | ''
+const dedent = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'dedent';
+  const result = { success: false, directive: true };
+  let indentCount = 0;
+
+  let diff = 0;
+
+  // If at the end of token list.
+  if (parser.lastReached()) {
+  // If at the beginning of token list.
+  } else if (tokenPosition === -1) {
+    diff = parser.tokens[tokenPosition + 1].startColumn;
+  // If in the middle of token list.
+  } else {
+    const spaceStart = parser.tokens[tokenPosition].stopColumn;
+    const spaceEnd = parser.tokens[tokenPosition + 1].startColumn;
+    diff = spaceEnd - spaceStart;
+  }
+
+  indentCount = diff / 4;
+
+  if (indentCount === parser.lastIndentCount - 1) {
+    result.success = true;
+    parser.lastIndentCount -= 1;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// spaces =
+//   | space+
+const spaces = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'spaces';
+  const result = { success: false, directive: true };
+
+  let diff = 0;
+
+  // If at the end of token list.
+  if (parser.lastReached()) {
+  // If at the beginning of token list.
+  } else if (tokenPosition === -1) {
+    diff = parser.tokens[tokenPosition + 1].startColumn;
+  // If in the middle of token list.
+  } else {
+    const spaceStart = parser.tokens[tokenPosition].stopColumn;
+    const spaceEnd = parser.tokens[tokenPosition + 1].startColumn - 1;
+    diff = spaceEnd - spaceStart;
+  }
+
+  if (diff > 0) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// nospace =
+//   | !spaces
+const noSpace = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'spaces';
+  const result = { success: false, directive: true };
+
+  let diff = 0;
+
+  // If at the end of token list.
+  if (parser.lastReached()) {
+  // If at the beginning of token list.
+  } else if (tokenPosition === -1) {
+    diff = parser.tokens[tokenPosition + 1].startColumn;
+  // If in the middle of token list.
+  } else {
+    const spaceStart = parser.tokens[tokenPosition].stopColumn;
+    const spaceEnd = parser.tokens[tokenPosition + 1].startColumn - 1;
+    diff = spaceEnd - spaceStart;
+  }
+
+  if (diff < 1) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// nextline =
+//   | newline (spaces? newline)*
+const nextline = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'nextline';
+  const result = { success: false, directive: true };
+  const parseResult = parse(
+    newline,
+    optmore(parse(opt(spaces), newline)),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// NOTE: I deliberately made `linecontinuation` not use nextcodeline. Comments shouldn't be
+// captured between '...' and a newline. For example, the following doesn't make too much sense.
+// ```nim
+// let x = 5 + ...
+// #: Integer
+// (4 * 5)
+// ```
+// linecontinuation =
+//   | spaces? '.' '.' '.' spaces? nextline samedent
+const lineContinuation = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'linecontinuation';
+  const result = { success: false, directive: true };
+  const parseResult = parse(
+    opt(spaces),
+    '.', '.', '.',
+    opt(spaces),
+    nextline,
+    samedent,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// _ =
+//   | linecontinuation
+//   | nextcodeline samedent // Checks if ignoreNewline is true first
+//   | spaces // Can eat others cake
+const _ = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = '_';
+  const result = { success: false, directive: true };
+  const parseResult = alt(
+    lineContinuation,
+    // TODO: change to nextcodeline
+    (parser.ignoreNewline ? parse(nextline) : () => ({ success: false })),
+    spaces,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// _comma =
+//   | _? ','
+const _comma = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = '_comma';
+  const result = { success: false, directive: true };
+  const parseResult = parse(
+    opt(_),
+    ',',
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// <<<<< DIRECTIVES <<<<<
+
+// nextcodeline =
+//   | spaces? nextline (samedent comment (nextline | eoi))*
+//   { comments }
+const nextCodeLine = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'nextcodeline';
+  const result = { success: false, ast: { kind } };
+  const parseResult = parse(
+    opt(spaces),
+    nextline,
+    optmore(
+      samedent,
+      comment,
+      alt(newline, eoi),
+    ),
+  )(parser);
+
+  print(parseResult);
+
+  if (parseResult.success) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
 
 module.exports = {
   Parser,
-  parseNonTerminalRule,
   parse,
   alt,
   optmore,
@@ -525,10 +978,24 @@ module.exports = {
   floatDecimalLiteral,
   floatLiteralNoMantissa,
   singleLineStringLiteral,
-  // multiLineStringLiteral,
+  multiLineStringLiteral,
   regexLiteral,
   singleLineComment,
-  // multiLineComment,
+  multiLineComment,
   integerLiteral,
   floatLiteral,
+  numericLiteral,
+  stringLiteral,
+  coefficientExpression,
+  comment,
+  indent,
+  samedent,
+  dedent,
+  spaces,
+  noSpace,
+  nextline,
+  lineContinuation,
+  _,
+  _comma,
+  nextCodeLine,
 };
