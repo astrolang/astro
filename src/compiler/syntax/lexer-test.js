@@ -306,13 +306,13 @@ test(
   },
 );
 
-lexer = new Lexer('~');
+lexer = new Lexer(';');
 result = lexer.punctuator();
 test(
-  String.raw`~`,
+  String.raw`;`,
   result,
   {
-    token: '~',
+    token: ';',
     kind: 'punctuator',
     startLine: 1,
     stopLine: 1,
@@ -1187,27 +1187,20 @@ test(
   null,
 );
 
+lexer = new Lexer('5045.id');
+result = lexer.floatLiteralNoMantissa();
+test(
+  String.raw`5045.id--------->FAIL`,
+  result,
+  null,
+);
+
 lexer = new Lexer('6_100./');
 result = lexer.floatLiteralNoMantissa();
 test(
   String.raw`6_100./--------->FAIL`,
   result,
   null,
-);
-
-lexer = new Lexer('6_100.a');
-result = lexer.floatLiteralNoMantissa();
-test(
-  String.raw`6_100.a--------->MID`,
-  result,
-  {
-    token: '6100.0',
-    kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
-    startColumn: 0,
-    stopColumn: 6,
-  },
 );
 
 lexer = new Lexer('5490.');
@@ -1526,34 +1519,74 @@ test(
 );
 
 print('============== REGEXLITERAL ==============');
+lexer = new Lexer('/ regex / id');
+result = lexer.regexLiteral();
+test(
+  String.raw`/ regex / id--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('/ regex / 5');
+result = lexer.regexLiteral();
+test(
+  String.raw`/ regex / 5--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('/ regex / @macro');
+result = lexer.regexLiteral();
+test(
+  String.raw`/ regex / @macro--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('/ regex /$symbol');
+result = lexer.regexLiteral();
+test(
+  String.raw`/ regex /$symbol--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('/ regex /{');
+result = lexer.regexLiteral();
+test(
+  String.raw`/ regex /{--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('/');
+result = lexer.regexLiteral();
+test(
+  String.raw`/--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('/hello\nworld/');
+result = lexer.regexLiteral();
+test(
+  String.raw`/hello\nworld/--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('/hello\\\\');
+result = lexer.regexLiteral();
+test(
+  String.raw`/hello\\--------->FAIL`,
+  result,
+  null,
+);
+
 lexer = new Lexer('//');
 result = lexer.regexLiteral();
 test(
-  String.raw`//--------->FAIL`,
-  result,
-  null,
-);
-
-lexer = new Lexer('//hello\nworld//');
-result = lexer.regexLiteral();
-test(
-  String.raw`//hello\nworld//--------->FAIL`,
-  result,
-  null,
-);
-
-lexer = new Lexer('//hello\\\\');
-result = lexer.regexLiteral();
-test(
-  String.raw`//hello\\--------->FAIL`,
-  result,
-  null,
-);
-
-lexer = new Lexer('////');
-result = lexer.regexLiteral();
-test(
-  String.raw`////`,
+  String.raw`//`,
   result,
   {
     token: '',
@@ -1561,14 +1594,14 @@ test(
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
-    stopColumn: 4,
+    stopColumn: 2,
   },
 );
 
-lexer = new Lexer('//Wanna (eat){3} Π*//');
+lexer = new Lexer('/Wanna (eat){3} Π*/');
 result = lexer.regexLiteral();
 test(
-  String.raw`//Wanna (eat){3} Π*//`,
+  String.raw`/Wanna (eat){3} Π*/`,
   result,
   {
     token: 'Wanna (eat){3} Π*',
@@ -1576,11 +1609,34 @@ test(
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
-    stopColumn: 21,
+    stopColumn: 19,
+  },
+);
+
+lexer = new Lexer('/ regex / + y');
+result = lexer.regexLiteral();
+test(
+  String.raw`/ regex / + y`,
+  result,
+  {
+    token: ' regex ',
+    kind: 'regexliteral',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 9,
   },
 );
 
 print('============== SINGLELINECOMMENT ==============');
+lexer = new Lexer('#= Hello World');
+result = lexer.singleLineComment();
+test(
+  String.raw`#= Hello World--------->FAIL`,
+  result,
+  null,
+);
+
 lexer = new Lexer('# Hello World\nHi World');
 result = lexer.singleLineComment();
 test(

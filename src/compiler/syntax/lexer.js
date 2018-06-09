@@ -22,8 +22,8 @@ class Lexer {
     this.digitHexadecimal = '0123456789ABCDEFabcdef';
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
-    this.operatorChar = '+-*/\\^%&|!><=÷×≠≈¹²³√?'; // Unicode?
-    this.punctuatorChar = '(){}[],.~;:'; // Unicode?
+    this.operatorChar = "+'-*/\\^%&|!><=÷×≠≈¹²³√?~"; // Unicode?
+    this.punctuatorChar = '(){}[],.;:@'; // Unicode?
     this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.keywords = [
       'import', 'export', 'let', 'var', 'const', 'fun', 'type', 'abst', 'async',
@@ -1210,7 +1210,7 @@ class Lexer {
   }
 
   // floatLiteralnomantissa =
-  //   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator)
+  //   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier)
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   floatLiteralNoMantissa() {
     const { lastPosition, column, line } = this;
@@ -1231,7 +1231,7 @@ class Lexer {
         token += '.0';
 
         // Check !(operator).
-        if (this.operator()) { token = ''; }
+        if (this.operator() || this.identifier()) { token = ''; }
       } else {
         token = '';
       }
@@ -1422,12 +1422,11 @@ class Lexer {
   }
 
   // regexchars =
-  //   | (!(newline | '//') .)+ // TODO
+  //   | (!(newline | '/') .)+ // TODO
   // regexliteral =
-  //   | '//' regexchars? '//'
+  //   | '/' regexchars? '/'
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
-  // NOTE: Only these infix operators with '//' in themn are allowed: a // b, a //= b
-  // Other operator names with '//' in them are invalid: a +// b, a //+ b
+  // NOTE: /regex/ (?!(\s*[\{\[\(a-zA-Z0-9@$])|{operatorChar})
   regexLiteral() {
     const { lastPosition, column, line } = this;
     let token = null;
@@ -1435,24 +1434,43 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Consume "//".
-    if (this.eatToken('//')) {
+    if (this.peekChar() === '/') {
+      // Consume "/".
+      this.eatChar();
       token = ''; // Make token a string.
 
       // Consume (singlequotestringchars: (!(newline | "/") .)+)?.
-      let regexQuote = this.eatToken('//');
-      while (true) {
-        if (this.lastReached() || regexQuote) break;
-        if (this.peekChar() === '\n' || this.peekChar() === '\r') {
-          break;
-        }
+      while (!this.lastReached() && this.peekChar() !== '/' && this.peekChar() !== '\n' && this.peekChar() !== '\r') {
         token += this.eatChar();
-        regexQuote = this.eatToken('//');
       }
 
-      // Check if '//' was consumed.
-      if (!regexQuote) {
+      // Consume "/".
+      if (this.peekChar() !== '/') {
         token = null;
+      } else {
+        this.eatChar();
+      }
+
+      // Check (?!(\s*[\{\[\(a-zA-Z0-9@$])|{operatorChar})
+      if (!this.lastReached()) {
+        const lastPos = this.lastPosition;
+        const col = this.column;
+        const ln = this.line;
+        // !operatorChar
+        if (this.operatorChar.indexOf(this.peekChar()) > -1) {
+          print('char1 ', this.peekChar());
+          token = null;
+        // !(identifierBeginChar | '{' | '[' | '(' | '@' | '$')
+        } else {
+          print('char2 ', this.peekChar());
+          this.spaces();
+          if (this.identifierEndChar.indexOf(this.peekChar()) > -1 || '{[(@$'.indexOf(this.peekChar()) > -1) {
+            print('char3 ', this.peekChar());
+            token = null;
+          }
+        }
+
+        this.revert(lastPos, col, ln);
       }
     }
 
@@ -1474,7 +1492,7 @@ class Lexer {
   // singlelinecommentchars =
   //   | (!(newline | eoi) .)+ // TODO
   // singlelinecomment =
-  //   | "#" singlelinecommentchars? &(newline | eoi)
+  //   | "#" !('=') singlelinecommentchars? &(newline | eoi)
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   singleLineComment() {
     const { lastPosition, column, line } = this;
@@ -1488,13 +1506,18 @@ class Lexer {
       this.eatChar();
       token = ''; // Make token a string.
 
-      // Consume (singlelinecommentchars: (!(newline | eoi) .)+)?.
-      while (
-        this.peekChar() !== '\n' &&
-        this.peekChar() !== '\r' &&
-        this.peekChar() !== null
-      ) {
-        token += this.eatChar();
+      // Check !('=').
+      if (this.peekChar() === '=') {
+        token = null;
+      } else {
+        // Consume (singlelinecommentchars: (!(newline | eoi) .)+)?.
+        while (
+          this.peekChar() !== '\n' &&
+          this.peekChar() !== '\r' &&
+          this.peekChar() !== null
+        ) {
+          token += this.eatChar();
+        }
       }
     }
 
@@ -1710,7 +1733,8 @@ class Lexer {
       // Return an error object instead of throwing
       // Enclosures should be much more clever. `'xyz` expects a closing '
       } else {
-        throw new Error(`Lex error! unexpected character at line: ${this.line}, column: ${this.column}`);
+        break;
+        // throw new Error(`Lex error! unexpected character at line: ${this.line}, column: ${this.column}`);
       }
     }
 
