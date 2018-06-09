@@ -895,9 +895,6 @@ LAMBDAS
     # An anonymous function or lambda can be recursively called within its body using the `_(...)`.
     list.aggregate((0, a) => (a == 0) ? 1 : a + _(a - 1))
 
-    # When binding a subject to a parameterless lambda, `= =>` can be shrunk into `=>`.
-    let some_function => echo 'Hello, world!'
-
     # Immediately-invoked function.
     ((a, b) => a + b)(2, 3)
 
