@@ -542,10 +542,12 @@ test(
     },
     result: {
       success: true,
-      alternative: 1,
       ast: {
-        kind: 'operator',
-        value: '++--',
+        alternative: 1,
+        ast: {
+          kind: 'operator',
+          value: '++--',
+        },
       },
     },
   },
@@ -572,13 +574,15 @@ test(
     },
     result: {
       success: true,
-      alternative: 2,
-      ast: [
-        {
-          kind: 'operator',
-          value: '++**',
-        },
-      ],
+      ast: {
+        alternative: 2,
+        ast: [
+          {
+            kind: 'operator',
+            value: '++**',
+          },
+        ],
+      },
     },
   },
 );

@@ -124,6 +124,8 @@ class Parser {
         if (this.cache[this.tokenPosition] && this.cache[this.tokenPosition][argName]) {
           const parseResult = this.cache[this.tokenPosition][argName];
 
+          print('comes here should be nextcodeline ', argName);
+
           if (!parseResult.directive) {
             result.ast.push(parseResult.ast);
           }
@@ -143,7 +145,7 @@ class Parser {
           // Run the function.
           const parseResult = arg(this);
 
-          // If the parser fucntion is not `and` or `not`
+          // If the parser function is not `and` or `not`
           if (!parseResult.directive) {
             // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
             result.ast.push(parseResult.ast);
@@ -276,19 +278,26 @@ const alt = (...args) => (parser) => {
     tokenPosition, lastIndentCount, column, line, ignoreNewline,
   } = parser;
 
-  const result = { success: false, alternative: -1, ast: {} };
+  const result = { success: false, ast: { alternative: -1, ast: {} } };
 
+  let count = 0;
   // Parse each argument.
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
-
     // Function.
     if (typeof (arg) === 'function') {
       const argName = arg.name.toLowerCase();
+      if (count === 2) {
+        print(parser.cache);
+      }
+      print('try ', (count += 1), ' ', argName, ' pos ', parser.tokenPosition, ' col ', parser.column);
       // Check if rule has already been cached for that position.
       // This will apply to rules only, since intermediates, parse, opt, etc. won't be cached.
       if (parser.cache[parser.tokenPosition] && parser.cache[parser.tokenPosition][argName]) {
         const parseResult = parser.cache[parser.tokenPosition][argName];
+        if (count === 2) {
+          print('here on at cached try 2');
+        }
 
         // If cached rule result shows success.
         if (parseResult.success) {
@@ -306,16 +315,19 @@ const alt = (...args) => (parser) => {
       } else {
         // Run the function.
         const parseResult = arg(parser);
+        if (count === 2) {
+          print('here on at otherwise try 2');
+        }
 
         // Parsing succeed.
         if (parseResult.success) {
           result.success = true;
-          result.alternative = i + 1;
+          result.ast.alternative = i + 1;
 
           // If the parser fucntion is not `and` or `not`
           if (!parseResult.directive) {
             // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
-            result.ast = parseResult.ast;
+            result.ast.ast = parseResult.ast;
           }
 
           break;
@@ -507,7 +519,7 @@ const integerLiteral = (parser) => {
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    result.ast = parseResult.ast;
+    result.ast = parseResult.ast.ast;
   }
 
   // Cache parse result if not already cached.
@@ -538,7 +550,7 @@ const floatLiteral = (parser) => {
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    result.ast = parseResult.ast;
+    result.ast = parseResult.ast.ast;
   }
 
   // Cache parse result if not already cached.
@@ -562,7 +574,7 @@ const numericLiteral = (parser) => {
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    result.ast = parseResult.ast;
+    result.ast = parseResult.ast.ast;
   }
 
   // Cache parse result if not already cached.
@@ -586,7 +598,7 @@ const stringLiteral = (parser) => {
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    result.ast = parseResult.ast;
+    result.ast = parseResult.ast.ast;
   }
 
   // Cache parse result if not already cached.
@@ -614,14 +626,13 @@ const coefficientExpression = (parser) => {
     parse(floatDecimalLiteral, identifier),
     parse(integerBinaryLiteral, identifier),
     parse(integerOctalLiteral, identifier),
-    // parse(integerDecimalLiteral, identifier),
     parse(not(alt('§0b', '§0o', '§0x')), integerDecimalLiteral, identifier),
   )(parser);
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    const coefficient = parseResult.ast[0];
-    const ident = parseResult.ast[1];
+    const coefficient = parseResult.ast.ast[0];
+    const ident = parseResult.ast.ast[1];
     result.ast = { kind, coefficient, identifier: ident };
   }
 
@@ -646,7 +657,7 @@ const comment = (parser) => {
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    result.ast = parseResult.ast;
+    result.ast = parseResult.ast.ast;
   }
 
   // Cache parse result if not already cached.
@@ -848,7 +859,7 @@ const nextline = (parser) => {
 
 // NOTE: I deliberately made `linecontinuation` not use nextcodeline. Comments shouldn't be
 // captured between '...' and a newline. For example, the following doesn't make too much sense.
-// ```nim
+// ```astro
 // let x = 5 + ...
 // #: Integer
 // (4 * 5)
@@ -927,7 +938,7 @@ const _comma = (parser) => {
 
 // nextcodeline =
 //   | spaces? nextline (samedent comment (nextline | eoi))*
-//   { comments }
+//   { kind, comments }
 const nextCodeLine = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'nextcodeline';
@@ -935,17 +946,56 @@ const nextCodeLine = (parser) => {
   const parseResult = parse(
     opt(spaces),
     nextline,
-    optmore(
+    optmore(parse(
       samedent,
       comment,
       alt(newline, eoi),
-    ),
+    )),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+    const comments = [];
+
+    // Check if optmore returned a non-empty array
+    if (parseResult.ast[1].length > 0) {
+      const optmoreArr = parseResult.ast[1];
+      for (let i = 0; i < optmoreArr.length; i += 1) {
+        comments.push(optmoreArr[i][0]);
+      }
+    }
+
+    result.ast = { kind, comments };
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// dedentoreoiend =
+//   | nextcodeline dedent
+//   | nextcodeline? _? eoi
+//   { kind, comments }
+const dedentOrEoiEnd = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'dedentoreoiend';
+  const result = { success: false, ast: { kind, comments: [] } };
+  const parseResult = alt(
+    parse(nextCodeLine, dedent),
+    parse(nextCodeLine),
+    // parse(opt(nextCodeLine), opt(_), eoi),
   )(parser);
 
   print(parseResult);
 
   if (parseResult.success) {
     result.success = true;
+
+    if (parseResult.ast.ast[0]) {
+      result.comments = [...parseResult.ast.ast[0]];
+    }
   }
 
   // Cache parse result if not already cached.
@@ -998,4 +1048,5 @@ module.exports = {
   _,
   _comma,
   nextCodeLine,
+  dedentOrEoiEnd,
 };
