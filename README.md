@@ -95,7 +95,7 @@ There is no proper documentation for the language yet since the main implementat
 - [x] ~Improve project structure~
 - [x] ~Add automated unit testing and coverage reports~
 - [x] ~Redesign and remove certain inconsistencies in language syntax~
-- [x] Complete lexer implementation
+- [x] ~Complete lexer implementation~
 - [ ] Complete parser implementation
 - [ ] Implement semantic analysis phase
 - [ ] Create ambiguity finders for inheritance, multiple dispatch, etc.
