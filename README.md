@@ -26,7 +26,7 @@ If you don't have `node` installed already, download and install it [here](https
 * Run tests ➡ ```npm run test:compiler```.
 
 ### What is Astro?
-Astro is a _fullstack_ multi-paradigm programming language designed for high-performance numerical-computing and web applications.
+Astro is a fun programming language designed for _high-performance numerical-computing_ and _web applications_.
 - statically-typed language that
 - compiles to native code and WebAssembly,
 - has no GC,
