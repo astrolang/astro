@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 #### Work in Progress :construction:
 Current Version: 0.1.14
-![astro screenshot](https://github.com/appcypher/astro/blob/dev/media/images/astro-syntax.png)
+![astro screenshot](https://github.com/astrolang/astro/blob/ch-implement-packrat-parser-156977411/media/images/astro-syntax.png?raw=true)
 
 ### Installation
 If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
