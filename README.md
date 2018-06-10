@@ -13,11 +13,11 @@ Current Version: 0.1.14
 
 ### Installation
 If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
-#### USERS
+##### _USERS_
 * Install astro by typing ```npm i -g astrolang``` in the terminal.
 * You can start using astro with ```astro -h```.
 
-#### DEVELOPERS
+##### _DEVELOPERS_
 * Clone repository ➡ ```git clone https://github.com/appcypher/astro.git```.
 * Move to astro directory ➡ ```cd astro```.
 * Install necessary dependencies ➡ ```npm i```.
@@ -96,7 +96,7 @@ There is no proper documentation for the language yet since the main implementat
 - [x] ~Add automated unit testing and coverage reports~
 - [x] ~Redesign and remove certain inconsistencies in language syntax~
 - [ ] Complete parser implementation
-- [ ] Implement basic semantic analysis
+- [ ] Implement semantic analysis phase
 - [ ] Create ambiguity finders for inheritance, multiple dispatch, etc.
 - [ ] Implement type inference and garbage collection using program flow analysis
 - [ ] Add wasm code generation
@@ -112,12 +112,6 @@ Please read the [code of conduct](CODE_OF_CONDUCT.md) and contribution [guidelin
 
 ### Do you have an unanswered question?
 Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask questions, offer to help, point out bugs or suggest features.
-
-### Other interesting new languages that compile to WebAssembly
-- [Forest](https://github.com/forest-lang/core) - a multi-syntax functional programming language.
-- [AssemblyScript](https://github.com/AssemblyScript/assemblyscript) - a new compiler targeting WebAssembly while utilizing TypeScript's syntax and node's vibrant ecosystem.
-- [WAlt](https://github.com/ballercat/walt) - an alternative syntax for WebAssembly text format. It's an experiment for using JavaScript syntax to write to as 'close to the metal' as possible.
-
 
 ### Attributions
 Astro logo made by [Freepik](https://www.freepik.com/)
