@@ -15,13 +15,13 @@
     "url": "git+https://github.com/AppCypher/Astro.git"
   },
   "keywords": [
-      "astro",
-      "appcypher",
-      "nigeria",
-      "language"
+    "astro",
+    "appcypher",
+    "nigeria",
+    "language"
   ],
   "author": "appcypher",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/AppCypher/Astro/issues"
   },
