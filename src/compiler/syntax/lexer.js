@@ -1701,6 +1701,9 @@ class Lexer {
     };
   }
 
+  /**
+   * TODO: Need a stream version of this.
+   */
   lex() {
     const tokens = [];
     while (!this.lastReached()) {
