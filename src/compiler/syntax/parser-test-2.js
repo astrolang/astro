@@ -111,7 +111,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'nextcodeline',
+        kind: 'dedentoreoiend',
         comments: [
           {
             kind: 'singlelinecomment',
@@ -126,8 +126,6 @@ test(
     },
   },
 );
-
-print(result);
 
 test();
 

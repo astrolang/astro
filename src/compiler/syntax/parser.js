@@ -57,10 +57,13 @@ class Parser {
    * Updates parser positional information.
    * @param{Number} tokenPosition - token position to get update from.
    */
-  updateState(tokenPosition) {
-    this.tokenPosition += 1;
-    this.column = this.tokens[tokenPosition].stopColumn;
-    this.line = this.tokens[tokenPosition].stopLine;
+  updateState(skip = 1) {
+    // If skip is zero, then no change occured.
+    if (skip > 0) {
+      this.tokenPosition += skip;
+      this.column = this.tokens[this.tokenPosition].stopColumn;
+      this.line = this.tokens[this.tokenPosition].stopLine;
+    }
   }
 
   /**
@@ -75,7 +78,7 @@ class Parser {
     if (!this.lastReached() && this.tokens[tokenPosition + 1].token === str) {
       result = { success: true, token: str };
       // Update parser positional information.
-      this.updateState(tokenPosition + 1);
+      this.updateState();
     }
 
     return result;
@@ -93,7 +96,7 @@ class Parser {
     if (!this.lastReached() && this.tokens[tokenPosition + 1].token.startsWith(str)) {
       result = { success: true, token: str };
       // Update parser positional information.
-      this.updateState(tokenPosition + 1);
+      this.updateState();
     }
 
     return result;
@@ -124,8 +127,6 @@ class Parser {
         if (this.cache[this.tokenPosition] && this.cache[this.tokenPosition][argName]) {
           const parseResult = this.cache[this.tokenPosition][argName];
 
-          print('comes here should be nextcodeline ', argName);
-
           if (!parseResult.directive) {
             result.ast.push(parseResult.ast);
           }
@@ -135,9 +136,9 @@ class Parser {
             result.success = false;
             break;
 
-          // Otherwise skip forward
+          // Otherwise skip forward.
           } else {
-            this.tokenPosition = this.cache[this.tokenPosition][argName].skip;
+            this.updateState(this.cache[this.tokenPosition][argName].skip);
           }
 
         // If rule isn't already cached or if it is not a rule but an intermediate.
@@ -229,7 +230,7 @@ const parseTerminalRule = (parser, kind) => {
   if (!parser.lastReached() && parser.tokens[tokenPosition + 1].kind === kind) {
     result = { success: true, ast: { kind, value: parser.tokens[tokenPosition + 1].token } };
     // Update parser positional information.
-    parser.updateState(tokenPosition + 1);
+    parser.updateState();
   }
 
   // Cache parse result if not already cached.
@@ -280,27 +281,21 @@ const alt = (...args) => (parser) => {
 
   const result = { success: false, ast: { alternative: -1, ast: {} } };
 
-  let count = 0;
   // Parse each argument.
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     // Function.
     if (typeof (arg) === 'function') {
       const argName = arg.name.toLowerCase();
-      if (count === 2) {
-        print(parser.cache);
-      }
-      print('try ', (count += 1), ' ', argName, ' pos ', parser.tokenPosition, ' col ', parser.column);
       // Check if rule has already been cached for that position.
       // This will apply to rules only, since intermediates, parse, opt, etc. won't be cached.
       if (parser.cache[parser.tokenPosition] && parser.cache[parser.tokenPosition][argName]) {
         const parseResult = parser.cache[parser.tokenPosition][argName];
-        if (count === 2) {
-          print('here on at cached try 2');
-        }
 
         // If cached rule result shows success.
         if (parseResult.success) {
+          // Move the parser forward.
+          parser.updateState(parser.cache[parser.tokenPosition][argName].skip);
           result.success = true;
           result.alternative = i + 1;
 
@@ -310,14 +305,10 @@ const alt = (...args) => (parser) => {
 
           break;
         }
-
       // If rule isn't already cached or if it is not a rule but an intermediate.
       } else {
         // Run the function.
         const parseResult = arg(parser);
-        if (count === 2) {
-          print('here on at otherwise try 2');
-        }
 
         // Parsing succeed.
         if (parseResult.success) {
@@ -399,7 +390,8 @@ const more = arg => (parser) => {
             result.ast.push(parseResult.ast);
           }
 
-          parser.tokenPosition = parser.cache[parser.tokenPosition][argName].skip;
+          // Move the parser forward.
+          parser.updateState(parser.cache[parser.tokenPosition][argName].skip);
         }
 
       // If rule isn't already cached or if it is not a rule but an intermediate.
@@ -969,7 +961,7 @@ const nextCodeLine = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, result, false);
 
   return result;
 };
@@ -984,22 +976,19 @@ const dedentOrEoiEnd = (parser) => {
   const result = { success: false, ast: { kind, comments: [] } };
   const parseResult = alt(
     parse(nextCodeLine, dedent),
-    parse(nextCodeLine),
-    // parse(opt(nextCodeLine), opt(_), eoi),
+    parse(opt(nextCodeLine), opt(_), eoi),
   )(parser);
-
-  print(parseResult);
 
   if (parseResult.success) {
     result.success = true;
 
-    if (parseResult.ast.ast[0]) {
-      result.comments = [...parseResult.ast.ast[0]];
+    if (parseResult.ast.ast[0].comments.length > 0) {
+      result.ast.comments = parseResult.ast.ast[0].comments;
     }
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, result, false);
 
   return result;
 };
