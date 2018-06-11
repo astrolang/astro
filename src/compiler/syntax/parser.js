@@ -982,8 +982,12 @@ const dedentOrEoiEnd = (parser) => {
   if (parseResult.success) {
     result.success = true;
 
-    if (parseResult.ast.ast[0].comments.length > 0) {
-      result.ast.comments = parseResult.ast.ast[0].comments;
+    const nextCodeLineComments = parseResult.ast.ast[0].comments;
+
+    if (nextCodeLineComments) {
+      if (nextCodeLineComments.length > 0) {
+        result.ast.comments = nextCodeLineComments;
+      }
     }
   }
 
@@ -992,7 +996,6 @@ const dedentOrEoiEnd = (parser) => {
 
   return result;
 };
-
 
 module.exports = {
   Parser,
