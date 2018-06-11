@@ -1,10 +1,10 @@
 
 # Astro Programming Language
 ![hound](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)
-[![Build Status](https://travis-ci.org/appcypher/astro.svg?branch=dev)](https://travis-ci.org/appcypher/astro)
-[![Coverage Status](https://coveralls.io/repos/github/AppCypher/Astro/badge.svg?branch=dev)](https://coveralls.io/github/AppCypher/Astro?branch=dev)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9739900850aeebc6b2d5/maintainability)](https://codeclimate.com/github/AppCypher/Astro/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/9739900850aeebc6b2d5/test_coverage)](https://codeclimate.com/github/AppCypher/Astro/test_coverage)
+[![Build Status](https://travis-ci.org/astrolang/astro.svg?branch=dev)](https://travis-ci.org/astrolang/astro)
+[![Coverage Status](https://coveralls.io/repos/github/astrolang/astro/badge.svg?branch=dev)](https://coveralls.io/github/astrolang/astro?branch=dev)
+[![Maintainability](https://api.codeclimate.com/v1/badges/bf1547053d4e22d1e9f3/maintainability)](https://codeclimate.com/github/astrolang/astro/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/bf1547053d4e22d1e9f3/test_coverage)](https://codeclimate.com/github/astrolang/astro/test_coverage)
 ![Maintained](https://img.shields.io/maintenance/yes/2018.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 #### Work in Progress :construction:
