@@ -1215,7 +1215,7 @@ OPERATORS
     # Postfix operators, with the operator coming directly after its operand.
     let squared = 4²
 
-    # Infix operators, with the operator in between its operand.
+    # Infix operators, with the operator in-between two operands.
     let addition = 5 + 8
 
     # Operators and Spacing.
