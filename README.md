@@ -26,24 +26,24 @@ If you don't have `node` installed already, download and install it [here](https
 * Run tests ➡ ```npm run test:compiler```.
 
 ### What is Astro?
-Astro is a fun programming language designed for _high-performance numerical-computing_ and _web applications_.
+Astro is a fun programming language designed for _high-performance numerical-computing_ and _web applications_. It is a
 - statically-typed language that
-- compiles to native code and WebAssembly,
-- has no GC,
-- has a syntax similar to [Python](https://en.m.wikipedia.org/wiki/Python_(programming_language)),
-- provides full type inference, and
-- has first-class support for data-race-free concurrency.
+- compiles to WebAssembly and native code,
+- requires no (tracing) Garbage Collector,
+- has an approachable syntax and learning curve,
+- provides full type inference for rapid prototyping, and
+- has built-in support for data-race-free concurrency.
 
 ### Why create yet another programming language?
 The language creator had a set of requirements (listed above) not met by any single language. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and the proposed GPU Compute standards will make the web a desirable HPC target in the near future. Astro makes developing high-performance web and native apps seamless, easier and less frustrating.
 
-Astro has no runtime [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, scientific simulations and other real-time software. This can make it suitable for embedded software development even though it's not a goal.
+Astro has no runtime-based [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough to develop games, simulations and other real-time software. This can make it suitable for embedded software development even though it's not a goal.
 
 In addition, Astro makes several design decisions that benefit numerical computing applications. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc.
 
-In order to match up with the expressiveness and productivity level of dynamic programming languages, Astro adds full type inference, and several other high-level language features that increase productivity. It feels like a scripting language for the most part. A typical Astro program looks very much like its Python translation.
+In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, and several other high-level language features that reduce boilerplate code commonly associated with statically-typed languages. It feels like a scripting language for the most part.
 
 #### Python
 ```python
@@ -64,34 +64,28 @@ fun times(a, b):
 
 Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets.
 
-Astro has builtin facilities for writing concurrent programs, in the form of fibers, a [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
+Astro has built-in facilities for writing concurrent programs. A [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
 
 
-### Why not just use exactly Python syntax or try to be compatible with Python?
-Python is a really dynamic programming language and there have been several attempts in the past to compile it AOT to native code. We don't want to reinvent the wheel since there are lessons to learn from old wheels. Python cannot be fully-inferred at compile-time without performance trade-offs.
+### Why not just use exactly Python syntax or be compatible with Python?
+Python is a really dynamic programming language and there have been several attempts in the past to compile it AOT to native code. We don't want to reinvent the wheel as there are lessons to learn from old wheels. Python cannot be fully-inferred at compile-time without performance trade-offs.
 
 More importantly Astro introduces some concepts that Python doesn't have and probably never will.
 
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
 Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting) (ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
-It's also unlike Rust current memory management model as it puts lesser restrictions on how references are moved around while still being memory safe.
+It's also unlike Rust current memory management model as it puts lesser restrictions on how references are moved around while still being memory safe. It's, however, very similar to the _non-lexical lifetime_ mechanism that's now being developed for Rust.
 
-Astro simply, stays out of your way, lets you write your code like you would in any other garbage-collected language.
+Astro simply stays out of your way; lets you write your code like you would in any other GC'ed language.
 
 ### How close is Astro to being ready for production use?
 Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
 
 For now, Astro can only compile its source code to ast format. It is not ready for even the simplest application.
 
-### How will Astro tooling be like?
-Astro is meant for interactive high-productivity usage therefore a visual REPL, for visualizing and introspecting different kinds of data, is planned.
-It will also have a set of language tools for making editor support easier.
-
-Incremental compilation is a goal as well since the language requires a lot of complex compile-time computations like control flow analysis and escape analysis.
-
 ### Where can I read about the language?
-There is no proper documentation for the language yet since the main implementation is still under active development, but you can find an up-to-date summary of language features [here](docs/language/summary.ast).
+There is no complete documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](docs/language/summary.ast).
 
 ### <a name="tasks"></a> What are the important tasks to complete?
 - [x] ~Improve project structure~
