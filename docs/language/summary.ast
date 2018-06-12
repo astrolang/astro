@@ -101,7 +101,7 @@ COMMAND NOTATION
     print name
     print 56
     print /9/
-    print @dict{x, y}
+    print @dict{ x, y }
     print $name
     print (x, y) => x
     print {x: y | x in z}
@@ -380,11 +380,11 @@ DICTIONARIES & OBJECTS
     # Dictonaries are dynamic data structures and will return nil where expected key is not present
     let game = @dict{ title: 'BioShock Infinite', year: 2014 } # Dictionary.
 
-    # Object keys must be valid identifiers.
+    # Object keys must be valid identifiers or string literals.
     let parents = {
         dad: {
             name: 'Sunday Williams'
-            age: 46
+            'age': 46
         }
     }
 
