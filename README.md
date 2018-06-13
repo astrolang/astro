@@ -13,7 +13,7 @@ Current Version: 0.1.14
 
 ![astro screenshot](https://github.com/astrolang/astro/blob/ch-implement-packrat-parser-156977411/media/images/astro-syntax.png?raw=true)
 
-### Installation
+### How do I install it?
 If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
 ##### _USERS_
 * Install astro by typing ```npm i -g astrolang``` in the terminal.
