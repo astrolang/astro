@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign, no-constant-condition, no-underscore-dangle */
 // eslint-disable-next-line no-unused-vars
-const { print } = require('../utils');
+const { print } = require('../../utils');
 
 /**
  * A Custom Packrat Parser Combinator for Astro extended-PEG grammar.

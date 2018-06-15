@@ -1,6 +1,6 @@
 /* eslint-disable max-len, no-constant-condition */
 // eslint-disable-next-line no-unused-vars
-const { print } = require('../utils');
+const { print } = require('../../utils');
 
 /**
  * The Lexer.

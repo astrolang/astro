@@ -33,7 +33,7 @@ const {
   _,
   _comma,
 } = require('./parser');
-const { print, createTest } = require('../utils');
+const { print, createTest } = require('../../utils');
 
 let lexer = null;
 let parser = null;

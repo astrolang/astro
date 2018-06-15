@@ -1,5 +1,5 @@
 const Lexer = require('./lexer');
-const { print, createTest } = require('../utils');
+const { print, createTest } = require('../../utils');
 
 let lexer = null;
 let result = null;
