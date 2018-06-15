@@ -531,9 +531,9 @@ CASCADING NOTATION
     first.{ name, age } = second
 
     # Cascading on function call, indexing and field access.
-    array.push!(x), .!(y)
-    array[x], .[y], .[z]
-    print(john.name, .age) # John 40
+    array.push!(x), \(y)
+    array[x], \[y], \[z] = 1, 2, 3
+    print(john.name, \age) # John 40
 
 PASS KEYWORD
     # `pass` keyword can used to represent an empty block.
