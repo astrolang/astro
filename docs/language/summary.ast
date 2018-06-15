@@ -525,13 +525,15 @@ CASCADING NOTATION
     if john.firstname.length == john.lastname.length: bar()
     if john.{ firstname == lastname }.length: bar()
 
-    # It also works with call tuple and element access operator.
-    array.push.{ !(x), !(y) }
-    array.{ [x], [y] }
+    # Cascading notation also allows you to assign values to multiple properties of an object.
+    first.name = second.name
+    first.age = second.age
+    first.{ name, age } = second
 
-    # Note: When used as a tuple, the expression is unpacked as an open tuple instead of being packed as a closed one
-    print(john.{ name, age }) # John 40
-    print((john.{ name, age })) # (John, 40)
+    # Cascading on function call, indexing and field access.
+    array.push!(x), .!(y)
+    array[x], .[y], .[z]
+    print(john.name, .age) # John 40
 
 PASS KEYWORD
     # `pass` keyword can used to represent an empty block.
