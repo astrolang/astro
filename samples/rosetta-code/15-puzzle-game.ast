@@ -1,18 +1,16 @@
-type Puzzle(var items: @dict{}, var position: -1)
+type Puzzle(var items: {}, var position: -1)
 
 fun mainframe(puz):
     let d = puz.items
-    print.{
-        ('+-----+-----+-----+-----+'),
-        (d[1], d[2], d[3], d[4], first: '|', sep: '|', last: '|'),
-        ('+-----+-----+-----+-----+'),
-        (d[5], d[6], d[7], d[8], first: '|', sep: '|', last: '|'),
-        ('+-----+-----+-----+-----+'),
-        (d[9], d[10], d[11], d[12], first: '|', sep: '|', last: '|'),
-        ('+-----+-----+-----+-----+'),
-        (d[13], d[14], d[15], d[16], first: '|', sep: '|', last: '|'),
-        ('+-----+-----+-----+-----+')
-    }
+    print('+-----+-----+-----+-----+'),
+    \(d[1], d[2], d[3], d[4], first: '|', sep: '|', last: '|'),
+    \('+-----+-----+-----+-----+'),
+    \(d[5], d[6], d[7], d[8], first: '|', sep: '|', last: '|'),
+    \('+-----+-----+-----+-----+'),
+    \(d[9], d[10], d[11], d[12], first: '|', sep: '|', last: '|'),
+    \('+-----+-----+-----+-----+'),
+    \(d[13], d[14], d[15], d[16], first: '|', sep: '|', last: '|'),
+    \('+-----+-----+-----+-----+')
 
 fun format(puz, ch):
     ch.trim().length
@@ -51,23 +49,23 @@ fun buildboard(puz, difficulty):
 fun validmoves(puz):
     let pos = puz.position
     | 6 or 7 or 10 or 11 =>
-        puz.items.{ [pos - 4], [pos - 1], [pos + 1], [pos + 4] }
+        puz.items[pos - 4], \[pos - 1], \[pos + 1], \[pos + 4]
     | 5 or 9 =>
-        puz.items.{ [pos - 4], [pos + 4], [pos + 1] }
+        puz.items[pos - 4], \[pos + 4], \[pos + 1]
     | 8 or 12 =>
-        puz.items.{ [pos - 4], [pos + 4], [pos - 1] }
+        puz.items[pos - 4], \[pos + 4], \[pos - 1]
     | 2 or 3 =>
-        puz.items.{ [pos - 1], [pos + 1], [pos + 4] }
+        puz.items[pos - 1], \[pos + 1], \[pos + 4]
     | 14 or 15 =>
-        puz.items.{ [pos - 1], [pos + 1], [pos - 4] }
+        puz.items[pos - 1], \[pos + 1], \[pos - 4]
     | 1 =>
-        puz.items.{ [pos + 1], [pos + 4] }
+        puz.items[pos + 1], \[pos + 4]
     | 4 =>
-        puz.items.{ [pos - 1], [pos + 4] }
+        puz.items[pos - 1], \[pos + 4]
     | 13 =>
-        puz.items.{ [pos + 1], [pos - 4] }
+        puz.items[pos + 1], \[pos - 4]
     | 16 =>
-        puz.items.{ [pos - 1], [pos - 4] }
+        puz.items[pos - 1], \[pos - 4]
 
 fun mainframe(puz):
     var flag = false

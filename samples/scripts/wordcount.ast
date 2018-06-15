@@ -1,7 +1,7 @@
 # Counts the occurence of each unique word in a text
 fun wordcount(text):
     let words = text.split(/[ \n\t\-.,:;]+/)
-    var counts = @dict{}
+    var counts = {}
     for w in words:
         counts[w] = (counts[w] ?? 0) + 1
     return counts
