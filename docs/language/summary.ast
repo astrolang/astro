@@ -122,7 +122,7 @@ TYPE DEFINITION (1)
 
 DELEGATED PROPERTIES
     # Delegated properties are subjects whose assignment and access operations are delegated to specified functions.
-    type Person(var name: '', var age: @delegated{ age, age })
+    type Person(var name: '', var age: @delegated { age, age })
 
     fun age(x, v): x.age = v + 1 # Setter of delegated property must have at least two compulsory parameters.
     fun age(x): x.age + 1 # Getter of delegated property must have at least one compulsory parameters.
@@ -131,13 +131,13 @@ DELEGATED PROPERTIES
     john.age
 
     # The delegated property has only a getter, only the getter should be specified.
-    type Person(var name: '', var age: @delegated{ age })
+    type Person(var name: '', var age: @delegated { age })
 
     # The delegated argument can be left out if delegate functions have the same names as the delegated properties.
     type Person(var name: '', var age: @delegated)
 
     # A delegated property can have a default value
-    type Person(var name: '', var age: @delegated{ init: 12 })
+    type Person(var name: '', var age: @delegated { init: 12 })
 
 EXPRESSION-ORIENTED
     # Everything (except the import and export statements) is an expression in Astro!
@@ -456,7 +456,7 @@ STRINGS
     let calc = '5 * 50 = ${5 * 50}'
 
     # Non-standard string literals don't have escape sequences nor interpolation.
-    var verbatim_string = @raw"Use '\t' to represent tab"
+    var verbatim_string = @raw "Use '\t' to represent tab"
 
     # Multiline strings are enclosed in triple `'` or `"` quotes and they ignore all escapes and interpolation
     # The first and last newlines are always ignored in multiline strings.
@@ -830,11 +830,11 @@ MUTATIVE FUNCTIONS
     # Mutative functions are functions that mutate the arguments passed to them.
     # Astro supports overloading of functions based on argument mutation.
     fun reverse(iterable):
-        let reversed = cast{List}({
+        let reversed = @cast(List) {
             buffer: malloc{iterable.type.T}(iterable.length)
-            length: @delegated{ length: iterable.length }
+            length: @delegated { length: iterable.length }
             capacity: 10
-        })
+        }
         for i, e in enumerate iterable:
             reversed[end + 1 - i] = e
         reversed
@@ -1081,7 +1081,7 @@ TYPE EXTENSION
     # Existing types can be extended in Astro using the `extend` macro
     @extend
     type Integer:
-        let f64 = @delegated{ float64 }
+        let f64 = @delegated { float64 }
 
 CUSTOM PRIMITIVE TYPES
     # Primitive types are value types that are stored and interpreted as machine-intrinsic types like Int and Float64.
@@ -1109,15 +1109,15 @@ TYPE ALIASES
 CAST FUNCTION
     # `cast` is a special function in Astro, just like `typeof`, because it can have either static and dynamic behavior.
     # `cast` turns a typeless object into a typed one. It can also change how a value type is interpreted.
-    let reversed = cast{List}({
+    let reversed = @cast(List) {
         buffer: malloc{list.T}(list.length)
-        length: @delegated{ length }
-    })
+        length: @delegated { length }
+    }
 
-    let value = cast{Int64}(1.0)
+    let value = @cast(Int64) 1.0
 
     # `cast` raises an error if reinterpretation is impossible.
-    let value = cast{Float64}(1.i8)
+    let value = @cast(Float64) 1.i8
 
 REFERENCE EQUALITY
     # `is` operator can be used check if two operands refer to the same object representation.
