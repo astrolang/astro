@@ -101,7 +101,7 @@ COMMAND NOTATION
     print name
     print 56
     print /9/
-    print @dict{ x, y }
+    print @set { x, y }
     print $name
     print (x, y) => x
     print {x: y | x in z}
@@ -292,10 +292,6 @@ LISTS
     fun average(students) = sum(getfield.(students, $gpa)) / students.length
     fun average(students) = students.{ getfield.($gpa).sum / length }
 
-    # List operations.
-    var concatenate = [1, 2] ++ [3, 4] # [1, 2, 3, 4]
-    var multiply = [1, 2] ** 2 # [1, 2, 1, 2]
-
 ARRAYS
     # Array is a supertype of List and works a bit differently from List.
     # Arrays are not preallocated and cannot be resized at runtime.
@@ -313,7 +309,7 @@ ARRAYS
     ]
 
     # A 2-dimensional Array can be created using horizontal concatenation with `;`.
-    let a = 2×4[
+    let a = 2×4 [
         1, 2, 7, 8;
         3, 4, 5, 6
     ]
@@ -371,52 +367,36 @@ VECTORIZATION
     # Infix operators.
     let z = 5 .+ M
 
-DICTIONARIES & OBJECTS
-    # Objects and dictionaries are both associative data structures.
-
-    # Objects are static construct and can be introspected at compile-time.
+DICTIONARIES
+    # Dictionary is an associative array that stores key-value pairs.
     let game = { title: 'BioShock Infinite', year: 2014 }
 
-    # Dictonaries are dynamic data structures and will return nil where expected key is not present
-    let game = @dict{ title: 'BioShock Infinite', year: 2014 } # Dictionary.
-
-    # Object keys must be valid identifiers or string literals.
-    let parents = {
-        dad: {
-            name: 'Sunday Williams'
-            'age': 46
-        }
-    }
-
     # Dictionary keys can be any valid expression.
-    let parents = @dict{
+    let parents = {
         'mum': {
             'name': 'Esther Williams'
             'age': 42
         }
     }
 
-    # Nested dictionaries/objects can be simplified with indentation.
+    # Nested dictionaries can be simplified with indentation.
     let siblings = {
         sister:
             name: 'Shade Williams'
             age: 15
     }
 
-    # Object fields are accessed using the dot operator.
-    let sister = siblings.sister.name
+    # Dictionary fields can be accessed using the dot operator or the index operator.
+    let mum_name = parents.mum.name
+    let sister_name = siblings['sister', 'name']
 
-    # Dictionary values are accessed using `[]` and can return nil.
-    let mum = parent['mum', 'name']
+    # You can also add more fields to a dictionary using the dot operator or the index operator.
+    parents.mum.nationality = 'Nigerian'
+    siblings.sister['nationality'] = 'Nigerian'
 
-    # Dictionary values can also be accessed using the dot operator, but since dictionaries can return nil, the nil operator is needed.
-    let mum = parent.mum.name?
-
-    # New fields can be added to an object.
-    siblings.brother = {
-        name: "Daniel Williams"
-        age: 23
-    }
+    # If the compiler is unsure if a field exists in a dictionary. You have to handle the possibility of nil.
+    let name = parent.mum.age # Invalid!
+    let name = parent.mum.age?
 
     # To use variable names from the outer scope as a dictionary key, the name needs to be enclosed in a bracket.
     var professor = {
@@ -424,11 +404,8 @@ DICTIONARIES & OBJECTS
         (id2): 56
     }
 
-    # Empty object.
-    var empty_obj = {}
-
     # Empty dictionary.
-    var empty_dict = @dict{}
+    var empty_dict = {}
 
 SET
     # Set is an unordered collection of items with no duplicate elements.
