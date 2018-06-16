@@ -971,7 +971,7 @@ GENERICS
 
     # Types and functions can have generic type parameters and the parameters can have default values.
     type Buffer: #: {T: Any}
-    var buffer
+        var buffer
 
     fun Buffer(length): #: {T} (Int)
         new { buffer: malloc{T}(length) }
@@ -995,10 +995,14 @@ TYPES AS FIRST-CLASS CITIZENS
     fun zero(t) = 0.0 #: Type{Float}
     fun zero(t) = 0 #: Type{Int}
 
+    zero(Float) # 0.0
+    zero(Int) # 0
+
 TYPE CONVERSION
     # In Astro, the lowercase version of type names are usually meant for type conversion operations.
     var three = int(3.14159265358) # Converts `3.14159265358` to an Int
     var five = str(5) # Converts `5` to a Str
+    var uniques = set([1, 2, 3, 4, 5, 4, 3, 7]) # Converts a list to a set
 
 INHERITANCE
     # Types can inherit from one or more parent types in Astro.
@@ -1093,16 +1097,16 @@ CUSTOM PRIMITIVE TYPES
     @primitive(Int64) # the type instance will be stored and interpreted as an Int64
     type Numeral(num)
 
-TYPE CHECKING
+TYPE ASSERTION
     # The `typeof` operator can be used to get an object's type.
     typeof 50 # Int32
 
-    # `::`, `>:`  and `>:` are operators for checking type relations.
-    50 :: Integer # Exact type check.
-    50 <: Integer # Subtype check.
-    50 >: Integer # Supertype check.
+    # `::`, `>:`  and `>:` are operators for asserting type relations.
+    50 :: Integer # Exact type assertion.
+    50 <: Integer # Subtype assertion.
+    50 >: Integer # Supertype assertion.
 
-    # A more complex type checking.
+    # A more complex type assertion.
     head([1, 2, 3]) :: ([Int]) -> Int
 
 TYPE ALIASES
@@ -1111,16 +1115,14 @@ TYPE ALIASES
     fun add(a, b) = a + b #: (Number, Number) -> Number
 
 CAST FUNCTION
-    # `cast` is a special function in Astro, just like `typeof`, because it can have either static and dynamic behavior.
-    # `cast` turns a typeless object into a typed one. It can also change how a value type is interpreted.
+    # `cast` is a special macro in Astro, because it can turn a dictionary into a typed object.
     let reversed = @cast(List) {
         buffer: malloc{list.T}(list.length)
         length: @delegated { length }
     }
 
+    # It can also change how a value type is interpreted.
     let value = @cast(Int64) 1.0
-
-    # `cast` raises an error if reinterpretation is impossible.
     let value = @cast(Float64) 1.i8
 
 REFERENCE EQUALITY
@@ -1166,11 +1168,7 @@ EXPORT
     # Subjects, functions and types declared within the current module can be exported using the 'export' keyword.
     export { cos, sin, tan }
 
-    # If only a single module member is being exported, the braces can be ommitted.
-    export sin
-
-    # There can only be one export statement in a module and it is expected to be defined at the
-    # bottom of the file.
+    # There can only be one export statement in a module.
     import random { randoms }
     fun random_string() = randoms(10).map str
     export random_string
