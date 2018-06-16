@@ -34,7 +34,12 @@ john.{
     print { x: y | x in z }
     print [x | y in z]
 
--
+- highlight as dot notation
+    \age
+
+- highlight lambda (?<!\|)\s+[a-zA-Z0-9]+(\s+\.([a-zA-Z0-9])/)?\s+\=\>
+    (a, b) => print a + b
+    x => print x
 
 - remove highlight on prev lambda syntax
     |a, b| => print a + b
@@ -50,6 +55,9 @@ john.{
 
     a / b / c
     a /= b
+    
+- fix regex highlight (/[^/]+/)
+    let x = /\d/ + re.'\[a-z]' + /\d/
 
 - remove highlight on unsafe keyword
     unsafe
@@ -113,9 +121,6 @@ john.{
 - remove highlight on nonstandard numeric literals
     2344'f32 #'
     2344.f32
-
-- fix regex highlight (/[^/]+/)
-    let x = /\d/ + re.'\[a-z]' + /\d/
 
 
 # TYPE
