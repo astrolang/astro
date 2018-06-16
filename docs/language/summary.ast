@@ -55,10 +55,9 @@ IDENTIFIERS
 
     # Names preceded by underscores are special to the compiler.
     let _song = 'Sorry' # Invalid!
-    let T = 5 # Invalid!
 
     # Naming convention.
-    # Snake case for variables, constants, function names and module names.
+    # Snake case for variables, constants and function names.
     let book_title = "Ender's Game"
     fun add_numbers(a, b): a + b
 
@@ -67,7 +66,7 @@ IDENTIFIERS
     abst LightSource: SpotLight | Directional | Ambient
     type XMLParser <: Parser
 
-    # Underscore in a two-word name can be ommitted if the name is readable and unambiguous without it.
+    # if a name remains readable and unambiguous without underscores, then the underscores can be ommitted.
     iseven 45
 
 VARIABLE/CONSTANT OBJECTS
@@ -292,7 +291,7 @@ LISTS
     fun average(students) = sum(getfield.(students, $gpa)) / students.length
     fun average(students) = students.{ getfield.($gpa).sum / length }
 
-ARRAYS
+ARRAYS # Needs redesign work
     # Array is a supertype of List and works a bit differently from List.
     # Arrays are not preallocated and cannot be resized at runtime.
     # If the type of elements is not specified, the element type will default to F64
@@ -340,8 +339,8 @@ ARRAYS
 
     # Array unpacking.
     let b = [
-        ...a', ...a;
-        ...a, ...a'
+        |a', |a;
+        |a,  |a'
     ]
     # [1 0 1 2]
     # [2 4 0 4]
