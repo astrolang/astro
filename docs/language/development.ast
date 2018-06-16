@@ -37,7 +37,7 @@ john.{
 - highlight as dot notation
     \age
 
-- highlight lambda (?<!\|)\s+[a-zA-Z0-9]+(\s+\.([a-zA-Z0-9])/)?\s+\=\>
+- highlight lambda syntax (?<!\|)\s+[a-zA-Z0-9]+(\s+\.([a-zA-Z0-9])/)?\s+\=\>
     (a, b) => print a + b
     x => print x
 
@@ -46,6 +46,7 @@ john.{
 
 - highlight multiple assignment
     cost price total = 4_000
+    let cost price = 4_500
 
 - highlight regex syntax properly
     var regex = /regex/
@@ -55,7 +56,7 @@ john.{
 
     a / b / c
     a /= b
-    
+
 - fix regex highlight (/[^/]+/)
     let x = /\d/ + re.'\[a-z]' + /\d/
 
