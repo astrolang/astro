@@ -604,10 +604,6 @@ BOOLEAN OPERATORS
     not (x == y)
     name not in list
 
-    # In `Astro`, `|` and `&` are used in different way. To simplify boolean expressions.
-    x == y and x == z # Can be rewritten as.
-    x == y & z # Same as above.
-
     # Astro also allows math-like boolean operator chaining.
     a == b and b == c # Can be rewritten as.
     a == b == c # Same as above.
@@ -631,11 +627,11 @@ FOR LOOP
     for i in array where i == 5:
         return i
 
-    # The `end` block executes when a loop completes without interruption from `break`, `return` or `throw`.
+    # The `else` block executes when a loop completes without interruption from `break`, `return` or `throw`.
     for line in file where /lagbaja/ in line:
         print "name found!"
         break
-    end:
+    else:
         print "name not found!"
 
 COMPREHENSION
@@ -661,7 +657,7 @@ BREAK WITH
     # Break-with breaks a loop and returns a value.
     for name in register where name == 'Tony':
         break name
-    end: ""
+    else: ""
 
 IN
     # `in` is a special keyword-based infix operator that checks for the existence of an object in a collection type.
@@ -722,7 +718,7 @@ WHILE LOOP & LOOP
     # Like `for` loops, `while` and `loop` can have a closing `end` block.
     while file.has_next() where /\t+/ in file.next():
         break 'File contains tabs!'
-    end: 'File is clean!'
+    else: 'File is clean!'
 
 MATCH EXPRESSION
     # Match expression is like a chain of if-elif-else expressions.
