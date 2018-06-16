@@ -953,13 +953,13 @@ GENERICS
         return a + b
 
     # Specifying generic type constraint with `where` and type relation operators (`::`, `<:`, `>:`)
-    fun any_common_elements(l, r): #: (T, U) -> Bool where (T, U)<:Sequence
+    fun any_common_elements(l, r): #: (T, U) -> Bool where |T, U| <: Sequence
         for x in l: for y in r where x == y:
             return true
         false
 
     #: C, D -> Bool
-    #: where (C, D)<:Collection,
+    #: where |C, D| <: Collection,
     #: where C.Element::D.Element
     #: where C.Element<:Equatable
     fun startequal(c, d): c.first == d.first
