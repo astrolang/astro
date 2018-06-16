@@ -66,6 +66,9 @@ IDENTIFIERS
     abst LightSource: SpotLight | Directional | Ambient
     type XMLParser <: Parser
 
+    # Kebab case for module names
+    import my-module { foo, bar }
+
     # if a name remains readable and unambiguous without underscores, then the underscores can be ommitted.
     iseven 45
 
@@ -293,15 +296,15 @@ LISTS
 
 ARRAYS # Needs redesign work
     # Array is a supertype of List and works a bit differently from List.
-    # Arrays are not preallocated and cannot be resized at runtime.
-    # If the type of elements is not specified, the element type will default to F64
-    let matrix = 5×5 []
-    let matrix = 5*5 [] # Alternate syntax
+    # Arrays are not preallocated and their dimension must be specified.
+    # If the element type is not specified, the element type will default to F64
+    let matrix = 5×5 [] # A 5 by 5 array.
+    let matrix = 5*5 [] # Alternative syntax.
 
-    # Specifying type
+    # Specifying element type.
     let matrix = 5*5 Int32[]
 
-    # Because Arrays can be more efficient, they can be used to represent matrices.
+    # Because Arrays are typically used to represent matrices.
     let a = 2×4 [
         [1, 2, 7, 8]
         [3, 4, 5, 6]
