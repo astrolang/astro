@@ -512,7 +512,7 @@ MULTILINE EXPRESSIONS
         + 5 + 6 + 7
     )
 
-    # Chained dot notation or cascading notation can be written on subsequent lines but with an indentation.
+    # Chained dot notation can be written on subsequent lines but with an indentation.
     sentence
         .trim()
         .lower()
@@ -1256,8 +1256,8 @@ SYMBOL
     # Symbols are static data types that hold their content as-is.
     let symbol = ${2 + 3}
 
-    # A symbol can be interpolated with another symbol using '\'.
-    let addition = ${let five = \symbol}
+    # A symbol can be interpolated with another symbol using back ticks.
+    let addition = ${let five = $symbol}
 
     # A symbol can be evaluated with the 'eval' keyword.
     eval addition
