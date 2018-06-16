@@ -982,6 +982,10 @@ GENERICS
     let languages #: List{Str}
     let languages #: [Str]
 
+    # Varargs type annotation.
+    fun total(first, ...rem): #: Int, ...Int -> Int
+        return first + sum rem
+
 TYPES AS FIRST-CLASS CITIZENS
     # Types can be passed around and specialized on like regular objects in Astro.
     Int64 :: Type{Int64}
