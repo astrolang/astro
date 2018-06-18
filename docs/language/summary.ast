@@ -693,7 +693,7 @@ WHILE LOOP & LOOP
         print file.next()
 
     # Unconditional loop. Synonymous to `while true`.
-    loop: # Note, `loop` is not a reserved keyword.
+    loop:
         let input = scan '>>> '
         let tokens = lex input
         let ast = parse tokens
@@ -702,7 +702,7 @@ WHILE LOOP & LOOP
         print result
 
     # A do-while loop block is evaluated at least once.
-    do: # Note, `do` is not a reserved keyword.
+    do:
         print x
         x += 1
     while x < 50
@@ -715,7 +715,7 @@ WHILE LOOP & LOOP
         title = choose_title_randomly()
     ..
 
-    # Like `for` loops, `while` and `loop` can have a closing `end` block.
+    # Like `for` loops, `while` and `loop` can have a closing `else` block.
     while file.has_next() where /\t+/ in file.next():
         break 'File contains tabs!'
     else: 'File is clean!'
