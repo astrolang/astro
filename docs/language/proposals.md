@@ -41,14 +41,19 @@ fun fib(n) {
     }
 }
 
-var age = { age += 5 } -> { age -= 5 }
+list.foldl(0, (a, b) => { a + b })
 
-list.foldl(0) |a, b| { a + b }
-
-20.each { print "Hello" }
+20.each x => print "Hello"
 
 type Employee <: Person {
     var job
+    var company
+}
+
+abst Fruits {
+    | Orange
+    | Mango
+    | Pineapple
 }
 
 dsl(src: 'hello', link: 'bar.io') {
@@ -56,31 +61,19 @@ dsl(src: 'hello', link: 'bar.io') {
 }
 ```
 
-## INTEROP WITH JS/PYTHON PROPOSAL
-```julia
-@pyimport(math)
-math.sin(45)
-math.cos(70)
-
-@jsimport(express)
-let app = express()
-let router = app.Router()
-```
-
 ## MACROS PROPOSAL
 Astro macros are resolved at parse time.
 Macros take asts as argument.
 ```julia
 fun @sorted(string): #: RawString
-    ${SortedStr('\(string.literal)')}
+    return `SortedStr('${string.literal}')`
 ```
 
 > Note: Macro functions cannot use subjects from outer scope
 ```julia
 fun @typify(abstract): #: AbstractType
-    let els = abstract.elements
-    let types = els.map |a| => ${type \a)}
-    ${\abstract; \types}
+    let types = abstract.elements.map t => `type $t`
+    return `$abstract; $types`
 ```
 
 Inline macro calls
@@ -90,26 +83,37 @@ Inline macro calls
 
 Block macro calls
 ```julia
-@loop(times: 3): print 'Happy birthday to you'
-@time(minutes)
+fun @loop(count, block): #: IntegerLiteral, Block
+    return `
+    var countup, max = 0, $count
+    while countup < max:
+        $block
+        countup += 1
+    `
+
+@loop(times: 3):
+    print 'Hello'
+    print ' World!'
 ```
 
 Macros can be called like regular functions.
 ```julia
-fun @where(cond, none): #: BinaryExpression, None
-    return ${filter|cond.lhs| => cond}
+fun @where(arr, cond, none): #: Sequence, BinaryExpression, None
+    return `${arr}.filter(${cond.lhs} => ${cond})`
 
-array.where(x > 5)
+let result = [1, 2, 3].@where(x > 5)
 ```
 
 ### TYPE EXTENSION PROPOSAL
 ```julia
-type Programmer(newField) @extend
+@extend
+type Programmer(new_field)
 ```
 
 ## STRUCT PROPOSAL
 ```julia
-type Programmer(name, skills) @struct
+@struct
+type Programmer(name, skills)
 ```
 
 ## UNSAFE BLOCK PROPOSAL
@@ -120,7 +124,7 @@ type Programmer(name, skills) @struct
 ```
 
 ## DYNAMIC IMPORT
-```nim
+```swift
 let { pi } = import(someModule) #: Inferred as dynamic
 ```
 
@@ -141,9 +145,30 @@ Fibers are lightweight CSP-style threading model.
 Modelling fibers around coroutine.
 ```nim
 fun main():
-    var p = await producer() #: Channel[Int]
+    var p = await producer() #: Channel{Int}
     print p.next()
 
 fub producer():
     yield 56
+```
+
+## INTEROP WITH OTHER LANGUAGES
+### Static Languages
+##### C
+```swift
+let result = @ccall(reshape_array, a, ...dims) (Array{T}, ...Int) -> Array{T}
+```
+
+### Dynamic Languages
+##### Python
+```javascript
+let { cos, sin } = import(math, 'python')
+sin(45)
+cos(70)
+```
+
+##### JavaScript
+```javascript
+let app = import(express, 'javascript')()
+let router = app.Router()
 ```
