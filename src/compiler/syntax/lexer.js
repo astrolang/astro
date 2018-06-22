@@ -3,8 +3,14 @@
 const { print } = require('../../utils');
 
 /**
- * The Lexer.
- * result = [{ token, kind, line, column }]
+ * The simple lexer.
+ *
+ * NOTES:
+ * * Lex functions return [{ token, kind, line, column }]
+ *
+ * TODO:
+ * * Fix unicode issues
+ * * Remove line, startLine and startLine attributes
  */
 class Lexer {
   constructor(code) {
@@ -145,7 +151,6 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Check if subsequent chars in input code are valid space character.
     if (this.code[this.lastPosition + 1] === '\n') {
       this.lastPosition += 1;
       this.column += 1;
