@@ -266,11 +266,7 @@ linecontinuation =
 
 _ =
   | linecontinuation
-  | nextcodeline samedent // Checks if ignoreNewline is true first // Comments here can be ignored because they are in enclosures.
   | spaces // Can eat others cake
-
-_comma =
-  | _? ','
 
 // <<<<< DIRECTIVES <<<<<
 
@@ -283,101 +279,77 @@ dedentoreoiend =
   | nextcodeline? _? eoi
   { kind, comments }
 
+comma =
+  | _? ',' _? (nextline samedent)?
+
 listarguments =
-  | primitiveexpression (_comma _? primitiveexpression)* _comma?
-  { kind, expressions }
+  | primitiveexpression (comma primitiveexpression)* comma?
+  { expressions }
 
 listargumentsmultiple =
   | listliteral (nextcodeline samedent listliteral)+
   | listarguments (_? ';' _? listarguments)+ (_? ';')?
-  | listarguments (_? ';')?
   { expressions }
 
 listliteral =
-  | '[' _? ']' // ignorenewline
-  | '[' spaces? listargumentsmultiple _? ']' // ignorenewline
-  | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']'
-  { kind, expressions }
-
-objectargument =
-  | identifier _? ':' _? objectblock &(primitiveexpression | '}')
-  | identifier _? ':' _? primitiveexpression &(_comma | nextcodeline _? | _? '}')
-  | identifier &(_comma | nextcodeline _? | _? '}')
-  { key, value }
-
-objectblock =
-  | nextcodeline indent objectarguments nextcodeline dedent
-  { kind, expressions: [{ key, value }] }
-
-objectliteral =
-  | '{' _? '}' // ignorenewline
-  | '{' spaces? objectarguments _? '}' // ignorenewline
-  | '{' nextcodeline indent objectarguments nextcodeline dedent '}'
-  { kind, expressions: [{ key, value }] }
+  | '[' _? ']' '\''?
+  | '[' spaces? listargumentsmultiple _? ']' \''?
+  | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']' \''?
+  { kind, transposed, expressions }
 
 dictargument =
   | primitiveexpression _? ':' _? objectblock &(primitiveexpression | '}')
-  | primitiveexpression _? ':' _? (subdictliteral | primitiveexpression) &(_comma | nextcodeline _? | _? '}')
-  | identifier &(_comma | nextcodeline _? | _? '}')
+  | primitiveexpression _? ':' _? (subdictliteral | primitiveexpression) &(comma | nextcodeline _? | _? '}')
+  | identifier &(comma | nextcodeline _? | _? '}')
   { key, value }
 
 dictarguments =
-  | dictargument ((_comma _? | nextcodeline samedent)? dictargument)* _comma?
+  | dictargument ((comma | nextcodeline samedent)? dictargument)* comma?
   { expressions: [{ key, value }] }
 
 dictliteral =
-  | '@' '{' _? '}' // ignorenewline
-  | '@' '{' spaces? dictarguments _? '}' // ignorenewline
-  | '@' '{' nextcodeline indent dictarguments nextcodeline dedent '}'
+  | '{' _? '}'
+  | '{' spaces? dictarguments _? '}'
+  | '{' nextcodeline indent dictarguments nextcodeline dedent '}'
   { kind, expressions: [{ key, value }] }
 
-setarguments =
-  | primitiveexpression (_comma _? primitiveexpression)* _comma?
-  { expressions }
-
-setliteral =
-  | '%' '{' _? '}' // ignorenewline
-  | '%' '{' spaces? setarguments _? '}' // ignorenewline
-  | '%' '{' nextcodeline indent setarguments nextcodeline dedent '}'
-  { kind, expressions }
-
 tuplearguments =
-  | primitiveexpression (_comma _? primitiveexpression)+ _comma?
-  | primitiveexpression _comma
+  | primitiveexpression (comma primitiveexpression)+ comma?
+  | primitiveexpression comma
   { expressions }
 
 tupleliteral =
-  | '(' _? ')' // ignorenewline
-  | '(' spaces? tuplearguments _? ')' // ignorenewline
+  | '(' _? ')'
+  | '(' spaces? tuplearguments _? ')'
   | '(' nextcodeline indent tuplearguments nextcodeline dedent ')'
   { kind, expressions }
 
 namedtuplearguments =
-  | identifier _? ':' _? primitiveexpression (_comma _? identifier _? ':' _? primitiveexpression)* _comma?
+  | identifier _? ':' _? primitiveexpression (comma identifier _? ':' _? primitiveexpression)* comma?
   { expressions: [{ key, value }] }
 
 namedtupleliteral =
-  | '(' _? ':' _?  ')' // ignorenewline
-  | '(' spaces? namedtuplearguments _? ')' // ignorenewline
+  | '(' _? ':' _?  ')'
+  | '(' spaces? namedtuplearguments _? ')'
   | '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
   { kind, expressions: [{ key, value }] }
 
 symbolliteral =
   | '$' identifier
-  | '$' '{' _? expression _? '}' // ignorenewline
+  | '$' '{' _? expression _? '}'
   | '$' '{' block '}'
   { kind, expressions }
 
+barecomprehension =
+  | primitiveexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)?
+  { kind, expression, iterators:[{ lhs, rhs}], guard }
+
 listcomprehension =
-  | '[' _? primitiveexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? ']' // ignorenewline
+  | '[' _? primitiveexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? ']'
   { kind, expression, iterators:[{ lhs, rhs}], guard }
 
 dictcomprehension =
-  | '@' '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? '}' // ignorenewline
-  { kind, key, value, iterators:[{ lhs, rhs}], guard }
-
-setcomprehension =
-  | '%' '{' _? primitiveexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? '}' // ignorenewline
+  | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? '}'
   { kind, key, value, iterators:[{ lhs, rhs}], guard }
 
 comprehension =
@@ -398,13 +370,17 @@ literal =
   | symbolliteral
   | comprehension
 
+callargument =
+  | barecomprehension
+  | primitiveexpression
+
 callarguments =
-  | (identifier _? ':' _?)? primitiveexpression (_comma _? (identifier _? ':' _?)? primitiveexpression)* _comma?
+  | (identifier _? ':' _?)? primitiveexpression (comma (identifier _? ':' _?)? primitiveexpression)* comma?
   { expressions: [{ key, value }] }
 
 callpostfix =
-  | spaces? ('!' spaces?)? '.'? '(' _? ')' // ignorenewline
-  | spaces? ('!' spaces?)? '.'? '(' spaces? callarguments _? ')' // ignorenewline
+  | spaces? ('!' spaces?)? '.'? '(' _? ')'
+  | spaces? ('!' spaces?)? '.'? '(' spaces? callarguments _? ')'
   | spaces? ('!' spaces?)? '.'? '(' nextcodeline indent callarguments nextcodeline dedent ')'
   { kind, expression, mutative, vectorized, arguments: [{ key, value }] }
 
@@ -416,11 +392,11 @@ cascadenotationargument =
   | (callpostfix | indexpostfix | spaces? '.' identifier) (spaces? '?')? (subatompostfix (spaces? '?')?)*
 
 cascadenotationarguments =
-  | cascadenotationargument (_comma _? cascadenotationargument)+ _comma?
+  | cascadenotationargument (comma cascadenotationargument)+ comma?
   | cascadenotationargument _ ('.'? operator | keywordoperator) _ (cascadenotationarguments | cascadenotationargument)
 
 cascadenotationpostfix = // Unfurl
-  | spaces? '.' '{' spaces? cascadenotationarguments _? '}' // ignorenewline
+  | spaces? '.' '{' spaces? cascadenotationarguments _? '}'
   | spaces? '.' '{' nextcodeline indent cascadenotationarguments nextcodeline dedent '}'
   { kind, expression, cascadeaccess }
 
@@ -430,16 +406,16 @@ indexargument =
   { index, begin, step, end }
 
 indexarguments =
-  | indexargument (_comma _? indexargument)* _comma?
+  | indexargument (comma indexargument)* comma?
   { expressions: [{ index, begin, step, end }] }
 
 indexpostfix =
-  | spaces? '[' spaces? indexarguments _? ']' // ignorenewline
+  | spaces? '[' spaces? indexarguments _? ']'
   | spaces? '[' nextcodeline indent indexarguments nextcodeline dedent ']'
   { kind, expression, arguments: [{ key, value }] }
 
 ternaryoperator =
-  | '(' spaces? primitiveexpression _? ')' _? '?' _? primitiveexpression _? ':' _? primitiveexpression  // ignorenewline
+  | '(' spaces? primitiveexpression _? ')' _? '?' _? primitiveexpression _? ':' _? primitiveexpression
   | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' _? '?' _? primitiveexpression _? ':' _? primitiveexpression
   { kind, condition, truebody, falsebody }
 
@@ -490,7 +466,7 @@ subatompostfix =
   | indexpostfix
 
 subatom =
-  | '(' spaces? simpleexpression _? ')' identifier? // ignorenewline
+  | '(' spaces? simpleexpression _? ')' identifier?
   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' identifier?
   | coefficientexpression
   | literal
@@ -555,7 +531,7 @@ simpleexpression =
   | primitiveexpression
 
 tupleexpression =
-  | simpleexpression (_comma _? simpleexpression)+ _comma?
+  | simpleexpression (comma simpleexpression)+ comma?
   | simpleexpression
 
 dotnotationline =
@@ -618,17 +594,17 @@ lhsname
   | '...' identifier?
 
 lhsarguments =
-  | lhsname (_comma _? lhsname)* _comma?
+  | lhsname (comma lhsname)* comma?
   { expressions }
 
 lhspattern =
-  | '[' spaces? lhsarguments _? ']' // ignorenewline
+  | '[' spaces? lhsarguments _? ']'
   | '[' nextcodeline indent lhsarguments nextcodeline dedent ']'
-  | '{' spaces? lhsarguments _? '}' // ignorenewline
+  | '{' spaces? lhsarguments _? '}'
   | '{' nextcodeline indent lhsarguments nextcodeline dedent '}'
-  | '(' spaces? lhsarguments _? ')' // ignorenewline
+  | '(' spaces? lhsarguments _? ')'
   | '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
-  |  lhsname (_comma _? lhsname)*
+  |  lhsname (comma lhsname)*
   { destructuretype, arguments }
 
 guard =
@@ -757,22 +733,22 @@ typerelationoperator =
   | ('::' | '<:' | '>:') !operator
 
 matchpattern =
-  | '[' spaces? matchargument (_comma _? matchargument)* _comma? _? ']' // ignorenewline
-  | '[' nextcodeline indent  matchargument (_comma _? matchargument)* _comma? nextcodeline dedent ']'
-  | '{' spaces? matchargument (_comma _? matchargument)* _comma? _? '}' (typerelationoperator identifier)? // ignorenewline
-  | '{' nextcodeline indent matchargument (_comma _? matchargument)* _comma? nextcodeline dedent '}' (typerelationoperator identifier)?
-  | '%' '{' spaces? matchargument (_comma _? matchargument)* _comma? _? '}' // ignorenewline
-  | '%' '{' nextcodeline indent matchargument (_comma _? matchargument)* _comma? nextcodeline dedent '}'
-  | '@' '{' spaces? matchargument (_comma _? matchargument)* _comma? _? '}' // ignorenewline
-  | '@' '{' nextcodeline indent matchargument (_comma _? matchargument)* _comma? nextcodeline dedent '}'
+  | '[' spaces? matchargument (comma matchargument)* comma? _? ']'
+  | '[' nextcodeline indent  matchargument (comma matchargument)* comma? nextcodeline dedent ']'
+  | '{' spaces? matchargument (comma matchargument)* comma? _? '}' (typerelationoperator identifier)?
+  | '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}' (typerelationoperator identifier)?
+  | '%' '{' spaces? matchargument (comma matchargument)* comma? _? '}'
+  | '%' '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}'
+  | '@' '{' spaces? matchargument (comma matchargument)* comma? _? '}'
+  | '@' '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}'
 
 matchexpression =
-  | ('|' | '!') _? matchpattern (_comma _? matchpattern)* _? '=>' _? subexpressionnoblock nextcodeline samedent (matchexpression | '')
-  | ('|' | '!') _? matchpattern (_comma _? matchpattern)* _? '=>' block (matchexpression | '')
+  | ('|' | '!') _? matchpattern (comma matchpattern)* _? '=>' _? subexpressionnoblock nextcodeline samedent (matchexpression | '')
+  | ('|' | '!') _? matchpattern (comma matchpattern)* _? '=>' block (matchexpression | '')
 
 callparens =
-  | '(' _? ')' // ignorenewline
-  | '(' spaces? callarguments _? ')' // ignorenewline
+  | '(' _? ')'
+  | '(' spaces? callarguments _? ')'
   | '(' nextcodeline indent callarguments nextcodeline dedent ')'
   { arguments: [{ key, value }] }
 
@@ -809,22 +785,22 @@ importargument =
   { key, value }
 
 importarguments =
-  | importargument (_comma importargument )* _comma?
+  | importargument (comma importargument )* comma?
   { members: [{ key, value }] }
 
 importdeclaration =
-  | 'import' (_ identifier _? ':') _ importpath  '{' _? importarguments _? '}' // ignorenewline
+  | 'import' (_ identifier _? ':') _ importpath  '{' _? importarguments _? '}'
   | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent importarguments nextcodeline dedent '}'
   | 'import' (_ identifier _? ':') _ importpath
   { kind, modulealias, modulename, path, all, members: [{ key, value }] }
 
 exportarguments =
-  | (identifier | operator) (_comma (identifier | operator))* _comma?
+  | (identifier | operator) (comma (identifier | operator))* comma?
   | '...'
   { members: [{ key, value }] }
 
 exportdeclaration =
-  | 'export' _ '{' _? exportarguments _? '}' // ignorenewline
+  | 'export' _ '{' _? exportarguments _? '}'
   | 'export' _ '{' nextcodeline indent exportarguments nextcodeline dedent '}'
   { kind, members: [{ key, value }] }
 
@@ -869,17 +845,17 @@ fieldlhsname
   { internal, expression }
 
 fieldlhsarguments =
-  | fieldlhsname (_comma _? fieldlhsname)* _comma?
+  | fieldlhsname (comma fieldlhsname)* comma?
   { expressions }
 
 fieldlhspattern =
-  | '[' spaces? fieldlhsarguments _? ']' // ignorenewline
+  | '[' spaces? fieldlhsarguments _? ']'
   | '[' nextcodeline indent fieldlhsarguments nextcodeline dedent ']'
-  | '{' spaces? fieldlhsarguments _? '}' // ignorenewline
+  | '{' spaces? fieldlhsarguments _? '}'
   | '{' nextcodeline indent fieldlhsarguments nextcodeline dedent '}'
-  | '(' spaces? fieldlhsarguments _? ')' // ignorenewline
+  | '(' spaces? fieldlhsarguments _? ')'
   | '(' nextcodeline indent fieldlhsarguments nextcodeline dedent ')'
-  |  fieldlhsname (_comma _? fieldlhsname)*
+  |  fieldlhsname (comma fieldlhsname)*
   { destructuretype, arguments }
 
 fieldhead =
@@ -899,7 +875,7 @@ fielddeclarationsecondinline =
   { kind, immutable, lhs, value }
 
 typename =
-  | identifier '{' spaces? (typeset | typename) _? '}' '?'? // ignorenewline
+  | identifier '{' spaces? (typeset | typename) _? '}' '?'?
   | identifier '{' nextcodeline indent (typeset | typename) nextcodeline dedent '}' '?'?
   | identifier '?'?
 
@@ -916,28 +892,32 @@ typesignatureargment =
   | noname
 
 typesignatureargments =
-  | typesignatureargment (_comma _? typesignatureargment)* _comma?
+  | typesignatureargment (comma typesignatureargment)* comma?
 
 typeconstraintargument =
   | (typeset | typename) typerelationoperator (typeset | typename)
 
 typeconstraintarguments =
-  | typeconstraintargument (_comma _? typeconstraintargument)*
+  | typeconstraintargument (comma typeconstraintargument)*
 
 typesignature =
-  | '(' spaces? typesignatureargments _? ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments // ignorenewline
+  | '(' spaces? typesignatureargments _? ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
   | '(' nextcodeline indent typesignatureargments nextcodeline dedent ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
   | typeset
   | typename
 
 lambdaexpression =
-  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionsecondinline
-  | '|' _? functionparameters _? '|' _? '=>' block
+  | identifier _? '=>' _? subexpressionsecondinline
+  | identifier _? '=>' block
+  | '(' _? functionparameters _? ')' _? '=>' _? subexpressionsecondinline
+  | '(' _? functionparameters _? ')' _? '=>' block
   { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
 
 lambdaexpressionsecondinline =
-  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionnoblock
-  | '|' _? functionparameters _? '|' _? '=>' block
+  | identifier _? '=>' _? subexpressionnoblock
+  | identifier _? '=>' block
+  | '(' _? functionparameters _? ')' _? '=>' _? subexpressionnoblock
+  | '(' _? functionparameters _? ')' _? '=>' block
   { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
 
 blockoperator =
@@ -949,11 +929,11 @@ typehead =
   | 'kind' _ identifier
 
 typeconstructor =
-  | '(' spaces? parameters _?')' // ignorenewline
+  | '(' spaces? parameters _?')'
   | '(' nextcodeline indent parameters nextcodeline dedent ')'
 
 typeparents =
-  | (_ '<:' _| '<:') identifier (_comma _? identifier)*
+  | (_ '<:' _| '<:') identifier (comma identifier)*
   { parenttypes }
 
 typeblock =
@@ -977,7 +957,7 @@ absthead =
   | 'abst' _ identifier
 
 subtypedeclaration =
-  | identifier (_? '(' spaces? functionparameters _? ')')? // ignorenewline
+  | identifier (_? '(' spaces? functionparameters _? ')')?
   | identifier (_? '(' nextcodeline indent functionparameters nextcodeline dedent ')')?
 
 abstsubtypeinline =
@@ -1006,10 +986,10 @@ functionparameter =
   | identifier
 
 functionparameters =
-  | functionparameter (_comma _? functionparameter)* _comma?
+  | functionparameter (comma functionparameter)* comma?
 
 functionhead =
-  | 'fun' _ (identifier | operator) _? '(' spaces? functionparameters _?')' // ignorenewline
+  | 'fun' _ (identifier | operator) _? '(' spaces? functionparameters _?')'
   | 'fun' _ (identifier | operator) _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
 
 functiondeclaration =
