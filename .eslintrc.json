@@ -3,8 +3,7 @@
     "rules": {
       "prefer-destructuring": [
         "error",
-        { "array": false, "object": true },
-        { "enforceForRenamedProperties": true }
+        { "array": false, "object": true }
       ]
     },
     "env": {
