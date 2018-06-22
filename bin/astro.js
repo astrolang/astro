@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { print, keyToUnicode } = require('../src/compiler/utils');
+const { print, keyToUnicode } = require('../src/utils');
 const Lexer = require('../src/compiler/syntax/lexer');
 const { Parser, operator } = require('../src/compiler/syntax/parser');
 
@@ -26,13 +26,15 @@ const commandlineInfo = {
     else if (mode === 'parser') modeBanner = parserModeBanner;
 
     return `
-\x1b[2m\x1b[39m_ ${astroVersion} _____________________${modeBanner}_\x1b[0m
+\x1b[2m\x1b[39m_______________ ${astroVersion} ________________\x1b[0m
+\x1b[2m\x1b[39m---------------------------------------\x1b[0m
   ____ __  _____  _     __ ___  ______
  /  \x1b[35m__\x1b[0m'  |/ \x1b[35m____\x1b[0m|/ |___|  / \x1b[35m__\x1b[0m|/  \x1b[35m_\x1b[0m   |
 |  /  |  |\x1b[35m__\x1b[0m \\__'   \x1b[35m__\x1b[0m/|   /  |  | |  |
 |  \\__|  |__\\_  |  |___|  |   |  |_|  |
  \\\x1b[35m____\x1b[0m'\x1b[35m__\x1b[0m|\x1b[35m______\x1b[0m/\\\x1b[35m_____\x1b[0m|\x1b[35m__\x1b[0m|   |\x1b[35m_______\x1b[0m/
-\x1b[2m\x1b[39m___________________ type \`?\` for help _\x1b[0m\n\n`;
+\x1b[2m\x1b[39m________________________________________\x1b[0m
+\x1b[2m\x1b[39m----------- type '?' for help ----------\x1b[0m\n\n`;
   },
   help: `
   \x1b[47m\x1b[30m USAGE \x1b[0m
