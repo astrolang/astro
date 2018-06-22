@@ -1,6 +1,11 @@
 {
     "extends": "airbnb",
     "rules": {
+      "prefer-destructuring": [
+        "error",
+        { "array": false, "object": true },
+        { "enforceForRenamedProperties": true }
+      ]
     },
     "env": {
       "es6": true,
