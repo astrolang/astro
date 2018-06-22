@@ -5,11 +5,17 @@ const { print } = require('../../utils');
 /**
  * A Custom Packrat Parser Combinator for Astro extended-PEG grammar.
  *
- * NOTES ON SPECIAL RULES:
- * * `ignoreNewlines` is needed in brackets where the first element isn't indented, it is
- *   used to signal that the elements of the bracket are to be parsed as being on a single line.
+ * NOTE:
  * * Some directive rules do not return an ast and they don't consume tokens. This means even if the
  *   rule fails, it won't advance tokenPosition. So rules like ```more(spaces)``` will be recursive.
+ *
+ * TODO:
+ * * Parse multilinestring properly
+ * * Remove ignoreNewline
+ * * Comments to be removed from parser and lexer. Should be done separately
+ * * Handle block end punctuators
+ * * Handle macros
+ * * Remove line attribute
  */
 class Parser {
   constructor(tokens) {
@@ -127,10 +133,6 @@ class Parser {
         if (this.cache[this.tokenPosition] && this.cache[this.tokenPosition][argName]) {
           const parseResult = this.cache[this.tokenPosition][argName];
 
-          if (!parseResult.directive) {
-            result.ast.push(parseResult.ast);
-          }
-
           // If cached rule result shows failed attempt.
           if (!parseResult.success) {
             result.success = false;
@@ -138,6 +140,10 @@ class Parser {
 
           // Otherwise skip forward.
           } else {
+            if (!parseResult.directive) {
+              result.ast.push(parseResult.ast);
+            }
+
             this.updateState(this.cache[this.tokenPosition][argName].skip);
           }
 
@@ -146,16 +152,15 @@ class Parser {
           // Run the function.
           const parseResult = arg(this);
 
-          // If the parser function is not `and` or `not`
-          if (!parseResult.directive) {
-            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
-            result.ast.push(parseResult.ast);
-          }
-
-          // Parsing failed.
+          // Parsing fails.
           if (!parseResult.success) {
             result.success = false;
             break;
+
+          // Parsing succeeds.
+          } else if (!parseResult.directive) {
+            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
+            result.ast.push(parseResult.ast);
           }
         }
 
@@ -170,12 +175,13 @@ class Parser {
           // Compare token.
           parseResult = this.eatToken(arg);
         }
-        result.ast.push(parseResult.token);
 
         // Parsing failed.
         if (!parseResult.success) {
           result.success = false;
           break;
+        } else {
+          result.ast.push(parseResult.token);
         }
 
       // None of the above.
@@ -279,7 +285,7 @@ const alt = (...args) => (parser) => {
     tokenPosition, lastIndentCount, column, line, ignoreNewline,
   } = parser;
 
-  const result = { success: false, ast: { alternative: -1, ast: {} } };
+  const result = { success: false, ast: { alternative: 0, ast: {} } };
 
   // Parse each argument.
   for (let i = 0; i < args.length; i += 1) {
@@ -310,7 +316,7 @@ const alt = (...args) => (parser) => {
         // Run the function.
         const parseResult = arg(parser);
 
-        // Parsing succeed.
+        // Parsing succeeds.
         if (parseResult.success) {
           result.success = true;
           result.ast.alternative = i + 1;
@@ -327,14 +333,24 @@ const alt = (...args) => (parser) => {
 
     // String.
     } else if (typeof (arg) === 'string') {
-      // Compare token.
-      const parseResult = parser.eatToken(arg);
+      let parseResult = null;
 
-      // Parsing succeed.
+      if (arg[0] === '§') {
+        // Compare start of token.
+        parseResult = parser.eatTokenStart(arg.slice(1));
+      } else {
+        // Compare token.
+        parseResult = parser.eatToken(arg);
+        print('got here');
+      }
+
+      // Parsing succeeds.
       if (parseResult.success) {
         result.success = true;
-        result.alternative = i + 1;
-        result.ast = parseResult.token;
+        result.ast.alternative = i + 1;
+
+        result.ast.ast = parseResult.token;
+
         break;
       }
 
@@ -355,80 +371,28 @@ const alt = (...args) => (parser) => {
   return result;
 };
 
-// NOTE: more cannot take more than one argument. For multiple arguments use format
-// more(parse(x, y, z))
-// CAREFUL: Some directive rules don't consume tokens, so they don't advance tokenPosition and if
+// CAUTION: Some directive rules don't consume tokens, so they don't advance tokenPosition and if
 // not careful you may end up with an infinite loop if you do sth like more(spaces)
-const more = arg => (parser) => {
+const more = (...arg) => (parser) => {
   const result = { success: false, ast: [] };
 
-  // Parse each argument.
   while (true) {
-    // Get state before parsing.
-    const {
-      tokenPosition, lastIndentCount, column, line, ignoreNewline,
-    } = parser;
+    const parseResult = parse(...arg)(parser);
 
-    // Function.
-    if (typeof (arg) === 'function') {
-      const argName = arg.name.toLowerCase();
-      // Check if rule has already been cached for that position.
-      // This will apply to rules only, since intermediates, parse, opt, etc. won't be cached.
-      if (parser.cache[parser.tokenPosition] && parser.cache[parser.tokenPosition][argName]) {
-        const parseResult = parser.cache[parser.tokenPosition][argName];
-
-        // If cached rule result shows failed attempt.
-        if (!parseResult.success) {
-          parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
-          break;
-
-        // Otherwise skip forward
+    // Parsing failed.
+    if (!parseResult.success) {
+      break;
+    } else {
+      result.success = true;
+      if (!parseResult.directive) {
+        // Check if parseResult contains just a string.
+        if (parseResult.ast.length === 1 && typeof (parseResult.ast[0]) === 'string') {
+          result.ast.push(parseResult.ast[0]);
         } else {
-          result.success = true;
-
-          if (!parseResult.directive) {
-            result.ast.push(parseResult.ast);
-          }
-
-          // Move the parser forward.
-          parser.updateState(parser.cache[parser.tokenPosition][argName].skip);
-        }
-
-      // If rule isn't already cached or if it is not a rule but an intermediate.
-      } else {
-        // Run the function.
-        const parseResult = arg(parser);
-
-        // Parsing failed.
-        if (!parseResult.success) {
-          parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
-          break;
-        } else {
-          result.success = true;
-          // If the parser fucntion is not `and` or `not`
-          if (!parseResult.directive) {
-            // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
-            result.ast.push(parseResult.ast);
-          }
+          result.ast.push(parseResult.ast);
         }
       }
-
-    // String.
-    } else if (typeof (arg) === 'string') {
-      // Compare token.
-      const parseResult = parser.eatToken(arg);
-
-      // Parsing failed.
-      if (!parseResult.success) {
-        parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
-        break;
-      } else {
-        result.success = true;
-        result.ast.push(parseResult.token);
-      }
-
-    // None of the above.
-    } else throw new TypeError('Got the wrong argument type');
+    }
   }
 
   // Update lastParseData.
@@ -437,22 +401,20 @@ const more = arg => (parser) => {
   return result;
 };
 
-// NOTE: more cannot take more than one argument. For multiple arguments use format
-// more(parse(x, y, z))
-// CAREFUL: Some directive rules don't consume tokens, so they don't advance tokenPosition and if
+// CAUTION: Some directive rules don't consume tokens, so they don't advance tokenPosition and if
 // not careful you may end up with an infinite loop if you do sth like optmore(spaces)
-const optmore = arg => parser => ({ success: true, ast: more(arg)(parser).ast });
+const optmore = (...arg) => parser => ({ success: true, ast: more(...arg)(parser).ast });
 
-const opt = arg => parser => ({ success: true, ast: parse(arg)(parser).ast[0] || null });
+const opt = (...arg) => parser => ({ success: true, ast: parse(...arg)(parser).ast });
 
-const and = arg => (parser) => {
+const and = (...arg) => (parser) => {
   // Get state before parsing.
   const {
     tokenPosition, lastIndentCount, column, line, ignoreNewline,
   } = parser;
 
   // Parse tokens.
-  const parseResult = { success: parse(arg)(parser).success, directive: true };
+  const parseResult = { success: parse(...arg)(parser).success, directive: true };
 
   // Revert parser state.
   parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
@@ -460,14 +422,14 @@ const and = arg => (parser) => {
   return parseResult;
 };
 
-const not = arg => (parser) => {
+const not = (...arg) => (parser) => {
   // Get state before parsing.
   const {
     tokenPosition, lastIndentCount, column, line, ignoreNewline,
   } = parser;
 
   // Parse tokens.
-  const parseResult = { success: !parse(arg)(parser).success, directive: true };
+  const parseResult = { success: !parse(...arg)(parser).success, directive: true };
 
   // Revert parser state.
   parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
@@ -836,7 +798,7 @@ const nextline = (parser) => {
   const result = { success: false, directive: true };
   const parseResult = parse(
     newline,
-    optmore(parse(opt(spaces), newline)),
+    optmore(opt(spaces), newline),
   )(parser);
 
   if (parseResult.success) {
@@ -882,38 +844,15 @@ const lineContinuation = (parser) => {
 
 // _ =
 //   | linecontinuation
-//   | nextcodeline samedent // Checks if ignoreNewline is true first
 //   | spaces // Can eat others cake
+// TODO: Fix tests.
 const _ = (parser) => {
   const { tokenPosition } = parser;
   const kind = '_';
   const result = { success: false, directive: true };
   const parseResult = alt(
     lineContinuation,
-    // TODO: change to nextcodeline
-    (parser.ignoreNewline ? parse(nextline) : () => ({ success: false })),
     spaces,
-  )(parser);
-
-  if (parseResult.success) {
-    result.success = true;
-  }
-
-  // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
-
-  return result;
-};
-
-// _comma =
-//   | _? ','
-const _comma = (parser) => {
-  const { tokenPosition } = parser;
-  const kind = '_comma';
-  const result = { success: false, directive: true };
-  const parseResult = parse(
-    opt(_),
-    ',',
   )(parser);
 
   if (parseResult.success) {
@@ -938,11 +877,11 @@ const nextCodeLine = (parser) => {
   const parseResult = parse(
     opt(spaces),
     nextline,
-    optmore(parse(
+    optmore(
       samedent,
       comment,
       alt(newline, eoi),
-    )),
+    ),
   )(parser);
 
   if (parseResult.success) {
@@ -982,12 +921,151 @@ const dedentOrEoiEnd = (parser) => {
   if (parseResult.success) {
     result.success = true;
 
-    const nextCodeLineComments = parseResult.ast.ast[0].comments;
+    if (parseResult.ast.alternative === 1) {
+      result.ast.comments = parseResult.ast.ast[0].comments;
+    } else if (parseResult.ast.ast[0].length > 0) {
+      result.ast.comments = parseResult.ast.ast[0][0].comments;
+    }
+  }
 
-    if (nextCodeLineComments) {
-      if (nextCodeLineComments.length > 0) {
-        result.ast.comments = nextCodeLineComments;
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, false);
+
+  return result;
+};
+
+// comma =
+//   | _? ',' _? (nextline samedent)?
+const comma = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'comma';
+  const result = { success: false, directive: true };
+  const parseResult = parse(
+    opt(_),
+    ',',
+    opt(_),
+    opt(nextline, samedent),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, true);
+
+  return result;
+};
+
+// listarguments =
+//   | primitiveexpression (comma primitiveexpression)* comma?
+//   { expressions }
+// TODO: Refactor: Change numericLiteral to primitiveexpression and write tests for it.
+// TODO: Add more tests with diverse expressions.
+const listArguments = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'listarguments';
+  const result = { success: false, ast: { kind, expressions: [] } };
+  const parseResult = parse(
+    numericLiteral,
+    optmore(comma, numericLiteral),
+    opt(comma),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+    result.ast.expressions.push(parseResult.ast[0]);
+
+    for (let i = 0; i < parseResult.ast[1].length; i += 1) {
+      result.ast.expressions.push(parseResult.ast[1][i][0]);
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, false);
+
+  return result;
+};
+
+// listargumentsmultiple =
+//   | listliteral (nextcodeline samedent listliteral)+
+//   | listarguments (_? ';' _? listarguments)* (_? ';' _?)?
+//   { expressions }
+// TODO: Refactor: Change numericLiteral to listliteral and write tests for it.
+// TODO: Add more tests with diverse expressions.
+const listArgumentsMultiple = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'listargumentsmultiple';
+  const result = { success: false, ast: { kind, expressions: [] } };
+  const parseResult = alt(
+    parse(numericLiteral, more(nextCodeLine, samedent, numericLiteral)),
+    parse(listArguments, optmore(opt(_), ';', opt(_), listArguments), opt(opt(_), ';', opt(_))),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      result.ast.expressions.push(parseResult.ast.ast[0]);
+
+      for (let i = 0; i < parseResult.ast.ast[1].length; i += 1) {
+        result.ast.expressions.push(parseResult.ast.ast[1][i][1]);
       }
+
+    // Alternative 2 passed.
+    } else {
+      // Checking if there is more listarguments
+      if (parseResult.ast.ast[1].length > 0) {
+        result.ast.expressions.push({ kind: 'listliteral', expressions: parseResult.ast.ast[0].expressions });
+      } else {
+        result.ast.expressions = parseResult.ast.ast[0].expressions;
+      }
+
+      for (let i = 0; i < parseResult.ast.ast[1].length; i += 1) {
+        result.ast.expressions.push({ kind: 'listliteral', expressions: parseResult.ast.ast[1][i][3] });
+      }
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, false);
+
+  return result;
+};
+
+// listliteral =
+//   | '[' _? ']' '\''?
+//   | '[' spaces? listargumentsmultiple _? ']' '\''?
+//   | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']' '\''?
+//   { kind, transposed, expressions }
+// TODO: Add more tests with diverse expressions.
+const listLiteral = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'listliteral';
+  const result = { success: false, ast: { kind, transposed: false, expressions: [] } };
+  const parseResult = alt(
+    parse('[', opt(_), ']', opt('\'')),
+    parse('[', opt(_), listArgumentsMultiple, opt(_), ']', opt('\'')),
+    parse('[', nextCodeLine, indent, listArgumentsMultiple, nextCodeLine, dedent, ']', opt('\'')),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      if (parseResult.ast.ast[3].length > 0) result.ast.transposed = true;
+
+    // Alternative 2 passed.
+    } else if (parseResult.ast.alternative === 2) {
+      result.ast.expressions = parseResult.ast.ast[2].expressions;
+      if (parseResult.ast.ast[5].length > 0) result.ast.transposed = true;
+
+    // Alternative 3 passed.
+    } else {
+      result.ast.expressions = parseResult.ast.ast[3].expressions;
+      if (parseResult.ast.ast[7].length > 0) result.ast.transposed = true;
     }
   }
 
@@ -1038,7 +1116,10 @@ module.exports = {
   nextline,
   lineContinuation,
   _,
-  _comma,
   nextCodeLine,
   dedentOrEoiEnd,
+  comma,
+  listArguments,
+  listArgumentsMultiple,
+  listLiteral,
 };

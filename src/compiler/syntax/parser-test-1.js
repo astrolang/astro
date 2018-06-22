@@ -31,7 +31,6 @@ const {
   nextline,
   lineContinuation,
   _,
-  _comma,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -252,7 +251,6 @@ test(
       ast: [
         'hello',
         'world',
-        null,
       ],
     },
   },
@@ -462,7 +460,6 @@ print('============== PARSE ==============');
 lexer = new Lexer('++-- world');
 parser = new Parser(lexer.lex());
 result = parse(operator, 'world')(parser);
-print(result);
 test(
   String.raw`++-- world`,
   {
@@ -557,7 +554,7 @@ lexer = new Lexer('++**');
 parser = new Parser(lexer.lex());
 result = alt('hello', parse(operator))(parser);
 test(
-  String.raw`hello`,
+  String.raw`++**`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -608,8 +605,10 @@ test(
     },
     result: {
       success: true,
-      alternative: 2,
-      ast: 'hello',
+      ast: {
+        alternative: 2,
+        ast: 'hello',
+      },
     },
   },
 );
@@ -750,7 +749,7 @@ test(
     },
     result: {
       success: true,
-      ast: 'world',
+      ast: ['world'],
     },
   },
 );
@@ -776,7 +775,7 @@ test(
     },
     result: {
       success: true,
-      ast: null,
+      ast: [],
     },
   },
 );
@@ -2618,38 +2617,11 @@ test(
   },
 );
 
-lexer = new Lexer('\n\n   \r\n');
-parser = new Parser(lexer.lex());
-parser.ignoreNewline = true;
-result = _(parser);
-test(
-  String.raw`\n\n   \r\n`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 2,
-      line: 1,
-      column: 7,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
 lexer = new Lexer('    hello');
 parser = new Parser(lexer.lex());
 result = _(parser);
 test(
-  String.raw`    hello`,
+  String.raw`    hello--------->MID`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2689,139 +2661,6 @@ test(
       tokenPosition: 3,
       line: 1,
       column: 6,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
-print('============== _COMMA ==============');
-lexer = new Lexer('\n\n   \r\n');
-parser = new Parser(lexer.lex());
-parser.ignoreNewline = true;
-result = _comma(parser);
-test(
-  String.raw`\n\n   \r\n--------->FAIL`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: -1,
-      line: 1,
-      column: 0,
-    },
-    result: {
-      success: false,
-      directive: true,
-    },
-  },
-);
-
-lexer = new Lexer('\n\n   \r\n,');
-parser = new Parser(lexer.lex());
-parser.ignoreNewline = true;
-result = _comma(parser);
-test(
-  String.raw`\n\n   \r\n,`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 3,
-      line: 1,
-      column: 8,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
-lexer = new Lexer('    ,');
-parser = new Parser(lexer.lex());
-result = _comma(parser);
-test(
-  String.raw`    ,`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 0,
-      line: 1,
-      column: 5,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
-lexer = new Lexer('... \r\n,');
-parser = new Parser(lexer.lex());
-result = _comma(parser);
-test(
-  String.raw`... \r\n,`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 4,
-      line: 1,
-      column: 7,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
-lexer = new Lexer(',');
-parser = new Parser(lexer.lex());
-result = _comma(parser);
-test(
-  String.raw`,`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 0,
-      line: 1,
-      column: 1,
     },
     result: {
       success: true,
