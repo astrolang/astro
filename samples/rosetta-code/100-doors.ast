@@ -1,7 +1,6 @@
-# 100 doors
 var doors = falses(100)
 
-for a in 1..100: for b in a..a..100:
+for a in 1..100, b in a..a..100:
     doors[b] = not doors[b]
 
 for a in 1..100:

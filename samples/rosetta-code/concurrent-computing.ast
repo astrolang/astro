@@ -1,4 +1,5 @@
 let words = ["Enjoy", "Rosetta", "Code"]
+
 for word in words:
     async (w) => (
         sleep(random())

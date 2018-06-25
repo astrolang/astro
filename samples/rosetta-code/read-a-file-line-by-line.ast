@@ -1,3 +1,2 @@
-try f = open('foobar.txt'):
-    for line in lines f:
-        print line
+for line in lines open('input.txt'):
+    print line

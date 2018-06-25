@@ -1,4 +1,25 @@
 # Astro 0.1.14a
+# June 23, 2018
+a.name, :age, :gender = 5, 6
+age[2], :[3], :[4] = 1, 2, 3
+
+# Astro 0.1.14a
+# June 22, 2018
+# Assignment Pattern
+x, y = 4, 5
+x[1], y[2] = 4, 5
+a.name, b.name = 5, 6
+a.name, :age, :gender = 5, 6
+age[2], :[3], :[4] = 1, 2, 3
+x = y = 4
+{ x, y } = obj
+[x, y] = arr
+{ x, y }.name = obj
+a.{ x, y } = obj
+a.{ x, y }.name = obj
+x = y = 4
+
+# Astro 0.1.14a
 # 20/03/18
 # Change unsafe block to macro
 @unsafe
@@ -27,6 +48,15 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- highlight just the type arguments
+    Dict{Int64, Abstract}
+    Dict{Array{Int64}, (Str, Int)}
+- highlight function call with multiline in the middle
+    print #= =# name
+
+- highlight the : in :( as a function call
+    print(name), :(age), :(game)
+
 - highlight command notation
     print /9/
     print @dict{x, y}
@@ -35,7 +65,7 @@ john.{
     print [x | y in z]
 
 - highlight as dot notation
-    \age
+    :age
 
 - highlight lambda syntax (?<!\|)\s+[a-zA-Z0-9]+(\s+\.([a-zA-Z0-9])/)?\s+\=\>
     (a, b) => print a + b
@@ -48,17 +78,15 @@ john.{
     cost price total = 4_000
     let cost price = 4_500
 
-- highlight regex syntax properly
+- highlight regex syntax properly (?!(\s*[\{\[\(a-zA-Z0-9@$])|{operatorChar})
     var regex = /regex/
     var regex =
         /regex/
     print(/regex/)
+    let regex = /\d/ + re.'\[a-z]' + /\d/
 
     a / b / c
     a /= b
-
-- fix regex highlight (/[^/]+/)
-    let x = /\d/ + re.'\[a-z]' + /\d/
 
 - remove highlight on unsafe keyword
     unsafe
