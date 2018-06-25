@@ -1,7 +1,10 @@
 print '# Number reversal game'
-var data, trials = list('123456789'), 0
+
+var data, trials = list(1..9), 0
+
 while data == sort data:
     random.shuffle data
+
 while data != sort data:
     trials += 1
     flip = int input '#$trials: LIST: ${join data} Flip how many?: '

@@ -1,6 +1,6 @@
 fun quibble(s):
     let result = " and ".join(s).replace(/ and /, ", ", length(s) - 1)
-    "{ $result }"
+    return "{ $result }"
 
 let s = [
     []
@@ -8,4 +8,6 @@ let s = [
     ["ABC", "DEF"]
     ["ABC", "DEF", "G", "H"]
 ]
-for i in s: print(quibble i)
+
+for i in s:
+    print(quibble i)
