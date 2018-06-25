@@ -3,14 +3,14 @@ type Puzzle(var items: {}, var position: -1)
 fun mainframe(puz):
     let d = puz.items
     print('+-----+-----+-----+-----+'),
-    \(d[1], d[2], d[3], d[4], first: '|', sep: '|', last: '|'),
-    \('+-----+-----+-----+-----+'),
-    \(d[5], d[6], d[7], d[8], first: '|', sep: '|', last: '|'),
-    \('+-----+-----+-----+-----+'),
-    \(d[9], d[10], d[11], d[12], first: '|', sep: '|', last: '|'),
-    \('+-----+-----+-----+-----+'),
-    \(d[13], d[14], d[15], d[16], first: '|', sep: '|', last: '|'),
-    \('+-----+-----+-----+-----+')
+    :(d[1], d[2], d[3], d[4], first: '|', sep: '|', last: '|'),
+    :('+-----+-----+-----+-----+'),
+    :(d[5], d[6], d[7], d[8], first: '|', sep: '|', last: '|'),
+    :('+-----+-----+-----+-----+'),
+    :(d[9], d[10], d[11], d[12], first: '|', sep: '|', last: '|'),
+    :('+-----+-----+-----+-----+'),
+    :(d[13], d[14], d[15], d[16], first: '|', sep: '|', last: '|'),
+    :('+-----+-----+-----+-----+')
 
 fun format(puz, ch):
     ch.trim().length
@@ -23,14 +23,14 @@ fun change(puz, to):
     for a, b in puz.items where b == puz.format(str i):
         to = a
         break
-    swap(puz.items[fro], [to])
+    swap(puz.items[fro], :[to])
     puz.position = to;
 
 fun buildboard(puz, difficulty):
     for i in 1..16:
         puz.items[i] = puz.format(str i)
     var tmp = a
-    for a, b in puz,items where b == '  16 ':
+    for a, b in puz.items where b == '  16 ':
         puz.items[a] = '     '
             tmp = a
             break
@@ -49,23 +49,23 @@ fun buildboard(puz, difficulty):
 fun validmoves(puz):
     let pos = puz.position
     | 6 or 7 or 10 or 11 =>
-        puz.items[pos - 4], \[pos - 1], \[pos + 1], \[pos + 4]
+        puz.items[pos - 4], :[pos - 1], :[pos + 1], :[pos + 4]
     | 5 or 9 =>
-        puz.items[pos - 4], \[pos + 4], \[pos + 1]
+        puz.items[pos - 4], :[pos + 4], :[pos + 1]
     | 8 or 12 =>
-        puz.items[pos - 4], \[pos + 4], \[pos - 1]
+        puz.items[pos - 4], :[pos + 4], :[pos - 1]
     | 2 or 3 =>
-        puz.items[pos - 1], \[pos + 1], \[pos + 4]
+        puz.items[pos - 1], :[pos + 1], :[pos + 4]
     | 14 or 15 =>
-        puz.items[pos - 1], \[pos + 1], \[pos - 4]
+        puz.items[pos - 1], :[pos + 1], :[pos - 4]
     | 1 =>
-        puz.items[pos + 1], \[pos + 4]
+        puz.items[pos + 1], :[pos + 4]
     | 4 =>
-        puz.items[pos - 1], \[pos + 4]
+        puz.items[pos - 1], :[pos + 4]
     | 13 =>
-        puz.items[pos + 1], \[pos - 4]
+        puz.items[pos + 1], :[pos - 4]
     | 16 =>
-        puz.items[pos - 1], \[pos - 4]
+        puz.items[pos - 1], :[pos - 4]
 
 fun mainframe(puz):
     var flag = false
@@ -87,7 +87,7 @@ loop:
     var lst = game.validmoves()
     var lst1 = []
     for i in lst:
-        lst1.push(i.trim().int())
+        lst1.push! i.trim().int()
         print(i.strip(), '\t', last: '')
     print()
     let value = int(input())

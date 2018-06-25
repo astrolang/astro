@@ -1,5 +1,6 @@
 fun abc(str, list):
-    if list.isempty: return true
+    if list.isempty:
+        return true
     for i in indices(list) where s[end] in list[i]:
         return abc(str[end-1:], remove(val list, i))
     false

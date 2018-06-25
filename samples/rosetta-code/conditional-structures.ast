@@ -1,7 +1,11 @@
-if x == 0: foo()
-elif x == 1: bar()
-elif x == 2: baz()
-else: qux()
+if x == 0:
+    foo()
+elif x == 1:
+    bar()
+elif x == 2:
+    baz()
+else:
+    qux()
 
 x
 | 0 => foo()

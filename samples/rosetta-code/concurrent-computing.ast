@@ -1,5 +1,6 @@
 let words = ["Enjoy", "Rosetta", "Code"]
 for word in words:
-    async (word) =>
+    async (w) => (
         sleep(random())
-        print(word)
+        print(w)
+    )(word)
