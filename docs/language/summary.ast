@@ -533,9 +533,9 @@ CASCADING NOTATION
     first.{ name, age } = second
 
     # Cascading on function call, indexing and field access.
-    array.push!(x), \(y)
-    array[x], \[y], \[z] = 1, 2, 3
-    print(john.name, \age) # John 40
+    array.push!(x), :(y)
+    array[x], :[y], :[z] = 1, 2, 3
+    print(john.name, :age) # John 40
 
 PASS KEYWORD
     # `pass` keyword can used to represent an empty block.
@@ -623,6 +623,10 @@ FOR LOOP
         j = i
     ..
 
+    # A nested for loop.
+    for a in arr1, b in a:
+        print(a, b)
+
     # A `for` loop can be extended with a `where` condiition.
     for i in array where i == 5:
         return i
@@ -651,7 +655,7 @@ COMPREHENSION
     let set = set(i | i in random(0, 200))
 
     # Nested loops.
-    let dict = { x: y | x in 1..30; y in 31..60 where even(y) }
+    let dict = { x: y | x in 1..30, y in 31..60 where even(y) }
 
 BREAK WITH
     # Break-with breaks a loop and returns a value.
@@ -683,7 +687,7 @@ CHAINED CONDITIONAL CONSTRUCTS
 
     # It can significantly reduce the number of indentations.
     fun any_common_elements(l, r):
-        for i in l: for j in r where i == j:
+        for i in l, j in r where i == j:
             return true
         false
 
@@ -818,6 +822,17 @@ FUNCTION DEFINITION (2)
     # Destructuring parameters.
     fun show({name, age}) = print(name, age)
 
+    # Astro supports trailing optional arguments
+    fun show(name, age?):
+        if name:
+            print 'Hi $name, your age is $age'
+        else:
+            print 'Hi $name'
+    ..
+
+    show('Ademola', 54)
+    show('Ademola')
+
     # A function's arguments can be accessed as a named tuple via _args.
     fun printperson(name, age) = print(_args)
     printperson('John', 25) # (name: 'John', age: 25)
@@ -950,7 +965,7 @@ GENERICS
 
     # Specifying generic type constraint with `where` and type relation operators (`::`, `<:`, `>:`)
     fun any_common_elements(l, r): #: (T, U) -> Bool where |T, U| <: Sequence
-        for x in l: for y in r where x == y:
+        for x in l, y in r where x == y:
             return true
         false
 
