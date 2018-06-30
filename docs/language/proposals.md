@@ -172,3 +172,12 @@ cos(70)
 let app = import(express, 'javascript')()
 let router = app.Router()
 ```
+
+## DYNAMIC LINKING
+#### This requires explicit type annotations to work.
+```julia
+dynamic export {
+    foo :: Int, Int -> Str
+    List :: {Int64}
+}
+```
