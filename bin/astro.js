@@ -331,7 +331,7 @@ class AstroPrompt {
   }
 
   exited() {
-    if (this.lineBuffer.trim() === 'exit') {
+    if (this.lineBuffer.trim() === '\\exit') {
       stdout.write('\n');
       process.exit();
     }
