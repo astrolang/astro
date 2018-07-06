@@ -1463,14 +1463,11 @@ class Lexer {
         const ln = this.line;
         // !operatorChar
         if (this.operatorChar.indexOf(this.peekChar()) > -1) {
-          print('char1 ', this.peekChar());
           token = null;
         // !(identifierBeginChar | '{' | '[' | '(' | '@' | '$')
         } else {
-          print('char2 ', this.peekChar());
           this.spaces();
           if (this.identifierEndChar.indexOf(this.peekChar()) > -1 || '{[(@$'.indexOf(this.peekChar()) > -1) {
-            print('char3 ', this.peekChar());
             token = null;
           }
         }
