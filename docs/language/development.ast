@@ -1,4 +1,36 @@
 # Astro 0.1.14a
+# July 6, 2018
+AOT
+- Static Import - Tree Shaking
+- Static Linking
+- Dynamic Linking
+
+JIT
+- Static Import - Tree Shaking
+- Dynamic Import
+- Static Linking
+- Dynamic Linking
+
+# Exporting for linking requires that type annotation be specifed.
+export {
+    foo :: (Int, Int) -> Str,
+    List :: {Int}
+}
+
+# Astro 0.1.14a
+# June 26, 2018
+# Astro supports trailing optional arguments
+fun show(name, age?):
+    if name:
+        print 'Hi $name, your age is $age'
+    else:
+        print 'Hi $name'
+..
+
+show('Ademola', 54)
+show('Ademola')
+
+# Astro 0.1.14a
 # June 23, 2018
 a.name, :age, :gender = 5, 6
 age[2], :[3], :[4] = 1, 2, 3

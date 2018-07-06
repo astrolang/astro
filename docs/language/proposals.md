@@ -176,7 +176,7 @@ let router = app.Router()
 ## DYNAMIC LINKING
 #### This requires explicit type annotations to work.
 ```julia
-dynamic export {
+export {
     foo :: Int, Int -> Str
     List :: {Int64}
 }
