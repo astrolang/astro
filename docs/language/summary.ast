@@ -106,7 +106,8 @@ COMMAND NOTATION
     print @set { x, y }
     print $name
     print (x, y) => x
-    print {x: y | x in z}
+    print (x | x in z)
+    print { x: y | x in z }
     print [x | y in z]
 
 
@@ -640,7 +641,7 @@ FOR LOOP
 
 COMPREHENSION
     # Comprehensions are syntactic sugar for iterator generators.
-    let gen = i | i in random(0, 200)
+    let gen = (i | i in random(0, 200))
 
     # Extending a comprehension with `where`.
     let list = list(x | x in 1..21 where x mod 2 != 0)
@@ -652,7 +653,7 @@ COMPREHENSION
     let dict =  { i: i² | i in arr1 }
 
     # Set comprehension.
-    let set = set(i | i in random(0, 200))
+    let set = set (i | i in random(0, 200))
 
     # Nested loops.
     let dict = { x: y | x in 1..30, y in 31..60 where even(y) }
