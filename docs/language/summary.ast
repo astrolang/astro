@@ -3,14 +3,14 @@ SINGLE-LINE COMMENTS
     # Hello, World!
 
 MULTILINE COMMENTS
-    #=
+    #*
     Multiline comments can span multiple lines.
-    They begin with `#=`.
-    #=
+    They begin with `#*`.
+    #*
         They can be nested.
-    =#
-    And they end with `=#`.
-    =#
+    *#
+    And they end with `*#`.
+    *#
 
 SUBJECT BINDING
     # In Astro, subjects are names to which values or objects are bound.
@@ -199,7 +199,7 @@ VALUES & REFERENCES
     # Passing a primitive object by reference.
     var new_number = ref number
 
-    # Astro manages memory automatically using a special reference counting technique, it handles reference cycles as well.
+    # Astro manages memory automatically using a non-lexical lifetime analysis, it handles reference cycles as well.
     my_company.affiliate = ref your_company
     your_company.affiliate = ref my_company
 
@@ -377,7 +377,7 @@ DICTIONARIES
     # Dictionary keys can be any valid expression.
     let parents = {
         'mum': {
-            'name': 'Esther Williams'
+            'name': 'Esther Williams',
             'age': 42
         }
     }
@@ -385,7 +385,7 @@ DICTIONARIES
     # Nested dictionaries can be simplified with indentation.
     let siblings = {
         sister:
-            name: 'Shade Williams'
+            name: 'Shade Williams',
             age: 15
     }
 
@@ -458,7 +458,7 @@ STRINGS
     # Both single and double quotes can be used to represent a string literal.
     let calc = '5 * 50 = ${5 * 50}'
 
-    # Non-standard string literals don't have escape sequences nor interpolation.
+    # Raw strings don't have escape sequences nor expression interpolation.
     var verbatim_string = @raw "Use '\t' to represent tab"
 
     # Multiline strings are enclosed in triple `'` or `"` quotes and they ignore all escapes and interpolation
@@ -468,7 +468,7 @@ STRINGS
     '''
 
     # Char is 32-bit datatype that represents a single Unicode codepoint.
-    var chars = char "π"
+    var chars = char "π" #: Char
 
     # String operations.
     var concatenate = 'ab' + 'c' # 'abc'
@@ -577,11 +577,11 @@ TERNARY OPERATOR
 NIL
     # Sometimes, it can be useful to represent an empty or a missing state.
     # This can be achieved with nils in Astro.
-    # Non-nillable subjects can give nil nor be assigned a nil value.
+    # Subjects that are not explicitly made nillable cannot be assigned a nil.
     var password = '#5Nj%4VpA391w' #: Str
     password = nil # Invalid!
 
-    # Nillable object can be assigned nil.
+    # Nillable subjects can be assigned a nil.
     var program = 'print(\"Hello World\")' #: Str|Nil
     var program_list = Str()?
 
@@ -591,7 +591,7 @@ NIL
     # Exceptionable unwrap.
     !getaccount("Default") # If result is nil, NilError is raised.
 
-    # Examples
+    # Other examples
     james.relative.sister?
     !james.relative.sister
     (!james.relative).sister?
@@ -625,7 +625,7 @@ FOR LOOP
     ..
 
     # A nested for loop.
-    for a in arr1, b in a:
+    for a in arr: for b in a:
         print(a, b)
 
     # A `for` loop can be extended with a `where` condiition.
@@ -660,9 +660,11 @@ COMPREHENSION
 
 BREAK WITH
     # Break-with breaks a loop and returns a value.
-    for name in register where name == 'Tony':
-        break name
-    else: ""
+    let name =
+        for name in register where /tony/ in name:
+            break name
+        else:
+            ""
 
 IN
     # `in` is a special keyword-based infix operator that checks for the existence of an object in a collection type.
@@ -688,7 +690,7 @@ CHAINED CONDITIONAL CONSTRUCTS
 
     # It can significantly reduce the number of indentations.
     fun any_common_elements(l, r):
-        for i in l, j in r where i == j:
+        for i in l: for j in r where i == j:
             return true
         false
 
@@ -728,16 +730,16 @@ WHILE LOOP & LOOP
 MATCH EXPRESSION
     # Match expression is like a chain of if-elif-else expressions.
     # If a match pattern fails, it goes to the next pattern.
-    object
-    | { x, y } :: Some => 0 # Matches if object is of `Some` type.
-    | { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
-    | [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
-    | (x, y) => x # Matches if object is a tuple of two elements.
-    | 75 or 90 => 3 # Matches if object has a value `75` or `67`
-    | 75 to 90 => 3 # Matches if object has a value between `75` and value `67`
-    | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
-    | n => 6 # Matches. Binds `n` to the object.
-    | _ => 7 # Matches.
+    match object:
+        | { x, y } :: Some => 0 # Matches if object is of `Some` type.
+        | { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
+        | [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
+        | (x, y) => x # Matches if object is a tuple of two elements.
+        | 75 or 90 => 3 # Matches if object has a value `75` or `67`
+        | 75 to 90 => 3 # Matches if object has a value between `75` and value `67`
+        | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
+        | n => 6 # Matches. Binds `n` to the object.
+        | _ => 7 # Matches.
 
     # A match expression can also be used to match against the arguments of a function, if, for, loop or while expressions.
     fun ischosen(option):
@@ -769,7 +771,7 @@ MAIN FUNCTION
         print 'Hello World!'
 
 FUNCTION DEFINITION (2)
-    # If a function returns nothing, it can either be annotated with None or left empty.
+    # If a function returns nothing, it can either be annotated with None or return type can be left empty.
     fun show(point): #: (Point) -> None
         print(point.{ a, b })
 
@@ -812,7 +814,7 @@ FUNCTION DEFINITION (2)
     ..
     send('Hello', to:'Cantell')
 
-    # Compulsory named can also be used with varargs, which would then be a named tuple.
+    # Compulsory named parameters can also be apllied on varargs, which would then be a named tuple.
     fun total(start, ...rest.):
         let result = start
         for i in rest: result += i
@@ -913,7 +915,7 @@ COROUTINES
     # A coroutine is a type of function that can pause and resume its execution.
     # `yield` marks an execution pause and resumption point.
     fun count(num):
-        for x in ..num: yield x
+        for x in 1..num: yield x
 
     # Instantiating the coroutine.
     var counter = count(25)
@@ -938,7 +940,7 @@ TYPE DEFINITION (2)
     # Types need constructors for object creation. A constructor always has the same name as the type.
     # The special `new` syntax creates a new object of the particular type.
     fun Car(make, year):
-        new { make, year }
+        new(make, year)
         print(self) #: self can be used to refer to the object in creation.
 
     let ride = Car('Camaro', 2016)
@@ -966,7 +968,7 @@ GENERICS
 
     # Specifying generic type constraint with `where` and type relation operators (`::`, `<:`, `>:`)
     fun any_common_elements(l, r): #: (T, U) -> Bool where |T, U| <: Sequence
-        for x in l, y in r where x == y:
+        for x in l: for y in r where x == y:
             return true
         false
 
@@ -986,7 +988,7 @@ GENERICS
         var buffer
 
     fun Buffer(length): #: {T} (Int)
-        new { buffer: malloc{T}(length) }
+        new(buffer: malloc{T}(length))
 
     let buf = Buffer{Int}(50)
 
@@ -1072,12 +1074,12 @@ CONSTRUCTOR TRAIN
     type Student(course) <: Person
 
     # The initialization of inherited fields should be delegated to the parent's constructor.
-    fun Teacher(name, subject) = new { subject }.Person(name)
+    fun Teacher(name, subject) = new(subject).Person(name)
 
     # In the case of multiple inheritance, the individual parent constructors are called and chained to the `new` syntax.
     type TeachingStudent(schedule) <: Teacher, Student
     fun TeachingStudent(name, subject, course, schedule):
-        new { schedule }.Student(name, course).Teacher(_, subject)
+        new(schedule).Student(name, course).Teacher(_, subject)
 
 ABSTRACT TYPES & FUNCTIONS
     # Abstract types cannot be instantiated.
@@ -1350,7 +1352,7 @@ POINTERS
 RESERVED KEYWORDS
     import, export, let, var, const, fun, type, abst, async,
     ref, val, iso, acq,
-    if, elif, else, while, for, try, except, ensure, defer, loop, end,
+    if, elif, else, while, for, try, except, ensure, defer, loop, end, match,
     spill, return, raise, break, continue, yield, from, await,
     where, at,
     is, not, in, as, mod, typeof,
