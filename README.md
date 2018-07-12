@@ -36,9 +36,11 @@ Astro is a fun programming language designed for safe _high-performance  applica
 ### Why create yet another programming language?
 The language creator had a set of requirements (some listed above) not met by any single language. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
-SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and other proposals for GPU Compute will make the web a desirable HPC target in the near future. Astro is, for this reason, designed for high-performance apps that are expected to run server-side or on the frontend. And as a result, Astro has no runtime-based [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough for real-time software like games, simulations, kernels, etc.
+SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and other proposals for GPU Compute will make the web a desirable HPC target in the near future. Astro is, for this reason, designed for high-performance apps that are expected to run on the server or in the browser.
 
-As part of targeting the high-performance community, Astro has features that benefit numerical computing environment. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc. And in order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, and several other high-level language features that reduce boilerplate code commonly associated with statically-typed languages. It feels like a scripting language for the most part.
+As part of targeting the high-performance community, Astro has features that benefit numerical computing environment. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc. It also has no runtime-based [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough for real-time software like games, simulations, kernels, etc.
+
+In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, and several other high-level abstractions that reduce boilerplate code commonly associated with statically-typed languages. It feels like a scripting language for the most part.
 
 #### Python
 ```python
@@ -57,9 +59,7 @@ fun times(a, b):
     return sum
 ```
 
-Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets.
-
-Astro has built-in facilities for writing concurrent programs. A [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
+Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets. Astro has built-in facilities for writing concurrent programs. A [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
 
 
 ### Why not just use exactly Python syntax or be compatible with Python?
