@@ -40,7 +40,7 @@ SIMD, threads and direct access to Web APIs are planned for WebAssembly. These a
 
 As part of targeting the high-performance community, Astro has features that benefit numerical computing environment. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc. It also has no runtime-based [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough for real-time software like games, simulations, kernels, etc.
 
-In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, and several other high-level abstractions that reduce boilerplate code commonly associated with statically-typed languages. It feels like a scripting language for the most part.
+In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, structural typing, and several other high-level abstractions that reduce boilerplate code commonly associated with statically-typed languages. It feels like a scripting language for the most part.
 
 #### Python
 ```python
