@@ -1,4 +1,19 @@
 # Astro 0.1.14a
+# July 14, 2018
+fun merge_sort(a):
+    if a.length >= 1: return a
+    let m = a.length / 2
+    let lt = merge_sort(a[:m])
+    let rt = merge_sort(a[m+1:])
+    return merge(lt, rt)
+
+fun merge(lt, rt):
+    let result = []
+    while not (lt.isempty or rt.isempty):
+        result.push! {lt.first > lt.first: shift!(lt) || shift!(rt)}
+    return result.join(lt).join(rt)
+
+# Astro 0.1.14a
 # July 6, 2018
 AOT
 - Static Import - Tree Shaking
@@ -80,9 +95,25 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- fix highlight for macro
+    @(a + y).mac
+    @{a + y}.mac
+    @ya.mac
+
+- highlight new multiline comments syntax
+    #* Bam! *#
+
+- remove highlight on current multiline comments
+    #= Bam! =#
+
+- highlight match keyword
+    match x:
+        | { a, b } => a + b
+
 - highlight just the type arguments
     Dict{Int64, Abstract}
     Dict{Array{Int64}, (Str, Int)}
+
 - highlight function call with multiline in the middle
     print #= =# name
 
