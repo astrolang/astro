@@ -29,12 +29,12 @@ class Lexer {
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
     this.operatorChar = "+'-*/\\^%&|!><=÷×≠≈¹²³√?~"; // Unicode?
-    this.punctuatorChar = '(){}[],.;:@'; // Unicode?
+    this.punctuatorChar = '(){}[],.;:@$'; // Unicode?
     this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.keywords = [
       'import', 'export', 'let', 'var', 'const', 'fun', 'type', 'abst', 'async',
       'ref', 'val', 'iso', 'acq', 'if', 'elif', 'else', 'while', 'for', 'try',
-      'except', 'ensure', 'defer', 'loop', 'end', 'spill', 'return', 'raise', 'break',
+      'except', 'ensure', 'defer', 'loop', 'end', 'match', 'spill', 'return', 'raise', 'break',
       'continue', 'yield', 'from', 'await', 'where', 'at', 'is', 'not', 'in', 'as',
       'mod', 'typeof', 'new', 'super',
     ];
@@ -1509,7 +1509,7 @@ class Lexer {
       token = ''; // Make token a string.
 
       // Check !('=').
-      if (this.peekChar() === '=') {
+      if (this.peekChar() === '*') {
         token = null;
       } else {
         // Consume (singlelinecommentchars: (!(newline | eoi) .)+)?.
@@ -1539,9 +1539,9 @@ class Lexer {
   }
 
   // multilinecommentchars =
-  //   | (!('#=' | '=#') .)+ // TODO
+  //   | (!('#*' | '*#') .)+ // TODO
   // innermultilinecomment =
-  //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#'
+  //   | "#*" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '*#'
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   innerMultiLineComment() {
     const { lastPosition, column, line } = this;
@@ -1551,13 +1551,13 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Consume "#=".
-    if (this.eatToken('#=')) {
+    // Consume "#*".
+    if (this.eatToken('#*')) {
       token = ''; // Make token a string.
 
-      // Consume (multilinecommentchars: (!('#=' | '=#') .)+)?.
-      let closeTag = this.eatToken('=#');
-      let openTag = this.eatToken('#=');
+      // Consume (multilinecommentchars: (!('#*' | '*#') .)+)?.
+      let closeTag = this.eatToken('*#');
+      let openTag = this.eatToken('#*');
       while (true) {
         if (this.lastReached()) break;
         if (closeTag) break;
@@ -1594,8 +1594,8 @@ class Lexer {
           }
         }
 
-        closeTag = this.eatToken('=#');
-        openTag = this.eatToken('#=');
+        closeTag = this.eatToken('*#');
+        openTag = this.eatToken('#*');
       }
 
       // Check if '=#' was consumed.
@@ -1608,7 +1608,7 @@ class Lexer {
       return null;
     }
 
-    token = `#=${token}=#`;
+    token = `#*${token}*#`;
 
     // Add stop line and column.
     const stopLine = this.line;
@@ -1620,7 +1620,7 @@ class Lexer {
   }
 
   // multilinecomment =
-  //   | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' spaces? &(newline | eoi)
+  //   | "#*" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '*#' spaces? &(newline | eoi)
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   multiLineComment() {
     const { lastPosition, column, line } = this;
@@ -1630,13 +1630,13 @@ class Lexer {
     const startLine = line;
     const startColumn = column;
 
-    // Consume "#=".
-    if (this.eatToken('#=')) {
+    // Consume "#*".
+    if (this.eatToken('#*')) {
       token = ''; // Make token a string.
 
-      // Consume (multilinecommentchars: (!('#=' | '=#') .)+)?.
-      let closeTag = this.eatToken('=#');
-      let openTag = this.eatToken('#=');
+      // Consume (multilinecommentchars: (!('#*' | '*#') .)+)?.
+      let closeTag = this.eatToken('*#');
+      let openTag = this.eatToken('#*');
       while (true) {
         if (this.lastReached()) break;
         if (closeTag) break;
@@ -1673,12 +1673,12 @@ class Lexer {
           }
         }
 
-        closeTag = this.eatToken('=#');
-        openTag = this.eatToken('#=');
+        closeTag = this.eatToken('*#');
+        openTag = this.eatToken('#*');
       }
 
 
-      // Check if '=#' was consumed.
+      // Check if '*#' was consumed.
       if (closeTag) {
         // Consume spaces?
         this.spaces();
