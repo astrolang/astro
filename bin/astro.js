@@ -37,32 +37,35 @@ const commandlineInfo = {
 \x1b[2m\x1b[39m----------- type '?' for help ----------\x1b[0m\n\n`;
   },
   help: `
-  \x1b[47m\x1b[30m USAGE \x1b[0m
-    astro \x1b[36m[options]\x1b[0m \x1b[36m[file]\x1b[0m
+\x1b[47m\x1b[30m USAGE \x1b[0m
+  
+  astro \x1b[36m[options]\x1b[0m \x1b[36m[file]\x1b[0m -- \x1b[36m[...args]\x1b[0m
 
-  \x1b[47m\x1b[30m OPTIONS \x1b[0m
-    -h, --help                Print this message
-    -v, --version             Display version information
-    -q, --quiet               Start the REPL without the astro banner
-    -e, --evaluate            Evaluate string and show the output
-    -c, --compile             Compile an astro file to native code
-    -j, --jit                 Interpret an astro file using the JIT compiler
-    -o, --optimize:{0|1|2|3}  Set the optimization level
-    -p, --phase:{lexer|parser}
-                              Show the output of a chosen compilation phase
-    -t, --target:{wasm|x86|arm|llvmir}
-                              Compile an astro file to the specified target representation
+\x1b[47m\x1b[30m OPTIONS \x1b[0m
 
-  \x1b[47m\x1b[30m EXAMPLES \x1b[0m
-    astro                     Starts the REPL
-    astro -h                  Shows this help message
-    astro --version           Shows the astro version you are running
-    astro \x1b[36msample.ast\x1b[0m          Compiles the file \`sample.ast\` to native code and runs it
-    astro -e \x1b[36m'print "hello"'\x1b[0m  Evaluates the string as astro code and prints the result out
-    astro \x1b[36msample.ast\x1b[0m --target:wasm
-                              Compiles the file \`sample.ast\` to webassembly code
-    astro \x1b[36msample.ast\x1b[0m --optimize:3
-                              Compiles the file \`sample.ast\` using the highest level of optimization\n\n`,
+  -h, --help                Print this message
+  -v, --version             Display version information
+  -q, --quiet               Start the REPL without the astro banner
+  -e, --evaluate            Evaluate string and show the output
+  -c, --compile             Compile an astro file to native code
+  -j, --jit                 Interpret an astro file using the JIT compiler
+  -o, --optimize:{0|1|...}  Set the optimization level
+  -p, --phase:{lexer|...}   Show the output of a chosen compilation phase
+  -t, --target:{wasm|...}   Compile an astro file to the specified target
+                            representation
+
+\x1b[47m\x1b[30m EXAMPLES \x1b[0m
+
+  astro                     Starts the REPL
+  astro -h                  Shows this help message
+  astro --version           Shows the astro version you are running
+  astro \x1b[36msample.ast\x1b[0m          Compiles the file \`sample.ast\` to native code
+                            and runs it
+  astro -e \x1b[36m'print "hello"'\x1b[0m  Evaluates the string as astro code and prints
+                            the result out
+  astro \x1b[36msample.ast\x1b[0m -t:wasm  Compiles the file \`sample.ast\` to webassembly code
+  astro \x1b[36msample.ast\x1b[0m -o:3     Compiles the file \`sample.ast\` using the highest
+                            level of optimization\n\n`,
   version: `Astro ${astroVersion}\n`,
   notSupported: `
   Those commandline arguments are currently not supported.
