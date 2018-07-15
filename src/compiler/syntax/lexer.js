@@ -83,7 +83,7 @@ class Lexer {
       this.lastPosition += length;
       this.column += length;
 
-      // update token.
+      // Update token.
       token = str;
     }
 
