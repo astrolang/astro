@@ -1629,10 +1629,10 @@ test(
 );
 
 print('============== SINGLELINECOMMENT ==============');
-lexer = new Lexer('#= Hello World');
+lexer = new Lexer('#* Hello World');
 result = lexer.singleLineComment();
 test(
-  String.raw`#= Hello World--------->FAIL`,
+  String.raw`#* Hello World--------->FAIL`,
   result,
   null,
 );
@@ -1698,37 +1698,37 @@ test(
 );
 
 print('============== INNERMULTILINECOMMENT ==============');
-lexer = new Lexer('#=');
+lexer = new Lexer('#*');
 result = lexer.innerMultiLineComment();
 test(
-  String.raw`#--------->FAIL`,
+  String.raw`#*--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('#= name');
+lexer = new Lexer('#* name');
 result = lexer.innerMultiLineComment();
 test(
-  String.raw`#= name--------->FAIL`,
+  String.raw`#* name--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('#= outer\n#= inner =# #');
+lexer = new Lexer('#* outer\n#* inner *# #');
 result = lexer.innerMultiLineComment();
 test(
-  String.raw`#= outer\n#= inner =# #--------->FAIL`,
+  String.raw`#* outer\n#* inner *# #--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('#==#');
+lexer = new Lexer('#**#');
 result = lexer.innerMultiLineComment();
 test(
-  String.raw`#==#`,
+  String.raw`#**#`,
   result,
   {
-    token: '#==#',
+    token: '#**#',
     kind: 'innermultilinecomment',
     indentations: [],
     startLine: 1,
@@ -1738,13 +1738,13 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello # world =#');
+lexer = new Lexer('#* hello # world *#');
 result = lexer.innerMultiLineComment();
 test(
-  String.raw`#= hello # world =#`,
+  String.raw`#* hello # world *#`,
   result,
   {
-    token: '#= hello # world =#',
+    token: '#* hello # world *#',
     kind: 'innermultilinecomment',
     indentations: [],
     startLine: 1,
@@ -1754,13 +1754,13 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello #= inner hello =# world =#');
+lexer = new Lexer('#* hello #* inner hello *# world *#');
 result = lexer.innerMultiLineComment();
 test(
-  String.raw`#= hello #= inner hello =# world =#`,
+  String.raw`#* hello #* inner hello *# world *#`,
   result,
   {
-    token: '#= hello #= inner hello =# world =#',
+    token: '#* hello #* inner hello *# world *#',
     kind: 'innermultilinecomment',
     indentations: [],
     startLine: 1,
@@ -1770,13 +1770,13 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#');
+lexer = new Lexer('#* hello \n    #* inner hello \r\n #* \n   another nest *#        *# world *#');
 result = lexer.innerMultiLineComment();
 test(
-  String.raw`#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#`,
+  String.raw`#* hello \n    #* inner hello \r\n #* \n   another nest *#        *# world *#`,
   result,
   {
-    token: '#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#',
+    token: '#* hello \n    #* inner hello \r\n #* \n   another nest *#        *# world *#',
     kind: 'innermultilinecomment',
     indentations: [4, 1, 3],
     startLine: 1,
@@ -1787,42 +1787,42 @@ test(
 );
 
 print('============== MULTILINECOMMENT ==============');
-lexer = new Lexer('#=');
+lexer = new Lexer('#*');
 result = lexer.multiLineComment();
 test(
-  String.raw`#--------->FAIL`,
+  String.raw`#*--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('#= name');
+lexer = new Lexer('#* name');
 result = lexer.multiLineComment();
 test(
-  String.raw`#= name--------->FAIL`,
+  String.raw`#* name--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('#= name =# hello');
+lexer = new Lexer('#* name *# hello');
 result = lexer.multiLineComment();
 test(
-  String.raw`#= name =# hello--------->FAIL`,
+  String.raw`#* name *# hello--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('#= outer\n#= inner =# #');
+lexer = new Lexer('#* outer\n#* inner *# #');
 result = lexer.multiLineComment();
 test(
-  String.raw`#= outer\n#= inner =# #--------->FAIL`,
+  String.raw`#* outer\n#* inner *# #--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('#==#');
+lexer = new Lexer('#**#');
 result = lexer.multiLineComment();
 test(
-  String.raw`#==#`,
+  String.raw`#**#`,
   result,
   {
     token: '',
@@ -1835,10 +1835,10 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello # world =#');
+lexer = new Lexer('#* hello # world *#');
 result = lexer.multiLineComment();
 test(
-  String.raw`#= hello # world =#`,
+  String.raw`#* hello # world *#`,
   result,
   {
     token: ' hello # world ',
@@ -1851,13 +1851,13 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello #= inner hello =# world =#');
+lexer = new Lexer('#* hello #* inner hello *# world *#');
 result = lexer.multiLineComment();
 test(
-  String.raw`#= hello #= inner hello =# world =#`,
+  String.raw`#* hello #* inner hello *# world *#`,
   result,
   {
-    token: ' hello #= inner hello =# world ',
+    token: ' hello #* inner hello *# world ',
     kind: 'multilinecomment',
     indentations: [],
     startLine: 1,
@@ -1867,13 +1867,13 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#');
+lexer = new Lexer('#* hello \n    #* inner hello \r\n #* \n   another nest *#        *# world *#');
 result = lexer.multiLineComment();
 test(
-  String.raw`#= hello \n    #= inner hello \r\n #= \n   another nest =#        =# world =#`,
+  String.raw`#* hello \n    #* inner hello \r\n #* \n   another nest *#        *# world *#`,
   result,
   {
-    token: ' hello \n    #= inner hello \r\n #= \n   another nest =#        =# world ',
+    token: ' hello \n    #* inner hello \r\n #* \n   another nest *#        *# world ',
     kind: 'multilinecomment',
     indentations: [4, 1, 3],
     startLine: 1,
@@ -1883,13 +1883,13 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello #=\n   inner hello\n =# world =#   \r\n');
+lexer = new Lexer('#* hello #*\n   inner hello\n *# world *#   \r\n');
 result = lexer.multiLineComment();
 test(
-  String.raw`#= hello #=\n   inner hello\n =# world =#   \r\n`,
+  String.raw`#* hello #*\n   inner hello\n *# world *#   \r\n`,
   result,
   {
-    token: ' hello #=\n   inner hello\n =# world ',
+    token: ' hello #*\n   inner hello\n *# world ',
     kind: 'multilinecomment',
     indentations: [3, 1],
     startLine: 1,
