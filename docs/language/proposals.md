@@ -181,3 +181,31 @@ export {
     List :: {Int64}
 }
 ```
+
+## INSTALLATION
+#### UNIX
+##### Commandline Installer
+https://get.astrolang.org/sh
+- curl https://get.astrolang.org/sh -sSf | sh
+
+##### Tarball
+https://get.astrolang.org/tar
+- Download tarball ➡ astro-0.1.14.tar.gz
+- Unpack tarball ➡ tar -xzJf astro-0.1.14.tar.gz
+- Run install script ➡ sh astro-0.1.14/install.sh
+
+#### BINARIES
+https://get.astrolang.org/exe
+- astro.msi
+- astro.dmg
+- astro.deb
+- astro
+
+## COMMAND LINE
+#### EXAMPLES
+```
+astro test.ast -- user arguments
+astro --compile test.ast
+astro --help
+astro --evaluate '1 + 2'
+```
