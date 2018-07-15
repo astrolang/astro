@@ -13,10 +13,10 @@ fun mainframe(puz):
     :('+-----+-----+-----+-----+')
 
 fun format(puz, ch):
-    ch.trim().length
-    | 1 => '  $ch  '
-    | 2 => '  $ch '
-    | 0 => '     '
+    match ch.trim().length:
+        | 1 => '  $ch  '
+        | 2 => '  $ch '
+        | 0 => '     '
 
 fun change(puz, to):
     let fro = puz.position
@@ -38,8 +38,7 @@ fun buildboard(puz, difficulty):
             break
 
     puz.position = tmp
-    let diff =
-        difficulty
+    let diff = match difficulty:
         | 0 => 10
         | 1 => 50
         | _ => 100
@@ -53,24 +52,25 @@ fun buildboard(puz, difficulty):
 
 fun validmoves(puz):
     let pos = puz.position
-    | 6 or 7 or 10 or 11 =>
-        puz.items[pos - 4], :[pos - 1], :[pos + 1], :[pos + 4]
-    | 5 or 9 =>
-        puz.items[pos - 4], :[pos + 4], :[pos + 1]
-    | 8 or 12 =>
-        puz.items[pos - 4], :[pos + 4], :[pos - 1]
-    | 2 or 3 =>
-        puz.items[pos - 1], :[pos + 1], :[pos + 4]
-    | 14 or 15 =>
-        puz.items[pos - 1], :[pos + 1], :[pos - 4]
-    | 1 =>
-        puz.items[pos + 1], :[pos + 4]
-    | 4 =>
-        puz.items[pos - 1], :[pos + 4]
-    | 13 =>
-        puz.items[pos + 1], :[pos - 4]
-    | 16 =>
-        puz.items[pos - 1], :[pos - 4]
+    match puz.position:
+        | 6 or 7 or 10 or 11 =>
+            puz.items[pos - 4], :[pos - 1], :[pos + 1], :[pos + 4]
+        | 5 or 9 =>
+            puz.items[pos - 4], :[pos + 4], :[pos + 1]
+        | 8 or 12 =>
+            puz.items[pos - 4], :[pos + 4], :[pos - 1]
+        | 2 or 3 =>
+            puz.items[pos - 1], :[pos + 1], :[pos + 4]
+        | 14 or 15 =>
+            puz.items[pos - 1], :[pos + 1], :[pos - 4]
+        | 1 =>
+            puz.items[pos + 1], :[pos + 4]
+        | 4 =>
+            puz.items[pos - 1], :[pos + 4]
+        | 13 =>
+            puz.items[pos + 1], :[pos - 4]
+        | 16 =>
+            puz.items[pos - 1], :[pos - 4]
 
 fun mainframe(puz):
     var flag = false

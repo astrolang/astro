@@ -19,11 +19,11 @@ fun anyCommonElements(l, r): #: T, U -> Bool where (T, U)<:Sequence
 
 # MATCH EXPRESSION
 fun fizzbuzz(i):
-    (i mod 3), (i mod 5)
-    | 0, 0 => 'fizzbuzz'
-    | 0, _ => 'fizz'
-    | _, 0 => 'buzz'
-    | _, _ => str(i)
+    match (i mod 3, i mod 5):
+        | 0, 0 => 'fizzbuzz'
+        | 0, _ => 'fizz'
+        | _, 0 => 'buzz'
+        | _, _ => str(i)
 
 # CONSTRUCTOR TYPES
 type Person(name, age)

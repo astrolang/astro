@@ -1,5 +1,4 @@
-fun fizzbuzz(i):
-    (i mod 3), (i mod 5)
+fun fizzbuzz(i): match (i mod 3, i mod 5):
     | 0, 0 => 'fizzbuzz'
     | 0, _ => 'fizz'
     | _, 0 => 'buzz'
