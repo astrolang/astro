@@ -1,5 +1,5 @@
 /*************** LEXER ***************/
-
+/************** TEST 1 ***************/
 spacechar =
   | [ \t] // Unicode?
 
@@ -110,10 +110,10 @@ multilinestringliteral =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 regexchars =
-  | (!(newline | '//') .)+ // TODO
+  | (!(newline | '/') .)+ // TODO
 
 regexliteral =
-  | '//' regexchars? '//'
+  | '/' regexchars? '/'
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 booleanliteral =
@@ -126,18 +126,18 @@ singlelinecommentchars =
   { token }
 
 singlelinecomment =
-  | "#" !('=') singlelinecommentchars? &(newline | eoi)
+  | "#" !('*') singlelinecommentchars? &(newline | eoi)
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecommentchars =
-  | (!('#=' | '=#') .)+ // TODO
+  | (!('#*' | '*#') .)+ // TODO
 
 innermultilinecomment =
-  | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#'
+  | "#*" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '*#'
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecomment =
-  | "#=" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '=#' _? &(newline | eoi)
+  | "#*" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '*#' _? &(newline | eoi)
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 
@@ -219,15 +219,6 @@ stringliteral =
   | singlelinestringliteral // Can eat others cake
   { kind, value }
 
-coefficientexpression = // Unfurl
-  | floatbinaryliteral identifier
-  | floatoctalliteral identifier
-  | floatdecimalliteral identifier
-  | integerbinaryliteral identifier
-  | integeroctalliteral identifier
-  | !('0b' | '0o' | '0x') integerdecimalliteral identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
-  { kind, coefficient, identifier }
-
 comment =
   | multilinecomment
   | singlelinecomment // Accepts others failed cake. Rectified with predicate.
@@ -270,6 +261,7 @@ _ =
 
 // <<<<< DIRECTIVES <<<<<
 
+/************** TEST 2 ***************/
 nextcodeline =
   | spaces? nextline (samedent comment (nextline | eoi))*
   { kind, comments }
@@ -293,66 +285,60 @@ listargumentsmultiple =
 
 listliteral =
   | '[' _? ']' '\''?
-  | '[' spaces? listargumentsmultiple _? ']' \''?
+  | '[' _? listargumentsmultiple _? ']' \''?
   | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']' \''?
   { kind, transposed, expressions }
 
 dictargument =
-  | primitiveexpression _? ':' _? objectblock &(primitiveexpression | '}')
-  | primitiveexpression _? ':' _? (subdictliteral | primitiveexpression) &(comma | nextcodeline _? | _? '}')
-  | identifier &(comma | nextcodeline _? | _? '}')
+  | primitiveexpression _? ':' nextcodeline indent dictarguments nextcodeline dedent !comma
+  | primitiveexpression _? ':' _? primitiveexpression &(comma | _? '}' | nextcodeline dedent)
+  | identifier &(comma | _? '}' | nextcodeline dedent)
   { key, value }
 
 dictarguments =
-  | dictargument ((comma | nextcodeline samedent)? dictargument)* comma?
+  | dictargument (comma dictargument)* comma?
   { expressions: [{ key, value }] }
 
 dictliteral =
   | '{' _? '}'
-  | '{' spaces? dictarguments _? '}'
+  | '{' _? dictarguments _? '}'
   | '{' nextcodeline indent dictarguments nextcodeline dedent '}'
   { kind, expressions: [{ key, value }] }
 
 tuplearguments =
-  | primitiveexpression (comma primitiveexpression)+ comma?
+  | (identifier _? ':' _?)? primitiveexpression (comma (identifier _? ':' _?)? primitiveexpression)+ comma?
   | primitiveexpression comma
   { expressions }
 
 tupleliteral =
   | '(' _? ')'
-  | '(' spaces? tuplearguments _? ')'
+  | '(' _? tuplearguments _? ')'
   | '(' nextcodeline indent tuplearguments nextcodeline dedent ')'
-  { kind, expressions }
-
-namedtuplearguments =
-  | identifier _? ':' _? primitiveexpression (comma identifier _? ':' _? primitiveexpression)* comma?
-  { expressions: [{ key, value }] }
-
-namedtupleliteral =
-  | '(' _? ':' _?  ')'
-  | '(' spaces? namedtuplearguments _? ')'
-  | '(' nextcodeline indent namedtuplearguments nextcodeline dedent ')'
-  { kind, expressions: [{ key, value }] }
+  { kind, expressions: [{ key, value}] }
 
 symbolliteral =
-  | '$' identifier
-  | '$' '{' _? expression _? '}'
-  | '$' '{' block '}'
-  { kind, expressions }
+  | '$' nospace identifier
+  | '$' nospace '{' _? expression _? '}'
+  | '$' nospace '{' block '}'
+  { kind, expression }
 
-barecomprehension =
-  | primitiveexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)?
+comprehensionhead =
+  | lhspattern _ 'in' _ primitiveexpression
+
+generatorcomprehension =
+  | '(' _? primitiveexpression ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)?  _? ')'
   { kind, expression, iterators:[{ lhs, rhs}], guard }
 
 listcomprehension =
-  | '[' _? primitiveexpression _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? ']'
+  | '[' _? primitiveexpression ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? ']'
   { kind, expression, iterators:[{ lhs, rhs}], guard }
 
 dictcomprehension =
-  | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) _? '|' _? forhead (_? ';' _? forhead)* (_ 'where' _ primitiveexpression)? _? '}'
+  | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? '}'
   { kind, key, value, iterators:[{ lhs, rhs}], guard }
 
 comprehension =
+  | generatorcomprehension
   | listcomprehension
   | dictcomprehension
 
@@ -362,43 +348,37 @@ literal =
   | stringliteral
   | regexliteral
   | listliteral
-  | objectliteral
   | dictliteral
-  | setliteral
   | tupleliteral
-  | namedtupleliteral
   | symbolliteral
   | comprehension
-
-callargument =
-  | barecomprehension
-  | primitiveexpression
 
 callarguments =
   | (identifier _? ':' _?)? primitiveexpression (comma (identifier _? ':' _?)? primitiveexpression)* comma?
   { expressions: [{ key, value }] }
 
 callpostfix =
-  | spaces? ('!' spaces?)? '.'? '(' _? ')'
-  | spaces? ('!' spaces?)? '.'? '(' spaces? callarguments _? ')'
-  | spaces? ('!' spaces?)? '.'? '(' nextcodeline indent callarguments nextcodeline dedent ')'
+  | nospace ('!' nospace)?  ('.' nospace)? '(' _? ')'
+  | nospace ('!' nospace)?  ('.' nospace)? '(' _? callarguments _? ')'
+  | nospace ('!' nospace)?  ('.' nospace)? '(' nextcodeline indent callarguments nextcodeline dedent ')'
   { kind, expression, mutative, vectorized, arguments: [{ key, value }] }
 
 dotnotationpostfix =
-  | spaces? '.' identifier
-  { kind, expression, field }
-
-cascadenotationargument =
-  | (callpostfix | indexpostfix | spaces? '.' identifier) (spaces? '?')? (subatompostfix (spaces? '?')?)*
+  | nospace '.' nospace identifier
+  { kind, expression, name }
 
 cascadenotationarguments =
-  | cascadenotationargument (comma cascadenotationargument)+ comma?
-  | cascadenotationargument _ ('.'? operator | keywordoperator) _ (cascadenotationarguments | cascadenotationargument)
+  | &(identifier) atom nospace '.'? nospace operator nospace (cascadenotationarguments | &(identifier) atom)
+  | &(identifier) atom _ ('.'? nospace operator | keywordoperator) _ (cascadenotationarguments | &(identifier) atom)
+  { expressions, operators }
 
 cascadenotationpostfix = // Unfurl
-  | spaces? '.' '{' spaces? cascadenotationarguments _? '}'
-  | spaces? '.' '{' nextcodeline indent cascadenotationarguments nextcodeline dedent '}'
-  { kind, expression, cascadeaccess }
+  | nospace '.' nospace '{' cascadenotationarguments '}' (nospace '.' nospace &(identifier) atom)?
+    { kind, leftexpression, rightexpression, expressions, operators }
+
+cascadenotationprefix = // Unfurl
+  | '{' cascadenotationarguments '}' nospace '.' nospace &(identifier) atom
+    { kind, leftexpression, rightexpression, expressions, operators }
 
 indexargument =
   | (primitiveexpression _?)? ':' (_? primitiveexpression? _? ':')? _? primitiveexpression?
@@ -410,14 +390,67 @@ indexarguments =
   { expressions: [{ index, begin, step, end }] }
 
 indexpostfix =
-  | spaces? '[' spaces? indexarguments _? ']'
-  | spaces? '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+  | '[' _? indexarguments _? ']'
+  | '[' nextcodeline indent indexarguments nextcodeline dedent ']'
   { kind, expression, arguments: [{ key, value }] }
 
+extendednotation
+  | ':' name
+  | ':' '(' _? ')'
+  | ':' '[' _? ']'
+  | ':' '(' _? callarguments _? ')'
+  | ':' '[' _? indexarguments _? ']'
+  | ':' '(' nextcodeline indent callarguments nextcodeline dedent ')'
+  | ':' '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+  { kind, notationtype, expressions }
+
 ternaryoperator =
-  | '(' spaces? primitiveexpression _? ')' _? '?' _? primitiveexpression _? ':' _? primitiveexpression
-  | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' _? '?' _? primitiveexpression _? ':' _? primitiveexpression
+  | '{' _? primitiveexpression _? ':' _? primitiveexpression ('||' | _ '||' _) primitiveexpression _? '}'
+  | '{' nextcodeline indent primitiveexpression _? '?' _? primitiveexpression ('||' | _ '||' _) primitiveexpression nextcodeline dedent '}'
   { kind, condition, truebody, falsebody }
+
+coefficientexpression = // Unfurl
+  | floatbinaryliteral identifier
+  | floatoctalliteral identifier
+  | floatdecimalliteral identifier
+  | integerbinaryliteral identifier
+  | integeroctalliteral identifier
+  | !('§0b' | '§0o' | '§0x') integerdecimalliteral identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
+  | '(' _? simpleexpression _? ')' identifier
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' identifier
+  { kind, coefficient, expression }
+
+returnexpression =
+  | 'return' (!(_ controlkeyword _) _ expressionnocontrolptimitive)?
+  { kind, expression }
+
+yieldexpression =
+  | 'yield' ((_ 'from')? !(_ controlkeyword _) _ expressionnocontrolptimitive)?
+  { kind, expression, redirect }
+
+raiseexpression =
+  | 'raise' (_ !(_ controlkeyword _) _ expressionnocontrolptimitive)?
+  { kind, expression }
+
+continueexpression =
+  | 'continue' (_ '@' identifier)?
+  { kind, label }
+
+breakexpression =
+  | 'break' (!(_ controlkeyword _)_ expressionnocontrolptimitive)?  (_ '@' identifier)?
+  { kind, expression, label }
+
+spillexpression =
+  | 'spill' (_ '@' identifier)?
+  { kind, label }
+
+controlprimitive =
+  | returnexpression
+  | yieldexpression
+  | continueexpression
+  | breakexpression
+  | raiseexpression
+  | spillexpression
 
 controlkeyword =
   | 'return'
@@ -427,62 +460,34 @@ controlkeyword =
   | 'break'
   | 'spill'
 
-return =
-  | 'return' (!(_ controlkeyword _) _ expressionnocontrolptimitive)?
-  { kind, expression }
-
-yield =
-  | 'yield' ((_ 'from')? !(_ controlkeyword _) _ expressionnocontrolptimitive)?
-  { kind, expression, redirect }
-
-raise =
-  | 'raise' (_ !(_ controlkeyword _) _ expressionnocontrolptimitive)?
-  { kind, expression }
-
-continue =
-  | 'continue' (_ '@' identifier)?
-  { kind, label }
-
-break =
-  | 'break' (!(_ controlkeyword _)_ expressionnocontrolptimitive)?  (_ '@' identifier)?
-  { kind, expression, label }
-
-spill =
-  | 'spill' (_ '@' identifier)?
-  { kind, label }
-
-controlprimitive =
-  | return
-  | yield
-  | continue
-  | break
-  | raise
-  | spill
-
 subatompostfix =
   | callpostfix
   | dotnotationpostfix
-  | cascadenotationpostfix
   | indexpostfix
 
 subatom =
-  | '(' spaces? simpleexpression _? ')' identifier?
-  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' identifier?
   | coefficientexpression
+  | '(' _? simpleexpression _? ')'
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')'
+  | extendednotation
   | literal
   | noname
   | identifier
   | operator
 
 atom =
-  | subatom (spaces? '?')? (subatompostfix (spaces? '?')?)*
+  | subatom (subatompostfix (_? '?')?)* cascadenotationpostfix?
+  | cascadenotationprefix
   { kind, expression }
 
+/************** TEST 3 ***************/
 prefixatom =
   | operator atom
+  { kind, vectorized, operator, expression }
 
 postfixatom =
   | atom '.'? operator
+  { kind, vectorized, operator, expression }
 
 prepostfixatom =
   | prefixatom
@@ -500,7 +505,7 @@ keywordoperator =
 infixexpression =
   | (prefixatom | atom) '.'? operator (infixexpression | prepostfixatom)
   | prepostfixatom _ ('.'? operator | keywordoperator) _ (infixexpression | prepostfixatom)
-  { kind, expressions, operators }
+  { kind, expressions, operators: [{ vectorized, operator }] }
 
 spreadexpression =
   | '...' atom
@@ -511,12 +516,12 @@ range =
   { kind, begin, step, end }
 
 commandnotationrest =
-  | spaces &(identifier | stringliteral | numericliteral | range | symbolliteral) primitiveexpression
-  | spaces? lambdaexpression
+  | _ &(identifier | stringliteral | numericliteral | range | symbolliteral | comprehension) primitiveexpression
+  | _? lambdaexpression
   { arguments: [{ key, value }] }
 
 commandnotation =
-  | !(operator) atom (spaces? '?')? (spaces? '!')? commandnotationrest
+  | !(operator) atom (_? '?')? (_? '!')? commandnotationrest
   { kind, expression, mutative, arguments: [{ key, value }] }
 
 primitiveexpression =
@@ -535,7 +540,7 @@ tupleexpression =
   | simpleexpression
 
 dotnotationline =
-  | dotnotationpostfix (spaces? '?')? (subatompostfix (spaces? '?')?)*
+  | dotnotationpostfix (_? '?')? (subatompostfix (_? '?')?)*
 
 dotnotationblock =
   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* dedentoreoiend
@@ -598,11 +603,11 @@ lhsarguments =
   { expressions }
 
 lhspattern =
-  | '[' spaces? lhsarguments _? ']'
+  | '[' _? lhsarguments _? ']'
   | '[' nextcodeline indent lhsarguments nextcodeline dedent ']'
-  | '{' spaces? lhsarguments _? '}'
+  | '{' _? lhsarguments _? '}'
   | '{' nextcodeline indent lhsarguments nextcodeline dedent '}'
-  | '(' spaces? lhsarguments _? ')'
+  | '(' _? lhsarguments _? ')'
   | '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
   |  lhsname (comma lhsname)*
   { destructuretype, arguments }
@@ -733,13 +738,13 @@ typerelationoperator =
   | ('::' | '<:' | '>:') !operator
 
 matchpattern =
-  | '[' spaces? matchargument (comma matchargument)* comma? _? ']'
+  | '[' _? matchargument (comma matchargument)* comma? _? ']'
   | '[' nextcodeline indent  matchargument (comma matchargument)* comma? nextcodeline dedent ']'
-  | '{' spaces? matchargument (comma matchargument)* comma? _? '}' (typerelationoperator identifier)?
+  | '{' _? matchargument (comma matchargument)* comma? _? '}' (typerelationoperator identifier)?
   | '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}' (typerelationoperator identifier)?
-  | '%' '{' spaces? matchargument (comma matchargument)* comma? _? '}'
+  | '%' '{' _? matchargument (comma matchargument)* comma? _? '}'
   | '%' '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}'
-  | '@' '{' spaces? matchargument (comma matchargument)* comma? _? '}'
+  | '@' '{' _? matchargument (comma matchargument)* comma? _? '}'
   | '@' '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}'
 
 matchexpression =
@@ -748,7 +753,7 @@ matchexpression =
 
 callparens =
   | '(' _? ')'
-  | '(' spaces? callarguments _? ')'
+  | '(' _? callarguments _? ')'
   | '(' nextcodeline indent callarguments nextcodeline dedent ')'
   { arguments: [{ key, value }] }
 
@@ -849,11 +854,11 @@ fieldlhsarguments =
   { expressions }
 
 fieldlhspattern =
-  | '[' spaces? fieldlhsarguments _? ']'
+  | '[' _? fieldlhsarguments _? ']'
   | '[' nextcodeline indent fieldlhsarguments nextcodeline dedent ']'
-  | '{' spaces? fieldlhsarguments _? '}'
+  | '{' _? fieldlhsarguments _? '}'
   | '{' nextcodeline indent fieldlhsarguments nextcodeline dedent '}'
-  | '(' spaces? fieldlhsarguments _? ')'
+  | '(' _? fieldlhsarguments _? ')'
   | '(' nextcodeline indent fieldlhsarguments nextcodeline dedent ')'
   |  fieldlhsname (comma fieldlhsname)*
   { destructuretype, arguments }
@@ -875,7 +880,7 @@ fielddeclarationsecondinline =
   { kind, immutable, lhs, value }
 
 typename =
-  | identifier '{' spaces? (typeset | typename) _? '}' '?'?
+  | identifier '{' _? (typeset | typename) _? '}' '?'?
   | identifier '{' nextcodeline indent (typeset | typename) nextcodeline dedent '}' '?'?
   | identifier '?'?
 
@@ -901,7 +906,7 @@ typeconstraintarguments =
   | typeconstraintargument (comma typeconstraintargument)*
 
 typesignature =
-  | '(' spaces? typesignatureargments _? ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
+  | '(' _? typesignatureargments _? ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
   | '(' nextcodeline indent typesignatureargments nextcodeline dedent ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
   | typeset
   | typename
@@ -929,7 +934,7 @@ typehead =
   | 'kind' _ identifier
 
 typeconstructor =
-  | '(' spaces? parameters _?')'
+  | '(' _? parameters _?')'
   | '(' nextcodeline indent parameters nextcodeline dedent ')'
 
 typeparents =
@@ -957,7 +962,7 @@ absthead =
   | 'abst' _ identifier
 
 subtypedeclaration =
-  | identifier (_? '(' spaces? functionparameters _? ')')?
+  | identifier (_? '(' _? functionparameters _? ')')?
   | identifier (_? '(' nextcodeline indent functionparameters nextcodeline dedent ')')?
 
 abstsubtypeinline =
@@ -989,7 +994,7 @@ functionparameters =
   | functionparameter (comma functionparameter)* comma?
 
 functionhead =
-  | 'fun' _ (identifier | operator) _? '(' spaces? functionparameters _?')'
+  | 'fun' _ (identifier | operator) _? '(' _? functionparameters _?')'
   | 'fun' _ (identifier | operator) _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
 
 functiondeclaration =
