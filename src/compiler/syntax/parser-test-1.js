@@ -429,32 +429,7 @@ lexer = new Lexer('5.034 hello 0.567 world');
 parser = new Parser(lexer.lex());
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'xxxxx');
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'world');
-// test(
-//   String.raw`5.034 hello 0.567 world`,
-//   parser.cache,
-//   {
-//     1: {
-//       floatdecimalliteral: {
-//         success: true,
-//         ast: {
-//           kind: 'floatdecimalliteral',
-//           value: '0.567',
-//         },
-//         skip: 1,
-//       },
-//     },
-//     '-1': {
-//       floatdecimalliteral: {
-//         success: true,
-//         ast: {
-//           kind: 'floatdecimalliteral',
-//           value: '5.034',
-//         },
-//         skip: 1,
-//       },
-//     },
-//   },
-// );
+print([parser.cache[1], parser.cache[-1]]);
 
 print('============== PARSE ==============');
 lexer = new Lexer('++-- world');
@@ -2337,6 +2312,41 @@ test(
   },
 );
 
+lexer = new Lexer('1 b');
+parser = new Parser(lexer.lex());
+result = parse(integerDecimalLiteral, spaces, identifier)(parser);
+test(
+  String.raw`1 b`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      line: 1,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: [
+        {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+        {
+          kind: 'identifier',
+          value: 'b',
+        },
+      ],
+    },
+  },
+);
+
 print('============== NOSPACE ==============');
 lexer = new Lexer('  print');
 parser = new Parser(lexer.lex());
@@ -2478,7 +2488,6 @@ test(
 lexer = new Lexer('1b');
 parser = new Parser(lexer.lex());
 result = parse(integerDecimalLiteral, noSpace, identifier)(parser);
-print(result);
 test(
   String.raw`1b`,
   {
