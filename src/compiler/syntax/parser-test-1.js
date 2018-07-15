@@ -429,32 +429,32 @@ lexer = new Lexer('5.034 hello 0.567 world');
 parser = new Parser(lexer.lex());
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'xxxxx');
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'world');
-test(
-  String.raw`5.034 hello 0.567 world`,
-  parser.cache,
-  {
-    1: {
-      floatdecimalliteral: {
-        success: true,
-        ast: {
-          kind: 'floatdecimalliteral',
-          value: '0.567',
-        },
-        skip: 1,
-      },
-    },
-    '-1': {
-      floatdecimalliteral: {
-        success: true,
-        ast: {
-          kind: 'floatdecimalliteral',
-          value: '5.034',
-        },
-        skip: 1,
-      },
-    },
-  },
-);
+// test(
+//   String.raw`5.034 hello 0.567 world`,
+//   parser.cache,
+//   {
+//     1: {
+//       floatdecimalliteral: {
+//         success: true,
+//         ast: {
+//           kind: 'floatdecimalliteral',
+//           value: '0.567',
+//         },
+//         skip: 1,
+//       },
+//     },
+//     '-1': {
+//       floatdecimalliteral: {
+//         success: true,
+//         ast: {
+//           kind: 'floatdecimalliteral',
+//           value: '5.034',
+//         },
+//         skip: 1,
+//       },
+//     },
+//   },
+// );
 
 print('============== PARSE ==============');
 lexer = new Lexer('++-- world');
@@ -1676,11 +1676,11 @@ test(
 );
 
 print('============== COMMENT ==============');
-lexer = new Lexer('#= hello world');
+lexer = new Lexer('*# hello world');
 parser = new Parser(lexer.lex());
 result = comment(parser);
 test(
-  String.raw`#= hello world--------->FAIL`,
+  String.raw`#* hello world--------->FAIL`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -1733,11 +1733,11 @@ test(
   },
 );
 
-lexer = new Lexer('#= hello \r\n 78f =#');
+lexer = new Lexer('#* hello \r\n 78f *#');
 parser = new Parser(lexer.lex());
 result = comment(parser);
 test(
-  String.raw`'#= hello \r\n 78f =#`,
+  String.raw`'#* hello \r\n 78f *#`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -1787,6 +1787,7 @@ test(
     },
     result: {
       success: false,
+      indentCount: 1,
       directive: true,
     },
   },
@@ -1815,6 +1816,7 @@ test(
     },
     result: {
       success: false,
+      indentCount: 0,
       directive: true,
     },
   },
@@ -1843,6 +1845,7 @@ test(
     },
     result: {
       success: false,
+      indentCount: 0,
       directive: true,
     },
   },
@@ -1871,6 +1874,7 @@ test(
     },
     result: {
       success: true,
+      indentCount: 1,
       directive: true,
     },
   },
@@ -1900,6 +1904,7 @@ test(
     },
     result: {
       success: true,
+      indentCount: 2,
       directive: true,
     },
   },
@@ -2102,6 +2107,7 @@ test(
     },
     result: {
       success: false,
+      indentCount: 1,
       directive: true,
     },
   },
@@ -2130,6 +2136,7 @@ test(
     },
     result: {
       success: false,
+      indentCount: 0,
       directive: true,
     },
   },
@@ -2159,6 +2166,7 @@ test(
     },
     result: {
       success: true,
+      indentCount: 0,
       directive: true,
     },
   },
@@ -2188,6 +2196,7 @@ test(
     },
     result: {
       success: true,
+      indentCount: 1,
       directive: true,
     },
   },
@@ -2217,6 +2226,7 @@ test(
     },
     result: {
       success: true,
+      indentCount: 0,
       directive: true,
     },
   },
@@ -2354,6 +2364,39 @@ test(
   },
 );
 
+lexer = new Lexer('1 b');
+parser = new Parser(lexer.lex());
+result = parse(integerDecimalLiteral, noSpace, identifier)(parser);
+print(result);
+test(
+  String.raw`1 b--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: [
+        {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      ],
+    },
+  },
+);
+
+
 lexer = new Lexer(' ');
 parser = new Parser(lexer.lex());
 result = noSpace(parser);
@@ -2428,6 +2471,42 @@ test(
     result: {
       success: true,
       directive: true,
+    },
+  },
+);
+
+lexer = new Lexer('1b');
+parser = new Parser(lexer.lex());
+result = parse(integerDecimalLiteral, noSpace, identifier)(parser);
+print(result);
+test(
+  String.raw`1b`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      line: 1,
+      column: 2,
+    },
+    result: {
+      success: true,
+      ast: [
+        {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+        {
+          kind: 'identifier',
+          value: 'b',
+        },
+      ],
     },
   },
 );
