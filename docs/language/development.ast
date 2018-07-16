@@ -1,4 +1,24 @@
 # Astro 0.1.14a
+# July 16, 2018
+# MULTILINE COMMENTS
+#- Hello there -#
+#* Hello There *#
+#[ Hello there ]#
+
+#* Hello there
+ * Hello there
+ *#
+
+#[ Hello there
+ * Hello there
+]#
+
+#- Hello there
+ - This is another point
+ -#
+
+
+# Astro 0.1.14a
 # July 14, 2018
 fun merge_sort(a):
     if a.length >= 1: return a
@@ -95,6 +115,9 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- remove highlight on val and acq
+    val acq
+
 - fix highlight for macro
     @(a + y).mac
     @{a + y}.mac
