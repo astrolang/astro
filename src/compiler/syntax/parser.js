@@ -1500,7 +1500,7 @@ const cascadeNotationArguments = (parser) => {
       alt(cascadeNotationArguments, parse(and(identifier), identifier)),
     ),
     parse(
-      and(identifier), identifier, spaces, alt(parse(opt('.', noSpace), operator), operator), spaces,
+      and(identifier), identifier, _, alt(parse(opt('.', noSpace), operator), operator), _,
       alt(cascadeNotationArguments, parse(and(identifier), identifier)),
     ),
   )(parser);
@@ -1562,16 +1562,77 @@ const cascadeNotationArguments = (parser) => {
   return result;
 };
 
-// {
-//   success: false,
-//   ast: {
-//     kind,
-//     leftexpression: null,
-//     rightexpression: null,
-//     expressions: [],
-//     operators: [],
-//   },
-// };
+// cascadenotationpostfix = // Unfurl
+//   | nospace '.' nospace '{' _? cascadenotationarguments _? '}' (nospace '.' nospace &(identifier) atom)?
+//   { kind, leftexpression, rightexpression, expressions, operators }
+// TODO: Refactor: Change identifier to atom and write tests for it.
+const cascadeNotationPostfix = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'cascade';
+  const result = {
+    success: false,
+    ast: {
+      kind,
+      leftexpression: null,
+      rightexpression: null,
+      expressions: [],
+      operators: [],
+    },
+  };
+  const parseResult = parse(
+    noSpace, '.', noSpace, '{', opt(_), cascadeNotationArguments, opt(_), '}',
+    opt(noSpace, '.', noSpace, and(identifier), identifier),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    result.ast.expressions = parseResult.ast[3].expressions;
+    result.ast.operators = parseResult.ast[3].operators;
+    if (parseResult.ast[6].length > 1) result.ast.rightexpression = parseResult.ast[6][1];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, false);
+
+  return result;
+};
+
+// cascadenotationprefix = // Unfurl
+//   | '{' _? cascadenotationarguments _? '}' nospace '.' nospace &(identifier) atom
+//   { kind, leftexpression, rightexpression, expressions, operators }
+// TODO: Refactor: Change identifier to atom and write tests for it.
+const cascadeNotationPrefix = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'cascade';
+  const result = {
+    success: false,
+    ast: {
+      kind,
+      leftexpression: null,
+      rightexpression: null,
+      expressions: [],
+      operators: [],
+    },
+  };
+  const parseResult = parse(
+    '{', opt(_), cascadeNotationArguments, opt(_), '}',
+    noSpace, '.', noSpace, and(identifier), identifier,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    result.ast.expressions = parseResult.ast[2].expressions;
+    result.ast.operators = parseResult.ast[2].operators;
+    result.ast.rightexpression = parseResult.ast[6];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, result, false);
+
+  return result;
+};
 
 // coefficientexpression = // Unfurl
 //   | floatbinaryliteral identifier
@@ -1676,8 +1737,8 @@ module.exports = {
   callPostfix,
   dotNotationPostfix,
   cascadeNotationArguments,
-  // cascadeNotationPostfix,
-  // cascadeNotationPrefix,
+  cascadeNotationPostfix,
+  cascadeNotationPrefix,
   // indexArgument,
   // indexArguments,
   // indexPostfix,
