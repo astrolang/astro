@@ -24,8 +24,8 @@ const {
   callPostfix,
   dotNotationPostfix,
   cascadeNotationArguments,
-  // cascadeNotationPostfix,
-  // cascadeNotationPrefix,
+  cascadeNotationPostfix,
+  cascadeNotationPrefix,
   // indexArgument,
   // indexArguments,
   // indexPostfix,
@@ -3441,6 +3441,327 @@ test(
             operator: {
               kind: 'operator',
               value: '*',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== CASCADENOTATIONPOSTFIX ==============');
+lexer = new Lexer('.{a . + b}');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPostfix(parser);
+test(
+  String.raw`.{a . + b}--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: null,
+        expressions: [],
+        operators: [],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('. {a .+ b}');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPostfix(parser);
+test(
+  String.raw`. {a .+ b}--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: null,
+        expressions: [],
+        operators: [],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('.{a + b} .name');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPostfix(parser);
+test(
+  String.raw`.{a + b} .name--------->MID`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 8,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: null,
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('.{ a + b.+c }.comp13x_n4m3');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPostfix(parser);
+test(
+  String.raw`.{ a + b.+c }.comp13x_n4m3`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 10,
+      column: 26,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: {
+          kind: 'identifier',
+          value: 'comp13x_n4m3',
+        },
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+          {
+            kind: 'identifier',
+            value: 'c',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+          {
+            vectorized: true,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== CASCADENOTATIONPREFIX ==============');
+lexer = new Lexer('.{a .+ b}.name');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPrefix(parser);
+test(
+  String.raw`.{a .+ b}.name--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: null,
+        expressions: [],
+        operators: [],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('{a .+ b}');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPrefix(parser);
+test(
+  String.raw`{a .+ b}--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: null,
+        expressions: [],
+        operators: [],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('{a + b} .name');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPrefix(parser);
+test(
+  String.raw`{a + b} .name--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: null,
+        expressions: [],
+        operators: [],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('{ a + b.+c }.comp13x_n4m3');
+parser = new Parser(lexer.lex());
+result = cascadeNotationPrefix(parser);
+test(
+  String.raw`{ a + b.+c }.comp13x_n4m3`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 9,
+      column: 25,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'cascade',
+        leftexpression: null,
+        rightexpression: {
+          kind: 'identifier',
+          value: 'comp13x_n4m3',
+        },
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+          {
+            kind: 'identifier',
+            value: 'c',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+          {
+            vectorized: true,
+            operator: {
+              kind: 'operator',
+              value: '+',
             },
           },
         ],
