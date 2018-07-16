@@ -193,23 +193,23 @@ VALUES & REFERENCES
     let string = "Gift"
     let number = 1000
 
-    # Passing a complex object by value.
-    var new_string = val string
-
     # Passing a primitive object by reference.
     var new_number = ref number
+
+    # Passing a complex object by value.
+    var new_string = copy(string)
 
     # Astro manages memory automatically using a non-lexical lifetime analysis, it handles reference cycles as well.
     my_company.affiliate = ref your_company
     your_company.affiliate = ref my_company
 
-    # `iso` is used to hold an exclusive reference to the object.
+    # `iso` is used to hold an exclusive reference to an object.
     let developer = iso 'AppCypher'
     let another_developer = developer # Invalid!
 
-    # While `val` is a shallow copy operation, `acq` is a deep copy operation.
-    let rent = val house
-    let buyer = acq game
+    # `copy` is a shallow copy operation, while `deepcopy` is a deep copy operation.
+    let rent = copy(house)
+    let buyer = deepcopy(game)
 
     let player = team.player
 
@@ -1236,7 +1236,7 @@ OPERATOR OVERLOADING & CUSTOM OPERATOR
 
     # New operators can also be created by combining operators as a name.
     fun ++(x): #: (Real, Real) -> Real
-        var temp = val x
+        var temp = copy x
         x += 1
         return temp
 
@@ -1351,7 +1351,7 @@ POINTERS
 
 RESERVED KEYWORDS
     import, export, let, var, const, fun, type, abst, async,
-    ref, val, iso, acq,
+    ref, iso,
     if, elif, else, while, for, try, except, ensure, defer, loop, end, match,
     spill, return, raise, break, continue, yield, from, await,
     where, at,
