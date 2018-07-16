@@ -126,18 +126,18 @@ singlelinecommentchars =
   { token }
 
 singlelinecomment =
-  | "#" !('*') singlelinecommentchars? &(newline | eoi)
+  | "#" !('-') singlelinecommentchars? &(newline | eoi)
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecommentchars =
-  | (!('#*' | '*#') .)+ // TODO
+  | (!('#-' | '-#') .)+ // TODO
 
 innermultilinecomment =
-  | "#*" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '*#'
+  | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecomment =
-  | "#*" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '*#' _? &(newline | eoi)
+  | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#' _? &(newline | eoi)
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 

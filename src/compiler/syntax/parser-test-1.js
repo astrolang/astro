@@ -1651,11 +1651,11 @@ test(
 );
 
 print('============== COMMENT ==============');
-lexer = new Lexer('*# hello world');
+lexer = new Lexer('#- hello world');
 parser = new Parser(lexer.lex());
 result = comment(parser);
 test(
-  String.raw`#* hello world--------->FAIL`,
+  String.raw`#- hello world--------->FAIL`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -1708,11 +1708,11 @@ test(
   },
 );
 
-lexer = new Lexer('#* hello \r\n 78f *#');
+lexer = new Lexer('#- hello \r\n 78f -#');
 parser = new Parser(lexer.lex());
 result = comment(parser);
 test(
-  String.raw`'#* hello \r\n 78f *#`,
+  String.raw`'#- hello \r\n 78f -#`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,

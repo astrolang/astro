@@ -3,14 +3,14 @@ SINGLE-LINE COMMENTS
     # Hello, World!
 
 MULTILINE COMMENTS
-    #*
+    #-
     Multiline comments can span multiple lines.
-    They begin with `#*`.
-    #*
-        They can be nested.
-    *#
-    And they end with `*#`.
-    *#
+    They begin with `#-`.
+    #-
+     -  They can be nested.
+     -#
+    And they end with `-#`.
+    -#
 
 SUBJECT BINDING
     # In Astro, subjects are names to which values or objects are bound.
