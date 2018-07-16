@@ -373,12 +373,12 @@ cascadenotationarguments =
   { expressions, operators }
 
 cascadenotationpostfix = // Unfurl
-  | nospace '.' nospace '{' cascadenotationarguments '}' (nospace '.' nospace &(identifier) atom)?
-    { kind, leftexpression, rightexpression, expressions, operators }
+  | nospace '.' nospace '{' _? cascadenotationarguments _? '}' (nospace '.' nospace &(identifier) atom)?
+  { kind, leftexpression, rightexpression, expressions, operators }
 
 cascadenotationprefix = // Unfurl
-  | '{' cascadenotationarguments '}' nospace '.' nospace &(identifier) atom
-    { kind, leftexpression, rightexpression, expressions, operators }
+  | '{' _? cascadenotationarguments _? '}' nospace '.' nospace &(identifier) atom
+  { kind, leftexpression, rightexpression, expressions, operators }
 
 indexargument =
   | (primitiveexpression _?)? ':' (_? primitiveexpression? _? ':')? _? primitiveexpression?
@@ -544,7 +544,7 @@ dotnotationline =
 
 dotnotationblock =
   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* dedentoreoiend
-  { kind, expression, lines }
+  { kind, expression, chain }
 
 subexpression =
   | dotnotationblock
@@ -554,8 +554,7 @@ subexpression =
   | tupleexpression
 
 expression =
-  | subexpression (_? ';' _? subexpression)+ (_? ';')?
-  | subexpression
+  | subexpression (_? (nextcodeline | ';') _? subexpression)* (_? (nextcodeline | ';'))?
 
 // Used in declarations and conditional expressions.
 // allows
@@ -568,8 +567,7 @@ subexpressionnoblock =
   | tupleexpression
 
 expressionnoblock =
-  | subexpressionnoblock (_? ';' _? subexpressionnoblock)+ (_? ';')?
-  | subexpressionnoblock
+  | subexpressionnoblock (_? (nextcodeline | ';') _? subexpressionnoblock)* (_? (nextcodeline | ';'))?
 
 // Used in declarations and conditional expressions.
 // allows
@@ -587,8 +585,7 @@ subexpressionsecondinline =
   | tupleexpression
 
 expressionsecondinline =
-  | subexpressionsecondinline (_? ';' _? subexpressionsecondinline)+ (_? ';')?
-  | subexpressionsecondinline
+  | subexpressionsecondinline (_? (nextcodeline | ';') _? subexpressionsecondinline)* (_? (nextcodeline | ';'))?
 
 block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
@@ -737,15 +734,20 @@ typerelationoperator =
   | _ ('::' | '<:' | '>:') _
   | ('::' | '<:' | '>:') !operator
 
+// TODO: REDESIGN
+// { x: { a }, b, c: 2 } :: Int where x > 5
+// ( x: 5, b, _, 10 ) :: Int where x > 5
+// 24
+// _
+// value to value
+// value or value
+// | _ => exp (; | \n?) | _ => exp
+// match x: | _ => exp (; | \n?) | _ => exp
 matchpattern =
   | '[' _? matchargument (comma matchargument)* comma? _? ']'
   | '[' nextcodeline indent  matchargument (comma matchargument)* comma? nextcodeline dedent ']'
   | '{' _? matchargument (comma matchargument)* comma? _? '}' (typerelationoperator identifier)?
   | '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}' (typerelationoperator identifier)?
-  | '%' '{' _? matchargument (comma matchargument)* comma? _? '}'
-  | '%' '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}'
-  | '@' '{' _? matchargument (comma matchargument)* comma? _? '}'
-  | '@' '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}'
 
 matchexpression =
   | ('|' | '!') _? matchpattern (comma matchpattern)* _? '=>' _? subexpressionnoblock nextcodeline samedent (matchexpression | '')
