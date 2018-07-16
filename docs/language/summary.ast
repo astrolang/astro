@@ -1354,7 +1354,7 @@ RESERVED KEYWORDS
     ref, iso,
     if, elif, else, while, for, try, except, ensure, defer, loop, end, match,
     spill, return, raise, break, continue, yield, from, await,
-    where, at,
+    where,
     is, not, in, as, mod, typeof,
     new,
 
