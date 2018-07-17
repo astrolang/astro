@@ -26,9 +26,9 @@ const {
   cascadeNotationArguments,
   cascadeNotationPostfix,
   cascadeNotationPrefix,
-  // indexArgument,
-  // indexArguments,
-  // indexPostfix,
+  indexArgument,
+  indexArguments,
+  indexPostfix,
   // extendedNotation,
   // ternaryOperator,
   // coefficientExpression,
@@ -55,11 +55,11 @@ let result = null;
 const test = createTest();
 
 print('============== NEXTCODELINE ==============');
-lexer = new Lexer('    \r\n# hello\n#* world *#\n');
+lexer = new Lexer('    \r\n# hello\n#- world -#\n');
 parser = new Parser(lexer.lex());
 result = nextCodeLine(parser);
 test(
-  String.raw`    \r\n# hello\n#* world *#\n`,
+  String.raw`    \r\n# hello\n#- world -#\n`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -91,11 +91,11 @@ test(
   },
 );
 
-lexer = new Lexer('    \r\n# hello\n#* world *#');
+lexer = new Lexer('    \r\n# hello\n#- world -#');
 parser = new Parser(lexer.lex());
 result = nextCodeLine(parser);
 test(
-  String.raw`    \r\n# hello\n#* world *#`,
+  String.raw`    \r\n# hello\n#- world -#`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -155,11 +155,11 @@ test(
   },
 );
 
-lexer = new Lexer('    \r\n# hello\n#* world *#\n');
+lexer = new Lexer('    \r\n# hello\n#- world -#\n');
 parser = new Parser(lexer.lex());
 result = dedentOrEoiEnd(parser);
 test(
-  String.raw`    \r\n# hello\n#* world *#\n`,
+  String.raw`    \r\n# hello\n#- world -#\n`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -191,12 +191,12 @@ test(
   },
 );
 
-lexer = new Lexer('    \r\n    # hello\n    #* world *#\nend');
+lexer = new Lexer('    \r\n    # hello\n    #- world -#\nend');
 parser = new Parser(lexer.lex());
 parser.lastIndentCount = 1;
 result = dedentOrEoiEnd(parser);
 test(
-  String.raw`    \r\n    # hello\n    #* world *#\nend`,
+  String.raw`    \r\n    # hello\n    #- world -#\nend`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2796,7 +2796,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -2826,7 +2826,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -2856,7 +2856,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -2886,7 +2886,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -2916,7 +2916,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -2946,7 +2946,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: true,
         vectorized: true,
@@ -2976,7 +2976,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -3034,7 +3034,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: true,
         vectorized: false,
@@ -3093,7 +3093,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'call',
+        kind: 'callpostfix',
         expression: null,
         mutative: false,
         vectorized: true,
@@ -3135,7 +3135,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'dot',
+        kind: 'dotnotationpostfix',
         expression: null,
         name: null,
       },
@@ -3163,7 +3163,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'dot',
+        kind: 'dotnotationpostfix',
         expression: null,
         name: {
           kind: 'identifier',
@@ -3470,7 +3470,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationpostfix',
         leftexpression: null,
         rightexpression: null,
         expressions: [],
@@ -3500,7 +3500,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationpostfix',
         leftexpression: null,
         rightexpression: null,
         expressions: [],
@@ -3530,7 +3530,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationpostfix',
         leftexpression: null,
         rightexpression: null,
         expressions: [
@@ -3577,7 +3577,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationpostfix',
         leftexpression: null,
         rightexpression: {
           kind: 'identifier',
@@ -3639,7 +3639,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationprefix',
         leftexpression: null,
         rightexpression: null,
         expressions: [],
@@ -3669,7 +3669,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationprefix',
         leftexpression: null,
         rightexpression: null,
         expressions: [],
@@ -3699,7 +3699,7 @@ test(
     result: {
       success: false,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationprefix',
         leftexpression: null,
         rightexpression: null,
         expressions: [],
@@ -3729,7 +3729,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'cascade',
+        kind: 'cascadenotationprefix',
         leftexpression: null,
         rightexpression: {
           kind: 'identifier',
@@ -3762,6 +3762,595 @@ test(
             operator: {
               kind: 'operator',
               value: '+',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== INDEXARGUMENT ==============');
+lexer = new Lexer('');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        begin: null,
+        step: null,
+        end: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('56:2:1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`56:2:1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 4,
+      column: 6,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '56',
+        },
+        step: {
+          kind: 'integerdecimalliteral',
+          value: '2',
+        },
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('::');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`::`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 2,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: null,
+        step: null,
+        end: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`:`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 1,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: null,
+        step: null,
+        end: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer(': : 1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`: : 1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: null,
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0o77_1774');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`0o77_1774`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 9,
+    },
+    result: {
+      success: true,
+      ast: {
+        index: {
+          kind: 'integeroctalliteral',
+          value: '771774',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('56::1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`56::1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '56',
+        },
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('56:1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`56:1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '56',
+        },
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('5:');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`5:`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 2,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '5',
+        },
+        step: null,
+        end: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':5');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`:5`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 2,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: null,
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '5',
+        },
+      },
+    },
+  },
+);
+
+print('============== INDEXARGUMENTS ==============');
+lexer = new Lexer('::1, 5: :34, 56');
+parser = new Parser(lexer.lex());
+result = indexArguments(parser);
+test(
+  String.raw`::1, 5: :34, 56`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 9,
+      column: 15,
+    },
+    result: {
+      success: true,
+      ast: {
+        expressions: [
+          {
+            begin: null,
+            step: null,
+            end: {
+              kind: 'integerdecimalliteral',
+              value: '1',
+            },
+          },
+          {
+            begin: {
+              kind: 'integerdecimalliteral',
+              value: '5',
+            },
+            step: null,
+            end: {
+              kind: 'integerdecimalliteral',
+              value: '34',
+            },
+          },
+          {
+            index: {
+              kind: 'integerdecimalliteral',
+              value: '56',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':, 56 , : : , :5:  ,');
+parser = new Parser(lexer.lex());
+result = indexArguments(parser);
+test(
+  String.raw`:, 56 , : : , :5:  ,`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 10,
+      column: 20,
+    },
+    result: {
+      success: true,
+      ast: {
+        expressions: [
+          {
+            begin: null,
+            step: null,
+            end: null,
+          },
+          {
+            index: {
+              kind: 'integerdecimalliteral',
+              value: '56',
+            },
+          },
+          {
+            begin: null,
+            step: null,
+            end: null,
+          },
+          {
+            begin: null,
+            step: {
+              kind: 'integerdecimalliteral',
+              value: '5',
+            },
+            end: null,
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('56 ,');
+parser = new Parser(lexer.lex());
+result = indexArguments(parser);
+test(
+  String.raw`56 ,`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        expressions: [
+          {
+            index: {
+              kind: 'integerdecimalliteral',
+              value: '56',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== INDEXPOSTFIX ==============');
+lexer = new Lexer('[::1, 5: :34, 56]');
+parser = new Parser(lexer.lex());
+result = indexPostfix(parser);
+test(
+  String.raw`[::1, 5: :34, 56]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 11,
+      column: 17,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'indexpostfix',
+        arguments: [
+          {
+            begin: null,
+            step: null,
+            end: {
+              kind: 'integerdecimalliteral',
+              value: '1',
+            },
+          },
+          {
+            begin: {
+              kind: 'integerdecimalliteral',
+              value: '5',
+            },
+            step: null,
+            end: {
+              kind: 'integerdecimalliteral',
+              value: '34',
+            },
+          },
+          {
+            index: {
+              kind: 'integerdecimalliteral',
+              value: '56',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('[\n    :, 56 , : : , :5:  , \n]');
+parser = new Parser(lexer.lex());
+result = indexPostfix(parser);
+test(
+  String.raw`[\n    :, 56 , : : , :5:  , \n]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 14,
+      column: 29,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'indexpostfix',
+        arguments: [
+          {
+            begin: null,
+            step: null,
+            end: null,
+          },
+          {
+            index: {
+              kind: 'integerdecimalliteral',
+              value: '56',
+            },
+          },
+          {
+            begin: null,
+            step: null,
+            end: null,
+          },
+          {
+            begin: null,
+            step: {
+              kind: 'integerdecimalliteral',
+              value: '5',
+            },
+            end: null,
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('[ 56 ,]');
+parser = new Parser(lexer.lex());
+result = indexPostfix(parser);
+test(
+  String.raw`[ 56 ,]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 7,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'indexpostfix',
+        arguments: [
+          {
+            index: {
+              kind: 'integerdecimalliteral',
+              value: '56',
             },
           },
         ],
