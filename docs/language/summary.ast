@@ -99,18 +99,18 @@ FUNCTION DEFINITION (1)
 COMMAND NOTATION
     # If a function call takes just one argument, the parens can be ommitted given the argument is not a list, dict, set or regex literal or preceded by a prefix operator.
     # This is necessary due to ambiguities that may otherwise be caused when parsing or reading the code.
-    print "Hello"
-    print name
-    print 56
-    print /9/
-    print @set { x, y }
-    print $name
-    print x > y ? x : y
-    print (x, y) => x
     print (x | x in z)
     print { x: y | x in z }
     print [x | y in z]
-
+    print (x > y) ? x || y
+    print (x, y) => x
+    print 1..2
+    print "Hello"
+    print name
+    print $name
+    print 56
+    print /9/
+    print @set { x, y }
 
     print [9] # Invalid!
     print {9} # Invalid!
@@ -737,7 +737,7 @@ MATCH EXPRESSION
         | (x, y) => x # Matches if object is a tuple of two elements.
         | 75 or 90 => 3 # Matches if object has a value `75` or `67`
         | 75 to 90 => 3 # Matches if object has a value between `75` and value `67`
-        | 75 => spill # `spill` keyword means the control flow should unconditionaly move to the next match condition.
+        | 75 => fallthrough # `fallthrough` keyword means the control flow should unconditionaly move to the next match condition.
         | n => 6 # Matches. Binds `n` to the object.
         | _ => 7 # Matches.
 
@@ -1353,7 +1353,7 @@ RESERVED KEYWORDS
     import, export, let, var, const, fun, type, abst, async,
     ref, iso,
     if, elif, else, while, for, try, except, ensure, defer, loop, end, match,
-    spill, return, raise, break, continue, yield, from, await,
+    fallthrough, return, raise, break, continue, yield, from, await,
     where,
     is, not, in, as, mod, typeof,
     new,
