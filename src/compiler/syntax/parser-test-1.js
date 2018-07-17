@@ -248,10 +248,7 @@ test(
     },
     result: {
       success: false,
-      ast: [
-        'hello',
-        'world',
-      ],
+      ast: [],
     },
   },
 );
@@ -2396,12 +2393,7 @@ test(
     },
     result: {
       success: false,
-      ast: [
-        {
-          kind: 'integerdecimalliteral',
-          value: '1',
-        },
-      ],
+      ast: [],
     },
   },
 );
