@@ -326,15 +326,15 @@ comprehensionhead =
   | lhspattern _ 'in' _ primitiveexpression
 
 generatorcomprehension =
-  | '(' _? primitiveexpression ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)?  _? ')'
+  | '(' _? primitiveexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)?  _? ')'
   { kind, expression, iterators:[{ lhs, rhs }], guard }
 
 listcomprehension =
-  | '[' _? primitiveexpression ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? ']'
+  | '[' _? primitiveexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? ']'
   { kind, expression, iterators:[{ lhs, rhs }], guard }
 
 dictcomprehension =
-  | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? '}'
+  | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? '}'
   { kind, key, value, iterators:[{ lhs, rhs }], guard }
 
 comprehension =
@@ -401,8 +401,8 @@ extendednotation
   { kind, expression }
 
 ternaryoperator =
-  | '(' _? primitiveexpression _? ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
-  | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+  | '(' _? primitiveexpression _? ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
+  | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
   { kind, condition, truebody, falsebody }
 
 coefficientexpression = // Unfurl
