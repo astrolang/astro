@@ -115,8 +115,11 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
-- remove highlight on val, at and acq
-    val at acq
+- highlight fallthrough keyword
+    fallthrough
+
+- remove highlight on val, at, spill and acq
+    val at acq spill
 
 - fix highlight for macro
     @(a + y).mac
