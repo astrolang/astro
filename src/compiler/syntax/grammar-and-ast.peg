@@ -417,27 +417,27 @@ coefficientexpression = // Unfurl
   { kind, coefficient, expression }
 
 returnexpression =
-  | 'return' (!(_ controlkeyword _) _ expressionnocontrolptimitive)?
+  | 'return' (_ subexpression)?
   { kind, expression }
 
 yieldexpression =
-  | 'yield' ((_ 'from')? !(_ controlkeyword _) _ expressionnocontrolptimitive)?
+  | 'yield' ((_ 'from')? _ subexpression)?
   { kind, expression, redirect }
 
 raiseexpression =
-  | 'raise' (_ !(_ controlkeyword _) _ expressionnocontrolptimitive)?
+  | 'raise' (_ subexpression)?
   { kind, expression }
 
 continueexpression =
-  | 'continue' (_ '@' identifier)?
+  | 'continue' (_ '@' nospace identifier)?
   { kind, label }
 
 breakexpression =
-  | 'break' (!(_ controlkeyword _)_ expressionnocontrolptimitive)?  (_ '@' identifier)?
+  | 'break' (_ subexpression)?  (_ '@' nospace identifier)?
   { kind, expression, label }
 
-spillexpression =
-  | 'spill' (_ '@' identifier)?
+fallthroughexpression =
+  | 'fallthrough' (_ '@' nospace identifier)?
   { kind, label }
 
 controlprimitive =
@@ -446,15 +446,7 @@ controlprimitive =
   | continueexpression
   | breakexpression
   | raiseexpression
-  | spillexpression
-
-controlkeyword =
-  | 'return'
-  | 'yield'
-  | 'raise'
-  | 'continue'
-  | 'break'
-  | 'spill'
+  | fallthroughexpression
 
 subatompostfix =
   | callpostfix
@@ -508,16 +500,27 @@ spreadexpression =
   { kind, expression }
 
 range =
-  | ((infixexpression | prepostfixatom) _?)? '..' (_? (infixexpression | prepostfixatom) _? '..')? _? (infixexpression | prepostfixatom)
+  | (infixexpression | prepostfixatom)? nospace '..' (infixexpression | prepostfixatom) nospace '..')? nospace (infixexpression | prepostfixatom)
   { kind, begin, step, end }
 
-commandnotationrest =
-  | _ &(identifier | stringliteral | numericliteral | range | symbolliteral | comprehension) primitiveexpression
-  | _? lambdaexpression
+commandnotationargument =
+  | _
+    &(
+      comprehension |
+      lambdaexpression |
+      ternaryoperator |
+      range |
+      stringliteral |
+      identifier |
+      symbolliteral |
+      numericliteral |
+      regexliteral
+    )
+    primitiveexpression
   { arguments: [{ key, value }] }
 
 commandnotation =
-  | !(operator) atom (_? '?')? (_? '!')? commandnotationrest
+  | !(operator) atom (nopspace '!')? argument
   { kind, expression, mutative, arguments: [{ key, value }] }
 
 primitiveexpression =
@@ -550,7 +553,7 @@ subexpression =
   | tupleexpression
 
 expression =
-  | subexpression (_? (nextcodeline | ';') _? subexpression)* (_? (nextcodeline | ';'))?
+  | subexpression ((nextcodeline | _? ';' _?) subexpression)* (nextcodeline | _? ';')?
 
 // Used in declarations and conditional expressions.
 // allows
@@ -563,7 +566,7 @@ subexpressionnoblock =
   | tupleexpression
 
 expressionnoblock =
-  | subexpressionnoblock (_? (nextcodeline | ';') _? subexpressionnoblock)* (_? (nextcodeline | ';'))?
+  | subexpressionnoblock ((nextcodeline | _? ';' _?) subexpressionnoblock)* (nextcodeline | _? ';')?
 
 // Used in declarations and conditional expressions.
 // allows
@@ -581,7 +584,7 @@ subexpressionsecondinline =
   | tupleexpression
 
 expressionsecondinline =
-  | subexpressionsecondinline (_? (nextcodeline | ';') _? subexpressionsecondinline)* (_? (nextcodeline | ';'))?
+  | subexpressionsecondinline ((nextcodeline | _? ';' _?) subexpressionsecondinline)* (nextcodeline | _? ';')?
 
 block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
@@ -614,7 +617,7 @@ declarationassignmentoperator =
   | '=' !operator
 
 ifheaddeclaration =
-  | subjecthead declarationassignmentoperator !(controlkeyword) tupleexpression
+  | subjecthead declarationassignmentoperator tupleexpression
   { immutable, lhs, value }
 
 ifhead =
@@ -866,14 +869,14 @@ fieldhead =
   { immutable, lhs }
 
 fielddeclaration =
-  | fieldhead (_ '=' _ | '=' !operator) !(controlkeyword) subexpressionsecondinline
-  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent !(controlkeyword) subexpression dedentoreoiend
+  | fieldhead (_ '=' _ | '=' !operator) subexpressionsecondinline
+  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
   | fieldhead
   { kind, immutable, lhs, value }
 
 fielddeclarationsecondinline =
-  | fieldhead (_ '=' _ | '=' !operator) !(controlkeyword) subexpressionnoblock
-  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent !(controlkeyword) subexpression dedentoreoiend
+  | fieldhead (_ '=' _ | '=' !operator) subexpressionnoblock
+  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
   | fieldhead
   { kind, immutable, lhs, value }
 
@@ -1016,7 +1019,7 @@ subjectdeclaration =
   { kind, immutable, lhs, value }
 
 subjectdeclarationsecondinline =
-  | subjecthead (_ '=' _ | '=' !operator) !(controlkeyword) subexpressionnoblock
+  | subjecthead (_ '=' _ | '=' !operator) subexpressionnoblock
   | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
   | subjecthead
   { kind, immutable, lhs, value }
