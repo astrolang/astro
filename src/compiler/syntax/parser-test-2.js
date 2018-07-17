@@ -30,7 +30,7 @@ const {
   indexArguments,
   indexPostfix,
   extendedNotation,
-  // ternaryOperator,
+  ternaryOperator,
   // coefficientExpression,
   // returnExpression,
   // yieldExpression,
@@ -4381,7 +4381,7 @@ test(
       success: false,
       ast: {
         kind: 'extendednotation',
-        expression: {},
+        expression: null,
       },
     },
   },
@@ -4513,6 +4513,141 @@ test(
               end: null,
             },
           ],
+        },
+      },
+    },
+  },
+);
+
+print('============== TERNARYOPERATOR ==============');
+lexer = new Lexer('(5_000)? 0b10.001 || 0x7_EFF8');
+parser = new Parser(lexer.lex());
+result = ternaryOperator(parser);
+test(
+  String.raw`(5_000)? 0b10.001 || 0x7_EFF8--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'ternaryoperator',
+        condition: null,
+        truebody: null,
+        falsebody: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('(5_000) ? 0b10.001 ||0x7_EFF8');
+parser = new Parser(lexer.lex());
+result = ternaryOperator(parser);
+test(
+  String.raw`(5_000)? 0b10.001 ||0x7_EFF8--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'ternaryoperator',
+        condition: null,
+        truebody: null,
+        falsebody: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('(5_000) ? 0b10.001 || 0x7_EFF8');
+parser = new Parser(lexer.lex());
+result = ternaryOperator(parser);
+test(
+  String.raw`(5_000) ? 0b10.001 || 0x7_EFF8`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 30,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'ternaryoperator',
+        condition: {
+          kind: 'integerdecimalliteral',
+          value: '5000',
+        },
+        truebody: {
+          kind: 'floatbinaryliteral',
+          value: '10.001',
+        },
+        falsebody: {
+          kind: 'integerhexadecimalliteral',
+          value: '7EFF8',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('(  \n    5_000\n) ? 0b10.001 || 0x7_EFF8');
+parser = new Parser(lexer.lex());
+result = ternaryOperator(parser);
+test(
+  String.raw`(  \n    5_000\n) ? 0b10.001 || 0x7_EFF8`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 38,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'ternaryoperator',
+        condition: {
+          kind: 'integerdecimalliteral',
+          value: '5000',
+        },
+        truebody: {
+          kind: 'floatbinaryliteral',
+          value: '10.001',
+        },
+        falsebody: {
+          kind: 'integerhexadecimalliteral',
+          value: '7EFF8',
         },
       },
     },

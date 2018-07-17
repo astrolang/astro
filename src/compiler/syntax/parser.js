@@ -1755,7 +1755,7 @@ const indexPostfix = (parser) => {
 const extendedNotation = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'extendednotation';
-  const result = { success: false, ast: { kind, expression: {} } };
+  const result = { success: false, ast: { kind, expression: null } };
   const parseResult = alt(
     parse(':', noSpace, identifier),
     parse(':', callPostfix),
@@ -1774,6 +1774,59 @@ const extendedNotation = (parser) => {
     // Alternative 3 passed.
     } else if (parseResult.ast.alternative === 3) {
       result.ast.expression = parseResult.ast.ast[1];
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
+
+  return result;
+};
+
+// ternaryoperator =
+//   | '(' _? primitiveexpression _? ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+//   | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+//   { kind, condition, truebody, falsebody }
+// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+const ternaryOperator = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'ternaryoperator';
+  const result = {
+    success: false,
+    ast: {
+      kind, condition: null, truebody: null, falsebody: null,
+    },
+  };
+  const parseResult = alt(
+    parse(
+      '(', opt(_), numericLiteral, opt(_), ')',
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)),
+      numericLiteral,
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)),
+      numericLiteral,
+    ),
+    parse(
+      '(', nextCodeLine, indent, numericLiteral, nextCodeLine, dedent, ')',
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)),
+      numericLiteral,
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)),
+      numericLiteral,
+    ),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      result.ast.condition = parseResult.ast.ast[2];
+      result.ast.truebody = parseResult.ast.ast[6];
+      result.ast.falsebody = parseResult.ast.ast[8];
+    // Alternative 2 passed.
+    } else if (parseResult.ast.alternative === 2) {
+      result.ast.condition = parseResult.ast.ast[2];
+      result.ast.truebody = parseResult.ast.ast[6];
+      result.ast.falsebody = parseResult.ast.ast[8];
     }
   }
 
@@ -1892,7 +1945,7 @@ module.exports = {
   indexArguments,
   indexPostfix,
   extendedNotation,
-  // ternaryOperator,
+  ternaryOperator,
   // coefficientExpression,
   // returnExpression,
   // yieldExpression,
