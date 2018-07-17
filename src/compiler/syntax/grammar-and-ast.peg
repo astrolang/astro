@@ -314,7 +314,7 @@ tupleliteral =
   | '(' _? ')'
   | '(' _? tuplearguments _? ')'
   | '(' nextcodeline indent tuplearguments nextcodeline dedent ')'
-  { kind, expressions: [{ key, value}] }
+  { kind, expressions: [{ key, value }] }
 
 symbolliteral =
   | '$' nospace identifier
@@ -327,15 +327,15 @@ comprehensionhead =
 
 generatorcomprehension =
   | '(' _? primitiveexpression ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)?  _? ')'
-  { kind, expression, iterators:[{ lhs, rhs}], guard }
+  { kind, expression, iterators:[{ lhs, rhs }], guard }
 
 listcomprehension =
   | '[' _? primitiveexpression ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? ']'
-  { kind, expression, iterators:[{ lhs, rhs}], guard }
+  { kind, expression, iterators:[{ lhs, rhs }], guard }
 
 dictcomprehension =
   | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) ('|' | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? '}'
-  { kind, key, value, iterators:[{ lhs, rhs}], guard }
+  { kind, key, value, iterators:[{ lhs, rhs }], guard }
 
 comprehension =
   | generatorcomprehension
@@ -383,11 +383,11 @@ cascadenotationprefix = // Unfurl
 indexargument =
   | (primitiveexpression _?)? ':' (_? primitiveexpression? _? ':')? _? primitiveexpression?
   | primitiveexpression
-  { index, begin, step, end }
+  { begin, step, end } | { index }
 
 indexarguments =
   | indexargument (comma indexargument)* comma?
-  { expressions: [{ index, begin, step, end }] }
+  { expressions: [{ begin, step, end } | { index }] }
 
 indexpostfix =
   | '[' _? indexarguments _? ']'
@@ -476,7 +476,7 @@ subatom =
   | operator
 
 atom =
-  | subatom (subatompostfix (_? '?')?)* cascadenotationpostfix?
+  | subatom (subatompostfix (nospace '?')?)* cascadenotationpostfix?
   | cascadenotationprefix
   { kind, expression }
 
@@ -540,7 +540,7 @@ tupleexpression =
   | simpleexpression
 
 dotnotationline =
-  | dotnotationpostfix (_? '?')? (subatompostfix (_? '?')?)*
+  | dotnotationpostfix (nospace '?')? (subatompostfix (nospace '?')?)*
 
 dotnotationblock =
   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* dedentoreoiend
