@@ -390,23 +390,18 @@ indexarguments =
   { expressions: [{ begin, step, end } | { index }] }
 
 indexpostfix =
-  | '[' _? indexarguments _? ']'
-  | '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+  | nospace '[' _? indexarguments _? ']'
+  | nospace '[' nextcodeline indent indexarguments nextcodeline dedent ']'
   { kind, expression, arguments: [{ key, value }] }
 
 extendednotation
-  | ':' name
-  | ':' '(' _? ')'
-  | ':' '[' _? ']'
-  | ':' '(' _? callarguments _? ')'
-  | ':' '[' _? indexarguments _? ']'
-  | ':' '(' nextcodeline indent callarguments nextcodeline dedent ')'
-  | ':' '[' nextcodeline indent indexarguments nextcodeline dedent ']'
-  { kind, notationtype, expressions }
+  | ':' nospace atom
+  | ':' callpostfix
+  | ':' indexpostfix
+  { kind, expression }
 
 ternaryoperator =
-  | '{' _? primitiveexpression _? ':' _? primitiveexpression ('||' | _ '||' _) primitiveexpression _? '}'
-  | '{' nextcodeline indent primitiveexpression _? '?' _? primitiveexpression ('||' | _ '||' _) primitiveexpression nextcodeline dedent '}'
+  | primitiveexpression ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
   { kind, condition, truebody, falsebody }
 
 coefficientexpression = // Unfurl

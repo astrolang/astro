@@ -105,6 +105,7 @@ COMMAND NOTATION
     print /9/
     print @set { x, y }
     print $name
+    print x > y ? x : y
     print (x, y) => x
     print (x | x in z)
     print { x: y | x in z }
@@ -114,7 +115,6 @@ COMMAND NOTATION
     print [9] # Invalid!
     print {9} # Invalid!
     print +5 # Invalid!
-    print x | y in z # Invalid!
 
 TYPE DEFINITION (1)
     # A type is synonymous with `struct` in C. It holds the blueprint of what an object can contain.
@@ -572,7 +572,7 @@ TERNARY OPERATOR
     let cmp = if a > b: 0 else: 1
 
     # Astro requires parens around the condition.
-    let cmp = {a > b: 0 || 1}
+    let cmp = a > b ? 0 || 1}
 
 NIL
     # Sometimes, it can be useful to represent an empty or a missing state.
@@ -888,7 +888,7 @@ LAMBDAS
 
     # Recursive lambda.
     # An anonymous function or lambda can be recursively called within its body using the `_(...)`.
-    list.aggregate((0, a) => {a == 0: 1 || a + _(a - 1)})
+    list.aggregate((0, a) => a == 0 ? 1 || a + _(a - 1))
 
     # Immediately-invoked function.
     ((a, b) => a + b)(2, 3)
