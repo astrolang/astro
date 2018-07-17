@@ -31,7 +31,7 @@ const {
   indexPostfix,
   extendedNotation,
   ternaryOperator,
-  // coefficientExpression,
+  coefficientExpression,
   // returnExpression,
   // yieldExpression,
   // raiseExpression,
@@ -4648,6 +4648,172 @@ test(
         falsebody: {
           kind: 'integerhexadecimalliteral',
           value: '7EFF8',
+        },
+      },
+    },
+  },
+);
+
+
+print('============== COEFFICIENTEXPRESSION ==============');
+lexer = new Lexer('0x78ff');
+parser = new Parser(lexer.lex());
+result = coefficientExpression(parser);
+test(
+  String.raw`0x78ff--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'coefficientexpression',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('78.f');
+parser = new Parser(lexer.lex());
+result = coefficientExpression(parser);
+test(
+  String.raw`78.f--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'coefficientexpression',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('78f');
+parser = new Parser(lexer.lex());
+result = coefficientExpression(parser);
+test(
+  String.raw`78f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      line: 1,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'coefficientexpression',
+        coefficient: {
+          kind: 'integerdecimalliteral',
+          value: '78',
+        },
+        identifier: {
+          kind: 'identifier',
+          value: 'f',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('.78f');
+parser = new Parser(lexer.lex());
+result = coefficientExpression(parser);
+test(
+  String.raw`.78f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      line: 1,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'coefficientexpression',
+        coefficient: {
+          kind: 'floatdecimalliteral',
+          value: '0.78',
+        },
+        identifier: {
+          kind: 'identifier',
+          value: 'f',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0o7.77f');
+parser = new Parser(lexer.lex());
+result = coefficientExpression(parser);
+test(
+  String.raw`0o7.77f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      line: 1,
+      column: 7,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'coefficientexpression',
+        coefficient: {
+          kind: 'floatoctalliteral',
+          value: '7.77',
+        },
+        identifier: {
+          kind: 'identifier',
+          value: 'f',
         },
       },
     },
