@@ -1343,6 +1343,7 @@ const symbolLiteral = (parser) => {
 //   | tupleliteral
 //   | symbolliteral
 //   | comprehension
+// TODO: Uncomment comprehesion.
 // TODO: Add more tests with diverse expressions.
 const literal = (parser) => {
   const { tokenPosition } = parser;
@@ -1875,6 +1876,165 @@ const coefficientExpression = (parser) => {
   return result;
 };
 
+// returnexpression =
+//   | 'return' (_ subexpression)?
+//   { kind, expression }
+// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
+const returnExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'returnexpression';
+  const result = { success: false, ast: { kind, expression: null } };
+  const parseResult = parse('return', opt(_, numericLiteral))(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    if (parseResult.ast[1].length > 0) result.ast.expression = parseResult.ast[1][0];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// yieldexpression =
+//   | 'yield' ((_ 'from')? _ subexpression)?
+//   { kind, expression, redirect }
+// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
+const yieldExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'yieldexpression';
+  const result = { success: false, ast: { kind, redirect: false, expression: null } };
+  const parseResult = parse('yield', opt(opt(_, 'from'), _, numericLiteral))(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    if (parseResult.ast[1].length > 0) {
+      result.ast.expression = parseResult.ast[1][1];
+      result.ast.redirect = parseResult.ast[1][0].length > 0;
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// raiseexpression =
+//   | 'raise' (_ subexpression)?
+//   { kind, expression }
+// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
+const raiseExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'raiseexpression';
+  const result = { success: false, ast: { kind, expression: null } };
+  const parseResult = parse('raise', opt(_, numericLiteral))(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    if (parseResult.ast[1].length > 0) result.ast.expression = parseResult.ast[1][0];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// continueexpression =
+//   | 'continue' (_ '@' nospace identifier)?
+//   { kind, label }
+const continueExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'continueexpression';
+  const result = { success: false, ast: { kind, label: null } };
+  const parseResult = parse('continue', opt(_, '@', noSpace, identifier))(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    if (parseResult.ast[1].length > 0) result.ast.label = parseResult.ast[1][1];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// breakexpression =
+//   | 'break' (_ subexpression)?  (_ '@' nospace identifier)?
+//   { kind, expression, label }
+// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
+const breakExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'breakexpression';
+  const result = { success: false, ast: { kind, label: null, expression: null } };
+  const parseResult = parse('break', opt(_, numericLiteral), opt(_, '@', noSpace, identifier))(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    if (parseResult.ast[1].length > 0) result.ast.expression = parseResult.ast[1][0];
+    if (parseResult.ast[2].length > 0) result.ast.label = parseResult.ast[2][1];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// fallthroughexpression =
+//   | 'fallthrough' (_ '@' nospace identifier)?
+//   { kind, label }
+const fallthroughExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'fallthroughexpression';
+  const result = { success: false, ast: { kind, label: null } };
+  const parseResult = parse('fallthrough', opt(_, '@', noSpace, identifier))(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    if (parseResult.ast[1].length > 0) result.ast.label = parseResult.ast[1][1];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// controlprimitive =
+//   | returnexpression
+//   | yieldexpression
+//   | continueexpression
+//   | breakexpression
+//   | raiseexpression
+//   | fallthroughexpression
+const controlPrimitive = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'controlprimitive';
+  const result = { success: false, ast: { kind, label: null } };
+  const parseResult = alt(
+    returnExpression,
+    yieldExpression,
+    continueExpression,
+    breakExpression,
+    raiseExpression,
+    fallthroughExpression,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -1907,7 +2067,6 @@ module.exports = {
   floatLiteral,
   numericLiteral,
   stringLiteral,
-  coefficientExpression,
   comment,
   indent,
   samedent,
@@ -1946,13 +2105,12 @@ module.exports = {
   indexPostfix,
   extendedNotation,
   ternaryOperator,
-  // coefficientExpression,
-  // returnExpression,
-  // yieldExpression,
-  // raiseExpression,
-  // continueExpression,
-  // breakExpression,
-  // spillExpression,
-  // controlPrimitive,
-  // controlKeyword,
+  coefficientExpression,
+  returnExpression,
+  yieldExpression,
+  raiseExpression,
+  continueExpression,
+  breakExpression,
+  fallthroughExpression,
+  controlPrimitive,
 };

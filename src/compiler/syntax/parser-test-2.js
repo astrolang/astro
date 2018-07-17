@@ -32,20 +32,13 @@ const {
   extendedNotation,
   ternaryOperator,
   coefficientExpression,
-  // returnExpression,
-  // yieldExpression,
-  // raiseExpression,
-  // continueExpression,
-  // breakExpression,
-  // spillExpression,
-  // controlPrimitive,
-  // controlKeyword,
-  // spaces,
-  // identifier,
-  // operator,
-  // parse,
-  // noSpace,
-  // _,
+  returnExpression,
+  yieldExpression,
+  raiseExpression,
+  continueExpression,
+  breakExpression,
+  fallthroughExpression,
+  controlPrimitive,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -4654,7 +4647,6 @@ test(
   },
 );
 
-
 print('============== COEFFICIENTEXPRESSION ==============');
 lexer = new Lexer('0x78ff');
 parser = new Parser(lexer.lex());
@@ -4664,7 +4656,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -4672,7 +4663,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -4692,7 +4682,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -4700,7 +4689,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -4720,7 +4708,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -4728,7 +4715,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 3,
     },
     result: {
@@ -4756,7 +4742,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -4764,7 +4749,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 4,
     },
     result: {
@@ -4792,7 +4776,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -4800,7 +4783,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 7,
     },
     result: {
@@ -4814,6 +4796,659 @@ test(
         identifier: {
           kind: 'identifier',
           value: 'f',
+        },
+      },
+    },
+  },
+);
+
+print('============== RETURNEXPRESSION ==============');
+lexer = new Lexer('return 0xb55f');
+parser = new Parser(lexer.lex());
+result = returnExpression(parser);
+test(
+  String.raw`return 0xb55f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'returnexpression',
+        expression: {
+          kind: 'integerhexadecimalliteral',
+          value: 'b55f',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('return');
+parser = new Parser(lexer.lex());
+result = returnExpression(parser);
+test(
+  String.raw`return`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 6,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'returnexpression',
+        expression: null,
+      },
+    },
+  },
+);
+
+print('============== YIELDEXPRESSION ==============');
+lexer = new Lexer('yield 0xb55f');
+parser = new Parser(lexer.lex());
+result = yieldExpression(parser);
+test(
+  String.raw`yield 0xb55f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 12,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'yieldexpression',
+        redirect: false,
+        expression: {
+          kind: 'integerhexadecimalliteral',
+          value: 'b55f',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('yield from 0xb55f');
+parser = new Parser(lexer.lex());
+result = yieldExpression(parser);
+test(
+  String.raw`yield from 0xb55f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 17,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'yieldexpression',
+        redirect: true,
+        expression: {
+          kind: 'integerhexadecimalliteral',
+          value: 'b55f',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('yield');
+parser = new Parser(lexer.lex());
+result = yieldExpression(parser);
+test(
+  String.raw`yield`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'yieldexpression',
+        redirect: false,
+        expression: null,
+      },
+    },
+  },
+);
+
+print('============== RAISEEXPRESSION ==============');
+lexer = new Lexer('raise 0xb55f');
+parser = new Parser(lexer.lex());
+result = raiseExpression(parser);
+test(
+  String.raw`raise 0xb55f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 12,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'raiseexpression',
+        expression: {
+          kind: 'integerhexadecimalliteral',
+          value: 'b55f',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('raise');
+parser = new Parser(lexer.lex());
+result = raiseExpression(parser);
+test(
+  String.raw`raise`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'raiseexpression',
+        expression: null,
+      },
+    },
+  },
+);
+
+print('============== CONTINUEEEXPRESSION ==============');
+lexer = new Lexer('continue @ name');
+parser = new Parser(lexer.lex());
+result = continueExpression(parser);
+test(
+  String.raw`continue @ name--------->MID`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 8,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'continueexpression',
+        label: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('continue @name');
+parser = new Parser(lexer.lex());
+result = continueExpression(parser);
+test(
+  String.raw`continue @name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 14,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'continueexpression',
+        label: {
+          kind: 'identifier',
+          value: 'name',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('continue');
+parser = new Parser(lexer.lex());
+result = continueExpression(parser);
+test(
+  String.raw`continue`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 8,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'continueexpression',
+        label: null,
+      },
+    },
+  },
+);
+
+print('============== BREAKEXPRESSION ==============');
+lexer = new Lexer('break @ name');
+parser = new Parser(lexer.lex());
+result = breakExpression(parser);
+test(
+  String.raw`break @ name--------->MID`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'breakexpression',
+        label: null,
+        expression: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('break 25 @name');
+parser = new Parser(lexer.lex());
+result = breakExpression(parser);
+test(
+  String.raw`break 25 @name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 14,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'breakexpression',
+        label: {
+          kind: 'identifier',
+          value: 'name',
+        },
+        expression: {
+          kind: 'integerdecimalliteral',
+          value: '25',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('break 25');
+parser = new Parser(lexer.lex());
+result = breakExpression(parser);
+test(
+  String.raw`break 25`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 8,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'breakexpression',
+        label: null,
+        expression: {
+          kind: 'integerdecimalliteral',
+          value: '25',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('break @name');
+parser = new Parser(lexer.lex());
+result = breakExpression(parser);
+test(
+  String.raw`break @name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'breakexpression',
+        label: {
+          kind: 'identifier',
+          value: 'name',
+        },
+        expression: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('break');
+parser = new Parser(lexer.lex());
+result = breakExpression(parser);
+test(
+  String.raw`break`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'breakexpression',
+        label: null,
+        expression: null,
+      },
+    },
+  },
+);
+
+print('============== CONTINUEEEXPRESSION ==============');
+lexer = new Lexer('fallthrough @ name');
+parser = new Parser(lexer.lex());
+result = fallthroughExpression(parser);
+test(
+  String.raw`fallthrough @ name--------->MID`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'fallthroughexpression',
+        label: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('fallthrough @name');
+parser = new Parser(lexer.lex());
+result = fallthroughExpression(parser);
+test(
+  String.raw`fallthrough @name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 17,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'fallthroughexpression',
+        label: {
+          kind: 'identifier',
+          value: 'name',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('fallthrough');
+parser = new Parser(lexer.lex());
+result = fallthroughExpression(parser);
+test(
+  String.raw`fallthrough`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'fallthroughexpression',
+        label: null,
+      },
+    },
+  },
+);
+
+print('============== CONTROLPRIMITIVE ==============');
+lexer = new Lexer('fallthrough @ name');
+parser = new Parser(lexer.lex());
+result = controlPrimitive(parser);
+test(
+  String.raw`fallthrough @ name--------->MID`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'fallthroughexpression',
+        label: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('break 25 @name');
+parser = new Parser(lexer.lex());
+result = controlPrimitive(parser);
+test(
+  String.raw`break 25 @name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 14,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'breakexpression',
+        label: {
+          kind: 'identifier',
+          value: 'name',
+        },
+        expression: {
+          kind: 'integerdecimalliteral',
+          value: '25',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('continue @name');
+parser = new Parser(lexer.lex());
+result = controlPrimitive(parser);
+test(
+  String.raw`continue @name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 14,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'continueexpression',
+        label: {
+          kind: 'identifier',
+          value: 'name',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('yield from 0xb55f');
+parser = new Parser(lexer.lex());
+result = controlPrimitive(parser);
+test(
+  String.raw`yield from 0xb55f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 17,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'yieldexpression',
+        redirect: true,
+        expression: {
+          kind: 'integerhexadecimalliteral',
+          value: 'b55f',
         },
       },
     },
