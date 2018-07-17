@@ -13,4 +13,4 @@ match x:
     | 2 => baz()
     | _ => qux()
 
-(a) ? b : c
+(a) ? b || c
