@@ -196,11 +196,9 @@ class Parser {
       } else throw new TypeError('Got the wrong argument type');
     }
 
-    // Update lastParseData.
-    this.lastParseData = result;
-
     // Revert state if parsing wasn't successful.
     if (!result.success) {
+      result.ast = [];
       this.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
     }
 
@@ -209,12 +207,13 @@ class Parser {
 
   /**
    * Stores result of parse in cache if it does not already exist.
+   * Also stores result in lastParseData for error recovery purpose.
    * @param{String} kind - name of rule.
    * @param{Number} tokenPosition - start position of rule.
    * @param{{ success: Boolean, ast: Object, skip: Number }} result - result of parse.
    * @param{Boolean} isDirective - true for rules that don't return meaningful ast results.
    */
-  cacheRule(kind, tokenPosition, result, isDirective) {
+  cacheRule(kind, tokenPosition, parseResult, result, isDirective) {
     // If that tokenPosition doesn't already exist in the cache.
     if (!this.cache[tokenPosition]) {
       this.cache[tokenPosition] = {};
@@ -241,6 +240,11 @@ class Parser {
         this.cache[tokenPosition][kind].directive = true;
       }
     }
+
+    // Also save necessary in lastParseData
+    this.lastParseData = {
+      kind, tokenPosition, parseResult, result,
+    };
   }
 }
 
@@ -255,7 +259,7 @@ const parseTerminalRule = (parser, kind) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, result, result);
 
   return result;
 };
@@ -319,10 +323,10 @@ const alt = (...args) => (parser) => {
           // Move the parser forward.
           parser.updateState(parser.cache[parser.tokenPosition][argName].skip);
           result.success = true;
-          result.alternative = i + 1;
+          result.ast.alternative = i + 1;
 
           if (!parseResult.directive) {
-            result.ast = parseResult.ast;
+            result.ast.ast = parseResult.ast;
           }
 
           // If the rule indent or dedent, update parser.lastIndentCount.
@@ -342,7 +346,7 @@ const alt = (...args) => (parser) => {
           result.success = true;
           result.ast.alternative = i + 1;
 
-          // If the parser fucntion is not `and` or `not`
+          // If the parser function is not a directive like `and`, `not`, etc.
           if (!parseResult.directive) {
             // Rules, alts and opt return "ast" key, parse, more and ooptmore return "ast" key.
             result.ast.ast = parseResult.ast;
@@ -380,9 +384,6 @@ const alt = (...args) => (parser) => {
     }
   }
 
-  // Update lastParseData.
-  parser.lastParseData = result;
-
   // Revert state if parsing wasn't successful.
   if (!result.success) {
     parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
@@ -414,9 +415,6 @@ const more = (...arg) => (parser) => {
       }
     }
   }
-
-  // Update lastParseData.
-  parser.lastParseData = result;
 
   return result;
 };
@@ -497,7 +495,7 @@ const integerLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
 
   return result;
 };
@@ -528,7 +526,7 @@ const floatLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
 
   return result;
 };
@@ -552,7 +550,7 @@ const numericLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
 
   return result;
 };
@@ -576,7 +574,7 @@ const stringLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
 
   return result;
 };
@@ -600,7 +598,7 @@ const comment = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
 
   return result;
 };
@@ -638,7 +636,7 @@ const indent = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, result, result, true);
 
   return result;
 };
@@ -673,7 +671,7 @@ const samedent = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, result, result, true);
 
   return result;
 };
@@ -715,7 +713,7 @@ const dedent = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, result, result, true);
 
   return result;
 };
@@ -746,7 +744,7 @@ const spaces = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, result, result, true);
 
   return result;
 };
@@ -777,7 +775,7 @@ const noSpace = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, result, result, true);
 
   return result;
 };
@@ -798,7 +796,7 @@ const nextline = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, true);
 
   return result;
 };
@@ -830,7 +828,7 @@ const lineContinuation = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, true);
 
   return result;
 };
@@ -854,7 +852,7 @@ const _ = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, true);
 
   return result;
 };
@@ -895,7 +893,7 @@ const nextCodeLine = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -924,7 +922,7 @@ const dedentOrEoiEnd = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -948,7 +946,7 @@ const comma = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, true);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, true);
 
   return result;
 };
@@ -978,7 +976,7 @@ const listArguments = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1024,7 +1022,7 @@ const listArgumentsMultiple = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1065,7 +1063,7 @@ const listLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1117,7 +1115,7 @@ const dictArgument = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1149,7 +1147,7 @@ const dictArguments = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1184,7 +1182,7 @@ const dictLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1235,7 +1233,7 @@ const tupleArguments = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1269,7 +1267,7 @@ const tupleLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1310,7 +1308,7 @@ const symbolLiteral = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1368,7 +1366,7 @@ const literal = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
 
   return result;
 };
@@ -1407,7 +1405,7 @@ const callArguments = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1419,7 +1417,7 @@ const callArguments = (parser) => {
 //   { kind, expression, mutative, vectorized, arguments: [{ key, value }] }
 const callPostfix = (parser) => {
   const { tokenPosition } = parser;
-  const kind = 'call';
+  const kind = 'callpostfix';
   const result = {
     success: false,
     ast: {
@@ -1453,7 +1451,7 @@ const callPostfix = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1463,7 +1461,7 @@ const callPostfix = (parser) => {
 //   { kind, expression, name }
 const dotNotationPostfix = (parser) => {
   const { tokenPosition } = parser;
-  const kind = 'dot';
+  const kind = 'dotnotationpostfix';
   const result = { success: false, ast: { kind, expression: null, name: null } };
   const parseResult = parse(noSpace, '.', noSpace, identifier)(parser);
 
@@ -1473,7 +1471,7 @@ const dotNotationPostfix = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1557,7 +1555,7 @@ const cascadeNotationArguments = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1568,7 +1566,7 @@ const cascadeNotationArguments = (parser) => {
 // TODO: Refactor: Change identifier to atom and write tests for it.
 const cascadeNotationPostfix = (parser) => {
   const { tokenPosition } = parser;
-  const kind = 'cascade';
+  const kind = 'cascadenotationpostfix';
   const result = {
     success: false,
     ast: {
@@ -1593,7 +1591,7 @@ const cascadeNotationPostfix = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1604,7 +1602,7 @@ const cascadeNotationPostfix = (parser) => {
 // TODO: Refactor: Change identifier to atom and write tests for it.
 const cascadeNotationPrefix = (parser) => {
   const { tokenPosition } = parser;
-  const kind = 'cascade';
+  const kind = 'cascadenotationprefix';
   const result = {
     success: false,
     ast: {
@@ -1629,7 +1627,121 @@ const cascadeNotationPrefix = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
+
+  return result;
+};
+
+// indexargument =
+//   | (primitiveexpression _?)? ':' (_? primitiveexpression? _? ':')? _? primitiveexpression?
+//   | primitiveexpression
+//   { begin, step, end } | { index }
+// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+const indexArgument = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'indexargument';
+  const result = {
+    success: false,
+    ast: {
+      begin: null,
+      step: null,
+      end: null,
+    },
+  };
+  const parseResult = alt(
+    parse(
+      opt(numericLiteral, opt(_)), ':', opt(opt(_), opt(numericLiteral), opt(_), ':'),
+      opt(opt(_), numericLiteral),
+    ),
+    numericLiteral,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      const { ast } = parseResult.ast;
+
+      // Getting the begin.
+      if (ast[0].length > 0) result.ast.begin = ast[0][0];
+
+      // Getting the step.
+      if (ast[2].length > 0 && ast[2][1].length > 0) result.ast.step = ast[2][1][0];
+
+      // Getting the end.
+      if (ast[3].length > 0) result.ast.end = ast[3][1];
+    // Alternative 2 passed.
+    } else if (parseResult.ast.alternative === 2) {
+      // Getting the index.
+      result.ast = { index: parseResult.ast.ast };
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
+
+  return result;
+};
+
+// indexarguments =
+//   | indexargument (comma indexargument)* comma?
+//   { expressions: [ { begin, step, end } | { index }] }
+const indexArguments = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'indexarguments';
+  const result = { success: false, ast: { expressions: [] } };
+  const parseResult = parse(
+    indexArgument,
+    optmore(comma, indexArgument),
+    opt(comma),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    // Get first indexargument.
+    result.ast.expressions.push(parseResult.ast[0]);
+
+    // If there are more, save them as well.
+    for (let i = 0; i < parseResult.ast[1].length; i += 1) {
+      result.ast.expressions.push(parseResult.ast[1][i][0]);
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
+
+  return result;
+};
+
+// indexpostfix =
+//   | nospace '[' _? indexarguments _? ']'
+//   | nospace '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+//   { kind, expression, arguments: [{ key, value }] }
+const indexPostfix = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'indexpostfix';
+  const result = { success: false, ast: { kind, arguments: [] } };
+  const parseResult = alt(
+    parse(noSpace, '[', opt(_), indexArguments, opt(_), ']'),
+    parse(noSpace, '[', nextCodeLine, indent, indexArguments, nextCodeLine, dedent, ']'),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      result.ast.arguments = parseResult.ast.ast[2].expressions;
+    // Alternative 2 passed.
+    } else if (parseResult.ast.alternative === 2) {
+      result.ast.arguments = parseResult.ast.ast[2].expressions;
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
 
   return result;
 };
@@ -1668,7 +1780,7 @@ const coefficientExpression = (parser) => {
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, result);
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
 
   return result;
 };
@@ -1739,9 +1851,9 @@ module.exports = {
   cascadeNotationArguments,
   cascadeNotationPostfix,
   cascadeNotationPrefix,
-  // indexArgument,
-  // indexArguments,
-  // indexPostfix,
+  indexArgument,
+  indexArguments,
+  indexPostfix,
   // extendedNotation,
   // ternaryOperator,
   // coefficientExpression,
