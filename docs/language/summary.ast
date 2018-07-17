@@ -572,7 +572,7 @@ TERNARY OPERATOR
     let cmp = if a > b: 0 else: 1
 
     # Astro requires parens around the condition.
-    let cmp = a > b ? 0 || 1}
+    let cmp = (a > b) ? 0 || 1
 
 NIL
     # Sometimes, it can be useful to represent an empty or a missing state.
@@ -888,7 +888,7 @@ LAMBDAS
 
     # Recursive lambda.
     # An anonymous function or lambda can be recursively called within its body using the `_(...)`.
-    list.aggregate((0, a) => a == 0 ? 1 || a + _(a - 1))
+    list.aggregate((0, a) => (a == 0) ? 1 || a + _(a - 1))
 
     # Immediately-invoked function.
     ((a, b) => a + b)(2, 3)

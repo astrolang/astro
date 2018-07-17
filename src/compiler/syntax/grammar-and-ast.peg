@@ -401,7 +401,8 @@ extendednotation
   { kind, expression }
 
 ternaryoperator =
-  | primitiveexpression ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+  | '(' _? primitiveexpression _? ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+  | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
   { kind, condition, truebody, falsebody }
 
 coefficientexpression = // Unfurl
