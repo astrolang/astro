@@ -1687,7 +1687,7 @@ const indexArgument = (parser) => {
 
 // indexarguments =
 //   | indexargument (comma indexargument)* comma?
-//   { expressions: [ { begin, step, end } | { index }] }
+//   { expressions: [{ begin, step, end } | { index }] }
 const indexArguments = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'indexarguments';
@@ -2014,7 +2014,7 @@ const fallthroughExpression = (parser) => {
 const controlPrimitive = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'controlprimitive';
-  const result = { success: false, ast: { kind, label: null } };
+  const result = { success: false, ast: { kind } };
   const parseResult = alt(
     returnExpression,
     yieldExpression,
@@ -2022,6 +2022,31 @@ const controlPrimitive = (parser) => {
     breakExpression,
     raiseExpression,
     fallthroughExpression,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// subatompostfix =
+//   | callpostfix
+//   | dotnotationpostfix
+//   | indexpostfix
+const subAtomPostfix = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'subatompostfix';
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    callPostfix,
+    dotNotationPostfix,
+    indexPostfix,
   )(parser);
 
   if (parseResult.success) {
@@ -2113,4 +2138,5 @@ module.exports = {
   breakExpression,
   fallthroughExpression,
   controlPrimitive,
+  subAtomPostfix,
 };

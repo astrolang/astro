@@ -39,6 +39,7 @@ const {
   breakExpression,
   fallthroughExpression,
   controlPrimitive,
+  subAtomPostfix,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -3065,7 +3066,6 @@ test(
   },
 );
 
-
 lexer = new Lexer('.(a: 0x5.5, )');
 parser = new Parser(lexer.lex());
 result = callPostfix(parser);
@@ -5454,6 +5454,132 @@ test(
     },
   },
 );
+
+print('============== SUBATOMPOSTFIX ==============');
+lexer = new Lexer('[\n    :, 56 , : : , :5:  , \n]');
+parser = new Parser(lexer.lex());
+result = subAtomPostfix(parser);
+test(
+  String.raw`[\n    :, 56 , : : , :5:  , \n]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 14,
+      column: 29,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'indexpostfix',
+        arguments: [
+          {
+            begin: null,
+            step: null,
+            end: null,
+          },
+          {
+            index: {
+              kind: 'integerdecimalliteral',
+              value: '56',
+            },
+          },
+          {
+            begin: null,
+            step: null,
+            end: null,
+          },
+          {
+            begin: null,
+            step: {
+              kind: 'integerdecimalliteral',
+              value: '5',
+            },
+            end: null,
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('.name');
+parser = new Parser(lexer.lex());
+result = subAtomPostfix(parser);
+test(
+  String.raw`.name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'dotnotationpostfix',
+        expression: null,
+        name: {
+          kind: 'identifier',
+          value: 'name',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('.(a: 0x5.5, )');
+parser = new Parser(lexer.lex());
+result = subAtomPostfix(parser);
+test(
+  String.raw`.(a: 0x5.5, )`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'callpostfix',
+        expression: null,
+        mutative: false,
+        vectorized: true,
+        arguments: [
+          {
+            key: {
+              kind: 'identifier',
+              value: 'a',
+            },
+            value: {
+              kind: 'floathexadecimalliteral',
+              value: '5.5',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
 
 test();
 
