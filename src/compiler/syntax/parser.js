@@ -1746,6 +1746,43 @@ const indexPostfix = (parser) => {
   return result;
 };
 
+// extendednotation
+//   | ':' nospace atom
+//   | ':' callpostfix
+//   | ':' indexpostfix
+//   { kind, expression }
+// TODO: Refactor: Change identifier to atom and write tests for it.
+const extendedNotation = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'extendednotation';
+  const result = { success: false, ast: { kind, expression: {} } };
+  const parseResult = alt(
+    parse(':', noSpace, identifier),
+    parse(':', callPostfix),
+    parse(':', indexPostfix),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      result.ast.expression = parseResult.ast.ast[1];
+    // Alternative 2 passed.
+    } else if (parseResult.ast.alternative === 2) {
+      result.ast.expression = parseResult.ast.ast[1];
+    // Alternative 3 passed.
+    } else if (parseResult.ast.alternative === 3) {
+      result.ast.expression = parseResult.ast.ast[1];
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
+
+  return result;
+};
+
 // coefficientexpression = // Unfurl
 //   | floatbinaryliteral identifier
 //   | floatoctalliteral identifier
@@ -1854,7 +1891,7 @@ module.exports = {
   indexArgument,
   indexArguments,
   indexPostfix,
-  // extendedNotation,
+  extendedNotation,
   // ternaryOperator,
   // coefficientExpression,
   // returnExpression,

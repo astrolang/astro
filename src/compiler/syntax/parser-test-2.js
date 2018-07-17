@@ -29,7 +29,7 @@ const {
   indexArgument,
   indexArguments,
   indexPostfix,
-  // extendedNotation,
+  extendedNotation,
   // ternaryOperator,
   // coefficientExpression,
   // returnExpression,
@@ -4354,6 +4354,166 @@ test(
             },
           },
         ],
+      },
+    },
+  },
+);
+
+print('============== EXTENDEDNOTATION ==============');
+lexer = new Lexer(': [1:2]');
+parser = new Parser(lexer.lex());
+result = extendedNotation(parser);
+test(
+  String.raw`: [1:2]--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'extendednotation',
+        expression: {},
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':comp13x_n4m3');
+parser = new Parser(lexer.lex());
+result = extendedNotation(parser);
+test(
+  String.raw`:comp13x_n4m3`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'extendednotation',
+        expression: {
+          kind: 'identifier',
+          value: 'comp13x_n4m3',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':(name  :   2)');
+parser = new Parser(lexer.lex());
+result = extendedNotation(parser);
+test(
+  String.raw`:(name  :   2)`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 14,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'extendednotation',
+        expression: {
+          kind: 'callpostfix',
+          expression: null,
+          mutative: false,
+          vectorized: false,
+          arguments: [
+            {
+              key: {
+                kind: 'identifier',
+                value: 'name',
+              },
+              value: {
+                kind: 'integerdecimalliteral',
+                value: '2',
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':[:1, 5: :34, 56:]');
+parser = new Parser(lexer.lex());
+result = extendedNotation(parser);
+test(
+  String.raw`:[:1, 5: :34, 56:]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 12,
+      column: 18,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'extendednotation',
+        expression: {
+          kind: 'indexpostfix',
+          arguments: [
+            {
+              begin: null,
+              step: null,
+              end: {
+                kind: 'integerdecimalliteral',
+                value: '1',
+              },
+            },
+            {
+              begin: {
+                kind: 'integerdecimalliteral',
+                value: '5',
+              },
+              step: null,
+              end: {
+                kind: 'integerdecimalliteral',
+                value: '34',
+              },
+            },
+            {
+              begin: {
+                kind: 'integerdecimalliteral',
+                value: '56',
+              },
+              step: null,
+              end: null,
+            },
+          ],
+        },
       },
     },
   },
