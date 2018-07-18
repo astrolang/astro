@@ -2185,6 +2185,87 @@ const atom = (parser) => {
   return result;
 };
 
+// prefixatom =
+//   | operator nospace atom
+//   { kind, vectorized, operator, expression }
+const prefixAtom = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'prefixatom';
+  const result = {
+    success: false,
+    ast: {
+      kind, vectorized: false, operator: null, expression: null,
+    },
+  };
+  const parseResult = parse(operator, noSpace, atom)(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast.operator = parseResult.ast[0];
+    result.ast.expression = parseResult.ast[1];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// postfixatom =
+//   | atom nospace ('.' nospace)? operator
+//   { kind, vectorized, operator, expression }
+const postfixAtom = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'postfixatom';
+  const result = {
+    success: false,
+    ast: {
+      kind, vectorized: false, operator: null, expression: null,
+    },
+  };
+  const parseResult = parse(atom, noSpace, opt('.', noSpace), operator)(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast.expression = parseResult.ast[0];
+    if (parseResult.ast[1].length > 0) result.ast.vectorized = true;
+    result.ast.operator = parseResult.ast[2];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// prepostfixatom =
+//   | prefixatom
+//   | postfixatom
+//   | atom
+const prePostfixAtom = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'prepostfixatom';
+  const result = {
+    success: false,
+    ast: { kind },
+  };
+  const parseResult = alt(
+    prefixAtom,
+    postfixAtom,
+    atom,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2266,4 +2347,8 @@ module.exports = {
   subAtomPostfix,
   subAtom,
   atom,
+  prefixAtom,
+  postfixAtom,
+  prePostfixAtom,
+  // infixExpression,
 };
