@@ -266,6 +266,7 @@ const parseTerminalRule = (parser, kind) => {
 
 const newline = parser => parseTerminalRule(parser, 'newline');
 const identifier = parser => parseTerminalRule(parser, 'identifier');
+const noName = parser => parseTerminalRule(parser, 'noname');
 const operator = parser => parseTerminalRule(parser, 'operator');
 const punctuator = parser => parseTerminalRule(parser, 'punctuator');
 const integerBinaryLiteral = parser => parseTerminalRule(parser, 'integerbinaryliteral');
@@ -1433,6 +1434,7 @@ const callPostfix = (parser) => {
 
   if (parseResult.success) {
     result.success = true;
+    result.ast.kind = 'call';
 
     // Alternative 1 passed.
     if (parseResult.ast.alternative === 1) {
@@ -1468,6 +1470,7 @@ const dotNotationPostfix = (parser) => {
 
   if (parseResult.success) {
     result.success = true;
+    result.ast.kind = 'dot';
     result.ast.name = parseResult.ast[1];
   }
 
@@ -1572,23 +1575,24 @@ const cascadeNotationPostfix = (parser) => {
     success: false,
     ast: {
       kind,
-      leftexpression: null,
-      rightexpression: null,
+      leftExpression: null,
+      rightExpression: null,
       expressions: [],
       operators: [],
     },
   };
   const parseResult = parse(
     noSpace, '.', noSpace, '{', opt(_), cascadeNotationArguments, opt(_), '}',
-    opt(noSpace, '.', noSpace, and(identifier), identifier),
+    opt(noSpace, '.', noSpace, and(identifier), atom),
   )(parser);
 
   if (parseResult.success) {
     result.success = true;
+    result.ast.kind = 'cascade';
 
     result.ast.expressions = parseResult.ast[3].expressions;
     result.ast.operators = parseResult.ast[3].operators;
-    if (parseResult.ast[6].length > 1) result.ast.rightexpression = parseResult.ast[6][1];
+    if (parseResult.ast[6].length > 1) result.ast.rightExpression = parseResult.ast[6][1];
   }
 
   // Cache parse result if not already cached.
@@ -1608,8 +1612,8 @@ const cascadeNotationPrefix = (parser) => {
     success: false,
     ast: {
       kind,
-      leftexpression: null,
-      rightexpression: null,
+      leftExpression: null,
+      rightExpression: null,
       expressions: [],
       operators: [],
     },
@@ -1621,10 +1625,11 @@ const cascadeNotationPrefix = (parser) => {
 
   if (parseResult.success) {
     result.success = true;
+    result.ast.kind = 'cascade';
 
     result.ast.expressions = parseResult.ast[2].expressions;
     result.ast.operators = parseResult.ast[2].operators;
-    result.ast.rightexpression = parseResult.ast[6];
+    result.ast.rightExpression = parseResult.ast[6];
   }
 
   // Cache parse result if not already cached.
@@ -1731,6 +1736,7 @@ const indexPostfix = (parser) => {
 
   if (parseResult.success) {
     result.success = true;
+    result.ast.kind = 'index';
 
     // Alternative 1 passed.
     if (parseResult.ast.alternative === 1) {
@@ -1838,14 +1844,14 @@ const ternaryOperator = (parser) => {
 };
 
 // coefficientexpression = // Unfurl
-//   | floatbinaryliteral identifier
-//   | floatoctalliteral identifier
-//   | floatdecimalliteral identifier
-//   | integerbinaryliteral identifier
-//   | integeroctalliteral identifier
-//   | !('§0b' | '§0o' | '§0x') integerdecimalliteral identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
-//   | '(' _? simpleexpression _? ')' identifier
-//   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' identifier
+//   | floatbinaryliteral nospace identifier
+//   | floatoctalliteral nospace identifier
+//   | floatdecimalliteral nospace identifier
+//   | integerbinaryliteral nospace identifier
+//   | integeroctalliteral nospace identifier
+//   | !('§0b' | '§0o' | '§0x') integerdecimalliteral nospace identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
+//   | '(' _? simpleexpression _? ')' nospace identifier
+//   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' nospace identifier
 //   { kind, coefficient, expression }
 // TODO: Refactor: Implementation needs update.
 // TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
@@ -1853,21 +1859,27 @@ const ternaryOperator = (parser) => {
 const coefficientExpression = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'coefficientexpression';
-  const result = { success: false, ast: { kind } };
+  const result = { success: false, ast: { kind, coefficient: null, identifier: null } };
   const parseResult = alt(
-    parse(floatBinaryLiteral, identifier),
-    parse(floatOctalLiteral, identifier),
-    parse(floatDecimalLiteral, identifier),
-    parse(integerBinaryLiteral, identifier),
-    parse(integerOctalLiteral, identifier),
-    parse(not(alt('§0b', '§0o', '§0x')), integerDecimalLiteral, identifier),
+    parse(floatBinaryLiteral, noSpace, identifier),
+    parse(floatOctalLiteral, noSpace, identifier),
+    parse(floatDecimalLiteral, noSpace, identifier),
+    parse(integerBinaryLiteral, noSpace, identifier),
+    parse(integerOctalLiteral, noSpace, identifier),
+    parse(not(alt('§0b', '§0o', '§0x')), integerDecimalLiteral, noSpace, identifier),
+    parse('(', opt(_), numericLiteral, opt(_), ')', noSpace, identifier),
+    parse('(', nextCodeLine, indent, numericLiteral, nextCodeLine, dedent, ')', noSpace, identifier),
   )(parser);
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    const coefficient = parseResult.ast.ast[0];
-    const ident = parseResult.ast.ast[1];
-    result.ast = { kind, coefficient, identifier: ident };
+    if (parseResult.ast.alternative === 7 || parseResult.ast.alternative === 8) {
+      result.ast.coefficient = parseResult.ast.ast[2];
+      result.ast.identifier = parseResult.ast.ast[5];
+    } else {
+      result.ast.coefficient = parseResult.ast.ast[0];
+      result.ast.identifier = parseResult.ast.ast[1];
+    }
   }
 
   // Cache parse result if not already cached.
@@ -2060,6 +2072,119 @@ const subAtomPostfix = (parser) => {
   return result;
 };
 
+// subatom =
+//   | coefficientexpression
+//   | extendednotation
+//   | '(' _? simpleexpression _? ')'
+//   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')'
+//   | literal
+//   | noname
+//   | identifier
+//   | operator
+// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
+const subAtom = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'subatom';
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    coefficientExpression,
+    extendedNotation,
+    parse('(', opt(_), numericLiteral, opt(_), ')'),
+    parse('(', nextCodeLine, indent, numericLiteral, nextCodeLine, dedent, ')'),
+    literal,
+    noName,
+    identifier,
+    operator,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Alternative 3 or 4 passed.
+    if (parseResult.ast.alternative === 3 || parseResult.ast.alternative === 4) {
+      result.ast = parseResult.ast.ast[2];
+    } else {
+      result.ast = parseResult.ast.ast;
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// atom =
+//   | subatom subatompostfix* cascadenotationpostfix? (nospace '?')?
+//   | cascadenotationprefix
+const atom = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'atom';
+  const result = { success: false, ast: { kind } };
+  const parseResult = alt(
+    parse(subAtom, optmore(subAtomPostfix), opt(cascadeNotationPostfix), opt(noSpace, '?')),
+    parse(cascadeNotationPrefix, opt(noSpace, '?')),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      let expression = null;
+
+      // Get the subatom.
+      expression = parseResult.ast.ast[0];
+
+      // Check for more subatompostfix.
+      const morePostfix = parseResult.ast.ast[1];
+      for (let i = 0; i < morePostfix.length; i += 1) {
+        // Get the postfix.
+        const postfix = morePostfix[i][0];
+        if (postfix.kind === 'call' || postfix.kind === 'dot' || postfix.kind === 'index') {
+          // Add existing expression to the postfix.
+          postfix.expression = expression;
+
+          // Assign the updated postfix to expression.
+          expression = postfix;
+        }
+      }
+
+      // Check for cascade postfix.
+      const cascade = parseResult.ast.ast[2];
+      if (cascade.length > 0) {
+        // Add existing expression to the cascade.
+        cascade[0].leftExpression = expression;
+
+        // Assign the updated postfix to expression.
+        expression = cascade[0];
+      }
+
+      // Check for nil operator.
+      if (parseResult.ast.ast[3].length > 0) {
+        result.ast = { kind: 'nillable', expression };
+      } else {
+        result.ast = expression;
+      }
+    // Alternative 2 passed.
+    } else if (parseResult.ast.alternative === 2) {
+      const expression = parseResult.ast.ast[0];
+
+      // Check for nil operator.
+      if (parseResult.ast.ast[1].length > 0) {
+        result.ast = { kind: 'nillable', expression };
+      } else {
+        result.ast = expression;
+      }
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2139,4 +2264,6 @@ module.exports = {
   fallthroughExpression,
   controlPrimitive,
   subAtomPostfix,
+  subAtom,
+  atom,
 };

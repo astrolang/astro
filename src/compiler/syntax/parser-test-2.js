@@ -40,6 +40,8 @@ const {
   fallthroughExpression,
   controlPrimitive,
   subAtomPostfix,
+  subAtom,
+  atom,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -2910,7 +2912,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'callpostfix',
+        kind: 'call',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -2940,7 +2942,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'callpostfix',
+        kind: 'call',
         expression: null,
         mutative: true,
         vectorized: true,
@@ -2970,7 +2972,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'callpostfix',
+        kind: 'call',
         expression: null,
         mutative: false,
         vectorized: false,
@@ -3028,7 +3030,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'callpostfix',
+        kind: 'call',
         expression: null,
         mutative: true,
         vectorized: false,
@@ -3086,7 +3088,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'callpostfix',
+        kind: 'call',
         expression: null,
         mutative: false,
         vectorized: true,
@@ -3156,7 +3158,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'dotnotationpostfix',
+        kind: 'dot',
         expression: null,
         name: {
           kind: 'identifier',
@@ -3464,8 +3466,8 @@ test(
       success: false,
       ast: {
         kind: 'cascadenotationpostfix',
-        leftexpression: null,
-        rightexpression: null,
+        leftExpression: null,
+        rightExpression: null,
         expressions: [],
         operators: [],
       },
@@ -3494,8 +3496,8 @@ test(
       success: false,
       ast: {
         kind: 'cascadenotationpostfix',
-        leftexpression: null,
-        rightexpression: null,
+        leftExpression: null,
+        rightExpression: null,
         expressions: [],
         operators: [],
       },
@@ -3523,9 +3525,9 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'cascadenotationpostfix',
-        leftexpression: null,
-        rightexpression: null,
+        kind: 'cascade',
+        leftExpression: null,
+        rightExpression: null,
         expressions: [
           {
             kind: 'identifier',
@@ -3570,9 +3572,9 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'cascadenotationpostfix',
-        leftexpression: null,
-        rightexpression: {
+        kind: 'cascade',
+        leftExpression: null,
+        rightExpression: {
           kind: 'identifier',
           value: 'comp13x_n4m3',
         },
@@ -3633,8 +3635,8 @@ test(
       success: false,
       ast: {
         kind: 'cascadenotationprefix',
-        leftexpression: null,
-        rightexpression: null,
+        leftExpression: null,
+        rightExpression: null,
         expressions: [],
         operators: [],
       },
@@ -3663,8 +3665,8 @@ test(
       success: false,
       ast: {
         kind: 'cascadenotationprefix',
-        leftexpression: null,
-        rightexpression: null,
+        leftExpression: null,
+        rightExpression: null,
         expressions: [],
         operators: [],
       },
@@ -3693,8 +3695,8 @@ test(
       success: false,
       ast: {
         kind: 'cascadenotationprefix',
-        leftexpression: null,
-        rightexpression: null,
+        leftExpression: null,
+        rightExpression: null,
         expressions: [],
         operators: [],
       },
@@ -3722,9 +3724,9 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'cascadenotationprefix',
-        leftexpression: null,
-        rightexpression: {
+        kind: 'cascade',
+        leftExpression: null,
+        rightExpression: {
           kind: 'identifier',
           value: 'comp13x_n4m3',
         },
@@ -4233,7 +4235,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'indexpostfix',
+        kind: 'index',
         arguments: [
           {
             begin: null,
@@ -4286,7 +4288,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'indexpostfix',
+        kind: 'index',
         arguments: [
           {
             begin: null,
@@ -4338,7 +4340,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'indexpostfix',
+        kind: 'index',
         arguments: [
           {
             index: {
@@ -4432,7 +4434,7 @@ test(
       ast: {
         kind: 'extendednotation',
         expression: {
-          kind: 'callpostfix',
+          kind: 'call',
           expression: null,
           mutative: false,
           vectorized: false,
@@ -4476,7 +4478,7 @@ test(
       ast: {
         kind: 'extendednotation',
         expression: {
-          kind: 'indexpostfix',
+          kind: 'index',
           arguments: [
             {
               begin: null,
@@ -4669,6 +4671,8 @@ test(
       success: false,
       ast: {
         kind: 'coefficientexpression',
+        coefficient: null,
+        identifier: null,
       },
     },
   },
@@ -4695,6 +4699,36 @@ test(
       success: false,
       ast: {
         kind: 'coefficientexpression',
+        coefficient: null,
+        identifier: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('78 f');
+parser = new Parser(lexer.lex());
+result = coefficientExpression(parser);
+test(
+  String.raw`78 f--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'coefficientexpression',
+        coefficient: null,
+        identifier: null,
       },
     },
   },
@@ -4792,6 +4826,40 @@ test(
         coefficient: {
           kind: 'floatoctalliteral',
           value: '7.77',
+        },
+        identifier: {
+          kind: 'identifier',
+          value: 'f',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('(2)f');
+parser = new Parser(lexer.lex());
+result = coefficientExpression(parser);
+test(
+  String.raw`(2)f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'coefficientexpression',
+        coefficient: {
+          kind: 'integerdecimalliteral',
+          value: '2',
         },
         identifier: {
           kind: 'identifier',
@@ -5476,7 +5544,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'indexpostfix',
+        kind: 'index',
         arguments: [
           {
             begin: null,
@@ -5528,7 +5596,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'dotnotationpostfix',
+        kind: 'dot',
         expression: null,
         name: {
           kind: 'identifier',
@@ -5559,7 +5627,7 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'callpostfix',
+        kind: 'call',
         expression: null,
         mutative: false,
         vectorized: true,
@@ -5580,6 +5648,547 @@ test(
   },
 );
 
+print('============== SUBATOM ==============');
+lexer = new Lexer('(4)');
+parser = new Parser(lexer.lex());
+result = subAtom(parser);
+test(
+  String.raw`(4)`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integerdecimalliteral',
+        value: '4',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('( \n    4\n)');
+parser = new Parser(lexer.lex());
+result = subAtom(parser);
+test(
+  String.raw`( \n    4\n)`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 4,
+      column: 10,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integerdecimalliteral',
+        value: '4',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('( \n    4,\n)');
+parser = new Parser(lexer.lex());
+result = subAtom(parser);
+test(
+  String.raw`( \n    4,\n)`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'tupleliteral',
+        expressions: [
+          {
+            key: null,
+            value: {
+              kind: 'integerdecimalliteral',
+              value: '4',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('_');
+parser = new Parser(lexer.lex());
+result = subAtom(parser);
+test(
+  String.raw`_`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 1,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'noname',
+        value: '_',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('+/+');
+parser = new Parser(lexer.lex());
+result = subAtom(parser);
+test(
+  String.raw`+/+`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'operator',
+        value: '+/+',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('/regex/');
+parser = new Parser(lexer.lex());
+result = subAtom(parser);
+test(
+  String.raw`/regex/`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 7,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'regexliteral',
+        value: 'regex',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('5.0f');
+parser = new Parser(lexer.lex());
+result = subAtom(parser);
+test(
+  String.raw`5.0f`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'coefficientexpression',
+        coefficient: {
+          kind: 'floatdecimalliteral',
+          value: '5.0',
+        },
+        identifier: {
+          kind: 'identifier',
+          value: 'f',
+        },
+      },
+    },
+  },
+);
+
+print('============== ATOM ==============');
+lexer = new Lexer('{ a - b }.object');
+parser = new Parser(lexer.lex());
+result = atom(parser);
+test(
+  String.raw`{ a - b }.object`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 16,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'cascade',
+        leftExpression: null,
+        rightExpression: {
+          kind: 'identifier',
+          value: 'object',
+        },
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '-',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('{ a - b }.object?');
+parser = new Parser(lexer.lex());
+result = atom(parser);
+test(
+  String.raw`{ a - b }.object?`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 7,
+      column: 17,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'nillable',
+        expression: {
+          kind: 'cascade',
+          leftExpression: null,
+          rightExpression: {
+            kind: 'identifier',
+            value: 'object',
+          },
+          expressions: [
+            {
+              kind: 'identifier',
+              value: 'a',
+            },
+            {
+              kind: 'identifier',
+              value: 'b',
+            },
+          ],
+          operators: [
+            {
+              vectorized: false,
+              operator: {
+                kind: 'operator',
+                value: '-',
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('name.age(4)');
+parser = new Parser(lexer.lex());
+result = atom(parser);
+test(
+  String.raw`name.age(4)`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'call',
+        expression: {
+          kind: 'dot',
+          expression: {
+            kind: 'identifier',
+            value: 'name',
+          },
+          name: {
+            kind: 'identifier',
+            value: 'age',
+          },
+        },
+        mutative: false,
+        vectorized: false,
+        arguments: [
+          {
+            key: null,
+            value: {
+              kind: 'integerdecimalliteral',
+              value: '4',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('name.{ a + b }.foo(  )');
+parser = new Parser(lexer.lex());
+result = atom(parser);
+test(
+  String.raw`name.{ a + b }.foo(  )`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 10,
+      column: 22,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'cascade',
+        leftExpression: {
+          kind: 'identifier',
+          value: 'name',
+        },
+        rightExpression: {
+          kind: 'call',
+          expression: {
+            kind: 'identifier',
+            value: 'foo',
+          },
+          mutative: false,
+          vectorized: false,
+          arguments: [],
+        },
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('23.foo[5]?');
+parser = new Parser(lexer.lex());
+result = atom(parser);
+test(
+  String.raw`23.foo[5]?`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 10,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'nillable',
+        expression: {
+          kind: 'index',
+          arguments: [
+            {
+              index: {
+                kind: 'integerdecimalliteral',
+                value: '5',
+              },
+            },
+          ],
+          expression: {
+            kind: 'dot',
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '23',
+            },
+            name: {
+              kind: 'identifier',
+              value: 'foo',
+            },
+          },
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('foo!(2, 3.,)[4:5:].bar.qux');
+parser = new Parser(lexer.lex());
+result = atom(parser);
+test(
+  String.raw`foo!(2, 3.,)[4:5:].bar.qux`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 17,
+      column: 26,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'dot',
+        expression: {
+          kind: 'dot',
+          expression: {
+            kind: 'index',
+            arguments: [
+              {
+                begin: {
+                  kind: 'integerdecimalliteral',
+                  value: '4',
+                },
+                step: {
+                  kind: 'integerdecimalliteral',
+                  value: '5',
+                },
+                end: null,
+              },
+            ],
+            expression: {
+              kind: 'call',
+              expression: {
+                kind: 'identifier',
+                value: 'foo',
+              },
+              mutative: true,
+              vectorized: false,
+              arguments: [
+                {
+                  key: null,
+                  value: {
+                    kind: 'integerdecimalliteral',
+                    value: '2',
+                  },
+                },
+                {
+                  key: null,
+                  value: {
+                    kind: 'floatdecimalliteral',
+                    value: '3.0',
+                  },
+                },
+              ],
+            },
+          },
+          name: {
+            kind: 'identifier',
+            value: 'bar',
+          },
+        },
+        name: {
+          kind: 'identifier',
+          value: 'qux',
+        },
+      },
+    },
+  },
+);
 
 test();
 
