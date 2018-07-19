@@ -13,27 +13,8 @@ Current Version: 0.1.14
 
 ![astro screenshot](https://github.com/astrolang/astro/blob/ch-implement-packrat-parser-156977411/media/images/astro-syntax.png?raw=true)
 
-### How do I install it?
-If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
-##### _USERS_
-* Install astro by typing ```npm i -g astrolang``` in the terminal.
-* You can start using astro with ```astro -h```.
-
-##### _DEVELOPERS_
-* Clone repository ➡ ```git clone https://github.com/appcypher/astro.git```.
-* Move to astro directory ➡ ```cd astro```.
-* Install necessary dependencies ➡ ```npm i```.
-* Run tests ➡ ```npm run test:compiler```.
-
-### What is Astro?
-Astro is a fun programming language designed for safe _high-performance applications_. It is essentially a statically-typed systems language that
-- encourages rapid prototyping,
-- features high-level abstractions with zero overhead,
-- ensures memory safety without a (tracing) Garbage Collector, and
-- supports data-race-free concurrency.
-
 ### Why create yet another programming language?
-The language creator had a set of requirements (listed above) not met by any language (Rust comes close). Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
+The language creator had a set of requirements (listed above) not met by any language ([Rust](https://en.wikipedia.org/wiki/Rust_(programming_language)) comes close). Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and other proposals for GPU Compute will make the web a desirable HPC target in the near future. Astro is, for this reason, designed for high-performance apps that are expected to run on the server or in the browser.
 
@@ -80,6 +61,25 @@ For now, Astro can compile its source code to ast format. It is not ready for ev
 
 ### Where can I read about the language?
 There is no complete documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](docs/language/summary.ast).
+
+### How do I install it?
+If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
+##### _USERS_
+* Install astro by typing ```npm i -g astrolang``` in the terminal.
+* You can start using astro with ```astro -h```.
+
+##### _DEVELOPERS_
+* Clone repository ➡ ```git clone https://github.com/appcypher/astro.git```.
+* Move to astro directory ➡ ```cd astro```.
+* Install necessary dependencies ➡ ```npm i```.
+* Run tests ➡ ```npm run test:compiler```.
+
+### What is Astro?
+Astro is a fun programming language designed for safe _high-performance applications_. It is essentially a statically-typed systems language that
+- encourages rapid prototyping,
+- features high-level abstractions with zero overhead,
+- ensures memory safety without a (tracing) Garbage Collector, and
+- supports data-race-free concurrency.
 
 ### <a name="tasks"></a> What are the important tasks to complete?
 - [x] ~Improve project structure~
