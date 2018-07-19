@@ -368,8 +368,8 @@ dotnotationpostfix =
   { kind, expression, name }
 
 cascadenotationarguments =
-  | &(identifier) atom nospace '.'? nospace operator nospace (cascadenotationarguments | &(identifier) atom)
-  | &(identifier) atom _ ('.'? nospace operator | keywordoperator) _ (cascadenotationarguments | &(identifier) atom)
+  | &(identifier) atom nospace ('.' nospace)? operator nospace (cascadenotationarguments | &(identifier) atom)
+  | &(identifier) atom _ (('.' nospace)? operator | keywordoperator) _ (cascadenotationarguments | &(identifier) atom)
   { expressions, operators }
 
 cascadenotationpostfix = // Unfurl
@@ -406,14 +406,14 @@ ternaryoperator =
   { kind, condition, truebody, falsebody }
 
 coefficientexpression = // Unfurl
-  | floatbinaryliteral identifier
-  | floatoctalliteral identifier
-  | floatdecimalliteral identifier
-  | integerbinaryliteral identifier
-  | integeroctalliteral identifier
-  | !('§0b' | '§0o' | '§0x') integerdecimalliteral identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
-  | '(' _? simpleexpression _? ')' identifier
-  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' identifier
+  | floatbinaryliteral nospace identifier
+  | floatoctalliteral nospace identifier
+  | floatdecimalliteral nospace identifier
+  | integerbinaryliteral nospace identifier
+  | integeroctalliteral nospace identifier
+  | !('§0b' | '§0o' | '§0x') integerdecimalliteral nospace identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
+  | '(' _? simpleexpression _? ')' nospace identifier
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' nospace identifier
   { kind, coefficient, expression }
 
 returnexpression =
@@ -455,26 +455,25 @@ subatompostfix =
 
 subatom =
   | coefficientexpression
+  | extendednotation
   | '(' _? simpleexpression _? ')'
   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')'
-  | extendednotation
   | literal
   | noname
   | identifier
   | operator
 
 atom =
-  | subatom (subatompostfix (nospace '?')?)* cascadenotationpostfix?
-  | cascadenotationprefix
-  { kind, expression }
+  | subatom subatompostfix* cascadenotationpostfix? (nospace '?')?
+  | cascadenotationprefix (nospace '?')?
 
 /************** TEST 3 ***************/
 prefixatom =
-  | operator atom
+  | operator nospace atom
   { kind, vectorized, operator, expression }
 
 postfixatom =
-  | atom '.'? operator
+  | atom nospace ('.' nospace)? operator
   { kind, vectorized, operator, expression }
 
 prepostfixatom =
@@ -484,19 +483,22 @@ prepostfixatom =
 
 keywordoperator =
   | 'is' _ 'not'
-  | 'in'
   | 'not' _ 'in'
+  | 'in'
   | 'mod'
   | 'is'
-  { kind, name }
+  | 'not'
+  | 'and'
+  | 'or'
+  { kind, value }
 
 infixexpression =
-  | (prefixatom | atom) '.'? operator (infixexpression | prepostfixatom)
-  | prepostfixatom _ ('.'? operator | keywordoperator) _ (infixexpression | prepostfixatom)
+  | (prefixatom | atom) nospace ('.' nospace)? operator nospace (infixexpression | prepostfixatom)
+  | prepostfixatom _ (('.' nospace)? operator | keywordoperator) _ (infixexpression | prepostfixatom)
   { kind, expressions, operators: [{ vectorized, operator }] }
 
 spreadexpression =
-  | '...' atom
+  | '...' nospace atom
   { kind, expression }
 
 range =
@@ -520,7 +522,7 @@ commandnotationargument =
   { arguments: [{ key, value }] }
 
 commandnotation =
-  | !(operator) atom (nopspace '!')? argument
+  | !(operator) atom (nopspace '!')? commandnotationargument
   { kind, expression, mutative, arguments: [{ key, value }] }
 
 primitiveexpression =
@@ -539,7 +541,7 @@ tupleexpression =
   | simpleexpression
 
 dotnotationline =
-  | dotnotationpostfix (nospace '?')? (subatompostfix (nospace '?')?)*
+  | dotnotationpostfix subatompostfix* cascadenotationpostfix? (nospace '?')?
 
 dotnotationblock =
   | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* dedentoreoiend
