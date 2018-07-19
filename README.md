@@ -26,19 +26,18 @@ If you don't have `node` installed already, download and install it [here](https
 * Run tests ➡ ```npm run test:compiler```.
 
 ### What is Astro?
-Astro is a fun programming language designed for safe _high-performance  applications_. It is essentially a
-- statically-typed systems language that
-- compiles to WebAssembly and native code,
-- works without a (tracing) Garbage Collector,
-- easy to get started with, and
-- has built-in support for data-race-free concurrency.
+Astro is a fun programming language designed for safe _high-performance applications_. It is essentially a statically-typed systems language that
+- encourages rapid prototyping,
+- features high-level abstractions with zero overhead,
+- ensures memory safety without a (tracing) Garbage Collector, and
+- supports data-race-free concurrency.
 
 ### Why create yet another programming language?
-The language creator had a set of requirements (listed above) not met by any language. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
+The language creator had a set of requirements (listed above) not met by any language (Rust comes close). Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and other proposals for GPU Compute will make the web a desirable HPC target in the near future. Astro is, for this reason, designed for high-performance apps that are expected to run on the server or in the browser.
 
-As part of targeting the high-performance community, Astro has features that benefit numerical computing environment. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc. It also has no runtime-based [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough for real-time software like games, simulations, kernels, etc.
+As part of targeting the high-performance community, Astro has features that benefit numerical computing environment. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc. It also has no runtime-based [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough for real-time software like games.
 
 In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, structural typing, and several other high-level abstractions that reduce boilerplate code commonly associated with statically-typed languages. It feels like a scripting language for the most part.
 
