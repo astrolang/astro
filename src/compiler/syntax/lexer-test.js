@@ -1187,6 +1187,14 @@ test(
   null,
 );
 
+lexer = new Lexer('5045..');
+result = lexer.floatLiteralNoMantissa();
+test(
+  String.raw`5045..--------->FAIL`,
+  result,
+  null,
+);
+
 lexer = new Lexer('5045.id');
 result = lexer.floatLiteralNoMantissa();
 test(

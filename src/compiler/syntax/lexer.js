@@ -1215,7 +1215,7 @@ class Lexer {
   }
 
   // floatLiteralnomantissa =
-  //   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier)
+  //   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier | '.')
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   floatLiteralNoMantissa() {
     const { lastPosition, column, line } = this;
@@ -1235,8 +1235,10 @@ class Lexer {
         this.eatChar();
         token += '.0';
 
-        // Check !(operator).
-        if (this.operator() || this.identifier()) { token = ''; }
+        // Check !(operator | identifier | '.').
+        // A followup '.' means that this is not a float literal but an integer in a range literal.
+        // Ex. 1..length.
+        if (this.operator() || this.identifier() || this.peekChar() === '.') { token = ''; }
       } else {
         token = '';
       }
