@@ -1543,7 +1543,7 @@ const cascadeNotationArguments = (parser) => {
         result.ast.operators.push({ vectorized, operator: ast[1].ast[1] });
       // Alternative 2 passed.
       } else if (ast[1].alternative === 2) {
-        result.ast.operators.push({ vectorized, operator: ast[1].ast[0] });
+        result.ast.operators.push({ vectorized, operator: ast[1].ast });
       }
 
       // Saving other expressions and operators
@@ -2266,6 +2266,127 @@ const prePostfixAtom = (parser) => {
   return result;
 };
 
+// keywordoperator =
+//   | 'is' _ 'not'
+//   | 'not' _ 'in'
+//   | 'in'
+//   | 'mod'
+//   | 'is'
+//   { kind, value }
+const keywordOperator = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'keywordoperator';
+  const result = {
+    success: false,
+    ast: { kind, value: null },
+  };
+  const parseResult = alt(
+    parse('is', _, 'not'),
+    parse('not', _, 'in'),
+    'in',
+    'mod',
+    'is',
+    'not',
+    'and',
+    'or',
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    if (parseResult.ast.alternative === 1 || parseResult.ast.alternative === 2) {
+      const { ast } = parseResult.ast;
+      result.ast.value = ast[0] + ast[1];
+    } else {
+      result.ast.value = parseResult.ast.ast;
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// infixexpression =
+//   | (prefixatom | atom) nospace ('.' nospace)? operator nospace (infixexpression | prepostfixatom)
+//   | prepostfixatom _ (('.' nospace)? operator | keywordoperator) _ (infixexpression | prepostfixatom)
+//   { kind, expressions, operators: [{ vectorized, operator }] }
+const infixExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'infixexpression';
+  const result = {
+    success: false,
+    ast: { kind, expressions: [], operators: [] },
+  };
+  const parseResult = alt(
+    parse(
+      alt(prefixAtom, atom), noSpace, opt('.', noSpace), operator, noSpace,
+      alt(infixExpression, prePostfixAtom),
+    ),
+    parse(
+      prePostfixAtom, _, alt(parse(opt('.', noSpace), operator), keywordOperator), _,
+      alt(infixExpression, prePostfixAtom),
+    ),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    const { ast } = parseResult.ast;
+
+    // Alternative 1 passed.
+    if (parseResult.ast.alternative === 1) {
+      // Save first expression
+      result.ast.expressions.push(ast[0].ast);
+
+      // Save first operator
+      const vectorized = ast[1].length > 0;
+      result.ast.operators.push({ vectorized, operator: ast[2] });
+
+      // Saving other expressions and operators
+      // Alternative 1 passed.
+      if (ast[3].alternative === 1) {
+        result.ast.expressions = result.ast.expressions.concat(ast[3].ast.expressions);
+        result.ast.operators = result.ast.operators.concat(ast[3].ast.operators);
+      // Alternative 2 passed.
+      } else if (ast[3].alternative === 2) {
+        result.ast.expressions.push(ast[3].ast);
+      }
+    // Alternative 2 passed.
+    } else if (parseResult.ast.alternative === 2) {
+      // Save first expression
+      result.ast.expressions.push(ast[0]);
+      let vectorized = false;
+
+      // Saving the first operator.
+      // Alternative 1 passed.
+      if (ast[1].alternative === 1) {
+        vectorized = ast[1].ast[0].length > 0;
+        result.ast.operators.push({ vectorized, operator: ast[1].ast[1] });
+      // Alternative 2 passed.
+      } else if (ast[1].alternative === 2) {
+        result.ast.operators.push({ vectorized, operator: ast[1].ast });
+      }
+
+      // Saving other expressions and operators
+      // Alternative 1 passed.
+      if (ast[2].alternative === 1) {
+        result.ast.expressions = result.ast.expressions.concat(ast[2].ast.expressions);
+        result.ast.operators = result.ast.operators.concat(ast[2].ast.operators);
+      // Alternative 2 passed.
+      } else if (ast[2].alternative === 2) {
+        result.ast.expressions.push(ast[2].ast);
+      }
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2350,5 +2471,6 @@ module.exports = {
   prefixAtom,
   postfixAtom,
   prePostfixAtom,
-  // infixExpression,
+  keywordOperator,
+  infixExpression,
 };
