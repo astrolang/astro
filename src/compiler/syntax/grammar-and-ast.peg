@@ -498,11 +498,11 @@ infixexpression =
   { kind, expressions, operators: [{ vectorized, operator }] }
 
 spreadexpression =
-  | '...' nospace atom
+  | '.' nospace '.' nospace '.' nospace atom nospace atom
   { kind, expression }
 
 range =
-  | (infixexpression | prepostfixatom)? nospace '..' (infixexpression | prepostfixatom) nospace '..')? nospace (infixexpression | prepostfixatom)
+  | (infixexpression | prepostfixatom)? nospace '.' nospace '.' (infixexpression | prepostfixatom) nospace '..')? nospace (infixexpression | prepostfixatom)
   { kind, begin, step, end }
 
 commandnotationargument =
