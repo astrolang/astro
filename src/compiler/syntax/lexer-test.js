@@ -1040,6 +1040,14 @@ test(
   null,
 );
 
+lexer = new Lexer('..7236_5490');
+result = lexer.floatDecimalLiteral();
+test(
+  String.raw`..7236_5490--------->FAIL`,
+  result,
+  null,
+);
+
 lexer = new Lexer('4391_1523.5545g1810');
 result = lexer.floatDecimalLiteral();
 test(

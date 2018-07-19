@@ -1068,14 +1068,22 @@ class Lexer {
       token += integerPart.token;
     }
 
-    // Consume '.'.
+    // Consume  [^.]  '.'.
     if (this.peekChar() === '.') {
       if (!integerPart) token += '0';
 
       token += this.eatChar();
 
+      // Check for [^.] '.'.
+      // A preceding '.' means that this is not a float literal but an integer in a range literal.
+      // Ex. a..1000.
+      let precedingDot = false;
+      if (this.lastPosition > 0 && this.code[this.lastPosition - 1] === '.') {
+        precedingDot = true;
+      }
+
       // Consume digitdecimal.
-      if (this.digitDecimal.indexOf(this.peekChar()) > -1) {
+      if (this.digitDecimal.indexOf(this.peekChar()) > -1 && !precedingDot) {
         token += this.eatChar();
 
         // Consume ('_'? digitdecimal)*.
@@ -1236,7 +1244,7 @@ class Lexer {
         token += '.0';
 
         // Check !(operator | identifier | '.').
-        // A followup '.' means that this is not a float literal but an integer in a range literal.
+        // A follow-up '.' means that this is not a float literal but an integer in a range literal.
         // Ex. 1..length.
         if (this.operator() || this.identifier() || this.peekChar() === '.') { token = ''; }
       } else {
