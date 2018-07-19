@@ -818,7 +818,7 @@ const lineContinuation = (parser) => {
   const result = { success: false, directive: true };
   const parseResult = parse(
     opt(spaces),
-    '.', '.', '.',
+    '.', noSpace, '.', noSpace, '.',
     opt(spaces),
     nextline,
     samedent,
@@ -2412,6 +2412,38 @@ const spreadExpression = (parser) => {
   return result;
 };
 
+// range =
+//   | prepostfixatom (nospace '.' nospace '.' nospace | _ '.' nospace '.' _) (prepostfixatom (nospace '.' nospace '.' nospace | _ '.' nospace '.' _))? prepostfixatom
+//   { kind, begin, step, end }
+const range = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'range';
+  const result = {
+    success: false,
+    ast: {
+      kind, begin: null, step: null, end: null,
+    },
+  };
+  const parseResult = parse(
+    prePostfixAtom,
+    alt(parse(noSpace, '.', noSpace, '.', noSpace), parse(_, '.', noSpace, '.', _)),
+    opt(prePostfixAtom, alt(parse(noSpace, '.', noSpace, '.', noSpace), parse(_, '.', noSpace, '.', _))),
+    noSpace, prePostfixAtom,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast.begin = parseResult.ast[0];
+    if (parseResult.ast[2].length > 0) result.ast.step = parseResult.ast[2][0];
+    result.ast.end = parseResult.ast[3] || null;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2500,7 +2532,7 @@ module.exports = {
   keywordOperator,
   infixExpression,
   spreadExpression,
-  // range,
+  range,
   // commandnotationargument,
   // commandnotation,
   // primitiveexpression,

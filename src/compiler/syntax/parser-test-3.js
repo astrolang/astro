@@ -8,7 +8,7 @@ const {
   keywordOperator,
   infixExpression,
   spreadExpression,
-  // range,
+  range,
   // commandnotationargument,
   // commandnotation,
   // primitiveexpression,
@@ -1000,6 +1000,182 @@ test(
       ast: {
         kind: 'spreadexpression',
         expression: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+print('============== RANGE ==============');
+lexer = new Lexer('1.. 10');
+parser = new Parser(lexer.lex());
+result = range(parser);
+test(
+  String.raw`1.. 10--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'range',
+        begin: null,
+        step: null,
+        end: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('12..name..(2)');
+parser = new Parser(lexer.lex());
+result = range(parser);
+test(
+  String.raw`12..name..(2)`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'range',
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '12',
+        },
+        step: {
+          kind: 'identifier',
+          value: 'name',
+        },
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '2',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('12..5_000');
+parser = new Parser(lexer.lex());
+result = range(parser);
+test(
+  String.raw`12..5_000`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 9,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'range',
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '12',
+        },
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '5000',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('a..name');
+parser = new Parser(lexer.lex());
+result = range(parser);
+test(
+  String.raw`a..name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 7,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'range',
+        begin: {
+          kind: 'identifier',
+          value: 'a',
+        },
+        step: null,
+        end: {
+          kind: 'identifier',
+          value: 'name',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('20 .. 50..1');
+parser = new Parser(lexer.lex());
+result = range(parser);
+test(
+  String.raw`20 .. 50..1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'range',
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '20',
+        },
+        step: {
+          kind: 'integerdecimalliteral',
+          value: '50',
+        },
+        end: {
           kind: 'integerdecimalliteral',
           value: '1',
         },
