@@ -253,7 +253,7 @@ nextline =
   | newline (spaces? newline)*
 
 linecontinuation =
-  | spaces? '.' '.' '.' spaces? nextline samedent
+  | spaces? '.' nospace '.' nospace '.' spaces? nextline samedent
 
 _ =
   | linecontinuation
@@ -502,7 +502,7 @@ spreadexpression =
   { kind, expression }
 
 range =
-  | (infixexpression | prepostfixatom)? nospace '.' nospace '.' (infixexpression | prepostfixatom) nospace '..')? nospace (infixexpression | prepostfixatom)
+  | prepostfixatom? (nospace '.' nospace '.' nospace | _ '.' nospace '.' _) (prepostfixatom (nospace '.' nospace '.' nospace | _ '.' nospace '.' _))? prepostfixatom
   { kind, begin, step, end }
 
 commandnotationargument =

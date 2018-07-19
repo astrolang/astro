@@ -2426,6 +2426,32 @@ test(
 );
 
 print('============== LINECONTINUATION ==============');
+lexer = new Lexer('  . . .\n');
+parser = new Parser(lexer.lex());
+result = lineContinuation(parser);
+test(
+  String.raw`  . . .\n`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      line: parser.line,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      line: 1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      directive: true,
+    },
+  },
+);
+
 lexer = new Lexer('  ...');
 parser = new Parser(lexer.lex());
 result = lineContinuation(parser);
