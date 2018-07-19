@@ -41,12 +41,6 @@ fun times(a, b):
 
 Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets. Astro has built-in facilities for writing concurrent programs. A [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
 
-
-### Why not just use exactly Python syntax or be compatible with Python?
-Python is a really dynamic programming language and there have been several attempts in the past to compile it AOT to native code. We don't want to reinvent the wheel as there are lessons to learn from old wheels. Python cannot be fully-inferred at compile-time without performance trade-offs.
-
-More importantly Astro introduces some concepts that Python doesn't have and probably never will.
-
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
 Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting) (ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
