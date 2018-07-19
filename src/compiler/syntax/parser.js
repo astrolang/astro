@@ -2387,6 +2387,31 @@ const infixExpression = (parser) => {
   return result;
 };
 
+// spreadexpression =
+//   | '.' nospace '.' nospace '.' nospace atom
+//   { kind, expression }
+const spreadExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'spreadexpression';
+  const result = {
+    success: false,
+    ast: {
+      kind, expression: null,
+    },
+  };
+  const parseResult = parse('.', noSpace, '.', noSpace, '.', noSpace, atom)(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast.expression = parseResult.ast[3];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2398,6 +2423,7 @@ module.exports = {
   not,
   eoi,
   identifier,
+  noName,
   operator,
   punctuator,
   integerBinaryLiteral,
@@ -2473,4 +2499,15 @@ module.exports = {
   prePostfixAtom,
   keywordOperator,
   infixExpression,
+  spreadExpression,
+  // range,
+  // commandnotationargument,
+  // commandnotation,
+  // primitiveexpression,
+  // simpleexpression,
+  // tupleexpression,
+  // dotnotationline,
+  // dotnotationblock,
+  // subexpression,
+  // expression,
 };

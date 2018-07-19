@@ -7,6 +7,17 @@ const {
   prePostfixAtom,
   keywordOperator,
   infixExpression,
+  spreadExpression,
+  // range,
+  // commandnotationargument,
+  // commandnotation,
+  // primitiveexpression,
+  // simpleexpression,
+  // tupleexpression,
+  // dotnotationline,
+  // dotnotationblock,
+  // subexpression,
+  // expression,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -904,6 +915,94 @@ test(
             },
           },
         ],
+      },
+    },
+  },
+);
+
+print('============== SPREADEXPRESSION ==============');
+lexer = new Lexer('... name');
+parser = new Parser(lexer.lex());
+result = spreadExpression(parser);
+test(
+  String.raw`... name--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'spreadexpression',
+        expression: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('...name');
+parser = new Parser(lexer.lex());
+result = spreadExpression(parser);
+test(
+  String.raw`...name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 7,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'spreadexpression',
+        expression: {
+          kind: 'identifier',
+          value: 'name',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('...(1)');
+parser = new Parser(lexer.lex());
+result = spreadExpression(parser);
+test(
+  String.raw`...(1)`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 6,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'spreadexpression',
+        expression: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
       },
     },
   },
