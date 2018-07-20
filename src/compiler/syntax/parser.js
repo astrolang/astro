@@ -953,9 +953,9 @@ const comma = (parser) => {
 };
 
 // listarguments =
-//   | primitiveexpression (comma primitiveexpression)* comma?
+//   | simpleexpression (comma simpleexpression)* comma?
 //   { expressions }
-// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 // TODO: Add more tests with diverse expressions.
 const listArguments = (parser) => {
   const { tokenPosition } = parser;
@@ -1070,11 +1070,11 @@ const listLiteral = (parser) => {
 };
 
 // dictargument =
-//   | primitiveexpression _? ':' nextcodeline indent dictarguments nextcodeline dedent !comma
-//   | primitiveexpression _? ':' _? primitiveexpression &(comma | _? '}' | nextcodeline dedent)
+//   | simpleexpression _? ':' nextcodeline indent dictarguments nextcodeline dedent !comma
+//   | simpleexpression _? ':' _? simpleexpression &(comma | _? '}' | nextcodeline dedent)
 //   | identifier &(comma | _? '}' | nextcodeline dedent)
 //   { key, value }
-// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 // TODO: Add more tests with diverse expressions.
 const dictArgument = (parser) => {
   const { tokenPosition } = parser;
@@ -1189,10 +1189,10 @@ const dictLiteral = (parser) => {
 };
 
 // tuplearguments =
-//   | (identifier _? ':' _?)? primitiveexpression (comma (identifier _? ':' _?)? primitiveexpression)+ comma?
-//   | primitiveexpression comma
+//   | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)+ comma?
+//   | simpleexpression comma
 //   { expressions }
-// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 // TODO: Add more tests with diverse expressions.
 const tupleArguments = (parser) => {
   const { tokenPosition } = parser;
@@ -1315,18 +1315,18 @@ const symbolLiteral = (parser) => {
 };
 
 // comprehensionhead =
-//   | lhspattern _ 'in' _ primitiveexpression
+//   | lhspattern _ 'in' _ simpleexpression
 
 // generatorcomprehension =
-//   | '(' _? primitiveexpression _? '|' _? comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)?  _? ')'
+//   | '(' _? simpleexpression _? '|' _? comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)?  _? ')'
 //   { kind, expression, iterators:[{ lhs, rhs}], guard }
 
 // listcomprehension =
-//   | '[' _? primitiveexpression _? '|' _? comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? ']'
+//   | '[' _? simpleexpression _? '|' _? comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? ']'
 //   { kind, expression, iterators:[{ lhs, rhs}], guard }
 
 // dictcomprehension =
-//   | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) _? '|' _? comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? '}'
+//   | '{' _? (simpleexpression _? ':' _? simpleexpression | identifier) _? '|' _? comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? '}'
 //   { kind, key, value, iterators:[{ lhs, rhs}], guard }
 
 // comprehension =
@@ -1374,9 +1374,9 @@ const literal = (parser) => {
 };
 
 // callarguments =
-//   | (identifier _? ':' _?)? primitiveexpression (comma (identifier _? ':' _?)? primitiveexpression)* comma?
+//   | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)* comma?
 //   { expressions: [{ key, value }] }
-// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 const callArguments = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'callarguments';
@@ -1639,10 +1639,10 @@ const cascadeNotationPrefix = (parser) => {
 };
 
 // indexargument =
-//   | (primitiveexpression _?)? ':' (_? primitiveexpression? _? ':')? _? primitiveexpression?
-//   | primitiveexpression
+//   | (simpleexpression _?)? ':' (_? simpleexpression? _? ':')? _? simpleexpression?
+//   | simpleexpression
 //   { begin, step, end } | { index }
-// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 const indexArgument = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'indexargument';
@@ -1791,9 +1791,10 @@ const extendedNotation = (parser) => {
 };
 
 // ternaryoperator =
-//   | '(' _? primitiveexpression _? ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
-//   | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+//   | '(' _? simpleexpression _? ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+//   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
 //   { kind, condition, truebody, falsebody }
+// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 // TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
 const ternaryOperator = (parser) => {
   const { tokenPosition } = parser;
@@ -2444,6 +2445,92 @@ const range = (parser) => {
   return result;
 };
 
+// commandnotationargument =
+//   | _
+//     &(
+//       comprehension |
+//       lambdaexpression |
+//       ternaryoperator |
+//       range |
+//       stringliteral |
+//       identifier |
+//       symbolliteral |
+//       numericliteral |
+//       regexliteral
+//     )
+//     simpleexpression
+//   { argument }
+// TODO: Refactor: Change atom to simpleexpression and write tests for it.
+// TODO: Refactor: Uncomment the commented out expressions and write tests for them.
+const commandNotationArgument = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'commandnotationargument';
+  const result = {
+    success: false,
+    ast: {
+      kind, argument: null,
+    },
+  };
+  const parseResult = parse(
+    _,
+    and(alt(
+      // comprehension,
+      // lambdaExpression,
+      ternaryOperator,
+      range,
+      stringLiteral,
+      identifier,
+      symbolLiteral,
+      numericLiteral,
+      regexLiteral,
+    )),
+    atom,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast.argument = parseResult.ast[0];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// commandnotation =
+//   | !(operator | numericliteral) atom (nopspace '!')? commandnotationargument
+//   { kind, expression, mutative, vectorized, arguments: [{ key, value }] }
+const commandNotation = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'commandnotationargument';
+  const result = {
+    success: false,
+    ast: {
+      kind, expression: null, mutative: false, vectorized: false, arguments: [],
+    },
+  };
+  const parseResult = parse(
+    not(alt(operator, numericLiteral)),
+    atom,
+    opt(noSpace, '!'),
+    commandNotationArgument,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast.kind = 'call';
+    result.ast.expression = parseResult.ast[0];
+    result.ast.mutative = parseResult.ast[1].length > 0;
+    result.ast.arguments = [{ key: null, value: parseResult.ast[2].argument }];
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2533,13 +2620,13 @@ module.exports = {
   infixExpression,
   spreadExpression,
   range,
-  // commandnotationargument,
-  // commandnotation,
-  // primitiveexpression,
-  // simpleexpression,
-  // tupleexpression,
-  // dotnotationline,
-  // dotnotationblock,
-  // subexpression,
+  commandNotationArgument,
+  commandNotation,
+  // primitiveExpression,
+  // simpleExpression,
+  // tupleExpression,
+  // dotNotationLine,
+  // dotNotationBlock,
+  // subExpression,
   // expression,
 };

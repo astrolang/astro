@@ -9,14 +9,14 @@ const {
   infixExpression,
   spreadExpression,
   range,
-  // commandnotationargument,
-  // commandnotation,
-  // primitiveexpression,
-  // simpleexpression,
-  // tupleexpression,
-  // dotnotationline,
-  // dotnotationblock,
-  // subexpression,
+  commandNotationArgument,
+  commandNotation,
+  // primitiveExpression,
+  // simpleExpression,
+  // tupleExpression,
+  // dotNotationLine,
+  // dotNotationBlock,
+  // subExpression,
   // expression,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
@@ -1179,6 +1179,280 @@ test(
           kind: 'integerdecimalliteral',
           value: '1',
         },
+      },
+    },
+  },
+);
+
+print('============== COMMANDNOTATIONARGUMENT ==============');
+lexer = new Lexer(' [1, 2]');
+parser = new Parser(lexer.lex());
+result = commandNotationArgument(parser);
+test(
+  String.raw` [1, 2]--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'commandnotationargument',
+        argument: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('2_000');
+parser = new Parser(lexer.lex());
+result = commandNotationArgument(parser);
+test(
+  String.raw`2_000--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'commandnotationargument',
+        argument: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer(' 2_000');
+parser = new Parser(lexer.lex());
+result = commandNotationArgument(parser);
+test(
+  String.raw` 2_000`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 6,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'commandnotationargument',
+        argument: {
+          kind: 'integerdecimalliteral',
+          value: '2000',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer(' /hello/.meta');
+parser = new Parser(lexer.lex());
+result = commandNotationArgument(parser);
+test(
+  String.raw` /hello/.meta`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'commandnotationargument',
+        argument: {
+          kind: 'dot',
+          expression: {
+            kind: 'regexliteral',
+            value: 'hello',
+          },
+          name: {
+            kind: 'identifier',
+            value: 'meta',
+          },
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer(' ${ 2 }.meta');
+parser = new Parser(lexer.lex());
+result = commandNotationArgument(parser);
+test(
+  ' ${ 2 }.meta',
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 12,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'commandnotationargument',
+        argument: {
+          kind: 'dot',
+          expression: {
+            kind: 'symbolliteral',
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '2',
+            },
+          },
+          name: {
+            kind: 'identifier',
+            value: 'meta',
+          },
+        },
+      },
+    },
+  },
+);
+
+print('============== COMMANDNOTATION ==============');
+lexer = new Lexer('foo /  hello/.bar()');
+parser = new Parser(lexer.lex());
+result = commandNotation(parser);
+test(
+  String.raw`foo /  hello/.bar()`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 19,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'call',
+        expression: {
+          kind: 'identifier',
+          value: 'foo',
+        },
+        mutative: false,
+        vectorized: false,
+        arguments: [
+          {
+            key: null,
+            value: {
+              kind: 'call',
+              expression: {
+                kind: 'dot',
+                expression: {
+                  kind: 'regexliteral',
+                  value: '  hello',
+                },
+                name: {
+                  kind: 'identifier',
+                  value: 'bar',
+                },
+              },
+              mutative: false,
+              vectorized: false,
+              arguments: [],
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('$id! 0b1001.01.bar()');
+parser = new Parser(lexer.lex());
+result = commandNotation(parser);
+test(
+  String.raw`$id! 0b1001.01.bar()`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 7,
+      column: 20,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'call',
+        expression: {
+          kind: 'symbolliteral',
+          expression: {
+            kind: 'identifier',
+            value: 'id',
+          },
+        },
+        mutative: true,
+        vectorized: false,
+        arguments: [
+          {
+            key: null,
+            value: {
+              kind: 'call',
+              expression: {
+                kind: 'dot',
+                expression: {
+                  kind: 'floatbinaryliteral',
+                  value: '1001.01',
+                },
+                name: {
+                  kind: 'identifier',
+                  value: 'bar',
+                },
+              },
+              mutative: false,
+              vectorized: false,
+              arguments: [],
+            },
+          },
+        ],
       },
     },
   },

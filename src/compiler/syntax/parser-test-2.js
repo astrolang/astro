@@ -2211,7 +2211,6 @@ test(
   },
 );
 
-
 lexer = new Lexer('${.357}');
 parser = new Parser(lexer.lex());
 result = symbolLiteral(parser);
