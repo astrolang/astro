@@ -2591,6 +2591,38 @@ const simpleExpression = (parser) => {
   return result;
 };
 
+
+// tupleexpression =
+//   | simpleexpression (comma simpleexpression)*
+//   { kind, expressions }
+const tupleExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'tupleexpression';
+  const result = {
+    success: false,
+    ast: { kind, expressions: [] },
+  };
+  const parseResult = parse(simpleExpression, optmore(comma, simpleExpression))(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Get first simplexpression.
+    result.ast.expressions.push(parseResult.ast[0]);
+
+    // Get the rest
+    for (let i = 0; i < parseResult.ast[1].length; i += 1) {
+      result.ast.expressions.push(parseResult.ast[1][i][0]);
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+
 module.exports = {
   Parser,
   parse,
@@ -2684,7 +2716,7 @@ module.exports = {
   commandNotation,
   primitiveExpression,
   simpleExpression,
-  // tupleExpression,
+  tupleExpression,
   // dotNotationLine,
   // dotNotationBlock,
   // subExpression,

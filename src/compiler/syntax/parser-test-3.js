@@ -13,7 +13,7 @@ const {
   commandNotation,
   primitiveExpression,
   simpleExpression,
-  // tupleExpression,
+  tupleExpression,
   // dotNotationLine,
   // dotNotationBlock,
   // subExpression,
@@ -1537,7 +1537,7 @@ test(
 
 lexer = new Lexer('1 .. -2 .. 55');
 parser = new Parser(lexer.lex());
-result = range(parser);
+result = primitiveExpression(parser);
 test(
   String.raw`1 .. -2 .. 55`,
   {
@@ -1732,6 +1732,169 @@ test(
           kind: 'integerdecimalliteral',
           value: '7',
         },
+      },
+    },
+  },
+);
+
+print('============== TUPLEEXPRESSION ==============');
+lexer = new Lexer('1 + 2,');
+parser = new Parser(lexer.lex());
+result = tupleExpression(parser);
+test(
+  String.raw`1 + 2,--------->MID`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'tupleexpression',
+        expressions: [
+          {
+            kind: 'infixexpression',
+            expressions: [
+              {
+                kind: 'integerdecimalliteral',
+                value: '1',
+              },
+              {
+                kind: 'integerdecimalliteral',
+                value: '2',
+              },
+            ],
+            operators: [
+              {
+                vectorized: false,
+                operator: {
+                  kind: 'operator',
+                  value: '+',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('1 + 2, \n(2) ? 4 || 5_000');
+parser = new Parser(lexer.lex());
+result = tupleExpression(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 11,
+      column: 24,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'tupleexpression',
+        expressions: [
+          {
+            kind: 'infixexpression',
+            expressions: [
+              {
+                kind: 'integerdecimalliteral',
+                value: '1',
+              },
+              {
+                kind: 'integerdecimalliteral',
+                value: '2',
+              },
+            ],
+            operators: [
+              {
+                vectorized: false,
+                operator: {
+                  kind: 'operator',
+                  value: '+',
+                },
+              },
+            ],
+          },
+          {
+            kind: 'ternaryoperator',
+            condition: {
+              kind: 'integerdecimalliteral',
+              value: '2',
+            },
+            truebody: {
+              kind: 'integerdecimalliteral',
+              value: '4',
+            },
+            falsebody: {
+              kind: 'integerdecimalliteral',
+              value: '5000',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('1..2, ...3');
+parser = new Parser(lexer.lex());
+result = tupleExpression(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 10,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'tupleexpression',
+        expressions: [
+          {
+            kind: 'range',
+            begin: {
+              kind: 'integerdecimalliteral',
+              value: '1',
+            },
+            step: null,
+            end: {
+              kind: 'integerdecimalliteral',
+              value: '2',
+            },
+          },
+          {
+            kind: 'spreadexpression',
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '3',
+            },
+          },
+        ],
       },
     },
   },
