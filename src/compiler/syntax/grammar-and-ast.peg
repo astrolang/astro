@@ -538,8 +538,8 @@ simpleexpression =
   | primitiveexpression
 
 tupleexpression =
-  | simpleexpression (comma simpleexpression)+ comma?
-  | simpleexpression
+  | simpleexpression (comma simpleexpression)*
+  { kind, expressions }
 
 dotnotationline =
   | dotnotationpostfix subatompostfix* cascadenotationpostfix? (nospace '?')?
