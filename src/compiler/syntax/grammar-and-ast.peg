@@ -275,7 +275,7 @@ comma =
   | _? ',' _? (nextline samedent)?
 
 listarguments =
-  | primitiveexpression (comma primitiveexpression)* comma?
+  | simpleexpression (comma simpleexpression)* comma?
   { expressions }
 
 listargumentsmultiple =
@@ -290,8 +290,8 @@ listliteral =
   { kind, transposed, expressions }
 
 dictargument =
-  | primitiveexpression _? ':' nextcodeline indent dictarguments nextcodeline dedent !comma
-  | primitiveexpression _? ':' _? primitiveexpression &(comma | _? '}' | nextcodeline dedent)
+  | simpleexpression _? ':' nextcodeline indent dictarguments nextcodeline dedent !comma
+  | simpleexpression _? ':' _? simpleexpression &(comma | _? '}' | nextcodeline dedent)
   | identifier &(comma | _? '}' | nextcodeline dedent)
   { key, value }
 
@@ -306,8 +306,8 @@ dictliteral =
   { kind, expressions: [{ key, value }] }
 
 tuplearguments =
-  | (identifier _? ':' _?)? primitiveexpression (comma (identifier _? ':' _?)? primitiveexpression)+ comma?
-  | primitiveexpression comma
+  | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)+ comma?
+  | simpleexpression comma
   { expressions }
 
 tupleliteral =
@@ -323,18 +323,18 @@ symbolliteral =
   { kind, expression }
 
 comprehensionhead =
-  | lhspattern _ 'in' _ primitiveexpression
+  | lhspattern _ 'in' _ simpleexpression
 
 generatorcomprehension =
-  | '(' _? primitiveexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)?  _? ')'
+  | '(' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)?  _? ')'
   { kind, expression, iterators:[{ lhs, rhs }], guard }
 
 listcomprehension =
-  | '[' _? primitiveexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? ']'
+  | '[' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? ']'
   { kind, expression, iterators:[{ lhs, rhs }], guard }
 
 dictcomprehension =
-  | '{' _? (primitiveexpression _? ':' _? primitiveexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ primitiveexpression)? _? '}'
+  | '{' _? (simpleexpression _? ':' _? simpleexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? '}'
   { kind, key, value, iterators:[{ lhs, rhs }], guard }
 
 comprehension =
@@ -354,7 +354,7 @@ literal =
   | comprehension
 
 callarguments =
-  | (identifier _? ':' _?)? primitiveexpression (comma (identifier _? ':' _?)? primitiveexpression)* comma?
+  | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)* comma?
   { expressions: [{ key, value }] }
 
 callpostfix =
@@ -381,8 +381,8 @@ cascadenotationprefix = // Unfurl
   { kind, leftexpression, rightexpression, expressions, operators }
 
 indexargument =
-  | (primitiveexpression _?)? ':' (_? primitiveexpression? _? ':')? _? primitiveexpression?
-  | primitiveexpression
+  | (simpleexpression _?)? ':' (_? simpleexpression? _? ':')? _? simpleexpression?
+  | simpleexpression
   { begin, step, end } | { index }
 
 indexarguments =
@@ -401,8 +401,8 @@ extendednotation
   { kind, expression }
 
 ternaryoperator =
-  | '(' _? primitiveexpression _? ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
-  | '(' nextcodeline indent primitiveexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
+  | '(' _? simpleexpression _? ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
   { kind, condition, truebody, falsebody }
 
 coefficientexpression = // Unfurl
@@ -518,16 +518,17 @@ commandnotationargument =
       numericliteral |
       regexliteral
     )
-    primitiveexpression
-  { arguments: [{ key, value }] }
+    simpleexpression
+  { argument }
 
 commandnotation =
-  | !(operator) atom (nopspace '!')? commandnotationargument
-  { kind, expression, mutative, arguments: [{ key, value }] }
+  | !(operator | numericliteral) atom (nopspace '!')? commandnotationargument
+  { kind, expression, mutative, vectorized, arguments: [{ key, value }] }
 
 primitiveexpression =
   | spreadexpression
   | range
+  | lambdaexpression
   | infixexpression
   | commandnotation
   | prepostfixatom
@@ -611,7 +612,7 @@ lhspattern =
   { destructuretype, arguments }
 
 guard =
-  | _ 'where' _ primitiveexpression
+  | _ 'where' _ simpleexpression
   { condition }
 
 declarationassignmentoperator =
@@ -623,7 +624,7 @@ ifheaddeclaration =
   { immutable, lhs, value }
 
 ifhead =
-  | (ifheaddeclaration | primitiveexpression) guard?
+  | (ifheaddeclaration | simpleexpression) guard?
   { head, guard }
 
 ifexpression =
@@ -691,7 +692,7 @@ loopexpressionsecondinline =
   { kind, body, endbody }
 
 forhead =
-  | ('var' _)? lhspattern _ 'in' _ primitiveexpression (_ 'where' _ primitiveexpression)?
+  | ('var' _)? lhspattern _ 'in' _ simpleexpression (_ 'where' _ simpleexpression)?
   { immutable, lhs, value, guard }
 
 forexpression =
@@ -709,9 +710,9 @@ tryexpression =
   | 'try' _? ':' _? subexpressionnoblock _ exceptexpressionsecondinline
   | 'try' _? ':' _? subexpressionsecondinline nextcodeline samedent exceptexpression+ ensureexpression?
   | 'try' _? ':' block exceptexpression+ ensureexpression?
-  | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' _? subexpressionnoblock exceptexpressionsecondinline
-  | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' _? subexpressionsecondinline (_? exceptexpression)+ (_? ensureexpression)?
-  | 'try' _ ('var' _)? lhspattern (_ '=' _ primitiveexpression | '=' !(operator) primitiveexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ simpleexpression | '=' !(operator) simpleexpression) ':' _? subexpressionnoblock exceptexpressionsecondinline
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ simpleexpression | '=' !(operator) simpleexpression) ':' _? subexpressionsecondinline (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ simpleexpression | '=' !(operator) simpleexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
 
 ensureexpression =
   | 'ensure' _? ':' _? subexpressionsecondinline
@@ -726,7 +727,7 @@ exceptexpressionsecondinline =
   | 'except' _ identifier _? ':' block
 
 matchargument
-  | identifier _? ':' _? primitiveexpression
+  | identifier _? ':' _? simpleexpression
   | noname
   | identifier
   | '...' identifier?
@@ -989,7 +990,7 @@ abstsubtypedeclaration = // Also secondinline
   { kind, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, subtypes }
 
 functionparameter =
-  | identifier ('.' lhspattern?)? _? ':' _? primitiveexpression
+  | identifier ('.' lhspattern?)? _? ':' _? simpleexpression
   | lhspattern
   | identifier
 
