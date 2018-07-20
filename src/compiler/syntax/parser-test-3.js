@@ -11,8 +11,8 @@ const {
   range,
   commandNotationArgument,
   commandNotation,
-  // primitiveExpression,
-  // simpleExpression,
+  primitiveExpression,
+  simpleExpression,
   // tupleExpression,
   // dotNotationLine,
   // dotNotationBlock,
@@ -1184,6 +1184,52 @@ test(
   },
 );
 
+lexer = new Lexer('1 .. -2 .. 55');
+parser = new Parser(lexer.lex());
+result = range(parser);
+test(
+  String.raw`1 .. -2 .. 55`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 7,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'range',
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+        step: {
+          kind: 'prefixatom',
+          vectorized: false,
+          operator: {
+            kind: 'operator',
+            value: '-',
+          },
+          expression: {
+            kind: 'integerdecimalliteral',
+            value: '2',
+          },
+        },
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '55',
+        },
+      },
+    },
+  },
+);
+
 print('============== COMMANDNOTATIONARGUMENT ==============');
 lexer = new Lexer(' [1, 2]');
 parser = new Parser(lexer.lex());
@@ -1453,6 +1499,239 @@ test(
             },
           },
         ],
+      },
+    },
+  },
+);
+
+print('============== PRIMITIVEEXPRESSION ==============');
+lexer = new Lexer('...0xFFEEFF.FFp-3');
+parser = new Parser(lexer.lex());
+result = primitiveExpression(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 17,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'spreadexpression',
+        expression: {
+          kind: 'floathexadecimalliteral',
+          value: 'FFEEFF.FFp-3',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('1 .. -2 .. 55');
+parser = new Parser(lexer.lex());
+result = range(parser);
+test(
+  String.raw`1 .. -2 .. 55`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 7,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'range',
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+        step: {
+          kind: 'prefixatom',
+          vectorized: false,
+          operator: {
+            kind: 'operator',
+            value: '-',
+          },
+          expression: {
+            kind: 'integerdecimalliteral',
+            value: '2',
+          },
+        },
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '55',
+        },
+      },
+    },
+  },
+);
+
+
+lexer = new Lexer('500 / 2');
+parser = new Parser(lexer.lex());
+result = primitiveExpression(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 7,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'infixexpression',
+        expressions: [
+          {
+            kind: 'integerdecimalliteral',
+            value: '500',
+          },
+          {
+            kind: 'integerdecimalliteral',
+            value: '2',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '/',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('foo! bar');
+parser = new Parser(lexer.lex());
+result = primitiveExpression(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 8,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'call',
+        expression: {
+          kind: 'identifier',
+          value: 'foo',
+        },
+        mutative: true,
+        vectorized: false,
+        arguments: [
+          {
+            key: null,
+            value: {
+              kind: 'identifier',
+              value: 'bar',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== SIMPLEEXPRESSION ==============');
+lexer = new Lexer('...0xFFEEFF.FFp-3');
+parser = new Parser(lexer.lex());
+result = simpleExpression(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 17,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'spreadexpression',
+        expression: {
+          kind: 'floathexadecimalliteral',
+          value: 'FFEEFF.FFp-3',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('(2) ? 4 || 7');
+parser = new Parser(lexer.lex());
+result = simpleExpression(parser);
+test(
+  String.raw`(2) ? 4 || 7`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 12,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'ternaryoperator',
+        condition: {
+          kind: 'integerdecimalliteral',
+          value: '2',
+        },
+        truebody: {
+          kind: 'integerdecimalliteral',
+          value: '4',
+        },
+        falsebody: {
+          kind: 'integerdecimalliteral',
+          value: '7',
+        },
       },
     },
   },

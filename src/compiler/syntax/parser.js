@@ -2429,7 +2429,7 @@ const range = (parser) => {
     prePostfixAtom,
     alt(parse(noSpace, '.', noSpace, '.', noSpace), parse(_, '.', noSpace, '.', _)),
     opt(prePostfixAtom, alt(parse(noSpace, '.', noSpace, '.', noSpace), parse(_, '.', noSpace, '.', _))),
-    noSpace, prePostfixAtom,
+    prePostfixAtom,
   )(parser);
 
   if (parseResult.success) {
@@ -2531,6 +2531,66 @@ const commandNotation = (parser) => {
   return result;
 };
 
+// primitiveexpression =
+//   | spreadexpression
+//   | range
+//   | lambdaexpression
+//   | infixexpression
+//   | commandnotation
+//   | prepostfixatom
+const primitiveExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'prepostfixatom';
+  const result = {
+    success: false,
+    ast: { kind },
+  };
+  const parseResult = alt(
+    spreadExpression,
+    range,
+    // lambdaExpression,
+    infixExpression,
+    commandNotation,
+    prePostfixAtom,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// simpleexpression =
+//   | ternaryoperator
+//   | primitiveexpression
+const simpleExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'simpleexpression';
+  const result = {
+    success: false,
+    ast: { kind },
+  };
+  const parseResult = alt(
+    ternaryOperator,
+    primitiveExpression,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2622,8 +2682,8 @@ module.exports = {
   range,
   commandNotationArgument,
   commandNotation,
-  // primitiveExpression,
-  // simpleExpression,
+  primitiveExpression,
+  simpleExpression,
   // tupleExpression,
   // dotNotationLine,
   // dotNotationBlock,
