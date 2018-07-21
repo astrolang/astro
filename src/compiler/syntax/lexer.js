@@ -32,7 +32,7 @@ class Lexer {
     this.punctuatorChar = '(){}[],.;:@$'; // Unicode?
     this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.keywords = [
-      'import', 'export', 'let', 'var', 'const', 'fun', 'type', 'abst', 'async',
+      'import', 'export', 'let', 'var', 'const', 'fun', 'type', 'async',
       'ref', 'iso', 'if', 'elif', 'else', 'while', 'for', 'try',
       'except', 'ensure', 'defer', 'loop', 'end', 'match', 'fallthrough', 'return', 'raise', 'break',
       'continue', 'yield', 'from', 'await', 'where', 'is', 'not', 'in', 'as',

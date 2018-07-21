@@ -118,8 +118,8 @@ john.{
 - highlight fallthrough keyword
     fallthrough
 
-- remove highlight on val, at, spill and acq
-    val at acq spill
+- remove highlight on val, at, spill, abst and acq
+    val at acq spill abst
 
 - fix highlight for macro
     @(a + y).mac
