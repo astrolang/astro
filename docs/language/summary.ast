@@ -959,11 +959,19 @@ TYPE DEFINITION (2)
     # The object can be referenced in the destructor body with `self`
     fun Car(!) = print('deleting car: ', self.{ make, year })
 
+    # Using `abstract` macro, a type can be made abstract so that it cannot be instantiated
+    @abstract
+    type Animal = var name, specie
+
 GENERICS
     # Uppercase single letter identifiers in type annotation are taken as type variable declaration.
     # Declaring a generic type T.
     fun add(a, b): #: (T, T) -> T
         print T
+        return a + b
+
+    # If no uppercase letter is available, an uppercase letter with backtick can be used.
+    fun add(a, b): #: (T`, T`) -> T`
         return a + b
 
     # Specifying generic type constraint with `where` and type relation operators (`::`, `<:`, `>:`)
@@ -1003,6 +1011,23 @@ GENERICS
     # Varargs type annotation.
     fun total(first, ...rem): #: Int, ...Int -> Int
         return first + sum rem
+
+    # Higher Kinded Types
+    map :: F{A}, (A -> B) -> F{B}
+
+ALGEBRAIC DATA TYPES
+    # Astro types are algebraic and can be used to compose new subtypes
+    type PaymentMethod =
+        | Cash
+        | Cheque(checkno)
+        | Card(cardtype, cardno)
+
+    # This can be used with pattern matching in the following ways.
+    fun print_payment_method(method): #: PaymentMethod
+        | Cash => print "Paid in cash"
+        | { checkno } :: Cheque => print "Paid by cheque: ${checkno}"
+        | { cardtype, cardtype } :: Card => print "Paid with card: ${cardno} ${cardtype}"
+
 
 TYPES AS FIRST-CLASS CITIZENS
     # Types can be passed around and specialized on like regular objects in Astro.
@@ -1081,28 +1106,6 @@ CONSTRUCTOR TRAIN
     fun TeachingStudent(name, subject, course, schedule):
         new(schedule).Student(name, course).Teacher(_, subject)
 
-ABSTRACT TYPES & FUNCTIONS
-    # Abstract types cannot be instantiated.
-    abst Player
-    var p = Player() #: Error!
-
-    # A function without a body is an abstract function and an error will be raised if called directly.
-    fun rewind(player) #: Player
-    rewind(p) #: Error!
-
-    # An abstract type can have fields.
-    abst Human(name, age)
-    abst Human = var name, age
-
-    # Abstract types can have subtypes declared within them effectively making them algebraic data types.
-    abst Tree:
-        | Leaf(value) #: (T) -> Leaf
-        | Node(l, r) #: (Leaf, Tree) -> Node
-
-    # If both fields and subtypes needs to be declared, the declarations can be separated.
-    abst Animal = var name
-    abst Animal = Dog | Cat | Parrot
-
 TYPE EXTENSION
     # Existing types can be extended in Astro using the `extend` macro
     @extend
@@ -1129,8 +1132,9 @@ TYPE ASSERTION
 
 TYPE ALIASES
     # A single or set of types can be given an alias
-    type Number = Integer | Float | Complex
-    fun add(a, b) = a + b #: (Number, Number) -> Number
+    type Number is Integer | Float | Complex128
+    type Identity is Person & Animal
+    type Person is (Name, Age)
 
 CAST FUNCTION
     # `cast` is a special macro in Astro, because it can turn a dictionary into a typed object.
