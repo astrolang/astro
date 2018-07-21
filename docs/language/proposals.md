@@ -209,3 +209,23 @@ astro --compile test.ast
 astro --help
 astro --evaluate '1 + 2'
 ```
+
+### LIBRARY FUNCTIONS
+#### Arrays, Lists and Strings
+##### Common
+```
+push, pop, length, concat, first, last
+remove, insert
+```
+
+##### Functional
+```
+map, filter, foldr, foldl, zip, enumerate,
+any, all, none, 
+```
+
+#### Maths
+```
+sin, cos, atan, atan2, log
+mean,
+```
