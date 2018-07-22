@@ -278,7 +278,7 @@ A `type constructor` must return a new object. The returned object will be consi
 type Person: var name, age
 
 # constructor
-fun Person(name, age) = new{ name, age }
+fun Person(name, age) = { name, age }
 ```
 
 A `type constructor` must return an object with all introduced and inherited fields inititialized.
@@ -289,7 +289,7 @@ type Person:
     var sex = "female"
 
 # constructor
-fun Person(name, age) = new{ name } # error! `age` field not initialized.
+fun Person(name, age) = { name } # error! `age` field not initialized.
 ```
 
 
@@ -301,8 +301,8 @@ type Person: var name, age
 type Student <: Person: var score
 
 # constructors
-fun Person(name, age) = new{ name, age }
-fun Student(name, age, score) = new{ score }.Person(name, age)
+fun Person(name, age) = { name, age }
+fun Student(name, age, score) = { score }.Person(name, age)
 ```
 
 A `type constructor` must not initialize or assign to fields not introduced by it's type.
@@ -312,7 +312,7 @@ type Person(name, age)
 type Student <: Person: var score
 
 # constructor
-fun Student(name, age, score) = new{ name, age, score } # error! initialized `age` and `name` fields.
+fun Student(name, age, score) = { name, age, score } # error! initialized `age` and `name` fields.
 ```
 
 A `type constructor` can only be defined in the same file as the type.
@@ -332,7 +332,7 @@ let b = add{Float}(5.25, 3.6)
 
 In the above example, a generic type parameter is not really needed as the type of `c` can be inferred from the `a + b` operation.
 
-However, buffer functions, like `malloc`, have uninitialized elements, so there is no way inferring what the element type is without explicitly specifying the element type. This is the only reason why type argument may be needed in Astro.
+However, buffer functions, like `malloc`, have uninitialized elements, so there is no way inferring what the element type is without explicitly specifying the element type.
 
 ```nim
 type List: #: {T: Any}
@@ -340,13 +340,13 @@ type List: #: {T: Any}
     var len = @delegated(len)
 
 fun List(len): #: {T}
-    new { buffer: malloc{T}(len) }
+    { buffer: malloc{T}(len) }
 ```
 
 ## GENERATOR
 In Astro, generators are passed around by value.
 ```nim
-let gen = {i | i in 1..500}
+let gen = (i | i in 1..500)
 next(gen) # 1
 next(gen) # 2
 
@@ -371,12 +371,12 @@ foo_global = { label: 0, vars: { a: 1, b: 'Hello', c: 5.0 } }
 
 fun foo():
     let { label, vars: { a, b, c } } = foo_global
-    jmp cont:
-        @(0):
+    jmp label:
+        @(0) do:
             do_something()
             foo_global.label += 1
             return
-        @(1):
+        @(1) do:
             do_another_thing()
             foo_global.label = 0
             return
