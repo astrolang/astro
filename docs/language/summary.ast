@@ -370,7 +370,7 @@ VECTORIZATION
     # Infix operators.
     let z = 5 .+ M
 
-DICTIONARIES
+DICTIONARIES AND OBJECTS
     # Dictionary is an associative array that stores key-value pairs.
     let game = { title: 'BioShock Infinite', year: 2014 }
 
@@ -409,6 +409,12 @@ DICTIONARIES
 
     # Empty dictionary.
     var empty_dict = {}
+
+    # A dictionary whose keys are symbols and are known at compile-time is considered an object
+    # and they are optimized for space and memory.
+    # Using a dictionary as an object also means keys should not be dynamically removed from the structure
+    # and regular dictionary should not be splat inside the object
+    var object = { name: 'James', age: 6 }
 
 SET
     # Set is an unordered collection of items with no duplicate elements.
