@@ -938,17 +938,10 @@ TYPE DEFINITION (2)
     type Car = var make, year
 
     # Types need constructors for object creation. A constructor always has the same name as the type.
-    # The special `new` syntax creates a new object of the particular type.
-    fun Car(make, year):
-        new(make, year)
-        print(self) #: self can be used to refer to the object in creation.
+    # TConstructors return new objects that are associated with the constructor's type.
+    fun Car(make, year): { make, year }
 
     let ride = Car('Camaro', 2016)
-
-    # Constructors containing `new` keyword cannot be defined outside the module the original type is defined in.
-
-    # A constructor that contains just a `new` function call can be shortened like this.
-    fun Car(maker, year)
 
     # Constructor types are a syntax sugar for merging type and corresponding constructor definitions together.
     type Car(var make, var year)
@@ -996,7 +989,7 @@ GENERICS
         var buffer
 
     fun Buffer(length): #: {T} (Int)
-        new(buffer: malloc{T}(length))
+        { buffer: malloc{T}(length) }
 
     let buf = Buffer{Int}(50)
 
@@ -1099,12 +1092,12 @@ CONSTRUCTOR TRAIN
     type Student(course) <: Person
 
     # The initialization of inherited fields should be delegated to the parent's constructor.
-    fun Teacher(name, subject) = new(subject).Person(name)
+    fun Teacher(name, subject) = { subject }.Person(name)
 
-    # In the case of multiple inheritance, the individual parent constructors are called and chained to the `new` syntax.
+    # In the case of multiple inheritance, the individual parent constructors are called and chained to the object.
     type TeachingStudent(schedule) <: Teacher, Student
     fun TeachingStudent(name, subject, course, schedule):
-        new(schedule).Student(name, course).Teacher(_, subject)
+        { schedule }.Student(name, course).Teacher(_, subject)
 
 TYPE EXTENSION
     # Existing types can be extended in Astro using the `extend` macro
