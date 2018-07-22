@@ -118,8 +118,8 @@ john.{
 - highlight fallthrough keyword
     fallthrough
 
-- remove highlight on val, at, spill, abst and acq
-    val at acq spill abst
+- remove highlight on val, at, spill, abst, acq, new
+    val at acq spill abst new
 
 - fix highlight for macro
     @(a + y).mac
@@ -127,10 +127,10 @@ john.{
     @ya.mac
 
 - highlight new multiline comments syntax
-    #* Bam! *#
+    #- Bam! -# hello
 
 - remove highlight on current multiline comments
-    #= Bam! =#
+    #= Bam! =# hello
 
 - highlight match keyword
     match x:
@@ -141,7 +141,7 @@ john.{
     Dict{Array{Int64}, (Str, Int)}
 
 - highlight function call with multiline in the middle
-    print #= =# name
+    print #- -# name
 
 - highlight the : in :( as a function call
     print(name), :(age), :(game)

@@ -1359,7 +1359,6 @@ RESERVED KEYWORDS
     fallthrough, return, raise, break, continue, yield, from, await,
     where,
     is, not, in, as, mod, typeof,
-    new,
 
 PREDEFINED TYPE HIERARCHY
     Type
