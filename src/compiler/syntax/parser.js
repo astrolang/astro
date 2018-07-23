@@ -2142,13 +2142,12 @@ const atom = (parser) => {
       for (let i = 0; i < morePostfix.length; i += 1) {
         // Get the postfix.
         const postfix = morePostfix[i][0];
-        if (postfix.kind === 'call' || postfix.kind === 'dot' || postfix.kind === 'index') {
-          // Add existing expression to the postfix.
-          postfix.expression = expression;
 
-          // Assign the updated postfix to expression.
-          expression = postfix;
-        }
+        // Add existing expression to the postfix.
+        postfix.expression = expression;
+
+        // Assign the updated postfix to expression.
+        expression = postfix;
       }
 
       // Check for cascade postfix.
@@ -2622,6 +2621,128 @@ const tupleExpression = (parser) => {
   return result;
 };
 
+// dotnotationline =
+//   | '.' nospace identifier subatompostfix*
+//   { postfixes }
+const dotNotationLine = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'dotnotationline';
+  const result = {
+    success: false,
+    ast: { postfixes: [] },
+  };
+  const parseResult = parse(
+    '.', noSpace, identifier,
+    optmore(subAtomPostfix),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Get the first postfix.
+    result.ast.postfixes.push({
+      kind: 'dot',
+      expression: null,
+      name: parseResult.ast[1],
+    });
+
+    // Check for more subatompostfix.
+    const morePostfix = parseResult.ast[2];
+    for (let i = 0; i < morePostfix.length; i += 1) {
+      // Get the postfix.
+      result.ast.postfixes.push(morePostfix[i][0]);
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// ************************ GET ****************************
+// eslint-disable-next-line no-unused-vars
+const get = fn => (parser) => {
+  const res = fn(parser);
+  print(`get ${fn.name} ---> `);
+  print(res);
+  return res;
+};
+// ************************ GET ****************************
+
+// dotnotationblock =
+//   | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)*  cascadenotationpostfix? (nospace '?')? dedentoreoiend
+//   { kind, expression }
+const dotNotationBlock = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'dotnotationblock';
+  const result = { success: false, ast: { kind } };
+  const parseResult = parse(
+    atom, nextCodeLine, indent, dotNotationLine,
+    optmore(nextCodeLine, samedent, dotNotationLine),
+    opt(cascadeNotationPostfix), opt(noSpace, '?'),
+    dedentOrEoiEnd,
+  )(parser);
+
+  // [0:{atom}, 1:[nextC], 2:{dot}, 3:[[[], {dot}], [], ..], 4:[], ]
+  // Function for merging expressions in dotnotationline
+  const merge = (headExpression, postfixes) => {
+    let expression = headExpression;
+
+    // Check for more postfixes.
+    for (let i = 0; i < postfixes.length; i += 1) {
+      // Get the postfix
+      const postfix = postfixes[i];
+
+      // Add existing expression to the postfix.
+      postfix.expression = expression;
+
+      // Assign the updated postfix to expression.
+      expression = postfix;
+    }
+
+    return expression;
+  };
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Get head expression
+    let expression = parseResult.ast[0];
+
+    // Get first dotnotationline
+    let line = parseResult.ast[2];
+    expression = merge(expression, line.postfixes, line.cascade);
+
+    // Get the other dotnotationline.
+    for (let i = 0; i < parseResult.ast[3].length; i += 1) {
+      line = parseResult.ast[3][i][1];
+      expression = merge(expression, line.postfixes, line.cascade);
+    }
+
+    // Check for cascade postfix.
+    const cascade = parseResult.ast[4];
+    if (cascade.length > 0) {
+      // Add existing expression to the cascade.
+      cascade[0].leftExpression = expression;
+
+      // Assign the updated postfix to expression.
+      expression = cascade[0];
+    }
+
+    // Check for nil operator at the end.
+    if (parseResult.ast[5].length > 0) {
+      result.ast = { kind: 'nillable', expression };
+    } else {
+      result.ast = expression;
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
 
 module.exports = {
   Parser,
@@ -2717,8 +2838,8 @@ module.exports = {
   primitiveExpression,
   simpleExpression,
   tupleExpression,
-  // dotNotationLine,
-  // dotNotationBlock,
+  dotNotationLine,
+  dotNotationBlock,
   // subExpression,
   // expression,
 };

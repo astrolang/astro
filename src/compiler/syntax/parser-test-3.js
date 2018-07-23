@@ -14,8 +14,8 @@ const {
   primitiveExpression,
   simpleExpression,
   tupleExpression,
-  // dotNotationLine,
-  // dotNotationBlock,
+  dotNotationLine,
+  dotNotationBlock,
   // subExpression,
   // expression,
 } = require('./parser');
@@ -1895,6 +1895,276 @@ test(
             },
           },
         ],
+      },
+    },
+  },
+);
+
+print('============== DOTNOTATIONLINE ==============');
+lexer = new Lexer('.age()');
+parser = new Parser(lexer.lex());
+result = dotNotationLine(parser);
+test(
+  String.raw`.age()`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 6,
+    },
+    result: {
+      success: true,
+      ast: {
+        postfixes: [
+          {
+            kind: 'dot',
+            expression: null,
+            name: {
+              kind: 'identifier',
+              value: 'age',
+            },
+          },
+          {
+            kind: 'call',
+            expression: null,
+            mutative: false,
+            vectorized: false,
+            arguments: [],
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('.age()[1:2]');
+parser = new Parser(lexer.lex());
+result = dotNotationLine(parser);
+test(
+  String.raw`.age()[1:2]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 11,
+    },
+    result: {
+      success: true,
+      ast: {
+        postfixes: [
+          {
+            kind: 'dot',
+            expression: null,
+            name: {
+              kind: 'identifier',
+              value: 'age',
+            },
+          },
+          {
+            kind: 'call',
+            expression: null,
+            mutative: false,
+            vectorized: false,
+            arguments: [],
+          },
+          {
+            kind: 'index',
+            arguments: [
+              {
+                begin: {
+                  kind: 'integerdecimalliteral',
+                  value: '1',
+                },
+                step: null,
+                end: {
+                  kind: 'integerdecimalliteral',
+                  value: '2',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== DOTNOTATIONBLOCK ==============');
+lexer = new Lexer('[1]\n    .name.{ a + b }\n    .end');
+parser = new Parser(lexer.lex());
+result = dotNotationBlock(parser);
+test(
+  String.raw`[1]\n    .name.{ a + b }\n    .end--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'dotnotationblock',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('[1]\n    .name.{ a + b }\n.end');
+parser = new Parser(lexer.lex());
+result = dotNotationBlock(parser);
+test(
+  String.raw`[1]\n    .name.{ a + b }\n.end`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 12,
+      column: 24,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'cascade',
+        leftExpression: {
+          kind: 'dot',
+          expression: {
+            kind: 'listliteral',
+            transposed: false,
+            expressions: [
+              {
+                kind: 'integerdecimalliteral',
+                value: '1',
+              },
+            ],
+          },
+          name: {
+            kind: 'identifier',
+            value: 'name',
+          },
+        },
+        rightExpression: null,
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('[1]\n    .name()\n    .age.{ a + b }?\n');
+parser = new Parser(lexer.lex());
+result = dotNotationBlock(parser);
+test(
+  String.raw`[1]\n    .name\n    .age`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 18,
+      column: 36,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'nillable',
+        expression: {
+          kind: 'cascade',
+          leftExpression: {
+            kind: 'dot',
+            expression: {
+              kind: 'call',
+              expression: {
+                kind: 'dot',
+                expression: {
+                  kind: 'listliteral',
+                  transposed: false,
+                  expressions: [
+                    {
+                      kind: 'integerdecimalliteral',
+                      value: '1',
+                    },
+                  ],
+                },
+                name: {
+                  kind: 'identifier',
+                  value: 'name',
+                },
+              },
+              mutative: false,
+              vectorized: false,
+              arguments: [],
+            },
+            name: {
+              kind: 'identifier',
+              value: 'age',
+            },
+          },
+          rightExpression: null,
+          expressions: [
+            {
+              kind: 'identifier',
+              value: 'a',
+            },
+            {
+              kind: 'identifier',
+              value: 'b',
+            },
+          ],
+          operators: [
+            {
+              vectorized: false,
+              operator: {
+                kind: 'operator',
+                value: '+',
+              },
+            },
+          ],
+        },
       },
     },
   },
