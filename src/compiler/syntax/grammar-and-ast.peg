@@ -542,11 +542,12 @@ tupleexpression =
   { kind, expressions }
 
 dotnotationline =
-  | dotnotationpostfix subatompostfix* cascadenotationpostfix? (nospace '?')?
+  | '.' nospace identifier subatompostfix* cascadenotationpostfix?
+  { postfixes, cascade }
 
 dotnotationblock =
-  | simpleexpression nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* dedentoreoiend
-  { kind, expression, chain }
+  | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* (nospace '?')? dedentoreoiend
+  { kind, expression }
 
 subexpression =
   | dotnotationblock
