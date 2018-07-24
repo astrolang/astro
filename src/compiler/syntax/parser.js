@@ -2590,10 +2590,10 @@ const simpleExpression = (parser) => {
   return result;
 };
 
-
 // tupleexpression =
-//   | simpleexpression (comma simpleexpression)*
-//   { kind, expressions }
+//   | simpleexpression (comma simpleexpression)+
+//   | simpleexpression
+//   { kind, expressions } | simpleexpression.ast
 const tupleExpression = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'tupleexpression';
@@ -2601,17 +2601,26 @@ const tupleExpression = (parser) => {
     success: false,
     ast: { kind, expressions: [] },
   };
-  const parseResult = parse(simpleExpression, optmore(comma, simpleExpression))(parser);
+  const parseResult = alt(
+    parse(simpleExpression, more(comma, simpleExpression)),
+    simpleExpression,
+  )(parser);
 
   if (parseResult.success) {
     result.success = parseResult.success;
 
-    // Get first simplexpression.
-    result.ast.expressions.push(parseResult.ast[0]);
+    if (parseResult.ast.alternative === 1) {
+      const { ast } = parseResult.ast;
 
-    // Get the rest
-    for (let i = 0; i < parseResult.ast[1].length; i += 1) {
-      result.ast.expressions.push(parseResult.ast[1][i][0]);
+      // Get first simplexpression.
+      result.ast.expressions.push(ast[0]);
+
+      // Get the rest
+      for (let i = 0; i < ast[1].length; i += 1) {
+        result.ast.expressions.push(ast[1][i][0]);
+      }
+    } else {
+      result.ast = parseResult.ast.ast;
     }
   }
 
@@ -2744,6 +2753,39 @@ const dotNotationBlock = (parser) => {
   return result;
 };
 
+// subexpression =
+//   | dotnotationblock
+//   | declaration
+//   | conditionalexpression
+//   | controlprimitive
+//   | tupleexpression
+// TODO: Refactor: Uncomment the commented out expressions and write tests for them.
+const subExpression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'subexpression';
+  const result = {
+    success: false,
+    ast: { kind },
+  };
+  const parseResult = alt(
+    dotNotationBlock,
+    // declaration,
+    // conditionalExpression,
+    controlPrimitive,
+    tupleExpression,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2840,6 +2882,6 @@ module.exports = {
   tupleExpression,
   dotNotationLine,
   dotNotationBlock,
-  // subExpression,
+  subExpression,
   // expression,
 };

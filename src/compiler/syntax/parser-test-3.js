@@ -16,7 +16,7 @@ const {
   tupleExpression,
   dotNotationLine,
   dotNotationBlock,
-  // subExpression,
+  subExpression,
   // expression,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
@@ -1758,29 +1758,24 @@ test(
     result: {
       success: true,
       ast: {
-        kind: 'tupleexpression',
+        kind: 'infixexpression',
         expressions: [
           {
-            kind: 'infixexpression',
-            expressions: [
-              {
-                kind: 'integerdecimalliteral',
-                value: '1',
-              },
-              {
-                kind: 'integerdecimalliteral',
-                value: '2',
-              },
-            ],
-            operators: [
-              {
-                vectorized: false,
-                operator: {
-                  kind: 'operator',
-                  value: '+',
-                },
-              },
-            ],
+            kind: 'integerdecimalliteral',
+            value: '1',
+          },
+          {
+            kind: 'integerdecimalliteral',
+            value: '2',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
           },
         ],
       },
@@ -1895,6 +1890,33 @@ test(
             },
           },
         ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0o711');
+parser = new Parser(lexer.lex());
+result = tupleExpression(parser);
+test(
+  String.raw`0o711`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integeroctalliteral',
+        value: '711',
       },
     },
   },
@@ -2165,6 +2187,190 @@ test(
             },
           ],
         },
+      },
+    },
+  },
+);
+
+print('============== SUBEXPRESSION ==============');
+lexer = new Lexer('[1]\n    .name(2).{ a + b }?');
+parser = new Parser(lexer.lex());
+result = subExpression(parser);
+test(
+  String.raw`[1]\n    .name(2).{ a + b }?`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 15,
+      column: 27,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'nillable',
+        expression: {
+          kind: 'cascade',
+          leftExpression: {
+            kind: 'call',
+            expression: {
+              kind: 'dot',
+              expression: {
+                kind: 'listliteral',
+                transposed: false,
+                expressions: [
+                  {
+                    kind: 'integerdecimalliteral',
+                    value: '1',
+                  },
+                ],
+              },
+              name: {
+                kind: 'identifier',
+                value: 'name',
+              },
+            },
+            mutative: false,
+            vectorized: false,
+            arguments: [
+              {
+                key: null,
+                value: {
+                  kind: 'integerdecimalliteral',
+                  value: '2',
+                },
+              },
+            ],
+          },
+          rightExpression: null,
+          expressions: [
+            {
+              kind: 'identifier',
+              value: 'a',
+            },
+            {
+              kind: 'identifier',
+              value: 'b',
+            },
+          ],
+          operators: [
+            {
+              vectorized: false,
+              operator: {
+                kind: 'operator',
+                value: '+',
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('return 45_000');
+parser = new Parser(lexer.lex());
+result = subExpression(parser);
+test(
+  String.raw`return 45_000`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'returnexpression',
+        expression: {
+          kind: 'integerdecimalliteral',
+          value: '45000',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('5, [3, 1]');
+parser = new Parser(lexer.lex());
+result = subExpression(parser);
+test(
+  String.raw`5, [3, 1]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 9,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'tupleexpression',
+        expressions: [
+          {
+            kind: 'integerdecimalliteral',
+            value: '5',
+          },
+          {
+            kind: 'listliteral',
+            transposed: false,
+            expressions: [
+              {
+                kind: 'integerdecimalliteral',
+                value: '3',
+              },
+              {
+                kind: 'integerdecimalliteral',
+                value: '1',
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0o711');
+parser = new Parser(lexer.lex());
+result = subExpression(parser);
+test(
+  String.raw`0o711`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integeroctalliteral',
+        value: '711',
       },
     },
   },
