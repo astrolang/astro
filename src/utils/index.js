@@ -97,7 +97,7 @@ const createTest = () => {
 
     // `gotten` must be strictly deep-equal to `expected`.
     if (equal(gotten, expected)) {
-      print('Test: ', message, '\x1b[32m', '\nTest passed!', '\x1b[0m', '\nExp: ', gotten, '\n');
+      print('Test: ', message, '\x1b[32m', '\nTest passed!', '\x1b[0m', '\n> Exp: ', gotten, '\n');
       // Increment test count state.
       testCount += 1;
       passedCount += 1;
@@ -108,7 +108,7 @@ const createTest = () => {
     }
 
     // Otherwise test failed.
-    print('Test: ', message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\nExp: ', expected, '\nGot: ', gotten, '\n');
+    print('Test: ', message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\n> Exp: ', expected, '\n\n> Got: ', gotten, '\n');
     // Increment test count state
     failedTests.push({ message, expected, gotten });
     testCount += 1;
@@ -144,7 +144,7 @@ const showTestInfo = (...args) => {
   if (failedCount > 0) {
     print('******** FAILED TESTS ********');
     for (let i = 0; i < failedTests.length; i += 1) {
-      print('Test: ', failedTests[i].message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\nExp: ', failedTests[i].expected, '\nGot: ', failedTests[i].gotten, '\n');
+      print('Test: ', failedTests[i].message, '\x1b[1m\x1b[31m', '\nTest failed!', '\x1b[0m', '\n> Exp: ', failedTests[i].expected, '\n\n> Got: ', failedTests[i].gotten, '\n');
     }
   }
 
