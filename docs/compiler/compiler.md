@@ -168,8 +168,66 @@ When there is no concurrency, deallocation points of objects can be entirely det
 When concurrency is involved, a count is maintained for concurrent coroutines that share an object and once one of the coroutine no longer needs an object, it decrements the count and checks if it can deallocate the object.
 
 ## Poymorphism
-### Subtype Polymorphism
-Astro supports multiple inheritance, but unlike C++, it doesn't duplicate same-name fields inherited from different parent types. This is enforced through `constructor chaining`.
+### Structural Polymorphism
+Astro's polymorphism is designed around structural typing. This means the shape of a type or object determines if such type can be passed to a function. If a type has the field names referenced inside the function body, then it is structurally compliant to the function's interface.
+
+```python
+fun foo(a, b):
+    print(a.name, b.age)
+```
+
+In the example above, `foo`'s structural interface would look like this `foo({ name }, { age })`. It accepts two objects, where the first object has a `name` field and the second object has an `age` field.
+
+#### Implementation
+Where the function is not explicitly constrained to take **specific leaf types** as arguments, the function should have a generic implementation so that it can allow different types that conform structurally to its interface.
+
+```nim
+type Person:
+    var name :: Str
+    var age :: Int
+
+fun show(p): :: Person -> None
+    print(p.name, :age)
+```
+
+In the example above, the function interface is constrained to a specific leaf type, so the implementation would look something like this
+
+```nim
+show :: (Ptr{Person}) -> None
+```
+
+However if the function interface is generic or polymorphic, the implementation will only expect
+```nim
+fun show(a): :: Any -> None
+    print(a.name, :age)
+
+let object1 = { name: 'John', age: 20 }
+let object2 = { name: 'John', gender: 'male' age: 20 }
+
+show(object1)
+show(object2)
+```
+
+The implementation of the function above should be similar to this:
+
+```nim
+show :: (Tuple{Ptr{Str}, Ptr{Int}}) -> Person
+
+let object1 = (ptr(object1.name), ptr(object1.age))
+show(object1)
+
+let object2 = (ptr(object2.name), ptr(object2.age))
+show(object2)
+```
+
+
+
+
+There are other alternative implementations given below, but the implementation described above should be better.
+
+
+### Subtype Polymorphism [Old]
+Subtype polymorphism relies on Astro structural typing properties. Astro supports multiple inheritance, but unlike C++, it doesn't duplicate same-name fields inherited from different parent types. This is enforced through `constructor chaining`.
 
                        [O] { name }
                        / \
@@ -248,8 +306,8 @@ into a `type witness table` which will be discussed later.
 it will throw a __compile-time error__ if you try to access a field that is not common to all the array's element types.
 
 ```python
-print a.name # Ok. `name` field is common to all of a's element types
-print a.age # Error. `age` field is not common to all of a's element types
+print a[i].name # Ok. `name` field is common to all of a's element types
+print a[i].age # Error. `age` field is not common to all of a's element types
 ```
 
 A `type witness table` is constructed based on the fields common to all the element types. This can be written as `Car&Person&Product` for the example above. A witness table simply
@@ -261,7 +319,7 @@ allows one to choose the right _field offset_ at runtime when the type of an ele
     Product [3]  ->   [5]
 
 ```python
-fun foo(a, b) = a.name, b.name #: Any, Any
+fun foo(a, b) = a.name, b.name :: (Any, Any) -> (T, T)
 foo(a[1]::Car, a[3]::Product, 1, 5)
 foo(a[1][2], a[3][2], a[1][1][1], a[3][1][1])
 ```
@@ -319,40 +377,51 @@ A `type constructor` can only be defined in the same file as the type.
 
 ## Generics
 #### Generic Type Arguments
-It is true that types can be inferred from assignments and passed arguments, and this means generic type arguments are redundant in many cases.
+It is true that types can be inferred from assignments and arguments passed to a function, and this means generic type arguments are redundant in many cases.
 
-```nim
-fun add(a, b): #: {T}
-    let c = a + b #: T
+```julia
+fun add(a, b): :: {T}
+    let c = a + b :: T
     return c
 
 let a = add{Int}(5, 6)
 let b = add{Float}(5.25, 3.6)
 ```
 
-In the above example, a generic type parameter is not really needed as the type of `c` can be inferred from the `a + b` operation.
+In the above example, a generic type parameter is not necessary as the type of `c` can be inferred from the `a + b` operation.
 
-However, buffer functions, like `malloc`, have uninitialized elements, so there is no way inferring what the element type is without explicitly specifying the element type.
+However, buffer functions, like `malloc`, can have uninitialized elements, so there is no way of inferring what the element type is without explicitly specifying the element type.
 
-```nim
-type List: #: {T: Any}
+```julia
+type List:
     var buffer*
-    var len = @delegated(len)
+    var len = @delegated { len }
 
-fun List(len): #: {T}
+fun List(len): :: {T}
     { buffer: malloc{T}(len) }
 ```
 
 ## GENERATOR
-In Astro, generators are passed around by value.
+In Astro, generators are passed around by reference.
 ```nim
 let gen = (i | i in 1..500)
 next(gen) # 1
 next(gen) # 2
 
 let another_gen = gen
-next(another_gen) # 1
-next(gen) # 3
+next(another_gen) # 3
+next(gen) # 4
+```
+
+This may be unintuitive, so a copy can made instead with the following:
+```nim
+let gen = (i | i in 1..500)
+next(gen) # 1
+next(gen) # 2
+
+let another_gen = copy gen
+next(another_gen) # 3
+next(gen) # 4
 ```
 
 #### Implementation

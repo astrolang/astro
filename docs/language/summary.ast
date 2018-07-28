@@ -88,7 +88,7 @@ FUNCTION DEFINITION (1)
     fun add(a, b) = return a + b
 
     # You can annotate the argument and return types of a function.
-    fun modulo(a, b): #: (Int, Int) -> Int
+    fun modulo(a, b): :: (Int, Int) -> Int
         return a % b
 
     # Astro is indentation-based, but for legibility reason blocks can optionally be delimited with `..`.
@@ -157,7 +157,7 @@ EXPRESSION-ORIENTED
     hieght = add(2, 3)
 
     # A semi-colon at the end of a block, stops it from returning its last value
-    fun set_name(p, name): #: (Person, Str)
+    fun set_name(p, name): :: (Person, Str) -> None
         p.name = name;
     ..
     let name = setname('John Smith') # Invalid! setname returns no result.
@@ -166,14 +166,14 @@ SPECIFYING TYPES
     # Types can be automatically inferred in Astro.
     var todo = 'Create a new programming language :)'
 
-    # However you can still specify types explicitly using '#:' type comment.
-    var number #: Int
+    # However you can still specify types explicitly using '::' type comment.
+    var number :: Int
 
     # Union types.
-    var identifier #: Str | Int
+    var identifier :: Str | Int
 
     # Intersection types.
-    var pegasus #: Horse & Wing
+    var pegasus :: Horse & Wing
 
 SOME BUILT-IN TYPES
     var index = UInt(2_000) # Unsigned integer type.
@@ -267,8 +267,8 @@ LISTS
     var empty_list = []
 
     # Specifying a list type.
-    var names #: [Str]
-    var names = Str[]
+    var names :: [Str]
+    var names = [] :: [Str]
 
     # Heterogenous list.
     var stuffs = [500, 'Steve', 1.0]
@@ -474,7 +474,7 @@ STRINGS
     '''
 
     # Char is 32-bit datatype that represents a single Unicode codepoint.
-    var chars = char "π" #: Char
+    var chars = char "π" # Char("π")
 
     # String operations.
     var concatenate = 'ab' + 'c' # 'abc'
@@ -584,11 +584,11 @@ NIL
     # Sometimes, it can be useful to represent an empty or a missing state.
     # This can be achieved with nils in Astro.
     # Subjects that are not explicitly made nillable cannot be assigned a nil.
-    var password = '#5Nj%4VpA391w' #: Str
+    var password = '#5Nj%4VpA391w' :: Str
     password = nil # Invalid!
 
     # Nillable subjects can be assigned a nil.
-    var program = 'print(\"Hello World\")' #: Str|Nil
+    var program = 'print(\"Hello World\")' :: Str|Nil
     var program_list = Str()?
 
     # Nillable unwrap.
@@ -778,11 +778,11 @@ MAIN FUNCTION
 
 FUNCTION DEFINITION (2)
     # If a function returns nothing, it can either be annotated with None or return type can be left empty.
-    fun show(point): #: (Point) -> None
+    fun show(point): :: (Point) -> None
         print(point.{ a, b })
 
     # The normal order of arguments in a function call can be changed if the parameter name is specified.
-    fun say(msg, name): #: (Str, Str)
+    fun say(msg, name): :: (Str, Str)
         print '$msg $name!'
     ..
     say(name: 'Steve', 'Hello') # Hello Steve!
@@ -965,50 +965,47 @@ TYPE DEFINITION (2)
 GENERICS
     # Uppercase single letter identifiers in type annotation are taken as type variable declaration.
     # Declaring a generic type T.
-    fun add(a, b): #: (T, T) -> T
+    fun add(a, b): :: (T, T) -> T
         print T
         return a + b
 
     # If no uppercase letter is available, an uppercase letter with backtick can be used.
-    fun add(a, b): #: (T`, T`) -> T`
+    fun add(a, b): :: (T`, T`) -> T`
         return a + b
 
     # Specifying generic type constraint with `where` and type relation operators (`::`, `<:`, `>:`)
-    fun any_common_elements(l, r): #: (T, U) -> Bool where |T, U| <: Sequence
+    fun any_common_elements(l, r): :: (T, U) -> Bool where |T, U| <: Sequence
         for x in l: for y in r where x == y:
             return true
         false
 
-    #: C, D -> Bool
-    #: where |C, D| <: Collection,
-    #: where C.Element::D.Element
-    #: where C.Element<:Equatable
+    :: C, D -> Bool where
+    :: |C, D|<:Collection,
+    :: C.Element::D.Element,
+    :: C.Element<:Equatable
     fun startequal(c, d): c.first == d.first
 
     # `_` is placeholder for type parameters that should be inferred by the compiler.
-    #: (Seq, _) -> T where T::Seq.T
+    :: (Seq, _) -> T where T::Seq.T
     fun getitem(list, index):
         list[index]
 
-    # Types and functions can have generic type parameters and the parameters can have default values.
-    type Buffer: #: {T: Any}
-        var buffer
-
-    fun Buffer(length): #: {T} (Int)
+    # Functions can have generic type parameters and the parameters can have default values.
+    fun Buffer(length): :: {T}(Int)
         { buffer: malloc{T}(length) }
 
     let buf = Buffer{Int}(50)
 
     # Nillable type annotation.
-    let language #: Str|Nil
-    let language #: Str?
+    let language :: Str|Nil
+    let language :: Str?
 
     # List type annotation.
-    let languages #: List{Str}
-    let languages #: [Str]
+    let languages :: List{Str}
+    let languages :: [Str]
 
     # Varargs type annotation.
-    fun total(first, ...rem): #: Int, ...Int -> Int
+    fun total(first, ...rem): :: (Int, ...Int) -> Int
         return first + sum rem
 
     # Higher Kinded Types
@@ -1022,7 +1019,7 @@ ALGEBRAIC DATA TYPES
         | Card(cardtype, cardno)
 
     # This can be used with pattern matching in the following ways.
-    fun print_payment_method(method): #: PaymentMethod
+    fun print_payment_method(method): :: (PaymentMethod) -> None
         | Cash => print "Paid in cash"
         | { checkno } :: Cheque => print "Paid by cheque: ${checkno}"
         | { cardtype, cardtype } :: Card => print "Paid with card: ${cardno} ${cardtype}"
@@ -1034,8 +1031,8 @@ TYPES AS FIRST-CLASS CITIZENS
     Int64 :: Type
 
     # Having type be objects themselves allows us to overload functions based on the type of a type
-    fun zero(t) = 0.0 #: Type{Float}
-    fun zero(t) = 0 #: Type{Int}
+    fun zero(t) = 0.0 :: Type{Float} -> Float
+    fun zero(t) = 0 :: Type{Int} -> Int
 
     zero(Float) # 0.0
     zero(Int) # 0
@@ -1057,14 +1054,14 @@ INHERITANCE
 
     # Astro has ways of resolving diamond problems, dicussed in "Method Ambiguities" and "Constructor Train"
     # below, but it is advised to use composition where inheritance does not make sense.
-    type Car <: Engine #: This makes no sense, a `Car` is not an `Engine`
-    type Car = let engine #: This makes sense, a `Car` can have an `Engine`
+    type Car <: Engine # This makes no sense, a `Car` is not an `Engine`
+    type Car = let engine # This makes sense, a `Car` can have an `Engine`
 
 MULTIPLE DISPATCH
     # Astro uses a covariant multiple dispatch to resolve function calls.
     # The most specific function is always called based on the number and types of arguments passed.
-    fun foo(a, b) = print('generic') #: (Int32, Real)
-    fun foo(a, b) = print('specific') #: (Int32, Int32)
+    fun foo(a, b) = print('generic') :: (Int32, Real) -> None
+    fun foo(a, b) = print('specific') :: (Int32, Int32) -> None
 
     foo(4, 5.0) # generic
     foo(4, 5) # specific
@@ -1075,20 +1072,20 @@ MULTIPLE DISPATCH
 METHOD AMBIGUITIES
     # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
     # Ambiguity error is thrown when a type inherits from types that have different specific implementations of function.
-    fun speak(parent1) = print('mom!') #: Parent1
-    fun speak(parent2) = print('dad!') #: Parent2
+    fun speak(parent1) = print('mom!') :: (Parent1) -> None
+    fun speak(parent2) = print('dad!') :: (Parent2) -> None
     type Child <: Parent1, Parent2 # Error!
 
     # To resolve this issue, the `sound` function need to be overloaded for `Child` type.
-    fun speak(child) = print('child!') #: Child
+    fun speak(child) = print('child!') :: (Child) -> None
 
     # Ambiguity error is also thrown when the arrangement of type paramters causes multiple dispatch ambiguity.
-    fun foo(a, b) = print('fizz') #: (Int32, Real)
-    fun foo(a, b) = print('buzz') #: (Real, Int32)
+    fun foo(a, b) = print('fizz') :: (Int32, Real) -> None
+    fun foo(a, b) = print('buzz') :: (Real, Int32) -> None
     foo(1, 2) # Error!
 
     # A more specific function need to be provided
-    fun foo(a, b) = print('fizz') #: (Int32, Int32)
+    fun foo(a, b) = print('fizz') :: (Int32, Int32) -> None
 
 CONSTRUCTOR TRAIN
     # Astro follows the principle where each type is responsible for the initialisation of fields it introduces to the type hierarchy.
@@ -1234,17 +1231,17 @@ OPERATORS
 
 OPERATOR OVERLOADING & CUSTOM OPERATOR
     # Existing operators can be overloaded just like regular functions.
-    fun +(x, y): #: (Dual, Dual) -> Dual
+    fun +(x, y): :: (Dual, Dual) -> Dual
         Dual({ x + y }.vl, { x + y }.adj)
 
     # New operators can also be created by combining operators as a name.
-    fun ++(x): #: (Real, Real) -> Real
+    fun ++(x): :: (Real, Real) -> Real
         var temp = copy x
         x += 1
         return temp
 
     # Special operators like [] and {} can be overloaded using their alternative identifier names.
-    fun getindex(sequence, index): #: (Sequence, Signed) -> T
+    fun getindex(sequence, index): :: (Sequence, Signed) -> T
         return sequence.items[index]
 
 TRY, EXCEPT & ENSURE
@@ -1298,7 +1295,7 @@ COEFFICIENT EXPRESSION
     let x = 3f + 2(6 + 1)
 
     # Because of this syntactic sugar, Numeric types cannot be made callable.
-    fun call(i, ...args) = i + sum(args) #: (Int, [Int]) -> Int # Invalid!
+    fun call(i, ...args) = i + sum(args) :: (Int, [Int]) -> Int # Invalid!
 
     # Note: In the case of hex literal, coefficient expressions are not permitted.
     let h = 0x344f # f is not considered a variable here, but part of the hex literal.

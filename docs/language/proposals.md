@@ -65,13 +65,13 @@ dsl(src: 'hello', link: 'bar.io') {
 Astro macros are resolved at parse time.
 Macros take asts as argument.
 ```julia
-fun @sorted(string): #: RawString
+fun @sorted(string): :: RawString
     return `SortedStr('${string.literal}')`
 ```
 
 > Note: Macro functions cannot use subjects from outer scope
 ```julia
-fun @typify(abstract): #: AbstractType
+fun @typify(abstract): :: AbstractType
     let types = abstract.elements.map t => `type $t`
     return `$abstract; $types`
 ```
@@ -83,7 +83,7 @@ Inline macro calls
 
 Block macro calls
 ```julia
-fun @loop(count, block): #: IntegerLiteral, Block
+fun @loop(count, block): :: IntegerLiteral, Block
     return `
     var countup, max = 0, $count
     while countup < max:
@@ -98,7 +98,7 @@ fun @loop(count, block): #: IntegerLiteral, Block
 
 Macros can be called like regular functions.
 ```julia
-fun @where(arr, cond, none): #: Sequence, BinaryExpression, None
+fun @where(arr, cond, none): :: Sequence, BinaryExpression, None
     return `${arr}.filter(${cond.lhs} => ${cond})`
 
 let result = [1, 2, 3].@where(x > 5)
@@ -125,7 +125,7 @@ type Programmer(name, skills)
 
 ## DYNAMIC IMPORT
 ```swift
-let { pi } = import(someModule) #: Inferred as dynamic
+let { pi } = import(someModule) :: <Inferred as dynamic>
 ```
 
 ## STATIC LOCAL SUBJECTS
@@ -145,7 +145,7 @@ Fibers are lightweight CSP-style threading model.
 Modelling fibers around coroutine.
 ```nim
 fun main():
-    var p = await producer() #: Channel{Int}
+    var p = await producer() :: Channel{Int}
     print p.next()
 
 fub producer():
@@ -221,7 +221,7 @@ remove, insert
 ##### Functional
 ```
 map, filter, foldr, foldl, zip, enumerate,
-any, all, none, 
+any, all, none,
 ```
 
 #### Maths

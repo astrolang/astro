@@ -12,7 +12,7 @@ fun normalize(a) = √sum a.map(x => x²)
 fun normalize(a) = √(a.²)
 
 # TYPE ANNOTATION
-fun anyCommonElements(l, r): #: T, U -> Bool where (T, U)<:Sequence
+fun anyCommonElements(l, r): :: T, U -> Bool where (T, U)<:Sequence
     for a in l: for b in r where a == b:
         return true
     false

@@ -17,15 +17,15 @@
     * Can be caused by order of types.
     ```nim
     type Int <: Integer
-    fun foo(a, b) = 1 #: Int, Integer
-    fun foo(a, b) = 2 #: Integer, Int
+    fun foo(a, b) = 1 :: (Int, Integer) -> Int
+    fun foo(a, b) = 2 :: (Integer, Int) -> Int
     foo(1, 2)
     ```
     * Can also be caused by multiple inheritance.
     ```nim
     type C <: A, B
-    fun foo(a) = 1 #: A
-    fun foo(b) = 2 #: B
+    fun foo(a) = 1 :: A -> Int
+    fun foo(b) = 2 :: B -> Int
     foo(C())
     ```
 
