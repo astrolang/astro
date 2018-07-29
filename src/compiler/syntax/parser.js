@@ -245,6 +245,16 @@ class Parser {
   }
 }
 
+// ************************ GET ****************************
+// eslint-disable-next-line no-unused-vars
+const get = fn => (parser) => {
+  const res = fn(parser);
+  print(`get ${fn.name} - ${parser.column} ---> `);
+  print(res);
+  return res;
+};
+// ************************ GET ****************************
+
 const parseTerminalRule = (parser, kind) => {
   const { tokenPosition } = parser;
   let result = { success: false, ast: { kind } };
@@ -2694,16 +2704,6 @@ const dotNotationLine = (parser) => {
 
   return result;
 };
-
-// ************************ GET ****************************
-// eslint-disable-next-line no-unused-vars
-const get = fn => (parser) => {
-  const res = fn(parser);
-  print(`get ${fn.name} - ${parser.column} ---> `);
-  print(res);
-  return res;
-};
-// ************************ GET ****************************
 
 // dotnotationblock =
 //   | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)*  cascadenotationpostfix? (nospace '?')? dedentoreoiend
