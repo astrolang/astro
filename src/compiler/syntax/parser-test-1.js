@@ -26,7 +26,6 @@ const {
   dedent,
   spaces,
   noSpace,
-  nextline,
   lineContinuation,
   nextCodeLine,
   dedentOrEoiEnd,
@@ -2109,12 +2108,12 @@ test(
   },
 );
 
-print('============== NEXTLINE ==============');
-lexer = new Lexer('\r');
+print('============== NEXTCODELINE ==============');
+lexer = new Lexer('    \r\n# hello\n#- world -#\n');
 parser = new Parser(lexer.lex().tokens);
-result = nextline(parser);
+result = nextCodeLine(parser);
 test(
-  String.raw`\r--------->FAIL`,
+  String.raw`    \r\n# hello\n#- world -#\n`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2124,32 +2123,8 @@ test(
   },
   {
     parser: {
-      tokenPosition: -1,
-      column: 0,
-    },
-    result: {
-      success: false,
-      directive: true,
-    },
-  },
-);
-
-lexer = new Lexer('\r\n\n     \r\n \n');
-parser = new Parser(lexer.lex().tokens);
-result = nextline(parser);
-test(
-  String.raw`\r\n\n     \r\n \n`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 3,
-      column: 12,
+      tokenPosition: 2,
+      column: 26,
     },
     result: {
       success: true,
@@ -2158,11 +2133,11 @@ test(
   },
 );
 
-lexer = new Lexer('\r\n  hello');
+lexer = new Lexer('    \r\n    \n     ');
 parser = new Parser(lexer.lex().tokens);
-result = nextline(parser);
+result = nextCodeLine(parser);
 test(
-  String.raw`\r\n  hello`,
+  String.raw`    \r\n    \n     `,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2172,8 +2147,33 @@ test(
   },
   {
     parser: {
-      tokenPosition: 0,
-      column: 2,
+      tokenPosition: 1,
+      column: 11,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+
+lexer = new Lexer('\r\n    \n');
+parser = new Parser(lexer.lex().tokens);
+result = nextCodeLine(parser);
+test(
+  String.raw`\r\n    \n`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 7,
     },
     result: {
       success: true,
@@ -2344,80 +2344,6 @@ test(
     parser: {
       tokenPosition: 3,
       column: 6,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
-print('============== NEXTCODELINE ==============');
-lexer = new Lexer('    \r\n# hello\n#- world -#\n');
-parser = new Parser(lexer.lex().tokens);
-result = nextCodeLine(parser);
-test(
-  String.raw`    \r\n# hello\n#- world -#\n`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 2,
-      column: 26,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
-lexer = new Lexer('    \r\n    \n     ');
-parser = new Parser(lexer.lex().tokens);
-result = nextCodeLine(parser);
-test(
-  String.raw`    \r\n    \n     `,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 1,
-      column: 11,
-    },
-    result: {
-      success: true,
-      directive: true,
-    },
-  },
-);
-
-
-lexer = new Lexer('\r\n    \n');
-parser = new Parser(lexer.lex().tokens);
-result = nextCodeLine(parser);
-test(
-  String.raw`\r\n    \n`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 1,
-      column: 7,
     },
     result: {
       success: true,

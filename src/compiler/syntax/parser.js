@@ -587,7 +587,7 @@ const stringLiteral = (parser) => {
 
 // >>>>> DIRECTIVES >>>>>
 
-// indent = // TODO. adding !space <- Dunno what this is about. May remove
+// indent =
 //   | ' '+
 const indent = (parser) => {
   const { tokenPosition } = parser;
@@ -623,7 +623,7 @@ const indent = (parser) => {
   return result;
 };
 
-// samedent = // TODO. adding !space <- Dunno what this is about. May remove
+// samedent =
 //   | ' '+
 //   | ''
 const samedent = (parser) => {
@@ -658,7 +658,7 @@ const samedent = (parser) => {
   return result;
 };
 
-// dedent = // TODO. adding !space <- Dunno what this is about. May remove
+// dedent =
 //   | ' '+
 //   | ''
 const dedent = (parser) => {
@@ -762,16 +762,13 @@ const noSpace = (parser) => {
   return result;
 };
 
-// nextline =
-//   | newline (spaces? newline)*
-const nextline = (parser) => {
+// nextcodeline =
+//   | (spaces? newline)+
+const nextCodeLine = (parser) => {
   const { tokenPosition } = parser;
-  const kind = 'nextline';
+  const kind = 'nextcodeline';
   const result = { success: false, directive: true };
-  const parseResult = parse(
-    newline,
-    optmore(opt(spaces), newline),
-  )(parser);
+  const parseResult = parse(more(opt(spaces), newline))(parser);
 
   if (parseResult.success) {
     result.success = true;
@@ -784,8 +781,7 @@ const nextline = (parser) => {
 };
 
 // linecontinuation =
-//   | spaces? '.' '.' '.' spaces? nextline samedent
-// TODO: Change nextline to nextcodeline and write tests for it.
+//   | spaces? '.' nospace '.' nospace '.' spaces? nextcodeline samedent
 const lineContinuation = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'linecontinuation';
@@ -794,7 +790,7 @@ const lineContinuation = (parser) => {
     opt(spaces),
     '.', noSpace, '.', noSpace, '.',
     opt(spaces),
-    nextline,
+    nextCodeLine,
     samedent,
   )(parser);
 
@@ -831,24 +827,6 @@ const _ = (parser) => {
   return result;
 };
 
-// nextcodeline =
-//   | (spaces? nextline)+ spaces?
-const nextCodeLine = (parser) => {
-  const { tokenPosition } = parser;
-  const kind = 'nextcodeline';
-  const result = { success: false, directive: true };
-  const parseResult = parse(more(opt(spaces), newline), opt(spaces))(parser);
-
-  if (parseResult.success) {
-    result.success = true;
-  }
-
-  // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, parseResult, result, true);
-
-  return result;
-};
-
 // dedentoreoiend =
 //   | nextcodeline dedent
 //   | nextcodeline? _? eoi
@@ -873,7 +851,6 @@ const dedentOrEoiEnd = (parser) => {
 
 // comma =
 //   | _? ',' _? (nextcodeline samedent)?
-// Change nextline to nextcodeline and write tests for it.
 const comma = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'comma';
@@ -2821,7 +2798,6 @@ module.exports = {
   dedent,
   spaces,
   noSpace,
-  nextline,
   lineContinuation,
   _,
   nextCodeLine,
