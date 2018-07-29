@@ -3844,7 +3844,7 @@ test(
   },
   {
     parser: {
-      tokenPosition: 1,
+      tokenPosition: 0,
       column: 2,
     },
     result: {
@@ -3853,6 +3853,68 @@ test(
         begin: null,
         step: null,
         end: null,
+      },
+    },
+  },
+);
+
+lexer = new Lexer('::1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`::1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: null,
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':: 1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`:: 1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: null,
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
       },
     },
   },
@@ -3960,8 +4022,76 @@ test(
   },
   {
     parser: {
-      tokenPosition: 3,
+      tokenPosition: 2,
       column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '56',
+        },
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('56 ::1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`56 ::1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 6,
+    },
+    result: {
+      success: true,
+      ast: {
+        begin: {
+          kind: 'integerdecimalliteral',
+          value: '56',
+        },
+        step: null,
+        end: {
+          kind: 'integerdecimalliteral',
+          value: '1',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer('56 :: 1');
+parser = new Parser(lexer.lex());
+result = indexArgument(parser);
+test(
+  String.raw`56 :: 1`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 7,
     },
     result: {
       success: true,
@@ -4091,7 +4221,7 @@ test(
   },
   {
     parser: {
-      tokenPosition: 9,
+      tokenPosition: 8,
       column: 15,
     },
     result: {
@@ -4228,7 +4358,7 @@ test(
   },
   {
     parser: {
-      tokenPosition: 11,
+      tokenPosition: 10,
       column: 17,
     },
     result: {

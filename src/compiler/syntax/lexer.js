@@ -59,6 +59,18 @@ class Lexer {
     return null;
   }
 
+  // Check if specified token is next token in code.
+  peekToken(str) {
+    const { length } = str;
+
+    // Check if input string matches the subsequent chars in code.
+    if (str === this.code.slice(this.lastPosition + 1, this.lastPosition + length + 1)) {
+      return true;
+    }
+
+    return false;
+  }
+
   // Check if lexer has reached last position.
   lastReached() {
     if (this.lastPosition + 1 >= this.code.length) {
@@ -274,6 +286,14 @@ class Lexer {
       if (this.eatToken('//') || this.eatToken('//=')) {
         this.revert(lastPosition, column, line);
         break;
+      }
+    }
+
+    // Check for special operators like "::".
+    if (token === '') {
+      if (this.peekToken('::') || this.peekToken('<:') || this.peekToken('<:')) {
+        token += this.eatChar();
+        token += this.eatChar();
       }
     }
 

@@ -14,7 +14,6 @@ const { print } = require('../../utils');
  *   when using their cached value you update the parser's lastIndentCount.
  * TODO:
  * * Parse multilinestring properly
- * * Remove ignoreNewline
  * * Comments to be removed from parser and lexer. Should be done separately
  * * Handle block end punctuators
  * * Handle macros
@@ -30,7 +29,6 @@ class Parser {
     this.lastIndentCount = 0;
     this.column = 0;
     this.line = 1;
-    this.ignoreNewline = false;
     // Caching.
     this.cache = {};
   }
@@ -41,14 +39,12 @@ class Parser {
    * @param{Number} lastIndentCount.
    * @param{Number} column.
    * @param{Number} line.
-   * @param{Number} ignoreNewline.
    */
-  revert(tokenPosition, lastIndentCount, column, line, ignoreNewline) {
+  revert(tokenPosition, lastIndentCount, column, line) {
     this.tokenPosition = tokenPosition;
     this.lastIndentCount = lastIndentCount;
     this.column = column;
     this.line = line;
-    this.ignoreNewline = ignoreNewline;
   }
 
   /**
@@ -119,7 +115,7 @@ class Parser {
   parse(...args) {
     // Get state before parsing.
     const {
-      tokenPosition, lastIndentCount, column, line, ignoreNewline,
+      tokenPosition, lastIndentCount, column, line,
     } = this;
 
     const result = { success: true, ast: [] };
@@ -199,7 +195,7 @@ class Parser {
     // Revert state if parsing wasn't successful.
     if (!result.success) {
       result.ast = [];
-      this.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+      this.revert(tokenPosition, lastIndentCount, column, line);
     }
 
     return result;
@@ -303,7 +299,7 @@ const parse = (...args) => parser => parser.parse(...args);
 const alt = (...args) => (parser) => {
   // Get state before parsing.
   const {
-    tokenPosition, lastIndentCount, column, line, ignoreNewline,
+    tokenPosition, lastIndentCount, column, line,
   } = parser;
 
   const result = { success: false, ast: { alternative: 0, ast: {} } };
@@ -387,7 +383,7 @@ const alt = (...args) => (parser) => {
 
   // Revert state if parsing wasn't successful.
   if (!result.success) {
-    parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+    parser.revert(tokenPosition, lastIndentCount, column, line);
   }
 
   return result;
@@ -429,14 +425,14 @@ const opt = (...arg) => parser => ({ success: true, ast: parse(...arg)(parser).a
 const and = (...arg) => (parser) => {
   // Get state before parsing.
   const {
-    tokenPosition, lastIndentCount, column, line, ignoreNewline,
+    tokenPosition, lastIndentCount, column, line,
   } = parser;
 
   // Parse tokens.
   const parseResult = { success: parse(...arg)(parser).success, directive: true };
 
   // Revert parser state.
-  parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+  parser.revert(tokenPosition, lastIndentCount, column, line);
 
   return parseResult;
 };
@@ -444,14 +440,14 @@ const and = (...arg) => (parser) => {
 const not = (...arg) => (parser) => {
   // Get state before parsing.
   const {
-    tokenPosition, lastIndentCount, column, line, ignoreNewline,
+    tokenPosition, lastIndentCount, column, line,
   } = parser;
 
   // Parse tokens.
   const parseResult = { success: !parse(...arg)(parser).success, directive: true };
 
   // Revert parser state.
-  parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+  parser.revert(tokenPosition, lastIndentCount, column, line);
 
   return parseResult;
 };
@@ -459,14 +455,14 @@ const not = (...arg) => (parser) => {
 const eoi = (parser) => {
   // Get state before parsing.
   const {
-    tokenPosition, lastIndentCount, column, line, ignoreNewline,
+    tokenPosition, lastIndentCount, column, line,
   } = parser;
 
   // Parse tokens.
   const parseResult = { success: parser.lastReached(), directive: true };
 
   // Revert parser state.
-  parser.revert(tokenPosition, lastIndentCount, column, line, ignoreNewline);
+  parser.revert(tokenPosition, lastIndentCount, column, line);
 
   return parseResult;
 };
@@ -1640,6 +1636,9 @@ const cascadeNotationPrefix = (parser) => {
 
 // indexargument =
 //   | (simpleexpression _?)? ':' (_? simpleexpression? _? ':')? _? simpleexpression?
+//   | '::' _? simpleexpression?
+//   | atom nospace '::' _? simpleexpression?
+//   | simpleexpression _? '::' _? simpleexpression?
 //   | simpleexpression
 //   { begin, step, end } | { index }
 // TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
@@ -1659,6 +1658,9 @@ const indexArgument = (parser) => {
       opt(numericLiteral, opt(_)), ':', opt(opt(_), opt(numericLiteral), opt(_), ':'),
       opt(opt(_), numericLiteral),
     ),
+    parse('::', opt(_), opt(simpleExpression)), // To prevent prefixatom clash. `::1`
+    parse(atom, opt(_), '::', opt(_), opt(simpleExpression)), // To prevent postfixatom and infixatom clash. `1::`
+    parse(simpleExpression, opt(_), '::', opt(_), opt(simpleExpression)),
     numericLiteral,
   )(parser);
 
@@ -1679,6 +1681,30 @@ const indexArgument = (parser) => {
       if (ast[3].length > 0) result.ast.end = ast[3][1];
     // Alternative 2 passed.
     } else if (parseResult.ast.alternative === 2) {
+      const { ast } = parseResult.ast;
+
+      // Getting the end.
+      if (ast[2].length > 0) result.ast.end = ast[2][0];
+    // Alternative 3 passed.
+    } else if (parseResult.ast.alternative === 3) {
+      const { ast } = parseResult.ast;
+
+      // Getting the begin.
+      result.ast.begin = ast[0];
+
+      // Getting the end.
+      if (ast[4].length > 0) result.ast.end = ast[4][0];
+    // Alternative 4 passed.
+    } else if (parseResult.ast.alternative === 4) {
+      const { ast } = parseResult.ast;
+
+      // Getting the begin.
+      result.ast.begin = ast[0];
+
+      // Getting the end.
+      if (ast[4].length > 0) result.ast.end = ast[4][0];
+    // Alternative 5 passed.
+    } else if (parseResult.ast.alternative === 5) {
       // Getting the index.
       result.ast = { index: parseResult.ast.ast };
     }
@@ -2459,7 +2485,6 @@ const range = (parser) => {
 //     )
 //     simpleexpression
 //   { argument }
-// TODO: Refactor: Change atom to simpleexpression and write tests for it.
 // TODO: Refactor: Uncomment the commented out expressions and write tests for them.
 const commandNotationArgument = (parser) => {
   const { tokenPosition } = parser;
@@ -2483,7 +2508,7 @@ const commandNotationArgument = (parser) => {
       numericLiteral,
       regexLiteral,
     )),
-    atom,
+    simpleExpression,
   )(parser);
 
   if (parseResult.success) {

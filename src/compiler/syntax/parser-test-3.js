@@ -1504,6 +1504,65 @@ test(
   },
 );
 
+lexer = new Lexer('foo! x + 0x55');
+parser = new Parser(lexer.lex());
+result = commandNotation(parser);
+test(
+  String.raw`foo! x + y`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 4,
+      column: 13,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'call',
+        expression: {
+          kind: 'identifier',
+          value: 'foo',
+        },
+        mutative: true,
+        vectorized: false,
+        arguments: [
+          {
+            key: null,
+            value: {
+              kind: 'infixexpression',
+              expressions: [
+                {
+                  kind: 'identifier',
+                  value: 'x',
+                },
+                {
+                  kind: 'integerhexadecimalliteral',
+                  value: '55',
+                },
+              ],
+              operators: [
+                {
+                  vectorized: false,
+                  operator: {
+                    kind: 'operator',
+                    value: '+',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
 print('============== PRIMITIVEEXPRESSION ==============');
 lexer = new Lexer('...0xFFEEFF.FFp-3');
 parser = new Parser(lexer.lex());
