@@ -2,7 +2,7 @@
 
 const { print, keyToUnicode } = require('../src/utils');
 const Lexer = require('../src/compiler/syntax/lexer');
-const { Parser, operator } = require('../src/compiler/syntax/parser');
+const { Parser, expression } = require('../src/compiler/syntax/parser');
 
 // PROBLEM
 // Bug when left is pressed two or more times and backspace is pressed
@@ -38,7 +38,7 @@ const commandlineInfo = {
   },
   help: `
 \x1b[47m\x1b[30m USAGE \x1b[0m
-  
+
   astro \x1b[36m[options]\x1b[0m \x1b[36m[file]\x1b[0m -- \x1b[36m[...args]\x1b[0m
 
 \x1b[47m\x1b[30m OPTIONS \x1b[0m
@@ -120,6 +120,10 @@ class AstroPrompt {
     this.lineBuffer = '';
     this.cursorInMiddle = false;
     this.cursorPosition = -1;
+
+    // History of all inputs
+    this.history = [];
+    this.historyPointer = -1;
   }
 
   startCommandline() {
@@ -169,7 +173,19 @@ class AstroPrompt {
         this.exited(this.lineBuffer);
         stdout.write('\n');
 
-        // Check if prompt is in mode.
+        // If historyPointer points to the middle of history when enter key was pressed
+        // Pop the last element. It's not supposed to be there. It's only there for navigation.
+        if (this.historyPointer > -1) {
+          this.history.pop();
+        }
+
+        // Save line input in history if lineBuffer isn't empty and
+        // If input isn't the same as the last item in history.
+        if (this.lineBuffer.length > 0 && this.lineBuffer !== this.history[this.history.length - 1]) {
+          this.history.push(this.lineBuffer);
+        }
+
+        // Check if prompt is in a mode.
         if (this.mode === 'help') {
           this.showHelpResult();
           this.mode = 'code';
@@ -186,6 +202,9 @@ class AstroPrompt {
             this.showParserResult();
           }
         }
+
+        // Reset historyPointer
+        this.historyPointer = -1;
 
         this.resetPrompt(); // Reset prompt.
         this.lineBuffer = '';
@@ -250,10 +269,65 @@ class AstroPrompt {
       // TODO: Use for autocomplete.
       } else if (data === '\u0009') {
         // Do nothing.
-      //== Up, down, Ctrl + K, Shift + {Up|Down|Right|Left}  key pressed.
+      //== Up key pressed
+      } else if (data === '\u001b[A') {
+        // Only do something if not at the first point of history and
+        // if history is not empty
+        if (this.historyPointer !== 0 && this.history.length > 0) {
+          // If at current prompt
+          if (this.historyPointer === -1) {
+            // Save content on line
+            this.history.push(this.lineBuffer);
+
+            // Set history pointer
+            this.historyPointer = this.history.length - 2;
+          } else {
+            // Set history pointer
+            this.historyPointer -= 1;
+          }
+
+          // Update lineBuffer
+          this.lineBuffer = this.history[this.historyPointer];
+
+          stdout.clearLine();  // Clear current text.
+          stdout.cursorTo(0);  // Move cursor to beginning of line.
+
+          // Print prompt.
+          stdout.write(this.currentPrompt);
+
+          // Print line content.
+          stdout.write(this.lineBuffer);
+        }
+      //== Down key pressed
+      } else if (data === '\u001b[B') {
+        // Only do something if not at current prompt
+        if (this.historyPointer !== -1) {
+          // Set history pointer
+          this.historyPointer += 1;
+
+          // Update lineBuffer
+          this.lineBuffer = this.history[this.historyPointer];
+
+          // If at current prompt
+          if (this.historyPointer === this.history.length - 1) {
+            // Remove current prompt from history
+            this.history.pop();
+
+            // Set history pointer
+            this.historyPointer = -1;
+          }
+
+          stdout.clearLine();  // Clear current text.
+          stdout.cursorTo(0);  // Move cursor to beginning of line.
+
+          // Print prompt.
+          stdout.write(this.currentPrompt);
+
+          // Print line content.
+          stdout.write(this.lineBuffer);
+        }
+      //== Ctrl + K, Shift + {Up|Down|Right|Left}  key pressed.
       } else if (
-        data === '\u001b[A' ||
-        data === '\u001b[B' ||
         data === '\u000B' ||
         data === '\u001B\u005B\u0031\u003B\u0032\u0041' ||
         data === '\u001B\u005B\u0031\u003B\u0032\u0042' ||
@@ -314,7 +388,7 @@ class AstroPrompt {
   showParserResult() {
     if (this.lineBuffer !== '') {
       const tokens = new Lexer(this.lineBuffer).lex();
-      print(new Parser(tokens).parse(operator));
+      print(new Parser(tokens).parse(expression));
       stdout.write('\n');
     }
   }
@@ -334,7 +408,8 @@ class AstroPrompt {
   }
 
   exited() {
-    if (this.lineBuffer.trim() === '\\exit') {
+    const trimmedBuffer = this.lineBuffer.trim();
+    if (trimmedBuffer === '\\exit' || trimmedBuffer === '\\quit' || trimmedBuffer === '\\q') {
       stdout.write('\n');
       process.exit();
     }
