@@ -49,7 +49,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -57,7 +56,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -77,7 +75,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -85,7 +82,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 11,
     },
     result: {
@@ -103,7 +99,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -111,7 +106,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 5,
     },
     result: {
@@ -130,7 +124,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -138,7 +131,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 11,
     },
     result: {
@@ -157,7 +149,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -165,7 +156,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -183,7 +173,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -191,7 +180,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 12,
     },
     result: {
@@ -209,7 +197,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -217,7 +204,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 5,
     },
     result: {
@@ -236,7 +222,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -244,7 +229,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -262,7 +246,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -270,7 +253,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 11,
     },
     result: {
@@ -291,7 +273,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -299,7 +280,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 5,
     },
     result: {
@@ -322,7 +302,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -330,7 +309,6 @@ test(
   {
     parser: {
       tokenPosition: 2,
-      line: 1,
       column: 16,
     },
     result: {
@@ -359,7 +337,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -367,7 +344,6 @@ test(
   {
     parser: {
       tokenPosition: 4,
-      line: 1,
       column: 25,
     },
     result: {
@@ -438,7 +414,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -446,7 +421,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 10,
     },
     result: {
@@ -470,7 +444,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -478,7 +451,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 5,
     },
     result: {
@@ -499,7 +471,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -507,7 +478,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 4,
     },
     result: {
@@ -531,7 +501,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -539,7 +508,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 4,
     },
     result: {
@@ -565,7 +533,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -573,7 +540,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 5,
     },
     result: {
@@ -595,7 +561,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -603,7 +568,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -621,7 +585,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -629,7 +592,6 @@ test(
   {
     parser: {
       tokenPosition: 2,
-      line: 1,
       column: 21,
     },
     result: {
@@ -652,7 +614,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -660,7 +621,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -678,7 +638,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -686,7 +645,6 @@ test(
   {
     parser: {
       tokenPosition: 2,
-      line: 1,
       column: 21,
     },
     result: {
@@ -709,7 +667,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -717,7 +674,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 5,
     },
     result: {
@@ -735,7 +691,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -743,7 +698,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -762,7 +716,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -770,7 +723,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -788,7 +740,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -796,7 +747,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -814,7 +764,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -822,7 +771,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -840,7 +788,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -848,7 +795,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -867,7 +813,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -875,7 +820,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -893,7 +837,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -901,7 +844,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -919,7 +861,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -927,7 +868,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -946,7 +886,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -954,7 +893,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -972,7 +910,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -980,7 +917,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -999,7 +935,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1007,7 +942,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -1027,7 +961,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1035,7 +968,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 3,
     },
     result: {
@@ -1056,7 +988,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1064,7 +995,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 9,
     },
     result: {
@@ -1085,7 +1015,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1093,7 +1022,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 10,
     },
     result: {
@@ -1114,7 +1042,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1122,7 +1049,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 10,
     },
     result: {
@@ -1144,7 +1070,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1152,7 +1077,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -1172,7 +1096,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1180,7 +1103,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 4,
     },
     result: {
@@ -1201,7 +1123,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1209,7 +1130,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 16,
     },
     result: {
@@ -1230,7 +1150,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1238,7 +1157,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 12,
     },
     result: {
@@ -1259,7 +1177,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1267,7 +1184,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 11,
     },
     result: {
@@ -1289,7 +1205,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1297,7 +1212,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -1317,7 +1231,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1325,7 +1238,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 12,
     },
     result: {
@@ -1346,7 +1258,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1354,7 +1265,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 10,
     },
     result: {
@@ -1376,7 +1286,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1384,7 +1293,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -1404,7 +1312,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1412,7 +1319,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 14,
     },
     result: {
@@ -1433,7 +1339,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1441,7 +1346,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 17,
     },
     result: {
@@ -1462,7 +1366,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1470,7 +1373,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 24,
     },
     result: {
@@ -1493,7 +1395,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1502,7 +1403,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 1,
     },
@@ -1522,7 +1422,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1531,7 +1430,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1551,7 +1449,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1560,7 +1457,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1580,7 +1476,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1589,7 +1484,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 1,
     },
@@ -1610,7 +1504,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1619,7 +1512,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 2,
     },
@@ -1640,7 +1532,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1649,7 +1540,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1669,7 +1559,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1678,7 +1567,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 1,
     },
@@ -1698,7 +1586,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1707,7 +1594,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 1,
     },
@@ -1726,7 +1612,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1735,7 +1620,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1755,7 +1639,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1764,7 +1647,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 2,
     },
@@ -1783,7 +1665,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1792,7 +1673,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1813,7 +1693,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1822,7 +1701,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 1,
     },
@@ -1842,7 +1720,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1851,7 +1728,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1872,7 +1748,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1881,7 +1756,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1902,7 +1776,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1911,7 +1784,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 1,
     },
@@ -1932,7 +1804,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
       lastIndentCount: parser.lastIndentCount,
     },
@@ -1941,7 +1812,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
       lastIndentCount: 0,
     },
@@ -1962,7 +1832,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1970,7 +1839,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -1988,7 +1856,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -1996,7 +1863,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2014,7 +1880,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2022,7 +1887,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2040,7 +1904,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2048,7 +1911,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2066,7 +1928,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2074,7 +1935,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 3,
     },
     result: {
@@ -2102,7 +1962,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2110,7 +1969,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2129,7 +1987,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2137,7 +1994,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2156,7 +2012,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2164,7 +2019,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2182,7 +2036,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2190,7 +2043,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2208,7 +2060,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2216,7 +2067,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2234,7 +2084,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2242,7 +2091,6 @@ test(
   {
     parser: {
       tokenPosition: 1,
-      line: 1,
       column: 2,
     },
     result: {
@@ -2270,7 +2118,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2278,7 +2125,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2296,7 +2142,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2304,7 +2149,6 @@ test(
   {
     parser: {
       tokenPosition: 3,
-      line: 1,
       column: 12,
     },
     result: {
@@ -2322,7 +2166,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2330,7 +2173,6 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      line: 1,
       column: 2,
     },
     result: {
@@ -2349,7 +2191,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2357,7 +2198,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2375,7 +2215,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2383,7 +2222,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2401,7 +2239,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2409,7 +2246,6 @@ test(
   {
     parser: {
       tokenPosition: 4,
-      line: 1,
       column: 16,
     },
     result: {
@@ -2427,7 +2263,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2435,7 +2270,6 @@ test(
   {
     parser: {
       tokenPosition: 3,
-      line: 1,
       column: 5,
     },
     result: {
@@ -2454,7 +2288,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2462,7 +2295,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2480,7 +2312,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2488,7 +2319,6 @@ test(
   {
     parser: {
       tokenPosition: -1,
-      line: 1,
       column: 0,
     },
     result: {
@@ -2506,7 +2336,6 @@ test(
   {
     parser: {
       tokenPosition: parser.tokenPosition,
-      line: parser.line,
       column: parser.column,
     },
     result,
@@ -2514,7 +2343,6 @@ test(
   {
     parser: {
       tokenPosition: 3,
-      line: 1,
       column: 6,
     },
     result: {

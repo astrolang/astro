@@ -85,7 +85,6 @@ class Lexer {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'eatToken';
-    const startLine = line;
     const startColumn = column;
     const { length } = str;
 
@@ -105,12 +104,12 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
+
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -129,7 +128,6 @@ class Lexer {
     const { lastPosition, column, line } = this;
     const token = '';
     const kind = 'spaces';
-    const startLine = line;
     const startColumn = column;
     let spaceCount = 0;
 
@@ -145,22 +143,20 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // newline =
   //   | '\r'? '\n'
   newline() {
-    const { column, line } = this;
+    const { column } = this;
     const token = '';
     const kind = 'newline';
-    const startLine = line;
     const startColumn = column;
 
     if (this.code[this.lastPosition + 1] === '\n') {
@@ -173,12 +169,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -188,7 +183,6 @@ class Lexer {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'noname';
-    const startLine = line;
     const startColumn = column;
 
     // Check if next char in input code is a '_' character.
@@ -202,12 +196,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -218,14 +211,13 @@ class Lexer {
   //   | digit
   // identifier =
   //   | identifierbeginchar identifierendchar* // Contains keyword check
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: identifier
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: keyword
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn } :: booleanliteral
+  //   { token, kind, startColumn, stopColumn } :: identifier
+  //   { token, kind, startColumn, stopColumn } :: keyword
+  //   { token, kind, startColumn, stopColumn } :: booleanliteral
   identifier() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'identifier';
-    const startLine = line;
     const startColumn = column;
 
     // Check if next char in input code is a valid identifier start character.
@@ -243,24 +235,23 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     // Check if lexed identifier is a boolean literal.
     if (token === 'true' || token === 'false') {
       return {
-        token, kind: 'booleanliteral', startLine, stopLine, startColumn, stopColumn,
+        token, kind: 'booleanliteral', startColumn, stopColumn,
       };
     // Otherwise check if lexed identifier is a keyword.
     } else if (this.keywords.indexOf(token) > -1) {
       return {
-        token, kind: 'keyword', startLine, stopLine, startColumn, stopColumn,
+        token, kind: 'keyword', startColumn, stopColumn,
       };
     }
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -268,12 +259,11 @@ class Lexer {
   //   | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
   // operator =
   //   | operatorchar+
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   operator() {
     let { lastPosition, column, line } = this;
     let token = '';
     const kind = 'operator';
-    const startLine = line;
     const startColumn = column;
 
     // Check if subsequent chars in input code are valid operator character.
@@ -303,12 +293,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -318,7 +307,6 @@ class Lexer {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'punctuator';
-    const startLine = line;
     const startColumn = column;
 
     // Check if subsequent chars in input code are valid operator character.
@@ -332,12 +320,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -351,12 +338,11 @@ class Lexer {
   //   | [0-9a-fA-F]
   // integerbinaryliteral =
   //   | '0b' '_'? digitbinary ('_'? digitbinary)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   integerBinaryLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'integerbinaryliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume '0b'.
@@ -401,23 +387,21 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // integeroctalliteral =
   //   | '0o' '_'? digitoctal ('_'? digitoctal)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   integerOctalLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'integeroctalliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume '0o'.
@@ -462,23 +446,21 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // integerhexadecimalliteral =
   //   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   integerHexadecimalLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'integerhexadecimalliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume '0x'.
@@ -523,23 +505,21 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // integerdecimalliteral =
   //   | digitdecimal ('_'? digitdecimal)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   integerDecimalLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'integerdecimalliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume digitdecimal.
@@ -578,24 +558,22 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // floatbinaryliteral =
   //   | '0b' '_'? digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   //   | '0b' '_'? digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   floatBinaryLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'floatbinaryliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume integerpart: ('0b' '_'? digitbinary) ('_'? digitbinary)*.
@@ -739,24 +717,22 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // floatoctalliteral =
   //   | '0o' '_'? digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
   //   | '0o' '_'? digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   floatOctalLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'floatoctalliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume integerpart: ('0o' '_'? digitoctal) ('_'? digitoctal)*.
@@ -900,24 +876,22 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // floathexadecimalliteral =
   //   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   //   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   floatHexadecimalLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'floathexadecimalliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume integerpart: ('0x' '_'? digithexadecimal) ('_'? digithexadecimal)*.
@@ -1062,24 +1036,22 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // floatdecimalliteral =
   //   | (digitdecimal ('_'? digitdecimal)*)? '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   //   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   floatDecimalLiteral() {
     const { lastPosition, column, line } = this;
     let token = '';
     const kind = 'floatdecimalliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume integerpart: digitdecimal ('_'? digitdecimal)*.
@@ -1233,23 +1205,21 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // floatLiteralnomantissa =
   //   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier | '.')
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   floatLiteralNoMantissa() {
     const { lastPosition, column, line } = this;
     let token = '';
     let kind = '';
-    const startLine = line;
     const startColumn = column;
 
     // Consume (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral).
@@ -1278,12 +1248,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -1294,12 +1263,11 @@ class Lexer {
   // singlelinestringliteral =
   //   | "'" singlequotestringchars? "'"
   //   | '"' doublequotestringchars? '"'
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   singleLineStringLiteral() {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'singlelinestringliteral';
-    const startLine = line;
     const startColumn = column;
 
     // Consume "'".
@@ -1349,12 +1317,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -1365,7 +1332,7 @@ class Lexer {
   // multilinestringliteral =
   //   | "'''" triplesinglequotestringchars? "'''"
   //   | '"""' tripledoublequotestringchars? '"""'
-  //   { token, kind, indentations, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, indentations, startColumn, stopColumn }
   // NOTE: Saves space-count of indentations in the string. These indentations are later checked at the
   // parsing stage to see if each is greater or equal to the indentation of the line of the opening quote.
   multiLineStringLiteral() {
@@ -1373,7 +1340,6 @@ class Lexer {
     let token = null;
     const kind = 'multilinestringliteral';
     const indentations = [];
-    const startLine = line;
     const startColumn = column;
 
     // Consume "'''".
@@ -1447,12 +1413,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, indentations, startLine, stopLine, startColumn, stopColumn,
+      token, kind, indentations, startColumn, stopColumn,
     };
   }
 
@@ -1460,13 +1425,12 @@ class Lexer {
   //   | (!(newline | '/') .)+ // TODO
   // regexliteral =
   //   | '/' regexchars? '/'
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   // NOTE: /regex/ (?!(\s*[\{\[\(a-zA-Z0-9@$])|{operatorChar})
   regexLiteral() {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'regexliteral';
-    const startLine = line;
     const startColumn = column;
 
     if (this.peekChar() === '/') {
@@ -1512,12 +1476,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -1525,12 +1488,11 @@ class Lexer {
   //   | (!(newline | eoi) .)+ // TODO
   // singlelinecomment =
   //   | "#" !('=') singlelinecommentchars? &(newline | eoi)
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   singleLineComment() {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'singlelinecomment';
-    const startLine = line;
     const startColumn = column;
 
     // Consume "#".
@@ -1559,12 +1521,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
@@ -1572,12 +1533,12 @@ class Lexer {
   //   | (!('#-' | '-#') .)+ // TODO
   // innermultilinecomment =
   //   | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   innerMultiLineComment() {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'innermultilinecomment';
-    const startLine = line;
+
     const startColumn = column;
 
     // Consume "#-".
@@ -1622,23 +1583,21 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 
   // multilinecomment =
   //   | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
-  //   { token, kind, startLine, stopLine, startColumn, stopColumn }
+  //   { token, kind, startColumn, stopColumn }
   multiLineComment() {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'multilinecomment';
-    const startLine = line;
     const startColumn = column;
 
     // Consume "#-".
@@ -1682,12 +1641,11 @@ class Lexer {
       return null;
     }
 
-    // Add stop line and column.
-    const stopLine = this.line;
+    // Add stop column.
     const stopColumn = this.column;
 
     return {
-      token, kind, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startColumn, stopColumn,
     };
   }
 

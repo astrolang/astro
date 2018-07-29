@@ -21,16 +21,16 @@ identifierendchar =
 
 identifier =
   | identifierbeginchar identifierendchar* // Contains keyword check
-  { token, kind, startLine, stopLine, startColumn, stopColumn } :: identifier
-  { token, kind, startLine, stopLine, startColumn, stopColumn } :: keyword
-  { token, kind, startLine, stopLine, startColumn, stopColumn } :: booleanliteral
+  { token, kind, startColumn, stopColumn } :: identifier
+  { token, kind, startColumn, stopColumn } :: keyword
+  { token, kind, startColumn, stopColumn } :: booleanliteral
 
 operatorchar =
   | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
 
 operator =
   | operatorchar+
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 punctuator =
   | [(){}[\],.~] // TODO: Incomplete
@@ -49,43 +49,43 @@ digithexadecimal =
 
 integerbinaryliteral =
   | '0b' '_'? digitbinary ('_'? digitbinary)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 integeroctalliteral =
   | '0o' '_'? digitoctal ('_'? digitoctal)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 integerhexadecimalliteral =
   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 integerdecimalliteral =
   | digitdecimal ('_'? digitdecimal)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 floatbinaryliteral =
   | '0b' '_'? digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
   | '0b' '_'? digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 floatoctalliteral =
   | '0o' '_'? digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
   | '0o' '_'? digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 floathexadecimalliteral =
   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
   | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 floatdecimalliteral =
   | (digitdecimal ('_'? digitdecimal)*)? !('.' nospace '.') '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 floatLiteralnomantissa =
   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier | '.')
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 singlequotestringchars =
   | (!(newline | "'") .)+ // TODO
@@ -96,7 +96,7 @@ doublequotestringchars =
 singlelinestringliteral =
   | "'" singlequotestringchars? "'"
   | '"' doublequotestringchars? '"'
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 triplesinglequotestringchars =
   | (!"'''" .)+ // TODO
@@ -107,19 +107,19 @@ tripledoublequotestringchars =
 multilinestringliteral =
   | "'''" triplesinglequotestringchars? (nextline samedent triplesinglequotestringchars?)* "'''"
   | '"""' tripledoublequotestringchars? (nextline samedent tripledoublequotestringchars?)* '"""'
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 regexchars =
   | (!(newline | '/') .)+ // TODO
 
 regexliteral =
   | '/' regexchars? '/'
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 booleanliteral =
   | 'true'
   | 'false'
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 singlelinecommentchars =
   | (!(newline) .)+ // TODO
@@ -127,18 +127,18 @@ singlelinecommentchars =
 
 singlelinecomment =
   | "#" !('-') singlelinecommentchars? &(newline | eoi)
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 multilinecommentchars =
   | (!('#-' | '-#') .)+ // TODO
 
 innermultilinecomment =
   | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 multilinecomment =
   | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
-  { token, kind, startLine, stopLine, startColumn, stopColumn }
+  { token, kind, startColumn, stopColumn }
 
 
 /*************** PARSER ***************/

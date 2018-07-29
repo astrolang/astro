@@ -14,8 +14,6 @@ test(
   {
     token: 'hello',
     kind: 'eatToken',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 5,
   },
@@ -29,8 +27,6 @@ test(
   {
     token: '..',
     kind: 'eatToken',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 2,
   },
@@ -53,8 +49,6 @@ test(
   {
     token: '',
     kind: 'spaces',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 5,
   },
@@ -77,8 +71,6 @@ test(
   {
     token: '',
     kind: 'newline',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -92,8 +84,6 @@ test(
   {
     token: '',
     kind: 'newline',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 2,
   },
@@ -108,8 +98,6 @@ test(
   {
     token: '_',
     kind: 'noname',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -132,8 +120,6 @@ test(
   {
     token: 'some_name678',
     kind: 'identifier',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 12,
   },
@@ -147,8 +133,6 @@ test(
   {
     token: 'where',
     kind: 'keyword',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 5,
   },
@@ -162,8 +146,6 @@ test(
   {
     token: 'else',
     kind: 'keyword',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 4,
   },
@@ -177,8 +159,6 @@ test(
   {
     token: 'elseif',
     kind: 'identifier',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 6,
   },
@@ -192,8 +172,6 @@ test(
   {
     token: 'true',
     kind: 'booleanliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 4,
   },
@@ -207,8 +185,6 @@ test(
   {
     token: 'false',
     kind: 'booleanliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 5,
   },
@@ -223,8 +199,6 @@ test(
   {
     token: '+',
     kind: 'operator',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -238,8 +212,6 @@ test(
   {
     token: '+',
     kind: 'operator',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -253,8 +225,6 @@ test(
   {
     token: '+',
     kind: 'operator',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -268,8 +238,6 @@ test(
   {
     token: '/-/',
     kind: 'operator',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 3,
   },
@@ -283,8 +251,6 @@ test(
   {
     token: '//',
     kind: 'operator',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 2,
   },
@@ -299,8 +265,6 @@ test(
   {
     token: '.',
     kind: 'punctuator',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -314,8 +278,6 @@ test(
   {
     token: ';',
     kind: 'punctuator',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -338,8 +300,6 @@ test(
   {
     token: '0',
     kind: 'integerbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 3,
   },
@@ -353,8 +313,6 @@ test(
   {
     token: '0',
     kind: 'integerbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 3,
   },
@@ -368,8 +326,6 @@ test(
   {
     token: '1001',
     kind: 'integerbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 6,
   },
@@ -383,8 +339,6 @@ test(
   {
     token: '101110001110',
     kind: 'integerbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -398,8 +352,6 @@ test(
   {
     token: '101110001110',
     kind: 'integerbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 17,
   },
@@ -422,8 +374,6 @@ test(
   {
     token: '7',
     kind: 'integeroctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 3,
   },
@@ -437,8 +387,6 @@ test(
   {
     token: '7',
     kind: 'integeroctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 3,
   },
@@ -452,8 +400,6 @@ test(
   {
     token: '5667',
     kind: 'integeroctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 6,
   },
@@ -467,8 +413,6 @@ test(
   {
     token: '66551466',
     kind: 'integeroctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 11,
   },
@@ -482,8 +426,6 @@ test(
   {
     token: '66551466',
     kind: 'integeroctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 12,
   },
@@ -506,8 +448,6 @@ test(
   {
     token: 'ff',
     kind: 'integerhexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 4,
   },
@@ -521,8 +461,6 @@ test(
   {
     token: 'ab',
     kind: 'integerhexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 4,
   },
@@ -536,8 +474,6 @@ test(
   {
     token: '56fe',
     kind: 'integerhexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 6,
   },
@@ -551,8 +487,6 @@ test(
   {
     token: '6C5F14e6',
     kind: 'integerhexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 13,
   },
@@ -566,8 +500,6 @@ test(
   {
     token: '6C5F14e6',
     kind: 'integerhexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
   },
@@ -590,8 +522,6 @@ test(
   {
     token: '345',
     kind: 'integerdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 4,
   },
@@ -605,8 +535,6 @@ test(
   {
     token: '90',
     kind: 'integerdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 3,
   },
@@ -620,8 +548,6 @@ test(
   {
     token: '5200',
     kind: 'integerdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 5,
   },
@@ -635,8 +561,6 @@ test(
   {
     token: '1245000',
     kind: 'integerdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 9,
   },
@@ -659,8 +583,6 @@ test(
   {
     token: '10011110.1101',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -674,8 +596,6 @@ test(
   {
     token: '10011110.1101',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -689,8 +609,6 @@ test(
   {
     token: '11011001.1001',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -704,8 +622,6 @@ test(
   {
     token: '110110011111e1001',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 21,
   },
@@ -719,8 +635,6 @@ test(
   {
     token: '1101.1100e1001',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 19,
   },
@@ -734,8 +648,6 @@ test(
   {
     token: '1101.1100e+1001',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 20,
   },
@@ -749,8 +661,6 @@ test(
   {
     token: '1101e-1001',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
   },
@@ -764,8 +674,6 @@ test(
   {
     token: '1101e-1001',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 15,
   },
@@ -788,8 +696,6 @@ test(
   {
     token: '77565461.5332',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -803,8 +709,6 @@ test(
   {
     token: '12345670.0234',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -818,8 +722,6 @@ test(
   {
     token: '12334455.7654',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -834,8 +736,6 @@ test(
   {
     token: '756010340023e1771',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 21,
   },
@@ -849,8 +749,6 @@ test(
   {
     token: '3466.2400e7001',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 19,
   },
@@ -864,8 +762,6 @@ test(
   {
     token: '7534.1100e+1771',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 20,
   },
@@ -879,8 +775,6 @@ test(
   {
     token: '5701e-3201',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
   },
@@ -894,8 +788,6 @@ test(
   {
     token: '5701e-3201',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 15,
   },
@@ -918,8 +810,6 @@ test(
   {
     token: '43fE1AcB.ff45',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -933,8 +823,6 @@ test(
   {
     token: '1ff456E0.02a4',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -948,8 +836,6 @@ test(
   {
     token: 'ff3A44Ab.7fE4',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -964,8 +850,6 @@ test(
   {
     token: '7fCc1fE30fE3paB71',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 21,
   },
@@ -979,8 +863,6 @@ test(
   {
     token: 'fFaB.eF03p7Ae1',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 19,
   },
@@ -994,8 +876,6 @@ test(
   {
     token: '7f3B.1c0Cp+1771',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 20,
   },
@@ -1009,8 +889,6 @@ test(
   {
     token: '5fEEp-32A1',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
   },
@@ -1024,8 +902,6 @@ test(
   {
     token: '5fEEp-32A1',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 15,
   },
@@ -1056,8 +932,6 @@ test(
   {
     token: '43911523.5545',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
   },
@@ -1071,8 +945,6 @@ test(
   {
     token: '16745630.0254',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
   },
@@ -1086,8 +958,6 @@ test(
   {
     token: '0.7923',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 5,
   },
@@ -1102,8 +972,6 @@ test(
   {
     token: '0.56793349e5590',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 15,
   },
@@ -1118,8 +986,6 @@ test(
   {
     token: '0.3451e-5078',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 11,
   },
@@ -1134,8 +1000,6 @@ test(
   {
     token: '750710911773e4211',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 19,
   },
@@ -1149,8 +1013,6 @@ test(
   {
     token: '9862.5503e6779',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 16,
   },
@@ -1164,8 +1026,6 @@ test(
   {
     token: '4336.1112e+1771',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 18,
   },
@@ -1179,8 +1039,6 @@ test(
   {
     token: '5045e-3251',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 12,
   },
@@ -1227,8 +1085,6 @@ test(
   {
     token: '5490.0',
     kind: 'floatdecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 5,
   },
@@ -1242,8 +1098,6 @@ test(
   {
     token: '1001.0',
     kind: 'floatbinaryliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 7,
   },
@@ -1257,8 +1111,6 @@ test(
   {
     token: '17750.0',
     kind: 'floatoctalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 9,
   },
@@ -1272,8 +1124,6 @@ test(
   {
     token: '56a9fF3.0',
     kind: 'floathexadecimalliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 12,
   },
@@ -1336,8 +1186,6 @@ test(
   {
     token: 'hello world',
     kind: 'singlelinestringliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 13,
   },
@@ -1351,8 +1199,6 @@ test(
   {
     token: '',
     kind: 'singlelinestringliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 2,
   },
@@ -1366,8 +1212,6 @@ test(
   {
     token: 'Wanna eat Π 😂😍😘',
     kind: 'singlelinestringliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 20,
   },
@@ -1381,8 +1225,6 @@ test(
   {
     token: '',
     kind: 'singlelinestringliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 2,
   },
@@ -1446,8 +1288,6 @@ test(
     token: 'return \n{ 1, 2, 3 }',
     kind: 'multilinestringliteral',
     indentations: [],
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 25,
   },
@@ -1462,8 +1302,6 @@ test(
     token: 'return \r\n{ 1, 2, 3 }',
     kind: 'multilinestringliteral',
     indentations: [],
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 26,
   },
@@ -1478,8 +1316,6 @@ test(
     token: 'return \n{ 1, \n    2, \n        3 }\n    ',
     kind: 'multilinestringliteral',
     indentations: [4, 8, 4],
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 44,
   },
@@ -1495,8 +1331,6 @@ test(
     token: 'return \n{ 1, 2, 3 }',
     kind: 'multilinestringliteral',
     indentations: [],
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 25,
   },
@@ -1511,8 +1345,6 @@ test(
     token: 'return \r\n{ 1, 2, 3 }',
     kind: 'multilinestringliteral',
     indentations: [],
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 26,
   },
@@ -1527,8 +1359,6 @@ test(
     token: 'return \n{ 1, \n    2, \n        3 }\n    ',
     kind: 'multilinestringliteral',
     indentations: [4, 8, 4],
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 44,
   },
@@ -1607,8 +1437,6 @@ test(
   {
     token: '',
     kind: 'regexliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 2,
   },
@@ -1622,8 +1450,6 @@ test(
   {
     token: 'Wanna (eat){3} Π*',
     kind: 'regexliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 19,
   },
@@ -1637,8 +1463,6 @@ test(
   {
     token: ' regex ',
     kind: 'regexliteral',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 9,
   },
@@ -1661,8 +1485,6 @@ test(
   {
     token: ' Hello World',
     kind: 'singlelinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 13,
   },
@@ -1676,8 +1498,6 @@ test(
   {
     token: '',
     kind: 'singlelinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 1,
   },
@@ -1691,8 +1511,6 @@ test(
   {
     token: ' Wanna eat Π?',
     kind: 'singlelinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 14,
   },
@@ -1706,8 +1524,6 @@ test(
   {
     token: ': Int, Str -> Int',
     kind: 'singlelinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 18,
   },
@@ -1746,8 +1562,6 @@ test(
   {
     token: '',
     kind: 'innermultilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 4,
   },
@@ -1761,8 +1575,6 @@ test(
   {
     token: '',
     kind: 'innermultilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 19,
   },
@@ -1776,8 +1588,6 @@ test(
   {
     token: '',
     kind: 'innermultilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 35,
   },
@@ -1791,8 +1601,6 @@ test(
   {
     token: '',
     kind: 'innermultilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 73,
   },
@@ -1823,8 +1631,6 @@ test(
   {
     token: '',
     kind: 'multilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 10,
   },
@@ -1846,8 +1652,6 @@ test(
   {
     token: '',
     kind: 'multilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 4,
   },
@@ -1861,8 +1665,6 @@ test(
   {
     token: '',
     kind: 'multilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 19,
   },
@@ -1876,8 +1678,6 @@ test(
   {
     token: '',
     kind: 'multilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 35,
   },
@@ -1891,8 +1691,6 @@ test(
   {
     token: '',
     kind: 'multilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 73,
   },
@@ -1906,8 +1704,6 @@ test(
   {
     token: '',
     kind: 'multilinecomment',
-    startLine: 1,
-    stopLine: 1,
     startColumn: 0,
     stopColumn: 39,
   },
@@ -1928,16 +1724,12 @@ test(
       {
         token: '45FEp34',
         kind: 'floathexadecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 0,
         stopColumn: 9,
       },
       {
         token: 'ident',
         kind: 'identifier',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 10,
         stopColumn: 15,
       },
@@ -1970,48 +1762,36 @@ test(
       {
         token: '45',
         kind: 'integerdecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 0,
         stopColumn: 2,
       },
       {
         token: '46.0',
         kind: 'floatdecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 3,
         stopColumn: 6,
       },
       {
         token: '0.56',
         kind: 'floatdecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 7,
         stopColumn: 10,
       },
       {
         token: '5F.0p+F',
         kind: 'floathexadecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 11,
         stopColumn: 20,
       },
       {
         token: 'hello',
         kind: 'singlelinestringliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 21,
         stopColumn: 28,
       },
       {
         token: 'world',
         kind: 'singlelinestringliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 29,
         stopColumn: 36,
       },
@@ -2030,16 +1810,12 @@ test(
       {
         token: 'hello',
         kind: 'identifier',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 0,
         stopColumn: 5,
       },
       {
         token: '45',
         kind: 'integerdecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 6,
         stopColumn: 8,
       },
@@ -2058,32 +1834,24 @@ test(
       {
         token: 'hello',
         kind: 'identifier',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 0,
         stopColumn: 5,
       },
       {
         token: '',
         kind: 'newline',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 6,
         stopColumn: 7,
       },
       {
         token: '45',
         kind: 'integerdecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 8,
         stopColumn: 10,
       },
       {
         token: '',
         kind: 'newline',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 11,
         stopColumn: 13,
       },
@@ -2102,16 +1870,12 @@ test(
       {
         token: 'ident',
         kind: 'identifier',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 0,
         stopColumn: 5,
       },
       {
         token: '45',
         kind: 'integerdecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 18,
         stopColumn: 20,
       },
@@ -2130,24 +1894,18 @@ test(
       {
         token: 'hello',
         kind: 'identifier',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 0,
         stopColumn: 5,
       },
       {
         token: '',
         kind: 'newline',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 13,
         stopColumn: 14,
       },
       {
         token: '45',
         kind: 'integerdecimalliteral',
-        startLine: 1,
-        stopLine: 1,
         startColumn: 15,
         stopColumn: 17,
       },
