@@ -40,7 +40,7 @@ const test = createTest();
 
 print('============== EATTOKEN ==============');
 lexer = new Lexer('hello world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.eatToken('world');
 test(
   String.raw`hello world--------->FAIL`,
@@ -66,7 +66,7 @@ test(
 );
 
 lexer = new Lexer('hello world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.eatToken('hello');
 result = parser.eatToken('world');
 result = parser.eatToken('world');
@@ -94,7 +94,7 @@ test(
 );
 
 lexer = new Lexer('hello world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.eatToken('hello');
 test(
   String.raw`hello world`,
@@ -120,7 +120,7 @@ test(
 );
 
 lexer = new Lexer('hello world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.eatToken('hello');
 result = parser.eatToken('world');
 test(
@@ -148,7 +148,7 @@ test(
 
 print('============== EATTOKENSTART ==============');
 lexer = new Lexer('helliworld');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.eatTokenStart('hello');
 test(
   String.raw`hello world--------->FAIL`,
@@ -174,7 +174,7 @@ test(
 );
 
 lexer = new Lexer('hellonamaste');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.eatTokenStart('hello');
 test(
   String.raw`hellonamaste`,
@@ -200,7 +200,7 @@ test(
 );
 
 lexer = new Lexer('hello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.eatTokenStart('hello');
 test(
   String.raw`hello`,
@@ -227,7 +227,7 @@ test(
 
 print('============== PARSER.PARSE ==============');
 lexer = new Lexer('hello world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.parse('hello', 'world', 'hello');
 test(
   String.raw`hello world--------->FAIL`,
@@ -253,7 +253,7 @@ test(
 );
 
 lexer = new Lexer('hello world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.parse('hello', 'world');
 test(
   String.raw`hello world`,
@@ -282,7 +282,7 @@ test(
 );
 
 lexer = new Lexer('hello hello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.parse('hello');
 test(
   String.raw`hello hello`,
@@ -311,7 +311,7 @@ test(
 
 print('============== LEXED FUNCTIONS ==============');
 lexer = new Lexer('5.034 hello 0.56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.parse(floatDecimalLiteral);
 result = parser.parse('hello');
 result = parser.parse(floatDecimalLiteral);
@@ -344,7 +344,7 @@ test(
 );
 
 lexer = new Lexer('5.034 . 0o5667 "hello" 58');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.parse(
   floatDecimalLiteral,
   punctuator,
@@ -399,7 +399,7 @@ test(
 print('============== CACHING =============='); // TODO: Needs a more complex example.
 const start1 = process.hrtime();
 lexer = new Lexer('5.034 hello 0.567 world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 // Failed Attempt
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'xxxxx');
 // Reset parser cache
@@ -412,7 +412,7 @@ print('Without Caching: ', diff1, 'ms');
 
 const start2 = process.hrtime();
 lexer = new Lexer('5.034 hello 0.567 world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 // Failed Attempt
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'xxxxx');
 // Successful Attempt
@@ -422,14 +422,14 @@ const diff2 = process.hrtime(start2)[1] * 1e-6;
 print('With Caching: ', diff2, 'ms');
 
 lexer = new Lexer('5.034 hello 0.567 world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'xxxxx');
 result = parser.parse(floatDecimalLiteral, 'hello', floatDecimalLiteral, 'world');
 print([parser.cache[1], parser.cache[-1]]);
 
 print('============== PARSE ==============');
 lexer = new Lexer('++-- world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parse(operator, 'world')(parser);
 test(
   String.raw`++-- world`,
@@ -461,7 +461,7 @@ test(
 );
 
 lexer = new Lexer('hello hello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parse('hello')(parser);
 test(
   String.raw`hello hello`,
@@ -490,7 +490,7 @@ test(
 
 print('============== ALT ==============');
 lexer = new Lexer('++--');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = alt(operator, 'world')(parser);
 test(
   String.raw`++--`,
@@ -522,7 +522,7 @@ test(
 );
 
 lexer = new Lexer('++**');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = alt('hello', parse(operator))(parser);
 test(
   String.raw`++**`,
@@ -556,7 +556,7 @@ test(
 );
 
 lexer = new Lexer('hello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = alt(operator, 'hello')(parser);
 test(
   String.raw`hello`,
@@ -586,7 +586,7 @@ test(
 
 print('============== MORE ==============');
 lexer = new Lexer('none world world none');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = more('world')(parser);
 test(
   String.raw`none world world none--------->FAIL`,
@@ -612,7 +612,7 @@ test(
 );
 
 lexer = new Lexer('world   world   world none');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = more('world')(parser);
 test(
   String.raw`world   world   world none`,
@@ -643,7 +643,7 @@ test(
 
 print('============== OPTMORE ==============');
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = optmore('world')(parser);
 test(
   String.raw``,
@@ -669,7 +669,7 @@ test(
 );
 
 lexer = new Lexer('world   world   world none');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = optmore('world')(parser);
 test(
   String.raw`world   world   world none`,
@@ -700,7 +700,7 @@ test(
 
 print('============== OPT ==============');
 lexer = new Lexer('world   world   world   world  none');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = opt('world')(parser);
 test(
   String.raw`world   world   world   world  none`,
@@ -726,7 +726,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = opt('world')(parser);
 test(
   String.raw``,
@@ -753,7 +753,7 @@ test(
 
 print('============== AND ==============');
 lexer = new Lexer('678');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = and(identifier)(parser);
 test(
   String.raw`678--------->FAIL`,
@@ -779,7 +779,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = and(identifier)(parser);
 test(
   String.raw`--------->FAIL`,
@@ -805,7 +805,7 @@ test(
 );
 
 lexer = new Lexer('0x45abcdef79');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = and(integerHexadecimalLiteral)(parser);
 test(
   String.raw`0x45abcdef79`,
@@ -831,7 +831,7 @@ test(
 );
 
 lexer = new Lexer('character');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = and('§ch')(parser);
 test(
   String.raw`character`,
@@ -858,7 +858,7 @@ test(
 
 // print('============== NOT ==============');
 lexer = new Lexer('0x45abcdef79');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = not(integerHexadecimalLiteral)(parser);
 test(
   String.raw`0x45abcdef79--------->FAIL`,
@@ -884,7 +884,7 @@ test(
 );
 
 lexer = new Lexer('678');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = not(identifier)(parser);
 test(
   String.raw`678`,
@@ -910,7 +910,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = not(identifier)(parser);
 test(
   String.raw``,
@@ -937,7 +937,7 @@ test(
 
 print('============== EOI ==============');
 lexer = new Lexer('678');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = eoi(parser);
 test(
   String.raw`678--------->FAIL`,
@@ -963,7 +963,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = eoi(parser);
 test(
   String.raw``,
@@ -990,7 +990,7 @@ test(
 
 print('============== INTEGERLITERAL ==============');
 lexer = new Lexer('a99');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = integerLiteral(parser);
 test(
   String.raw`a99--------->FAIL`,
@@ -1018,7 +1018,7 @@ test(
 );
 
 lexer = new Lexer('678');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = integerLiteral(parser);
 test(
   String.raw`678`,
@@ -1047,7 +1047,7 @@ test(
 );
 
 lexer = new Lexer('0b11_0011');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = integerLiteral(parser);
 test(
   String.raw`0b11_0011`,
@@ -1076,7 +1076,7 @@ test(
 );
 
 lexer = new Lexer('0x_ff_0e11');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = integerLiteral(parser);
 test(
   String.raw`0x_ff_0e11`,
@@ -1105,7 +1105,7 @@ test(
 );
 
 lexer = new Lexer('0o_776_122');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = integerLiteral(parser);
 test(
   String.raw`0o_776_122`,
@@ -1135,7 +1135,7 @@ test(
 
 print('============== FLOATLITERAL ==============');
 lexer = new Lexer('a99');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = floatLiteral(parser);
 test(
   String.raw`a99--------->FAIL`,
@@ -1163,7 +1163,7 @@ test(
 );
 
 lexer = new Lexer('.678');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = floatLiteral(parser);
 test(
   String.raw`.678`,
@@ -1192,7 +1192,7 @@ test(
 );
 
 lexer = new Lexer('0b11_0011e-11_01');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = floatLiteral(parser);
 test(
   String.raw`0b11_0011e-11_01`,
@@ -1221,7 +1221,7 @@ test(
 );
 
 lexer = new Lexer('0x_ff.6_0e11');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = floatLiteral(parser);
 test(
   String.raw`0x_ff.6_0e11`,
@@ -1250,7 +1250,7 @@ test(
 );
 
 lexer = new Lexer('0o_77.6_122');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = floatLiteral(parser);
 test(
   String.raw`0o_77.6_122`,
@@ -1280,7 +1280,7 @@ test(
 
 print('============== NUMERICLITERAL ==============');
 lexer = new Lexer('_99');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = numericLiteral(parser);
 test(
   String.raw`_99--------->FAIL`,
@@ -1308,7 +1308,7 @@ test(
 );
 
 lexer = new Lexer('0x_ff.6_0e11');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = numericLiteral(parser);
 test(
   String.raw`0x_ff.6_0e11`,
@@ -1337,7 +1337,7 @@ test(
 );
 
 lexer = new Lexer('0x_ff_0e11');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = numericLiteral(parser);
 test(
   String.raw`0x_ff_0e11`,
@@ -1367,7 +1367,7 @@ test(
 
 print('============== STRINGLITERAL ==============');
 lexer = new Lexer("'");
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = stringLiteral(parser);
 test(
   String.raw`'--------->FAIL`,
@@ -1395,7 +1395,7 @@ test(
 );
 
 lexer = new Lexer('"ẹjọ 😆 hello"');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = stringLiteral(parser);
 test(
   String.raw`"ẹjọ 😆 hello"`,
@@ -1424,7 +1424,7 @@ test(
 );
 
 lexer = new Lexer("'this is america'");
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = stringLiteral(parser);
 test(
   String.raw`'this is america'`,
@@ -1453,7 +1453,7 @@ test(
 );
 
 lexer = new Lexer('"""this \n  is america"""');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = stringLiteral(parser);
 test(
   String.raw`"""this \n  is america"""`,
@@ -1483,7 +1483,7 @@ test(
 
 print('============== COMMENT ==============');
 lexer = new Lexer('#- hello world');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = comment(parser);
 test(
   String.raw`#- hello world--------->FAIL`,
@@ -1511,7 +1511,7 @@ test(
 );
 
 lexer = new Lexer('# 78.f hello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = comment(parser);
 test(
   String.raw`# 78.f hello--------->FAIL`,
@@ -1540,7 +1540,7 @@ test(
 );
 
 lexer = new Lexer('#- hello \r\n 78f -#');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = comment(parser);
 test(
   String.raw`'#- hello \r\n 78f -#`,
@@ -1570,7 +1570,7 @@ test(
 
 print('============== INDENT ==============');
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 1;
 result = indent(parser);
 test(
@@ -1600,7 +1600,7 @@ test(
 );
 
 lexer = new Lexer('        print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indent(parser);
 test(
   String.raw`        print--------->FAIL`,
@@ -1629,7 +1629,7 @@ test(
 );
 
 lexer = new Lexer('print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indent(parser);
 test(
   String.raw`print--------->FAIL`,
@@ -1658,7 +1658,7 @@ test(
 );
 
 lexer = new Lexer('    print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indent(parser);
 test(
   String.raw`    print`,
@@ -1687,7 +1687,7 @@ test(
 );
 
 lexer = new Lexer('        print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 1;
 result = indent(parser);
 test(
@@ -1718,7 +1718,7 @@ test(
 
 print('============== SAMEDENT ==============');
 lexer = new Lexer('    print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = samedent(parser);
 test(
   String.raw`    print--------->FAIL`,
@@ -1746,7 +1746,7 @@ test(
 );
 
 lexer = new Lexer('        print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 1;
 result = samedent(parser);
 test(
@@ -1775,7 +1775,7 @@ test(
 );
 
 lexer = new Lexer('    print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 1;
 result = samedent(parser);
 test(
@@ -1804,7 +1804,7 @@ test(
 );
 
 lexer = new Lexer('print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = samedent(parser);
 test(
   String.raw`print`,
@@ -1832,7 +1832,7 @@ test(
 );
 
 lexer = new Lexer('        print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 2;
 result = samedent(parser);
 test(
@@ -1861,7 +1861,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = samedent(parser);
 test(
   String.raw``,
@@ -1890,7 +1890,7 @@ test(
 
 print('============== DEDENT ==============');
 lexer = new Lexer('    print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 1;
 result = dedent(parser);
 test(
@@ -1920,7 +1920,7 @@ test(
 );
 
 lexer = new Lexer('        print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dedent(parser);
 test(
   String.raw`        print--------->FAIL`,
@@ -1949,7 +1949,7 @@ test(
 );
 
 lexer = new Lexer('print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 1;
 result = dedent(parser);
 test(
@@ -1979,7 +1979,7 @@ test(
 );
 
 lexer = new Lexer('    print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 2;
 result = dedent(parser);
 test(
@@ -2009,7 +2009,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount += 1;
 result = dedent(parser);
 test(
@@ -2040,7 +2040,7 @@ test(
 
 print('============== SPACES ==============');
 lexer = new Lexer('print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = spaces(parser);
 test(
   String.raw`print--------->FAIL`,
@@ -2066,7 +2066,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = spaces(parser);
 test(
   String.raw`--------->FAIL`,
@@ -2092,7 +2092,7 @@ test(
 );
 
 lexer = new Lexer('  print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = spaces(parser);
 test(
   String.raw`  print`,
@@ -2118,7 +2118,7 @@ test(
 );
 
 lexer = new Lexer(' print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = spaces(parser);
 test(
   String.raw` print`,
@@ -2144,7 +2144,7 @@ test(
 );
 
 lexer = new Lexer('1 b');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parse(integerDecimalLiteral, spaces, identifier)(parser);
 test(
   String.raw`1 b`,
@@ -2180,7 +2180,7 @@ test(
 
 print('============== NOSPACE ==============');
 lexer = new Lexer('  print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = noSpace(parser);
 test(
   String.raw`  print--------->FAIL`,
@@ -2206,7 +2206,7 @@ test(
 );
 
 lexer = new Lexer('1 b');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parse(integerDecimalLiteral, noSpace, identifier)(parser);
 print(result);
 test(
@@ -2234,7 +2234,7 @@ test(
 
 
 lexer = new Lexer(' ');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = noSpace(parser);
 test(
   String.raw` `,
@@ -2260,7 +2260,7 @@ test(
 );
 
 lexer = new Lexer('print');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = noSpace(parser);
 test(
   String.raw`print`,
@@ -2286,7 +2286,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = noSpace(parser);
 test(
   String.raw``,
@@ -2312,7 +2312,7 @@ test(
 );
 
 lexer = new Lexer('1b');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = parse(integerDecimalLiteral, noSpace, identifier)(parser);
 test(
   String.raw`1b`,
@@ -2348,7 +2348,7 @@ test(
 
 print('============== NEXTLINE ==============');
 lexer = new Lexer('\r');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = nextline(parser);
 test(
   String.raw`\r--------->FAIL`,
@@ -2374,7 +2374,7 @@ test(
 );
 
 lexer = new Lexer('\r\n\n     \r\n \n');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = nextline(parser);
 test(
   String.raw`\r\n\n     \r\n \n`,
@@ -2400,7 +2400,7 @@ test(
 );
 
 lexer = new Lexer('\r\n  hello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = nextline(parser);
 test(
   String.raw`\r\n  hello`,
@@ -2427,7 +2427,7 @@ test(
 
 print('============== LINECONTINUATION ==============');
 lexer = new Lexer('  . . .\n');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = lineContinuation(parser);
 test(
   String.raw`  . . .\n`,
@@ -2453,7 +2453,7 @@ test(
 );
 
 lexer = new Lexer('  ...');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = lineContinuation(parser);
 test(
   String.raw`  ...`,
@@ -2479,7 +2479,7 @@ test(
 );
 
 lexer = new Lexer('  ...     \r\n   \n');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = lineContinuation(parser);
 test(
   String.raw`  ...     \r\n   \n`,
@@ -2505,7 +2505,7 @@ test(
 );
 
 lexer = new Lexer('... \nhello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = lineContinuation(parser);
 test(
   String.raw`... \nhello`,
@@ -2532,7 +2532,7 @@ test(
 
 print('============== _ ==============');
 lexer = new Lexer('\n\n   \r\n');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = _(parser);
 test(
   String.raw`\n\n   \r\n--------->FAIL`,
@@ -2558,7 +2558,7 @@ test(
 );
 
 lexer = new Lexer('    hello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = _(parser);
 test(
   String.raw`    hello--------->MID`,
@@ -2584,7 +2584,7 @@ test(
 );
 
 lexer = new Lexer('... \r\nhello');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = _(parser);
 test(
   String.raw`... \r\nhello`,

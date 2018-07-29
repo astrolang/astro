@@ -3,12 +3,12 @@
 const { print } = require('../../utils');
 
 /**
- * The simple lexer.
+ * ### The simple lexer.
  *
- * NOTES:
+ * ##### NOTES:
  * * Lex functions return [{ token, kind, line, column }]
  *
- * TODO:
+ * ##### TODO:
  * * Fix unicode issues
  * * Remove line, startLine and startLine attributes
  */
@@ -1764,16 +1764,13 @@ class Lexer {
       if (token) {
         // Ignore spaces
         if (token.kind !== 'spaces') tokens.push(token);
-      // TODO: this catch-all error handler is bad!
-      // Return an error object instead of throwing
-      // Enclosures should be much more clever. `'xyz` expects a closing '
+      // TODO: Enclosures should be much more clever. `"abc` expects a closing `"`
       } else {
-        break;
-        // throw new Error(`Lex error! unexpected character at line: ${this.line}, column: ${this.column}`);
+        return { error: { line: this.line, column: this.column }, tokens };
       }
     }
 
-    return tokens;
+    return { error: null, tokens };
   }
 }
 

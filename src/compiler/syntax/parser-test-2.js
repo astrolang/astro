@@ -52,7 +52,7 @@ const test = createTest();
 
 print('============== NEXTCODELINE ==============');
 lexer = new Lexer('    \r\n# hello\n#- world -#\n');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = nextCodeLine(parser);
 test(
   String.raw`    \r\n# hello\n#- world -#\n`,
@@ -88,7 +88,7 @@ test(
 );
 
 lexer = new Lexer('    \r\n# hello\n#- world -#');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = nextCodeLine(parser);
 test(
   String.raw`    \r\n# hello\n#- world -#`,
@@ -125,7 +125,7 @@ test(
 
 print('============== DEDENTOREOIEND ==============');
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dedentOrEoiEnd(parser);
 test(
   String.raw``,
@@ -152,7 +152,7 @@ test(
 );
 
 lexer = new Lexer('    \r\n# hello\n#- world -#\n');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dedentOrEoiEnd(parser);
 test(
   String.raw`    \r\n# hello\n#- world -#\n`,
@@ -188,7 +188,7 @@ test(
 );
 
 lexer = new Lexer('    \r\n    # hello\n    #- world -#\nend');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount = 1;
 result = dedentOrEoiEnd(parser);
 test(
@@ -226,7 +226,7 @@ test(
 
 result = print('============== COMMA ==============');
 lexer = new Lexer('    ,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = comma(parser);
 test(
   String.raw`    ,`,
@@ -250,7 +250,7 @@ test(
 );
 
 lexer = new Lexer('... \r\n,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = comma(parser);
 test(
   String.raw`... \r\n,`,
@@ -274,7 +274,7 @@ test(
 );
 
 lexer = new Lexer(',  ');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = comma(parser);
 test(
   String.raw`,  `,
@@ -298,7 +298,7 @@ test(
 );
 
 lexer = new Lexer('  ,   \nworld');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = comma(parser);
 test(
   String.raw`'  ,   \nworld`,
@@ -323,7 +323,7 @@ test(
 
 print('============== LISTARGUMENTS ==============');
 lexer = new Lexer(', 1, 2, 3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArguments(parser);
 test(
   String.raw`, 1, 2, 3--------->FAIL`,
@@ -349,7 +349,7 @@ test(
 );
 
 lexer = new Lexer('1, 2, 3,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArguments(parser);
 test(
   String.raw`1, 2, 3,`,
@@ -388,7 +388,7 @@ test(
 );
 
 lexer = new Lexer('1, 2, \r\n3, 4, 5, 6,\n   \n7');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArguments(parser);
 test(
   String.raw`1, 2, \r\n3, 4, 5, 6,\n   \n7`,
@@ -444,7 +444,7 @@ test(
 
 print('============== LISTARGUMENTSMULTIPLE ==============');
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArgumentsMultiple(parser);
 test(
   String.raw`--------->FAIL`,
@@ -470,7 +470,7 @@ test(
 );
 
 lexer = new Lexer('3, 2, 1; , 1, 2, 3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArgumentsMultiple(parser);
 test(
   String.raw`3, 2, 1; , 1, 2, 3--------->MID`,
@@ -509,7 +509,7 @@ test(
 );
 
 lexer = new Lexer('[1, 2]\n[3, 4]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArgumentsMultiple(parser);
 test(
   String.raw`[1, 2]\n[3, 4]`,
@@ -564,7 +564,7 @@ test(
 );
 
 lexer = new Lexer('1, 2, 3,\n4, 5, 6');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArgumentsMultiple(parser);
 test(
   String.raw`1, 2, 3,\n4, 5, 6`,
@@ -616,7 +616,7 @@ test(
 
 
 lexer = new Lexer('1, 2, 3; 4, 5, 6');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listArgumentsMultiple(parser);
 test(
   String.raw`1, 2, 3; 4, 5, 6`,
@@ -678,7 +678,7 @@ test(
 
 print('============== LISTLITERAL ==============');
 lexer = new Lexer('[}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[}--------->FAIL`,
@@ -706,7 +706,7 @@ test(
 );
 
 lexer = new Lexer('[3, 2, 1; , 1, 2, 3]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[3, 2, 1; , 1, 2, 3]--------->FAIL`,
@@ -734,7 +734,7 @@ test(
 );
 
 lexer = new Lexer('[50, 62,  \n56, 7,]\'');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[50, 62,  \n56, 7]'`,
@@ -779,7 +779,7 @@ test(
 );
 
 lexer = new Lexer('[1, 2, 3,]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[1, 2, 3,]`,
@@ -820,7 +820,7 @@ test(
 );
 
 lexer = new Lexer('[\n    1, 2, 3,\n    4, 5, 6\n]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[\n    1, 2, 3,\n    4, 5, 6\n]`,
@@ -873,7 +873,7 @@ test(
 );
 
 lexer = new Lexer('[1, 2, 3; 4, 5, 6]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[1, 2, 3; 4, 5, 6]`,
@@ -936,7 +936,7 @@ test(
 );
 
 lexer = new Lexer('[]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[]`,
@@ -964,7 +964,7 @@ test(
 );
 
 lexer = new Lexer('[1., .2,]\'');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
   String.raw`[1., .2,]'`,
@@ -1002,7 +1002,7 @@ test(
 
 print('============== DICTARGUMENT ==============');
 lexer = new Lexer('0: 56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArgument(parser);
 test(
   String.raw`0: 56--------->FAIL`,
@@ -1029,7 +1029,7 @@ test(
 );
 
 lexer = new Lexer('0: \n    56\n,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArgument(parser);
 test(
   String.raw`0: \n    56\n,--------->FAIL`,
@@ -1056,7 +1056,7 @@ test(
 );
 
 lexer = new Lexer('0o5566: 0x5Ap-4,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArgument(parser);
 test(
   String.raw`0o5566: 0x5Ap-4,`,
@@ -1089,7 +1089,7 @@ test(
 );
 
 lexer = new Lexer('0b110_110 : 89 }');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArgument(parser);
 test(
   String.raw`0b110_110 : 89 }`,
@@ -1122,7 +1122,7 @@ test(
 );
 
 lexer = new Lexer('name\n}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 parser.lastIndentCount = 1;
 result = dictArgument(parser);
 test(
@@ -1156,7 +1156,7 @@ test(
 );
 
 lexer = new Lexer('0: \n    3:56, id\nend');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArgument(parser);
 test(
   String.raw`0: \n    3:56, id\nend`,
@@ -1211,7 +1211,7 @@ test(
 
 print('============== DICTARGUMENTS ==============');
 lexer = new Lexer('0x45:\n    56 : 2\n,56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArguments(parser);
 test(
   String.raw`0x45:\n    56 : 2\n,56--------->FAIL`,
@@ -1237,7 +1237,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArguments(parser);
 test(
   String.raw`--------->FAIL`,
@@ -1263,7 +1263,7 @@ test(
 );
 
 lexer = new Lexer('0x5:1, 0xE: 56, id,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArguments(parser);
 test(
   String.raw`0x5:1, 0xE: 56, id,`,
@@ -1320,7 +1320,7 @@ test(
 );
 
 lexer = new Lexer('0b1.1101: 78,  \n0x45: 66,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArguments(parser);
 test(
   String.raw`0b1.1101: 78,  \n0x45: 66 }`,
@@ -1367,7 +1367,7 @@ test(
 );
 
 lexer = new Lexer('0b1.1101: 78,  \n1:\n    0x45 : 6\n56 : 2}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArguments(parser);
 test(
   String.raw`0b1.1101: 78,  \n1:\n    0x45 : 6\n56 : 2}`,
@@ -1435,7 +1435,7 @@ test(
 );
 
 lexer = new Lexer('1:\n    2:\n        3: 0x5.5,\n        id\n    4: 1\n5: 2_000,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictArguments(parser);
 test(
   String.raw``,
@@ -1525,7 +1525,7 @@ test(
 
 print('============== DICTLITERAL ==============');
 lexer = new Lexer('{]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictLiteral(parser);
 test(
   String.raw`{]--------->FAIL`,
@@ -1552,7 +1552,7 @@ test(
 );
 
 lexer = new Lexer('{   }');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictLiteral(parser);
 test(
   String.raw`{   }`,
@@ -1579,7 +1579,7 @@ test(
 );
 
 lexer = new Lexer('{ 3: 0x5.5, id, \n2_000: 1 }');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictLiteral(parser);
 test(
   String.raw`{ 3: 0x5.5, id, \n2_000: 1 }`,
@@ -1637,7 +1637,7 @@ test(
 );
 
 lexer = new Lexer('{ \n    3:\n        2: 0x5.5, id\n    2_000: 1, \n}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictLiteral(parser);
 test(
   String.raw`{ \n    3:\n        2: 0x5.5, id\n    2_000: 1, \n}`,
@@ -1706,7 +1706,7 @@ test(
 );
 
 lexer = new Lexer('{ name, 0b11_01.001:\n    age\n0o77:7,}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dictLiteral(parser);
 test(
   String.raw`{ name, 0b11_01.001:\n    age\n0o77:7,}`,
@@ -1776,7 +1776,7 @@ test(
 
 print('============== TUPLEARGUMENTS ==============');
 lexer = new Lexer('56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleArguments(parser);
 test(
   String.raw`56--------->FAIL`,
@@ -1802,7 +1802,7 @@ test(
 );
 
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleArguments(parser);
 test(
   String.raw`--------->FAIL`,
@@ -1828,7 +1828,7 @@ test(
 );
 
 lexer = new Lexer('56, 23:5');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleArguments(parser);
 test(
   String.raw`56, 23:5--------->MID`,
@@ -1869,7 +1869,7 @@ test(
 );
 
 lexer = new Lexer('num:1, total_500 :34, 56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleArguments(parser);
 test(
   String.raw`num:1, total_500 :34, 56`,
@@ -1923,7 +1923,7 @@ test(
 );
 
 lexer = new Lexer('56 ,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleArguments(parser);
 test(
   String.raw`56 ,`,
@@ -1957,7 +1957,7 @@ test(
 );
 
 lexer = new Lexer('num:1, \n0b1_001, total_500 :34, 56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleArguments(parser);
 test(
   String.raw`num:1, \n0b1_001, total_500 :34, 56`,
@@ -2019,7 +2019,7 @@ test(
 
 print('============== TUPLELITERAL ==============');
 lexer = new Lexer('(]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleLiteral(parser);
 test(
   String.raw`(]--------->FAIL`,
@@ -2046,7 +2046,7 @@ test(
 );
 
 lexer = new Lexer('(   )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleLiteral(parser);
 test(
   String.raw`(   )`,
@@ -2073,7 +2073,7 @@ test(
 );
 
 lexer = new Lexer('( a: 0x5.5, 23, \nb: 1 )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleLiteral(parser);
 test(
   String.raw`( a: 0x5.5, 23, \nb: 1 )`,
@@ -2129,7 +2129,7 @@ test(
 
 print('============== SYMBOLLITERAL ==============');
 lexer = new Lexer('${}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = symbolLiteral(parser);
 test(
   '${}--------->FAIL',
@@ -2157,7 +2157,7 @@ test(
 
 
 lexer = new Lexer('$ {.357}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = symbolLiteral(parser);
 test(
   '$ {.357}--------->FAIL',
@@ -2185,7 +2185,7 @@ test(
 
 
 lexer = new Lexer('$ identifier');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = symbolLiteral(parser);
 test(
   '$ identifier--------->FAIL',
@@ -2212,7 +2212,7 @@ test(
 );
 
 lexer = new Lexer('${.357}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = symbolLiteral(parser);
 test(
   '${.357}',
@@ -2242,7 +2242,7 @@ test(
 );
 
 lexer = new Lexer('$complex_456_name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = symbolLiteral(parser);
 test(
   String.raw`$complex_456_name`,
@@ -2273,7 +2273,7 @@ test(
 
 print('============== TUPLELITERAL ==============');
 lexer = new Lexer('(]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleLiteral(parser);
 test(
   String.raw`(]--------->FAIL`,
@@ -2300,7 +2300,7 @@ test(
 );
 
 lexer = new Lexer('(   )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleLiteral(parser);
 test(
   String.raw`(   )`,
@@ -2327,7 +2327,7 @@ test(
 );
 
 lexer = new Lexer('( a: 0x5.5, 23, \nb: 1 )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleLiteral(parser);
 test(
   String.raw`( a: 0x5.5, 23, \nb: 1 )`,
@@ -2383,7 +2383,7 @@ test(
 
 print('============== LITERAL ==============');
 lexer = new Lexer('0x55.01pE3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = literal(parser);
 test(
   '0x55.01pE3',
@@ -2411,7 +2411,7 @@ test(
 
 
 lexer = new Lexer('${.357}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = literal(parser);
 test(
   '${.357}',
@@ -2441,7 +2441,7 @@ test(
 );
 
 lexer = new Lexer('[1, 2; 3, 4]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = literal(parser);
 test(
   String.raw`[1, 2; 3, 4]`,
@@ -2496,7 +2496,7 @@ test(
 );
 
 lexer = new Lexer('{ 2:1, id, 3:4 }');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = literal(parser);
 test(
   String.raw`{ 2:1, id, 3:4 }`,
@@ -2555,7 +2555,7 @@ test(
 
 print('============== CALLARGUMENTS ==============');
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callArguments(parser);
 test(
   String.raw`--------->FAIL`,
@@ -2581,7 +2581,7 @@ test(
 );
 
 lexer = new Lexer('56, 23:5');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callArguments(parser);
 test(
   String.raw`56, 23:5--------->MID`,
@@ -2622,7 +2622,7 @@ test(
 );
 
 lexer = new Lexer('num:1, total_500 :34, 56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callArguments(parser);
 test(
   String.raw`num:1, total_500 :34, 56`,
@@ -2676,7 +2676,7 @@ test(
 );
 
 lexer = new Lexer('56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callArguments(parser);
 test(
   String.raw`56`,
@@ -2710,7 +2710,7 @@ test(
 );
 
 lexer = new Lexer('num:1, \n0b1_001, total_500 :34, 56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callArguments(parser);
 test(
   String.raw`num:1, \n0b1_001, total_500 :34, 56`,
@@ -2772,7 +2772,7 @@ test(
 
 print('============== CALLPOSTFIX ==============');
 lexer = new Lexer('(]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`(]--------->FAIL`,
@@ -2802,7 +2802,7 @@ test(
 );
 
 lexer = new Lexer('! ()');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`! ()--------->FAIL`,
@@ -2832,7 +2832,7 @@ test(
 );
 
 lexer = new Lexer('. (2)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`. (2)--------->FAIL`,
@@ -2862,7 +2862,7 @@ test(
 );
 
 lexer = new Lexer('.!(5, 6)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`.!(5, 6)--------->FAIL`,
@@ -2892,7 +2892,7 @@ test(
 );
 
 lexer = new Lexer('(   )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`(   )`,
@@ -2922,7 +2922,7 @@ test(
 );
 
 lexer = new Lexer('!.(   )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`!.(   )`,
@@ -2952,7 +2952,7 @@ test(
 );
 
 lexer = new Lexer('( a: 0x5.5, 23, \nb: 1 )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`( a: 0x5.5, 23, \nb: 1 )`,
@@ -3010,7 +3010,7 @@ test(
 );
 
 lexer = new Lexer('!( a: 0x5.5, 23, \nb: 1 )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`!( a: 0x5.5, 23, \nb: 1 )`,
@@ -3068,7 +3068,7 @@ test(
 );
 
 lexer = new Lexer('.(a: 0x5.5, )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = callPostfix(parser);
 test(
   String.raw`.(a: 0x5.5, )`,
@@ -3110,7 +3110,7 @@ test(
 
 print('============== DOTNOTATIONPOSTFIX ==============');
 lexer = new Lexer('. name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dotNotationPostfix(parser);
 test(
   String.raw`. name--------->FAIL`,
@@ -3138,7 +3138,7 @@ test(
 );
 
 lexer = new Lexer('.name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dotNotationPostfix(parser);
 test(
   String.raw`.name`,
@@ -3170,7 +3170,7 @@ test(
 
 print('============== CASCADENOTATIONARGUMENTS ==============');
 lexer = new Lexer('a . + b');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationArguments(parser);
 test(
   String.raw`a . + b--------->FAIL`,
@@ -3197,7 +3197,7 @@ test(
 );
 
 lexer = new Lexer('a.+ b');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationArguments(parser);
 test(
   String.raw`a.+ b--------->FAIL`,
@@ -3224,7 +3224,7 @@ test(
 );
 
 lexer = new Lexer('a + b+ c');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationArguments(parser);
 test(
   String.raw`a + b+ c--------->MID`,
@@ -3268,7 +3268,7 @@ test(
 );
 
 lexer = new Lexer('a + b .+ c');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationArguments(parser);
 test(
   String.raw`a + b .+ c`,
@@ -3323,7 +3323,7 @@ test(
 );
 
 lexer = new Lexer('a + b.+c');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationArguments(parser);
 test(
   String.raw`a + b.+c`,
@@ -3378,7 +3378,7 @@ test(
 );
 
 lexer = new Lexer('a+b.+c * d');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationArguments(parser);
 test(
   String.raw`a+b.+c * d`,
@@ -3445,7 +3445,7 @@ test(
 
 print('============== CASCADENOTATIONPOSTFIX ==============');
 lexer = new Lexer('.{a . + b}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPostfix(parser);
 test(
   String.raw`.{a . + b}--------->FAIL`,
@@ -3475,7 +3475,7 @@ test(
 );
 
 lexer = new Lexer('. {a .+ b}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPostfix(parser);
 test(
   String.raw`. {a .+ b}--------->FAIL`,
@@ -3505,7 +3505,7 @@ test(
 );
 
 lexer = new Lexer('.{a + b} .name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPostfix(parser);
 test(
   String.raw`.{a + b} .name--------->MID`,
@@ -3552,7 +3552,7 @@ test(
 );
 
 lexer = new Lexer('.{ a + b.+c }.comp13x_n4m3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPostfix(parser);
 test(
   String.raw`.{ a + b.+c }.comp13x_n4m3`,
@@ -3614,7 +3614,7 @@ test(
 
 print('============== CASCADENOTATIONPREFIX ==============');
 lexer = new Lexer('.{a .+ b}.name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPrefix(parser);
 test(
   String.raw`.{a .+ b}.name--------->FAIL`,
@@ -3644,7 +3644,7 @@ test(
 );
 
 lexer = new Lexer('{a .+ b}');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPrefix(parser);
 test(
   String.raw`{a .+ b}--------->FAIL`,
@@ -3674,7 +3674,7 @@ test(
 );
 
 lexer = new Lexer('{a + b} .name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPrefix(parser);
 test(
   String.raw`{a + b} .name--------->FAIL`,
@@ -3704,7 +3704,7 @@ test(
 );
 
 lexer = new Lexer('{ a + b.+c }.comp13x_n4m3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = cascadeNotationPrefix(parser);
 test(
   String.raw`{ a + b.+c }.comp13x_n4m3`,
@@ -3766,7 +3766,7 @@ test(
 
 print('============== INDEXARGUMENT ==============');
 lexer = new Lexer('');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`--------->FAIL`,
@@ -3794,7 +3794,7 @@ test(
 );
 
 lexer = new Lexer('56:2:1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`56:2:1`,
@@ -3831,7 +3831,7 @@ test(
 );
 
 lexer = new Lexer('::');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`::`,
@@ -3859,7 +3859,7 @@ test(
 );
 
 lexer = new Lexer('::1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`::1`,
@@ -3890,7 +3890,7 @@ test(
 );
 
 lexer = new Lexer(':: 1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`:: 1`,
@@ -3921,7 +3921,7 @@ test(
 );
 
 lexer = new Lexer(':');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`:`,
@@ -3949,7 +3949,7 @@ test(
 );
 
 lexer = new Lexer(': : 1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`: : 1`,
@@ -3980,7 +3980,7 @@ test(
 );
 
 lexer = new Lexer('0o77_1774');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`0o77_1774`,
@@ -4009,7 +4009,7 @@ test(
 );
 
 lexer = new Lexer('56::1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`56::1`,
@@ -4043,7 +4043,7 @@ test(
 );
 
 lexer = new Lexer('56 ::1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`56 ::1`,
@@ -4077,7 +4077,7 @@ test(
 );
 
 lexer = new Lexer('56 :: 1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`56 :: 1`,
@@ -4111,7 +4111,7 @@ test(
 );
 
 lexer = new Lexer('56:1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`56:1`,
@@ -4145,7 +4145,7 @@ test(
 );
 
 lexer = new Lexer('5:');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`5:`,
@@ -4176,7 +4176,7 @@ test(
 );
 
 lexer = new Lexer(':5');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArgument(parser);
 test(
   String.raw`:5`,
@@ -4208,7 +4208,7 @@ test(
 
 print('============== INDEXARGUMENTS ==============');
 lexer = new Lexer('::1, 5: :34, 56');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArguments(parser);
 test(
   String.raw`::1, 5: :34, 56`,
@@ -4260,7 +4260,7 @@ test(
 );
 
 lexer = new Lexer(':, 56 , : : , :5:  ,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArguments(parser);
 test(
   String.raw`:, 56 , : : , :5:  ,`,
@@ -4311,7 +4311,7 @@ test(
 );
 
 lexer = new Lexer('56 ,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexArguments(parser);
 test(
   String.raw`56 ,`,
@@ -4345,7 +4345,7 @@ test(
 
 print('============== INDEXPOSTFIX ==============');
 lexer = new Lexer('[::1, 5: :34, 56]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexPostfix(parser);
 test(
   String.raw`[::1, 5: :34, 56]`,
@@ -4398,7 +4398,7 @@ test(
 );
 
 lexer = new Lexer('[\n    :, 56 , : : , :5:  , \n]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexPostfix(parser);
 test(
   String.raw`[\n    :, 56 , : : , :5:  , \n]`,
@@ -4450,7 +4450,7 @@ test(
 );
 
 lexer = new Lexer('[ 56 ,]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = indexPostfix(parser);
 test(
   String.raw`[ 56 ,]`,
@@ -4485,7 +4485,7 @@ test(
 
 print('============== EXTENDEDNOTATION ==============');
 lexer = new Lexer(': [1:2]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = extendedNotation(parser);
 test(
   String.raw`: [1:2]--------->FAIL`,
@@ -4512,7 +4512,7 @@ test(
 );
 
 lexer = new Lexer(':comp13x_n4m3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = extendedNotation(parser);
 test(
   String.raw`:comp13x_n4m3`,
@@ -4542,7 +4542,7 @@ test(
 );
 
 lexer = new Lexer(':(name  :   2)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = extendedNotation(parser);
 test(
   String.raw`:(name  :   2)`,
@@ -4586,7 +4586,7 @@ test(
 );
 
 lexer = new Lexer(':[:1, 5: :34, 56:]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = extendedNotation(parser);
 test(
   String.raw`:[:1, 5: :34, 56:]`,
@@ -4645,7 +4645,7 @@ test(
 
 print('============== TERNARYOPERATOR ==============');
 lexer = new Lexer('(5_000)? 0b10.001 || 0x7_EFF8');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
   String.raw`(5_000)? 0b10.001 || 0x7_EFF8--------->FAIL`,
@@ -4674,7 +4674,7 @@ test(
 );
 
 lexer = new Lexer('(5_000) ? 0b10.001 ||0x7_EFF8');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
   String.raw`(5_000)? 0b10.001 ||0x7_EFF8--------->FAIL`,
@@ -4703,7 +4703,7 @@ test(
 );
 
 lexer = new Lexer('(5_000) ? 0b10.001 || 0x7_EFF8');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
   String.raw`(5_000) ? 0b10.001 || 0x7_EFF8`,
@@ -4741,7 +4741,7 @@ test(
 );
 
 lexer = new Lexer('(  \n    5_000\n) ? 0b10.001 || 0x7_EFF8');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
   String.raw`(  \n    5_000\n) ? 0b10.001 || 0x7_EFF8`,
@@ -4780,7 +4780,7 @@ test(
 
 print('============== COEFFICIENTEXPRESSION ==============');
 lexer = new Lexer('0x78ff');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = coefficientExpression(parser);
 test(
   String.raw`0x78ff--------->FAIL`,
@@ -4808,7 +4808,7 @@ test(
 );
 
 lexer = new Lexer('78.f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = coefficientExpression(parser);
 test(
   String.raw`78.f--------->FAIL`,
@@ -4836,7 +4836,7 @@ test(
 );
 
 lexer = new Lexer('78 f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = coefficientExpression(parser);
 test(
   String.raw`78 f--------->FAIL`,
@@ -4864,7 +4864,7 @@ test(
 );
 
 lexer = new Lexer('78f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = coefficientExpression(parser);
 test(
   String.raw`78f`,
@@ -4898,7 +4898,7 @@ test(
 );
 
 lexer = new Lexer('.78f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = coefficientExpression(parser);
 test(
   String.raw`.78f`,
@@ -4932,7 +4932,7 @@ test(
 );
 
 lexer = new Lexer('0o7.77f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = coefficientExpression(parser);
 test(
   String.raw`0o7.77f`,
@@ -4966,7 +4966,7 @@ test(
 );
 
 lexer = new Lexer('(2)f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = coefficientExpression(parser);
 test(
   String.raw`(2)f`,
@@ -5001,7 +5001,7 @@ test(
 
 print('============== RETURNEXPRESSION ==============');
 lexer = new Lexer('return 0xb55f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = returnExpression(parser);
 test(
   String.raw`return 0xb55f`,
@@ -5031,7 +5031,7 @@ test(
 );
 
 lexer = new Lexer('return');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = returnExpression(parser);
 test(
   String.raw`return`,
@@ -5059,7 +5059,7 @@ test(
 
 print('============== YIELDEXPRESSION ==============');
 lexer = new Lexer('yield 0xb55f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = yieldExpression(parser);
 test(
   String.raw`yield 0xb55f`,
@@ -5090,7 +5090,7 @@ test(
 );
 
 lexer = new Lexer('yield from 0xb55f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = yieldExpression(parser);
 test(
   String.raw`yield from 0xb55f`,
@@ -5121,7 +5121,7 @@ test(
 );
 
 lexer = new Lexer('yield');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = yieldExpression(parser);
 test(
   String.raw`yield`,
@@ -5150,7 +5150,7 @@ test(
 
 print('============== RAISEEXPRESSION ==============');
 lexer = new Lexer('raise 0xb55f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = raiseExpression(parser);
 test(
   String.raw`raise 0xb55f`,
@@ -5180,7 +5180,7 @@ test(
 );
 
 lexer = new Lexer('raise');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = raiseExpression(parser);
 test(
   String.raw`raise`,
@@ -5208,7 +5208,7 @@ test(
 
 print('============== CONTINUEEEXPRESSION ==============');
 lexer = new Lexer('continue @ name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = continueExpression(parser);
 test(
   String.raw`continue @ name--------->MID`,
@@ -5235,7 +5235,7 @@ test(
 );
 
 lexer = new Lexer('continue @name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = continueExpression(parser);
 test(
   String.raw`continue @name`,
@@ -5265,7 +5265,7 @@ test(
 );
 
 lexer = new Lexer('continue');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = continueExpression(parser);
 test(
   String.raw`continue`,
@@ -5293,7 +5293,7 @@ test(
 
 print('============== BREAKEXPRESSION ==============');
 lexer = new Lexer('break @ name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = breakExpression(parser);
 test(
   String.raw`break @ name--------->MID`,
@@ -5321,7 +5321,7 @@ test(
 );
 
 lexer = new Lexer('break 25 @name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = breakExpression(parser);
 test(
   String.raw`break 25 @name`,
@@ -5355,7 +5355,7 @@ test(
 );
 
 lexer = new Lexer('break 25');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = breakExpression(parser);
 test(
   String.raw`break 25`,
@@ -5386,7 +5386,7 @@ test(
 );
 
 lexer = new Lexer('break @name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = breakExpression(parser);
 test(
   String.raw`break @name`,
@@ -5417,7 +5417,7 @@ test(
 );
 
 lexer = new Lexer('break');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = breakExpression(parser);
 test(
   String.raw`break`,
@@ -5446,7 +5446,7 @@ test(
 
 print('============== CONTINUEEEXPRESSION ==============');
 lexer = new Lexer('fallthrough @ name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = fallthroughExpression(parser);
 test(
   String.raw`fallthrough @ name--------->MID`,
@@ -5473,7 +5473,7 @@ test(
 );
 
 lexer = new Lexer('fallthrough @name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = fallthroughExpression(parser);
 test(
   String.raw`fallthrough @name`,
@@ -5503,7 +5503,7 @@ test(
 );
 
 lexer = new Lexer('fallthrough');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = fallthroughExpression(parser);
 test(
   String.raw`fallthrough`,
@@ -5531,7 +5531,7 @@ test(
 
 print('============== CONTROLPRIMITIVE ==============');
 lexer = new Lexer('fallthrough @ name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = controlPrimitive(parser);
 test(
   String.raw`fallthrough @ name--------->MID`,
@@ -5558,7 +5558,7 @@ test(
 );
 
 lexer = new Lexer('break 25 @name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = controlPrimitive(parser);
 test(
   String.raw`break 25 @name`,
@@ -5592,7 +5592,7 @@ test(
 );
 
 lexer = new Lexer('continue @name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = controlPrimitive(parser);
 test(
   String.raw`continue @name`,
@@ -5622,7 +5622,7 @@ test(
 );
 
 lexer = new Lexer('yield from 0xb55f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = controlPrimitive(parser);
 test(
   String.raw`yield from 0xb55f`,
@@ -5654,7 +5654,7 @@ test(
 
 print('============== SUBATOMPOSTFIX ==============');
 lexer = new Lexer('[\n    :, 56 , : : , :5:  , \n]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtomPostfix(parser);
 test(
   String.raw`[\n    :, 56 , : : , :5:  , \n]`,
@@ -5706,7 +5706,7 @@ test(
 );
 
 lexer = new Lexer('.name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtomPostfix(parser);
 test(
   String.raw`.name`,
@@ -5737,7 +5737,7 @@ test(
 );
 
 lexer = new Lexer('.(a: 0x5.5, )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtomPostfix(parser);
 test(
   String.raw`.(a: 0x5.5, )`,
@@ -5779,7 +5779,7 @@ test(
 
 print('============== SUBATOM ==============');
 lexer = new Lexer('(4)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
   String.raw`(4)`,
@@ -5806,7 +5806,7 @@ test(
 );
 
 lexer = new Lexer('( \n    4\n)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
   String.raw`( \n    4\n)`,
@@ -5833,7 +5833,7 @@ test(
 );
 
 lexer = new Lexer('( \n    4,\n)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
   String.raw`( \n    4,\n)`,
@@ -5868,7 +5868,7 @@ test(
 );
 
 lexer = new Lexer('_');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
   String.raw`_`,
@@ -5895,7 +5895,7 @@ test(
 );
 
 lexer = new Lexer('+/+');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
   String.raw`+/+`,
@@ -5922,7 +5922,7 @@ test(
 );
 
 lexer = new Lexer('/regex/');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
   String.raw`/regex/`,
@@ -5949,7 +5949,7 @@ test(
 );
 
 lexer = new Lexer('5.0f');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
   String.raw`5.0f`,
@@ -5984,7 +5984,7 @@ test(
 
 print('============== ATOM ==============');
 lexer = new Lexer('{ a - b }.object');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = atom(parser);
 test(
   String.raw`{ a - b }.object`,
@@ -6034,7 +6034,7 @@ test(
 );
 
 lexer = new Lexer('{ a - b }.object?');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = atom(parser);
 test(
   String.raw`{ a - b }.object?`,
@@ -6087,7 +6087,7 @@ test(
 );
 
 lexer = new Lexer('name.age(4)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = atom(parser);
 test(
   String.raw`name.age(4)`,
@@ -6135,7 +6135,7 @@ test(
 );
 
 lexer = new Lexer('name.{ a + b }.foo(  )');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = atom(parser);
 test(
   String.raw`name.{ a + b }.foo(  )`,
@@ -6194,7 +6194,7 @@ test(
 );
 
 lexer = new Lexer('23.foo[5]?');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = atom(parser);
 test(
   String.raw`23.foo[5]?`,
@@ -6242,7 +6242,7 @@ test(
 );
 
 lexer = new Lexer('foo!(2, 3.,)[4:5:].bar.qux');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = atom(parser);
 test(
   String.raw`foo!(2, 3.,)[4:5:].bar.qux`,

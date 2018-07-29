@@ -4,20 +4,21 @@ no-underscore-dangle, no-use-before-define */
 const { print } = require('../../utils');
 
 /**
- * A Custom Packrat Parser Combinator for Astro extended-PEG grammar.
+ * ### A Custom Packrat Parser Combinator for Astro extended-PEG grammar.
  *
- * NOTE:
+ * #### NOTE:
  * * Directive rules don't return meaningful ast result.
  * * Some directive rules do not return an ast and they don't consume tokens. This means even if the
  *   rule fails, it won't advance tokenPosition. So rules like `more(spaces)` will be recursive.
  * * Rules like indent and dedent change certain parser state (i.e. lastIndentCount), ensure that
  *   when using their cached value you update the parser's lastIndentCount.
- * TODO:
+ * #### TODO:
  * * Parse multilinestring properly
  * * Comments to be removed from parser and lexer. Should be done separately
  * * Handle block end punctuators
  * * Handle macros
  * * Remove line attribute
+ * * Remove comments saving
  */
 class Parser {
   constructor(tokens) {
@@ -1636,8 +1637,8 @@ const cascadeNotationPrefix = (parser) => {
 
 // indexargument =
 //   | (simpleexpression _?)? ':' (_? simpleexpression? _? ':')? _? simpleexpression?
-//   | '::' _? simpleexpression?
-//   | atom nospace '::' _? simpleexpression?
+//   | '::' _? simpleexpression? // To prevent prefixatom clash. `::1`
+//   | atom _? '::' _? simpleexpression? // To prevent postfixatom and infixatom clash. `1::`
 //   | simpleexpression _? '::' _? simpleexpression?
 //   | simpleexpression
 //   { begin, step, end } | { index }

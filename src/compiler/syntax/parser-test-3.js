@@ -28,7 +28,7 @@ const test = createTest();
 
 print('============== PREFIXATOM ==============');
 lexer = new Lexer('*+ 5_200');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = prefixAtom(parser);
 test(
   String.raw`*+ 5_200`,
@@ -57,7 +57,7 @@ test(
 );
 
 lexer = new Lexer('*+5_200');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = prefixAtom(parser);
 test(
   String.raw`*+5_200`,
@@ -93,7 +93,7 @@ test(
 
 print('============== POSTFIXATOM ==============');
 lexer = new Lexer('5_200 *+');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = postfixAtom(parser);
 test(
   String.raw`5_200 *+`,
@@ -122,7 +122,7 @@ test(
 );
 
 lexer = new Lexer('5_200+*');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = postfixAtom(parser);
 test(
   String.raw`5_200+*`,
@@ -157,7 +157,7 @@ test(
 );
 
 lexer = new Lexer('[1, 2].+*');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = postfixAtom(parser);
 test(
   String.raw`[1, 2].+*`,
@@ -203,7 +203,7 @@ test(
 
 print('============== PREPOSTFIXATOM ==============');
 lexer = new Lexer('-=5_200');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = prePostfixAtom(parser);
 test(
   String.raw`-=5_200`,
@@ -238,7 +238,7 @@ test(
 );
 
 lexer = new Lexer('[1, 2].+*');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = prePostfixAtom(parser);
 test(
   String.raw`[1, 2].+*`,
@@ -283,7 +283,7 @@ test(
 );
 
 lexer = new Lexer('[1, 2]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = prePostfixAtom(parser);
 test(
   String.raw`[1, 2]`,
@@ -321,7 +321,7 @@ test(
 
 print('============== KEYWORDOPERATOR ==============');
 lexer = new Lexer('isnot');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = keywordOperator(parser);
 test(
   String.raw`isnot--------->FAIL`,
@@ -348,7 +348,7 @@ test(
 );
 
 lexer = new Lexer('not in');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = keywordOperator(parser);
 test(
   String.raw`not in`,
@@ -375,7 +375,7 @@ test(
 );
 
 lexer = new Lexer('is not');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = keywordOperator(parser);
 test(
   String.raw`is not`,
@@ -402,7 +402,7 @@ test(
 );
 
 lexer = new Lexer('mod');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = keywordOperator(parser);
 test(
   String.raw`mod`,
@@ -431,7 +431,7 @@ test(
 
 print('============== INFIXEXPRESSION ==============');
 lexer = new Lexer('1.+ 2');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`1.+ 2--------->FAIL`,
@@ -459,7 +459,7 @@ test(
 );
 
 lexer = new Lexer('1in2');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`1in2--------->FAIL`,
@@ -487,7 +487,7 @@ test(
 );
 
 lexer = new Lexer('1+2+ 3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`1+2+ 3--------->MID`,
@@ -540,7 +540,7 @@ test(
 );
 
 lexer = new Lexer('1+2 +3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`1+2 +3--------->MID`,
@@ -586,7 +586,7 @@ test(
 
 
 lexer = new Lexer('1 - d+ in b');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`1 - d+ in b`,
@@ -650,7 +650,7 @@ test(
 );
 
 lexer = new Lexer('+1 - d*');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`+1 - d*`,
@@ -711,7 +711,7 @@ test(
 );
 
 lexer = new Lexer('1 mod +2');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`1 mod +2`,
@@ -764,7 +764,7 @@ test(
 );
 
 lexer = new Lexer('1 .+ 2');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`1 .+ 2`,
@@ -809,7 +809,7 @@ test(
 );
 
 lexer = new Lexer('a .+ b.+c');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`a .+ b.+c`,
@@ -865,7 +865,7 @@ test(
 );
 
 lexer = new Lexer('a+b + 3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = infixExpression(parser);
 test(
   String.raw`a+b + 3`,
@@ -922,7 +922,7 @@ test(
 
 print('============== SPREADEXPRESSION ==============');
 lexer = new Lexer('... name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = spreadExpression(parser);
 test(
   String.raw`... name--------->FAIL`,
@@ -949,7 +949,7 @@ test(
 );
 
 lexer = new Lexer('...name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = spreadExpression(parser);
 test(
   String.raw`...name`,
@@ -979,7 +979,7 @@ test(
 );
 
 lexer = new Lexer('...(1)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = spreadExpression(parser);
 test(
   String.raw`...(1)`,
@@ -1010,7 +1010,7 @@ test(
 
 print('============== RANGE ==============');
 lexer = new Lexer('1.. 10');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = range(parser);
 test(
   String.raw`1.. 10--------->FAIL`,
@@ -1039,7 +1039,7 @@ test(
 );
 
 lexer = new Lexer('12..name..(2)');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = range(parser);
 test(
   String.raw`12..name..(2)`,
@@ -1077,7 +1077,7 @@ test(
 );
 
 lexer = new Lexer('12..5_000');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = range(parser);
 test(
   String.raw`12..5_000`,
@@ -1112,7 +1112,7 @@ test(
 );
 
 lexer = new Lexer('a..name');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = range(parser);
 test(
   String.raw`a..name`,
@@ -1147,7 +1147,7 @@ test(
 );
 
 lexer = new Lexer('20 .. 50..1');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = range(parser);
 test(
   String.raw`20 .. 50..1`,
@@ -1185,7 +1185,7 @@ test(
 );
 
 lexer = new Lexer('1 .. -2 .. 55');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = range(parser);
 test(
   String.raw`1 .. -2 .. 55`,
@@ -1232,7 +1232,7 @@ test(
 
 print('============== COMMANDNOTATIONARGUMENT ==============');
 lexer = new Lexer(' [1, 2]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotationArgument(parser);
 test(
   String.raw` [1, 2]--------->FAIL`,
@@ -1259,7 +1259,7 @@ test(
 );
 
 lexer = new Lexer('2_000');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotationArgument(parser);
 test(
   String.raw`2_000--------->FAIL`,
@@ -1286,7 +1286,7 @@ test(
 );
 
 lexer = new Lexer(' 2_000');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotationArgument(parser);
 test(
   String.raw` 2_000`,
@@ -1316,7 +1316,7 @@ test(
 );
 
 lexer = new Lexer(' /hello/.meta');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotationArgument(parser);
 test(
   String.raw` /hello/.meta`,
@@ -1353,7 +1353,7 @@ test(
 );
 
 lexer = new Lexer(' ${ 2 }.meta');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotationArgument(parser);
 test(
   ' ${ 2 }.meta',
@@ -1394,7 +1394,7 @@ test(
 
 print('============== COMMANDNOTATION ==============');
 lexer = new Lexer('foo /  hello/.bar()');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotation(parser);
 test(
   String.raw`foo /  hello/.bar()`,
@@ -1448,7 +1448,7 @@ test(
 );
 
 lexer = new Lexer('$id! 0b1001.01.bar()');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotation(parser);
 test(
   String.raw`$id! 0b1001.01.bar()`,
@@ -1505,7 +1505,7 @@ test(
 );
 
 lexer = new Lexer('foo! x + 0x55');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = commandNotation(parser);
 test(
   String.raw`foo! x + y`,
@@ -1565,7 +1565,7 @@ test(
 
 print('============== PRIMITIVEEXPRESSION ==============');
 lexer = new Lexer('...0xFFEEFF.FFp-3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = primitiveExpression(parser);
 test(
   String.raw``,
@@ -1595,7 +1595,7 @@ test(
 );
 
 lexer = new Lexer('1 .. -2 .. 55');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = primitiveExpression(parser);
 test(
   String.raw`1 .. -2 .. 55`,
@@ -1642,7 +1642,7 @@ test(
 
 
 lexer = new Lexer('500 / 2');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = primitiveExpression(parser);
 test(
   String.raw``,
@@ -1687,7 +1687,7 @@ test(
 );
 
 lexer = new Lexer('foo! bar');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = primitiveExpression(parser);
 test(
   String.raw``,
@@ -1729,7 +1729,7 @@ test(
 
 print('============== SIMPLEEXPRESSION ==============');
 lexer = new Lexer('...0xFFEEFF.FFp-3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = simpleExpression(parser);
 test(
   String.raw``,
@@ -1759,7 +1759,7 @@ test(
 );
 
 lexer = new Lexer('(2) ? 4 || 7');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = simpleExpression(parser);
 test(
   String.raw`(2) ? 4 || 7`,
@@ -1798,7 +1798,7 @@ test(
 
 print('============== TUPLEEXPRESSION ==============');
 lexer = new Lexer('1 + 2,');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleExpression(parser);
 test(
   String.raw`1 + 2,--------->MID`,
@@ -1843,7 +1843,7 @@ test(
 );
 
 lexer = new Lexer('1 + 2, \n(2) ? 4 || 5_000');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleExpression(parser);
 test(
   String.raw``,
@@ -1908,7 +1908,7 @@ test(
 );
 
 lexer = new Lexer('1..2, ...3');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleExpression(parser);
 test(
   String.raw``,
@@ -1955,7 +1955,7 @@ test(
 );
 
 lexer = new Lexer('0o711');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = tupleExpression(parser);
 test(
   String.raw`0o711`,
@@ -1983,7 +1983,7 @@ test(
 
 print('============== DOTNOTATIONLINE ==============');
 lexer = new Lexer('.age()');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dotNotationLine(parser);
 test(
   String.raw`.age()`,
@@ -2025,7 +2025,7 @@ test(
 );
 
 lexer = new Lexer('.age()[1:2]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dotNotationLine(parser);
 test(
   String.raw`.age()[1:2]`,
@@ -2084,7 +2084,7 @@ test(
 
 print('============== DOTNOTATIONBLOCK ==============');
 lexer = new Lexer('[1]\n    .name.{ a + b }\n    .end');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dotNotationBlock(parser);
 test(
   String.raw`[1]\n    .name.{ a + b }\n    .end--------->FAIL`,
@@ -2110,7 +2110,7 @@ test(
 );
 
 lexer = new Lexer('[1]\n    .name.{ a + b }\n.end');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dotNotationBlock(parser);
 test(
   String.raw`[1]\n    .name.{ a + b }\n.end`,
@@ -2173,7 +2173,7 @@ test(
 );
 
 lexer = new Lexer('[1]\n    .name()\n    .age.{ a + b }?\n');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = dotNotationBlock(parser);
 test(
   String.raw`[1]\n    .name\n    .age`,
@@ -2253,7 +2253,7 @@ test(
 
 print('============== SUBEXPRESSION ==============');
 lexer = new Lexer('[1]\n    .name(2).{ a + b }?');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subExpression(parser);
 test(
   String.raw`[1]\n    .name(2).{ a + b }?`,
@@ -2333,7 +2333,7 @@ test(
 );
 
 lexer = new Lexer('return 45_000');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subExpression(parser);
 test(
   String.raw`return 45_000`,
@@ -2363,7 +2363,7 @@ test(
 );
 
 lexer = new Lexer('5, [3, 1]');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subExpression(parser);
 test(
   String.raw`5, [3, 1]`,
@@ -2409,7 +2409,7 @@ test(
 );
 
 lexer = new Lexer('0o711');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = subExpression(parser);
 test(
   String.raw`0o711`,
@@ -2437,7 +2437,7 @@ test(
 
 print('============== EXPRESSION ==============');
 lexer = new Lexer('[1].name(2).{ a + b }? ; 500 ;');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = expression(parser);
 test(
   String.raw`[1].name(2).{ a + b }? ; 500 ;`,
@@ -2526,7 +2526,7 @@ test(
 );
 
 lexer = new Lexer('return 45_000; break 200 @name ; fallthrough');
-parser = new Parser(lexer.lex());
+parser = new Parser(lexer.lex().tokens);
 result = expression(parser);
 test(
   String.raw`return 45_000; break 200 @name ; fallthrough`,

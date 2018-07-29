@@ -1916,86 +1916,138 @@ test(
 );
 
 print('============== LEX ==============');
+lexer = new Lexer('0x45FEp34 ident §');
+result = lexer.lex();
+test(
+  String.raw`0x45FEp34 ident §--------->FAIL`,
+  result,
+  {
+    error: {
+      line: 1,
+      column: 16,
+    },
+    tokens: [
+      {
+        token: '45FEp34',
+        kind: 'floathexadecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 0,
+        stopColumn: 9,
+      },
+      {
+        token: 'ident',
+        kind: 'identifier',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 10,
+        stopColumn: 15,
+      },
+    ],
+  },
+);
+
+lexer = new Lexer('"hello world');
+result = lexer.lex();
+test(
+  String.raw`"hello world--------->FAIL`,
+  result,
+  {
+    error: {
+      line: 1,
+      column: 0,
+    },
+    tokens: [],
+  },
+);
+
 lexer = new Lexer("45 46. .56 0x5F.0p+F 'hello' \"world\"");
 result = lexer.lex();
 test(
   String.raw`45 46. .56 0x5F.e+F 'hello' "world"`,
   result,
-  [
-    {
-      token: '45',
-      kind: 'integerdecimalliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 0,
-      stopColumn: 2,
-    },
-    {
-      token: '46.0',
-      kind: 'floatdecimalliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 3,
-      stopColumn: 6,
-    },
-    {
-      token: '0.56',
-      kind: 'floatdecimalliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 7,
-      stopColumn: 10,
-    },
-    {
-      token: '5F.0p+F',
-      kind: 'floathexadecimalliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 11,
-      stopColumn: 20,
-    },
-    {
-      token: 'hello',
-      kind: 'singlelinestringliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 21,
-      stopColumn: 28,
-    },
-    {
-      token: 'world',
-      kind: 'singlelinestringliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 29,
-      stopColumn: 36,
-    },
-  ],
+  {
+    error: null,
+    tokens: [
+      {
+        token: '45',
+        kind: 'integerdecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 0,
+        stopColumn: 2,
+      },
+      {
+        token: '46.0',
+        kind: 'floatdecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 3,
+        stopColumn: 6,
+      },
+      {
+        token: '0.56',
+        kind: 'floatdecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 7,
+        stopColumn: 10,
+      },
+      {
+        token: '5F.0p+F',
+        kind: 'floathexadecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 11,
+        stopColumn: 20,
+      },
+      {
+        token: 'hello',
+        kind: 'singlelinestringliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 21,
+        stopColumn: 28,
+      },
+      {
+        token: 'world',
+        kind: 'singlelinestringliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 29,
+        stopColumn: 36,
+      },
+    ],
+  },
 );
 
 lexer = new Lexer('hello 45');
 result = lexer.lex();
+print(result);
 test(
   String.raw`hello 45`,
   result,
-  [
-    {
-      token: 'hello',
-      kind: 'identifier',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 0,
-      stopColumn: 5,
-    },
-    {
-      token: '45',
-      kind: 'integerdecimalliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 6,
-      stopColumn: 8,
-    },
-  ],
+  {
+    error: null,
+    tokens: [
+      {
+        token: 'hello',
+        kind: 'identifier',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 0,
+        stopColumn: 5,
+      },
+      {
+        token: '45',
+        kind: 'integerdecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 6,
+        stopColumn: 8,
+      },
+    ],
+  },
 );
 
 lexer = new Lexer('hello \n 45 \r\n');
@@ -2003,40 +2055,43 @@ result = lexer.lex();
 test(
   String.raw`hello \n 45 \r\n`,
   result,
-  [
-    {
-      token: 'hello',
-      kind: 'identifier',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 0,
-      stopColumn: 5,
-    },
-    {
-      token: '',
-      kind: 'newline',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 6,
-      stopColumn: 7,
-    },
-    {
-      token: '45',
-      kind: 'integerdecimalliteral',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 8,
-      stopColumn: 10,
-    },
-    {
-      token: '',
-      kind: 'newline',
-      startLine: 1,
-      stopLine: 1,
-      startColumn: 11,
-      stopColumn: 13,
-    },
-  ],
+  {
+    error: null,
+    tokens: [
+      {
+        token: 'hello',
+        kind: 'identifier',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 0,
+        stopColumn: 5,
+      },
+      {
+        token: '',
+        kind: 'newline',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 6,
+        stopColumn: 7,
+      },
+      {
+        token: '45',
+        kind: 'integerdecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 8,
+        stopColumn: 10,
+      },
+      {
+        token: '',
+        kind: 'newline',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 11,
+        stopColumn: 13,
+      },
+    ],
+  },
 );
 
 test();
