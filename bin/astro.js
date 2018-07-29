@@ -381,7 +381,7 @@ class AstroPrompt {
 
   showParserResult() {
     if (this.lineBuffer !== '') {
-      const tokens = new Lexer(this.lineBuffer).lex();
+      const tokens = new Lexer(this.lineBuffer).lex().tokens;
       print(new Parser(tokens).parse(parseEntry));
       stdout.write('\n');
     }
