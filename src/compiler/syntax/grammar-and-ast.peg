@@ -382,6 +382,9 @@ cascadenotationprefix = // Unfurl
 
 indexargument =
   | (simpleexpression _?)? ':' (_? simpleexpression? _? ':')? _? simpleexpression?
+  | '::' _? simpleexpression? // To prevent prefixatom clash. `::1`
+  | atom _? '::' _? simpleexpression? // To prevent postfixatom and infixatom clash. `1::`
+  | simpleexpression _? '::' _? simpleexpression?
   | simpleexpression
   { begin, step, end } | { index }
 
@@ -542,11 +545,11 @@ tupleexpression =
   { kind, expressions }
 
 dotnotationline =
-  | '.' nospace identifier subatompostfix* cascadenotationpostfix?
-  { postfixes, cascade }
+  | '.' nospace identifier subatompostfix*
+  { postfixes }
 
 dotnotationblock =
-  | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* (nospace '?')? dedentoreoiend
+  | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* cascadenotationpostfix? (nospace '?')? dedentoreoiend
   { kind, expression }
 
 subexpression =
@@ -557,7 +560,8 @@ subexpression =
   | tupleexpression
 
 expression =
-  | subexpression ((nextcodeline | _? ';' _?) subexpression)* (nextcodeline | _? ';')?
+  | subexpression ((nextcodeline samedent | _? ';' _?) subexpression)* (nextcodeline samedent | _? ';')?
+  { kind, expressions }
 
 // Used in declarations and conditional expressions.
 // allows
@@ -592,6 +596,8 @@ expressionsecondinline =
 
 block =
   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
+
+// NOW: FIX OLD REPLACEMENTS!
 
 lhsname
   | noname
