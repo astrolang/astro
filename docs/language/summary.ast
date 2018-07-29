@@ -829,11 +829,11 @@ FUNCTION DEFINITION (2)
     total(0, watch: 500, shoes: 6700, laptop: 1200)
 
     # Destructuring parameters.
-    fun show({name, age}) = print(name, age)
+    fun show({ name, age }) = print(name, age)
 
     # Astro supports trailing optional arguments
     fun show(name, age?):
-        if name:
+        if age:
             print 'Hi $name, your age is $age'
         else:
             print 'Hi $name'
