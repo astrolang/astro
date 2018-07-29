@@ -4,6 +4,9 @@ const { print, keyToUnicode } = require('../src/utils');
 const Lexer = require('../src/compiler/syntax/lexer');
 const { Parser, expression } = require('../src/compiler/syntax/parser');
 
+// Parsing
+const parseEntry = expression;
+
 // PROBLEM
 // Bug when left is pressed two or more times and backspace is pressed
 
@@ -16,15 +19,6 @@ const astroShellPrompt = '\x1b[1m\x1b[33m$••• \x1b[0m';
 
 const commandlineInfo = {
   banner: (mode) => {
-    const lexerModeBanner = '_ LEXER ';
-    const parserModeBanner = ' PARSER ';
-    const codeModeBanner = '________';
-
-    let modeBanner = parserModeBanner;
-
-    if (mode === 'lexer') modeBanner = lexerModeBanner;
-    else if (mode === 'parser') modeBanner = parserModeBanner;
-
     return `
 \x1b[2m\x1b[39m_______________ ${astroVersion} ________________\x1b[0m
 \x1b[2m\x1b[39m---------------------------------------\x1b[0m
@@ -388,7 +382,7 @@ class AstroPrompt {
   showParserResult() {
     if (this.lineBuffer !== '') {
       const tokens = new Lexer(this.lineBuffer).lex();
-      print(new Parser(tokens).parse(expression));
+      print(new Parser(tokens).parse(parseEntry));
       stdout.write('\n');
     }
   }
