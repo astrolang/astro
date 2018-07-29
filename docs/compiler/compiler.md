@@ -83,6 +83,7 @@ In the following code sample, it is evident that the object that `c` points to i
 fun foo():
     var c = 'Hello'
     bar(c)
+    # Deallocate `c` here
     for i in ..max:
        print(i)
 ```
@@ -128,29 +129,30 @@ There are several ways of going about this, each with its own set of problems.
 
     This scheme allocates an array on the stack, just before a call to a function. The array holds pointers to arguments the function is allowed to destroy and the array is passed as an argument to the function. At the end of the function, the array is passed to `free_externals` function, which releases the pointers in the array.
 
-    ```nim
+    ```python
     fun foo(a, b, heapvars):
-        do_something()
+        let m, n = 5, 6
+        do_something(a, b)
         # Free resources
-        free_locals()
-        free_externals(heapvars)
+        free_locals(anyptr(m), anyptr(n))
+        free_externals(heapvars) # Can be inlined.
 
     fun main():
-        let x, y = "Hi", Car("Camaro", 2009)
-        let heapvars = stackalloc{(UInt, Type)}(2)
-        heapvars[1] = (cast{UInt}(ptr(x)), x.type)
-        heapvars[2] = (cast{UInt}(ptr(y)), t.type)
-        foo(x, y, heapvars)
-        ...
+        let m, y = "Hi", Car("Camaro", 2009)
+        let heapvars = stackalloc{(AnyPtr, Type)}(2)
+        heapvars[1] = (anyptr x, typeof x)
+        heapvars[2] = (anyptr y, typeof y)
+        foo(x, y, heapvars) # Release x and y at this point.
+        print("Hello")
+        print("World")
 
     @unsafe
     fun free_externals(heapvars):
-        if heapvars: for i, T in heapvars:
-            destruct(T, i)
-            free(i)
+        if heapvars: for p, t in heapvars:
+            destruct(t, p)
     ```
 
-    This is nice because, unlike the _Deallocation Checks_ scheme, it knows what arguments to destroy, so it's not making checks on each argument. It also doesn't exhibit cache spill problem of traditional ref counting beacuse there is no counting done at runtime (for a non-concurrent program). But it still has the same cascading deallocation problem and it still has some runtime overhead.
+    This is nice because, unlike the _Deallocation Checks_ scheme, it knows what arguments to destroy, so it's not making checks on each argument. It also doesn't exhibit cache spill problem of traditional ref counting because there is no counting done at runtime (for a non-concurrent program). But it still has the same cascading deallocation problem and it still has some runtime overhead.
 
 #### Possible Optimizations
 I will have to benchmark each scheme to be sure how they perform under different conditions. A mix of some of the schemes may be the ideal approach.
