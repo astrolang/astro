@@ -2328,11 +2328,11 @@ test(
   },
 );
 
-lexer = new Lexer('... \r\nhello');
+lexer = new Lexer('... \r\n   \nhello');
 parser = new Parser(lexer.lex().tokens);
 result = _(parser);
 test(
-  String.raw`... \r\nhello`,
+  String.raw`... \r\n   \nhello`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2342,8 +2342,8 @@ test(
   },
   {
     parser: {
-      tokenPosition: 3,
-      column: 6,
+      tokenPosition: 4,
+      column: 10,
     },
     result: {
       success: true,

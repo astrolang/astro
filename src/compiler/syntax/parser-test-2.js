@@ -113,11 +113,11 @@ test(
   },
 );
 
-lexer = new Lexer('1, 2, \r\n3, 4, 5, 6,\n   \n7');
+lexer = new Lexer('1..2, func boo, \r\n3, [4], 5, 6,\n   \n7');
 parser = new Parser(lexer.lex().tokens);
 result = listArguments(parser);
 test(
-  String.raw`1, 2, \r\n3, 4, 5, 6,\n   \n7`,
+  String.raw`1..2, func boo, \r\n3, [4], 5, 6,\n   \n7`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -127,28 +127,56 @@ test(
   },
   {
     parser: {
-      tokenPosition: 15,
-      column: 25,
+      tokenPosition: 21,
+      column: 37,
     },
     result: {
       success: true,
       ast: {
         expressions: [
           {
-            kind: 'integerdecimalliteral',
-            value: '1',
+            kind: 'range',
+            begin: {
+              kind: 'integerdecimalliteral',
+              value: '1',
+            },
+            step: null,
+            end: {
+              kind: 'integerdecimalliteral',
+              value: '2',
+            },
           },
           {
-            kind: 'integerdecimalliteral',
-            value: '2',
+            kind: 'call',
+            expression: {
+              kind: 'identifier',
+              value: 'func',
+            },
+            mutative: false,
+            vectorized: false,
+            arguments: [
+              {
+                key: null,
+                value: {
+                  kind: 'identifier',
+                  value: 'boo',
+                },
+              },
+            ],
           },
           {
             kind: 'integerdecimalliteral',
             value: '3',
           },
           {
-            kind: 'integerdecimalliteral',
-            value: '4',
+            kind: 'listliteral',
+            transposed: false,
+            expressions: [
+              {
+                kind: 'integerdecimalliteral',
+                value: '4',
+              },
+            ],
           },
           {
             kind: 'integerdecimalliteral',
@@ -195,11 +223,11 @@ test(
   },
 );
 
-lexer = new Lexer('3, 2, 1; , 1, 2, 3');
+lexer = new Lexer('3, ident, (1,); , 1, 2, 3');
 parser = new Parser(lexer.lex().tokens);
 result = listArgumentsMultiple(parser);
 test(
-  String.raw`3, 2, 1; , 1, 2, 3--------->MID`,
+  String.raw`3, ident, (1,); , 1, 2, 3--------->MID`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -209,8 +237,8 @@ test(
   },
   {
     parser: {
-      tokenPosition: 5,
-      column: 8,
+      tokenPosition: 8,
+      column: 15,
     },
     result: {
       success: true,
@@ -221,12 +249,20 @@ test(
             value: '3',
           },
           {
-            kind: 'integerdecimalliteral',
-            value: '2',
+            kind: 'identifier',
+            value: 'ident',
           },
           {
-            kind: 'integerdecimalliteral',
-            value: '1',
+            kind: 'tupleliteral',
+            expressions: [
+              {
+                key: null,
+                value: {
+                  kind: 'integerdecimalliteral',
+                  value: '1',
+                },
+              },
+            ],
           },
         ],
       },
@@ -598,11 +634,11 @@ test(
   },
 );
 
-lexer = new Lexer('[1, 2, 3; 4, 5, 6]');
+lexer = new Lexer('[1, foo bar >> name, 3 + 2; 4, 5, 6]');
 parser = new Parser(lexer.lex().tokens);
 result = listLiteral(parser);
 test(
-  String.raw`[1, 2, 3; 4, 5, 6]`,
+  String.raw`[1, foo bar >> name, 3 + 2; 4, 5, 6]`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -612,8 +648,8 @@ test(
   },
   {
     parser: {
-      tokenPosition: 12,
-      column: 18,
+      tokenPosition: 17,
+      column: 36,
     },
     result: {
       success: true,
@@ -629,12 +665,62 @@ test(
                 value: '1',
               },
               {
-                kind: 'integerdecimalliteral',
-                value: '2',
+                kind: 'call',
+                expression: {
+                  kind: 'identifier',
+                  value: 'foo',
+                },
+                mutative: false,
+                vectorized: false,
+                arguments: [
+                  {
+                    key: null,
+                    value: {
+                      kind: 'infixexpression',
+                      expressions: [
+                        {
+                          kind: 'identifier',
+                          value: 'bar',
+                        },
+                        {
+                          kind: 'identifier',
+                          value: 'name',
+                        },
+                      ],
+                      operators: [
+                        {
+                          vectorized: false,
+                          operator: {
+                            kind: 'operator',
+                            value: '>>',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
               {
-                kind: 'integerdecimalliteral',
-                value: '3',
+                kind: 'infixexpression',
+                expressions: [
+                  {
+                    kind: 'integerdecimalliteral',
+                    value: '3',
+                  },
+                  {
+                    kind: 'integerdecimalliteral',
+                    value: '2',
+                  },
+                ],
+                operators: [
+                  {
+                    vectorized: false,
+                    operator: {
+                      kind: 'operator',
+                      value: '+',
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -1997,12 +2083,11 @@ test(
   },
 );
 
-print('============== TUPLELITERAL ==============');
-lexer = new Lexer('(]');
+lexer = new Lexer('${[foo bar]}');
 parser = new Parser(lexer.lex().tokens);
-result = tupleLiteral(parser);
+result = symbolLiteral(parser);
 test(
-  String.raw`(]--------->FAIL`,
+  '${[foo bar]}',
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2012,96 +2097,37 @@ test(
   },
   {
     parser: {
-      tokenPosition: -1,
-      column: 0,
-    },
-    result: {
-      success: false,
-      ast: {
-        kind: 'tupleliteral',
-        expressions: [],
-      },
-    },
-  },
-);
-
-lexer = new Lexer('(   )');
-parser = new Parser(lexer.lex().tokens);
-result = tupleLiteral(parser);
-test(
-  String.raw`(   )`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 1,
-      column: 5,
+      tokenPosition: 6,
+      column: 12,
     },
     result: {
       success: true,
       ast: {
-        kind: 'tupleliteral',
-        expressions: [],
-      },
-    },
-  },
-);
-
-lexer = new Lexer('( a: 0x5.5, 23, \nb: 1 )');
-parser = new Parser(lexer.lex().tokens);
-result = tupleLiteral(parser);
-test(
-  String.raw`( a: 0x5.5, 23, \nb: 1 )`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 11,
-      column: 23,
-    },
-    result: {
-      success: true,
-      ast: {
-        kind: 'tupleliteral',
-        expressions: [
-          {
-            key: {
-              kind: 'identifier',
-              value: 'a',
+        kind: 'symbolliteral',
+        expression: {
+          kind: 'listliteral',
+          transposed: false,
+          expressions: [
+            {
+              kind: 'call',
+              expression: {
+                kind: 'identifier',
+                value: 'foo',
+              },
+              mutative: false,
+              vectorized: false,
+              arguments: [
+                {
+                  key: null,
+                  value: {
+                    kind: 'identifier',
+                    value: 'bar',
+                  },
+                },
+              ],
             },
-            value: {
-              kind: 'floathexadecimalliteral',
-              value: '5.5',
-            },
-          },
-          {
-            key: null,
-            value: {
-              kind: 'integerdecimalliteral',
-              value: '23',
-            },
-          },
-          {
-            key: {
-              kind: 'identifier',
-              value: 'b',
-            },
-            value: {
-              kind: 'integerdecimalliteral',
-              value: '1',
-            },
-          },
-        ],
+          ],
+        },
       },
     },
   },
@@ -3088,6 +3114,61 @@ test(
             operator: {
               kind: 'operator',
               value: '+',
+            },
+          },
+          {
+            vectorized: true,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('a in b.+c');
+parser = new Parser(lexer.lex().tokens);
+result = cascadeNotationArguments(parser);
+test(
+  String.raw`a in b.+c`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 5,
+      column: 9,
+    },
+    result: {
+      success: true,
+      ast: {
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+          {
+            kind: 'identifier',
+            value: 'c',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'keywordoperator',
+              value: 'in',
             },
           },
           {
@@ -4261,6 +4342,43 @@ test(
         expression: {
           kind: 'identifier',
           value: 'comp13x_n4m3',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer(':foo.name');
+parser = new Parser(lexer.lex().tokens);
+result = extendedNotation(parser);
+test(
+  String.raw`:foo.name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 9,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'extendednotation',
+        expression: {
+          kind: 'dot',
+          expression: {
+            kind: 'identifier',
+            value: 'foo',
+          },
+          name: {
+            kind: 'identifier',
+            value: 'name',
+          },
         },
       },
     },
@@ -5759,59 +5877,6 @@ test(
   },
 );
 
-lexer = new Lexer('{ a - b }.object?');
-parser = new Parser(lexer.lex().tokens);
-result = atom(parser);
-test(
-  String.raw`{ a - b }.object?`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 7,
-      column: 17,
-    },
-    result: {
-      success: true,
-      ast: {
-        kind: 'nillable',
-        expression: {
-          kind: 'cascade',
-          leftExpression: null,
-          rightExpression: {
-            kind: 'identifier',
-            value: 'object',
-          },
-          expressions: [
-            {
-              kind: 'identifier',
-              value: 'a',
-            },
-            {
-              kind: 'identifier',
-              value: 'b',
-            },
-          ],
-          operators: [
-            {
-              vectorized: false,
-              operator: {
-                kind: 'operator',
-                value: '-',
-              },
-            },
-          ],
-        },
-      },
-    },
-  },
-);
-
 lexer = new Lexer('name.age(4)');
 parser = new Parser(lexer.lex().tokens);
 result = atom(parser);
@@ -5914,54 +5979,6 @@ test(
             },
           },
         ],
-      },
-    },
-  },
-);
-
-lexer = new Lexer('23.foo[5]?');
-parser = new Parser(lexer.lex().tokens);
-result = atom(parser);
-test(
-  String.raw`23.foo[5]?`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 6,
-      column: 10,
-    },
-    result: {
-      success: true,
-      ast: {
-        kind: 'nillable',
-        expression: {
-          kind: 'index',
-          arguments: [
-            {
-              index: {
-                kind: 'integerdecimalliteral',
-                value: '5',
-              },
-            },
-          ],
-          expression: {
-            kind: 'dot',
-            expression: {
-              kind: 'integerdecimalliteral',
-              value: '23',
-            },
-            name: {
-              kind: 'identifier',
-              value: 'foo',
-            },
-          },
-        },
       },
     },
   },

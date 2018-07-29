@@ -807,7 +807,6 @@ const lineContinuation = (parser) => {
 // _ =
 //   | linecontinuation
 //   | spaces // Can eat others cake
-// TODO: Fix tests.
 const _ = (parser) => {
   const { tokenPosition } = parser;
   const kind = '_';
@@ -877,15 +876,13 @@ const comma = (parser) => {
 // listarguments =
 //   | simpleexpression (comma simpleexpression)* comma?
 //   { expressions }
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
-// TODO: Add more tests with diverse expressions.
 const listArguments = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'listarguments';
   const result = { success: false, ast: { expressions: [] } };
   const parseResult = parse(
-    numericLiteral,
-    optmore(comma, numericLiteral),
+    simpleExpression,
+    optmore(comma, simpleExpression),
     opt(comma),
   )(parser);
 
@@ -908,7 +905,6 @@ const listArguments = (parser) => {
 //   | listliteral (nextcodeline samedent listliteral)+
 //   | listarguments (_? ';' _? listarguments)* (_? ';' _?)?
 //   { expressions }
-// TODO: Add more tests with diverse expressions.
 const listArgumentsMultiple = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'listargumentsmultiple';
@@ -955,7 +951,6 @@ const listArgumentsMultiple = (parser) => {
 //   | '[' _? listargumentsmultiple _? ']' '\''?
 //   | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']' '\''?
 //   { kind, transposed, expressions }
-// TODO: Add more tests with diverse expressions.
 const listLiteral = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'listliteral';
@@ -996,15 +991,13 @@ const listLiteral = (parser) => {
 //   | simpleexpression _? ':' _? simpleexpression &(comma | _? '}' | nextcodeline dedent)
 //   | identifier &(comma | _? '}' | nextcodeline dedent)
 //   { key, value }
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
-// TODO: Add more tests with diverse expressions.
 const dictArgument = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'dictargument';
   const result = { success: false, ast: { key: null, value: null } };
   const parseResult = alt(
-    parse(numericLiteral, opt(_), ':', opt(_), nextCodeLine, indent, dictArguments, nextCodeLine, dedent, not(comma)),
-    parse(numericLiteral, opt(_), ':', opt(_), numericLiteral, and(alt(
+    parse(simpleExpression, opt(_), ':', opt(_), nextCodeLine, indent, dictArguments, nextCodeLine, dedent, not(comma)),
+    parse(simpleExpression, opt(_), ':', opt(_), simpleExpression, and(alt(
       parse(nextCodeLine, dedent),
       parse(opt(_), '}'),
       comma,
@@ -1046,7 +1039,6 @@ const dictArgument = (parser) => {
 // dictarguments =
 //   | dictargument (comma? dictargument)* comma?
 //   { expressions: [{ key, value }] }
-// TODO: Add more tests with diverse expressions.
 const dictArguments = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'dictarguments';
@@ -1080,7 +1072,6 @@ const dictArguments = (parser) => {
 //   | '{' _? dictarguments _? '}'
 //   | '{' nextcodeline indent dictarguments nextcodeline dedent '}'
 //   { kind, expressions: [{ key, value }] }
-// TODO: Add more tests with diverse expressions.
 const dictLiteral = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'dictliteral';
@@ -1114,8 +1105,6 @@ const dictLiteral = (parser) => {
 //   | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)+ comma?
 //   | simpleexpression comma
 //   { expressions }
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
-// TODO: Add more tests with diverse expressions.
 const tupleArguments = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'tuplearguments';
@@ -1123,8 +1112,8 @@ const tupleArguments = (parser) => {
   const parseResult = alt(
     parse(
       opt(identifier, opt(_), ':', opt(_)),
-      numericLiteral,
-      more(comma, opt(identifier, opt(_), ':', opt(_)), numericLiteral),
+      simpleExpression,
+      more(comma, opt(identifier, opt(_), ':', opt(_)), simpleExpression),
       opt(comma),
     ),
     parse(numericLiteral, comma),
@@ -1200,16 +1189,14 @@ const tupleLiteral = (parser) => {
 //   | '$' nospace '{' _? expression _? '}'
 //   | '$' nospace '{' block '}'
 //   { kind, expression }
-// TODO: Refactor: Change numericliteral to expression and write tests for it.
 // TODO: Refactor: Change numericliteral to block and write tests for it.
-// TODO: Add more tests with diverse expressions.
 const symbolLiteral = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'symbolliteral';
   const result = { success: false, ast: { kind, expression: {} } };
   const parseResult = alt(
     parse('$', noSpace, identifier),
-    parse('$', noSpace, '{', opt(_), numericLiteral, opt(_), '}'),
+    parse('$', noSpace, '{', opt(_), simpleExpression, opt(_), '}'),
     parse('$', noSpace, '{', numericLiteral, '}'),
   )(parser);
 
@@ -1267,7 +1254,6 @@ const symbolLiteral = (parser) => {
 //   | symbolliteral
 //   | comprehension
 // TODO: Uncomment comprehesion.
-// TODO: Add more tests with diverse expressions.
 const literal = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'literal';
@@ -1298,15 +1284,14 @@ const literal = (parser) => {
 // callarguments =
 //   | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)* comma?
 //   { expressions: [{ key, value }] }
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 const callArguments = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'callarguments';
   const result = { success: false, ast: { expressions: [] } };
   const parseResult = parse(
     opt(identifier, opt(_), ':', opt(_)),
-    numericLiteral,
-    optmore(comma, opt(identifier, opt(_), ':', opt(_)), numericLiteral),
+    simpleExpression,
+    optmore(comma, opt(identifier, opt(_), ':', opt(_)), simpleExpression),
     opt(comma),
   )(parser);
 
@@ -1406,8 +1391,6 @@ const dotNotationPostfix = (parser) => {
 //   | &(identifier) atom nospace ('.' nospace)?  operator nospace (cascadenotationarguments | &(identifier) atom)
 //   | &(identifier) atom _ (('.' nospace)?  operator | keywordoperator) _ (cascadenotationarguments | &(identifier) atom)
 //   { expressions, operators }
-// TODO: Refactor: Change identifier to atom and write tests for it.
-// TODO: Refactor: Change operator to keywordoperator and write tests for it.
 const cascadeNotationArguments = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'cascadeNotationArguments';
@@ -1420,12 +1403,12 @@ const cascadeNotationArguments = (parser) => {
   };
   const parseResult = alt(
     parse(
-      and(identifier), identifier, noSpace, opt('.', noSpace), operator, noSpace,
-      alt(cascadeNotationArguments, parse(and(identifier), identifier)),
+      and(identifier), atom, noSpace, opt('.', noSpace), operator, noSpace,
+      alt(cascadeNotationArguments, parse(and(identifier), atom)),
     ),
     parse(
-      and(identifier), identifier, _, alt(parse(opt('.', noSpace), operator), operator), _,
-      alt(cascadeNotationArguments, parse(and(identifier), identifier)),
+      and(identifier), atom, _, alt(parse(opt('.', noSpace), operator), keywordOperator), _,
+      alt(cascadeNotationArguments, parse(and(identifier), atom)),
     ),
   )(parser);
 
@@ -1489,7 +1472,6 @@ const cascadeNotationArguments = (parser) => {
 // cascadenotationpostfix = // Unfurl
 //   | nospace '.' nospace '{' _? cascadenotationarguments _? '}' (nospace '.' nospace &(identifier) atom)?
 //   { kind, leftexpression, rightexpression, expressions, operators }
-// TODO: Refactor: Change identifier to atom and write tests for it.
 const cascadeNotationPostfix = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'cascadenotationpostfix';
@@ -1526,7 +1508,6 @@ const cascadeNotationPostfix = (parser) => {
 // cascadenotationprefix = // Unfurl
 //   | '{' _? cascadenotationarguments _? '}' nospace '.' nospace &(identifier) atom
 //   { kind, leftexpression, rightexpression, expressions, operators }
-// TODO: Refactor: Change identifier to atom and write tests for it.
 const cascadeNotationPrefix = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'cascadenotationprefix';
@@ -1542,7 +1523,7 @@ const cascadeNotationPrefix = (parser) => {
   };
   const parseResult = parse(
     '{', opt(_), cascadeNotationArguments, opt(_), '}',
-    noSpace, '.', noSpace, and(identifier), identifier,
+    noSpace, '.', noSpace, and(identifier), atom,
   )(parser);
 
   if (parseResult.success) {
@@ -1567,7 +1548,6 @@ const cascadeNotationPrefix = (parser) => {
 //   | simpleexpression _? '::' _? simpleexpression?
 //   | simpleexpression
 //   { begin, step, end } | { index }
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 const indexArgument = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'indexargument';
@@ -1710,13 +1690,12 @@ const indexPostfix = (parser) => {
 //   | ':' callpostfix
 //   | ':' indexpostfix
 //   { kind, expression }
-// TODO: Refactor: Change identifier to atom and write tests for it.
 const extendedNotation = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'extendednotation';
   const result = { success: false, ast: { kind, expression: null } };
   const parseResult = alt(
-    parse(':', noSpace, identifier),
+    parse(':', noSpace, atom),
     parse(':', callPostfix),
     parse(':', indexPostfix),
   )(parser);
@@ -1746,8 +1725,7 @@ const extendedNotation = (parser) => {
 //   | '(' _? simpleexpression _? ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
 //   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
 //   { kind, condition, truebody, falsebody }
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
-// TODO: Refactor: Change numericliteral to primitiveexpression and write tests for it.
+// TODO: Fix postfix/infix operator issue
 const ternaryOperator = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'ternaryoperator';
@@ -1759,14 +1737,14 @@ const ternaryOperator = (parser) => {
   };
   const parseResult = alt(
     parse(
-      '(', opt(_), numericLiteral, opt(_), ')',
-      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), numericLiteral,
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), numericLiteral,
+      '(', opt(_), simpleExpression, opt(_), ')',
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), get(primitiveExpression),
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
     ),
     parse(
-      '(', nextCodeLine, indent, numericLiteral, nextCodeLine, dedent, ')',
-      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), numericLiteral,
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), numericLiteral,
+      '(', nextCodeLine, indent, simpleExpression, nextCodeLine, dedent, ')',
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), primitiveExpression,
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
     ),
   )(parser);
 
@@ -1802,9 +1780,6 @@ const ternaryOperator = (parser) => {
 //   | '(' _? simpleexpression _? ')' nospace identifier
 //   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' nospace identifier
 //   { kind, coefficient, expression }
-// TODO: Refactor: Implementation needs update.
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
-// TODO: Add more tests with diverse expressions.
 const coefficientExpression = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'coefficientexpression';
@@ -1816,8 +1791,8 @@ const coefficientExpression = (parser) => {
     parse(integerBinaryLiteral, noSpace, identifier),
     parse(integerOctalLiteral, noSpace, identifier),
     parse(not(alt('§0b', '§0o', '§0x')), integerDecimalLiteral, noSpace, identifier),
-    parse('(', opt(_), numericLiteral, opt(_), ')', noSpace, identifier),
-    parse('(', nextCodeLine, indent, numericLiteral, nextCodeLine, dedent, ')', noSpace, identifier),
+    parse('(', opt(_), simpleExpression, opt(_), ')', noSpace, identifier),
+    parse('(', nextCodeLine, indent, simpleExpression, nextCodeLine, dedent, ')', noSpace, identifier),
   )(parser);
 
   if (parseResult.success) {
@@ -1843,12 +1818,11 @@ const coefficientExpression = (parser) => {
 // returnexpression =
 //   | 'return' (_ subexpression)?
 //   { kind, expression }
-// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
 const returnExpression = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'returnexpression';
   const result = { success: false, ast: { kind, expression: null } };
-  const parseResult = parse('return', opt(_, numericLiteral))(parser);
+  const parseResult = parse('return', opt(_, subExpression))(parser);
 
   if (parseResult.success) {
     result.success = parseResult.success;
@@ -1864,12 +1838,11 @@ const returnExpression = (parser) => {
 // yieldexpression =
 //   | 'yield' ((_ 'from')? _ subexpression)?
 //   { kind, expression, redirect }
-// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
 const yieldExpression = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'yieldexpression';
   const result = { success: false, ast: { kind, redirect: false, expression: null } };
-  const parseResult = parse('yield', opt(opt(_, 'from'), _, numericLiteral))(parser);
+  const parseResult = parse('yield', opt(opt(_, 'from'), _, subExpression))(parser);
 
   if (parseResult.success) {
     result.success = parseResult.success;
@@ -1888,12 +1861,11 @@ const yieldExpression = (parser) => {
 // raiseexpression =
 //   | 'raise' (_ subexpression)?
 //   { kind, expression }
-// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
 const raiseExpression = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'raiseexpression';
   const result = { success: false, ast: { kind, expression: null } };
-  const parseResult = parse('raise', opt(_, numericLiteral))(parser);
+  const parseResult = parse('raise', opt(_, subExpression))(parser);
 
   if (parseResult.success) {
     result.success = parseResult.success;
@@ -1929,12 +1901,11 @@ const continueExpression = (parser) => {
 // breakexpression =
 //   | 'break' (_ subexpression)?  (_ '@' nospace identifier)?
 //   { kind, expression, label }
-// TODO: Refactor: Change numericliteral to subexpression and write tests for it.
 const breakExpression = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'breakexpression';
   const result = { success: false, ast: { kind, label: null, expression: null } };
-  const parseResult = parse('break', opt(_, numericLiteral), opt(_, '@', noSpace, identifier))(parser);
+  const parseResult = parse('break', opt(_, subExpression), opt(_, '@', noSpace, identifier))(parser);
 
   if (parseResult.success) {
     result.success = parseResult.success;
@@ -2033,7 +2004,6 @@ const subAtomPostfix = (parser) => {
 //   | noname
 //   | identifier
 //   | operator
-// TODO: Refactor: Change numericliteral to simpleexpression and write tests for it.
 const subAtom = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'subatom';
@@ -2041,8 +2011,8 @@ const subAtom = (parser) => {
   const parseResult = alt(
     coefficientExpression,
     extendedNotation,
-    parse('(', opt(_), numericLiteral, opt(_), ')'),
-    parse('(', nextCodeLine, indent, numericLiteral, nextCodeLine, dedent, ')'),
+    parse('(', opt(_), simpleExpression, opt(_), ')'),
+    parse('(', nextCodeLine, indent, simpleExpression, nextCodeLine, dedent, ')'),
     literal,
     noName,
     identifier,
@@ -2076,7 +2046,7 @@ const atom = (parser) => {
   const kind = 'atom';
   const result = { success: false, ast: { kind } };
   const parseResult = alt(
-    parse(subAtom, optmore(subAtomPostfix), opt(cascadeNotationPostfix), opt(noSpace, '?')),
+    parse(subAtom, optmore(subAtomPostfix), opt(cascadeNotationPostfix)),
     parse(cascadeNotationPrefix, opt(noSpace, '?')),
   )(parser);
 
@@ -2113,22 +2083,12 @@ const atom = (parser) => {
         expression = cascade[0];
       }
 
-      // Check for nil operator.
-      if (parseResult.ast.ast[3].length > 0) {
-        result.ast = { kind: 'nillable', expression };
-      } else {
-        result.ast = expression;
-      }
+      result.ast = expression;
     // Alternative 2 passed.
     } else if (parseResult.ast.alternative === 2) {
       const expression = parseResult.ast.ast[0];
 
-      // Check for nil operator.
-      if (parseResult.ast.ast[1].length > 0) {
-        result.ast = { kind: 'nillable', expression };
-      } else {
-        result.ast = expression;
-      }
+      result.ast = expression;
     }
   }
 
@@ -2622,8 +2582,9 @@ const dotNotationLine = (parser) => {
 };
 
 // dotnotationblock =
-//   | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)*  cascadenotationpostfix? (nospace '?')? dedentoreoiend
+//   | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)*  cascadenotationpostfix? dedentoreoiend
 //   { kind, expression }
+// TODO: prefix/postfix operator support
 const dotNotationBlock = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'dotnotationblock';
@@ -2631,7 +2592,7 @@ const dotNotationBlock = (parser) => {
   const parseResult = parse(
     atom, nextCodeLine, indent, dotNotationLine,
     optmore(nextCodeLine, samedent, dotNotationLine),
-    opt(cascadeNotationPostfix), opt(noSpace, '?'),
+    opt(cascadeNotationPostfix),
     dedentOrEoiEnd,
   )(parser);
 
@@ -2681,12 +2642,7 @@ const dotNotationBlock = (parser) => {
       expression = cascade[0];
     }
 
-    // Check for nil operator at the end.
-    if (parseResult.ast[4].length > 0) {
-      result.ast = { kind: 'nillable', expression };
-    } else {
-      result.ast = expression;
-    }
+    result.ast = expression;
   }
 
   // Cache parse result if not already cached.

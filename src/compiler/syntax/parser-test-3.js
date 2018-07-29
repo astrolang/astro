@@ -2172,11 +2172,11 @@ test(
   },
 );
 
-lexer = new Lexer('[1]\n    .name()\n    .age.{ a + b }?\n');
+lexer = new Lexer('[1]\n    .name()\n    .age.{ a + b }\n');
 parser = new Parser(lexer.lex().tokens);
 result = dotNotationBlock(parser);
 test(
-  String.raw`[1]\n    .name\n    .age`,
+  String.raw`[1]\n    .name()\n    .age.{ a + b }\n`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2186,96 +2186,16 @@ test(
   },
   {
     parser: {
-      tokenPosition: 18,
-      column: 36,
+      tokenPosition: 17,
+      column: 35,
     },
     result: {
       success: true,
       ast: {
-        kind: 'nillable',
-        expression: {
-          kind: 'cascade',
-          leftExpression: {
-            kind: 'dot',
-            expression: {
-              kind: 'call',
-              expression: {
-                kind: 'dot',
-                expression: {
-                  kind: 'listliteral',
-                  transposed: false,
-                  expressions: [
-                    {
-                      kind: 'integerdecimalliteral',
-                      value: '1',
-                    },
-                  ],
-                },
-                name: {
-                  kind: 'identifier',
-                  value: 'name',
-                },
-              },
-              mutative: false,
-              vectorized: false,
-              arguments: [],
-            },
-            name: {
-              kind: 'identifier',
-              value: 'age',
-            },
-          },
-          rightExpression: null,
-          expressions: [
-            {
-              kind: 'identifier',
-              value: 'a',
-            },
-            {
-              kind: 'identifier',
-              value: 'b',
-            },
-          ],
-          operators: [
-            {
-              vectorized: false,
-              operator: {
-                kind: 'operator',
-                value: '+',
-              },
-            },
-          ],
-        },
-      },
-    },
-  },
-);
-
-print('============== SUBEXPRESSION ==============');
-lexer = new Lexer('[1]\n    .name(2).{ a + b }?');
-parser = new Parser(lexer.lex().tokens);
-result = subExpression(parser);
-test(
-  String.raw`[1]\n    .name(2).{ a + b }?`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 15,
-      column: 27,
-    },
-    result: {
-      success: true,
-      ast: {
-        kind: 'nillable',
-        expression: {
-          kind: 'cascade',
-          leftExpression: {
+        kind: 'cascade',
+        leftExpression: {
+          kind: 'dot',
+          expression: {
             kind: 'call',
             expression: {
               kind: 'dot',
@@ -2296,37 +2216,111 @@ test(
             },
             mutative: false,
             vectorized: false,
-            arguments: [
-              {
-                key: null,
-                value: {
-                  kind: 'integerdecimalliteral',
-                  value: '2',
-                },
-              },
-            ],
+            arguments: [],
           },
-          rightExpression: null,
-          expressions: [
-            {
-              kind: 'identifier',
-              value: 'a',
+          name: {
+            kind: 'identifier',
+            value: 'age',
+          },
+        },
+        rightExpression: null,
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
             },
-            {
-              kind: 'identifier',
-              value: 'b',
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== SUBEXPRESSION ==============');
+lexer = new Lexer('[1]\n    .name(2).{ a + b }');
+parser = new Parser(lexer.lex().tokens);
+result = subExpression(parser);
+test(
+  String.raw`[1]\n    .name(2).{ a + b }`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 14,
+      column: 26,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'cascade',
+        leftExpression: {
+          kind: 'call',
+          expression: {
+            kind: 'dot',
+            expression: {
+              kind: 'listliteral',
+              transposed: false,
+              expressions: [
+                {
+                  kind: 'integerdecimalliteral',
+                  value: '1',
+                },
+              ],
             },
-          ],
-          operators: [
+            name: {
+              kind: 'identifier',
+              value: 'name',
+            },
+          },
+          mutative: false,
+          vectorized: false,
+          arguments: [
             {
-              vectorized: false,
-              operator: {
-                kind: 'operator',
-                value: '+',
+              key: null,
+              value: {
+                kind: 'integerdecimalliteral',
+                value: '2',
               },
             },
           ],
         },
+        rightExpression: null,
+        expressions: [
+          {
+            kind: 'identifier',
+            value: 'a',
+          },
+          {
+            kind: 'identifier',
+            value: 'b',
+          },
+        ],
+        operators: [
+          {
+            vectorized: false,
+            operator: {
+              kind: 'operator',
+              value: '+',
+            },
+          },
+        ],
       },
     },
   },
@@ -2436,11 +2430,11 @@ test(
 );
 
 print('============== EXPRESSION ==============');
-lexer = new Lexer('[1].name(2).{ a + b }? ; 500 ;');
+lexer = new Lexer('[1].name(2).{ a + b } ; 500 ;');
 parser = new Parser(lexer.lex().tokens);
 result = expression(parser);
 test(
-  String.raw`[1].name(2).{ a + b }? ; 500 ;`,
+  String.raw`[1].name(2).{ a + b } ; 500 ;`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -2450,8 +2444,8 @@ test(
   },
   {
     parser: {
-      tokenPosition: 17,
-      column: 30,
+      tokenPosition: 16,
+      column: 29,
     },
     result: {
       success: true,
@@ -2459,61 +2453,58 @@ test(
         kind: 'expression',
         expressions: [
           {
-            kind: 'nillable',
-            expression: {
-              kind: 'cascade',
-              leftExpression: {
-                kind: 'call',
+            kind: 'cascade',
+            leftExpression: {
+              kind: 'call',
+              expression: {
+                kind: 'dot',
                 expression: {
-                  kind: 'dot',
-                  expression: {
-                    kind: 'listliteral',
-                    transposed: false,
-                    expressions: [
-                      {
-                        kind: 'integerdecimalliteral',
-                        value: '1',
-                      },
-                    ],
-                  },
-                  name: {
-                    kind: 'identifier',
-                    value: 'name',
-                  },
-                },
-                mutative: false,
-                vectorized: false,
-                arguments: [
-                  {
-                    key: null,
-                    value: {
+                  kind: 'listliteral',
+                  transposed: false,
+                  expressions: [
+                    {
                       kind: 'integerdecimalliteral',
-                      value: '2',
+                      value: '1',
                     },
-                  },
-                ],
+                  ],
+                },
+                name: {
+                  kind: 'identifier',
+                  value: 'name',
+                },
               },
-              rightExpression: null,
-              expressions: [
+              mutative: false,
+              vectorized: false,
+              arguments: [
                 {
-                  kind: 'identifier',
-                  value: 'a',
-                },
-                {
-                  kind: 'identifier',
-                  value: 'b',
-                },
-              ],
-              operators: [
-                {
-                  vectorized: false,
-                  operator: {
-                    kind: 'operator',
-                    value: '+',
+                  key: null,
+                  value: {
+                    kind: 'integerdecimalliteral',
+                    value: '2',
                   },
                 },
               ],
             },
+            rightExpression: null,
+            expressions: [
+              {
+                kind: 'identifier',
+                value: 'a',
+              },
+              {
+                kind: 'identifier',
+                value: 'b',
+              },
+            ],
+            operators: [
+              {
+                vectorized: false,
+                operator: {
+                  kind: 'operator',
+                  value: '+',
+                },
+              },
+            ],
           },
           {
             kind: 'integerdecimalliteral',

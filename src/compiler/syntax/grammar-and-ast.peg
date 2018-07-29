@@ -229,16 +229,16 @@ comment =
 eoi =
   | !.
 
-indent = // TODO. adding !space <- Dunno what this is about. May remove
+indent =
   | ' '+
   { level }
 
-samedent = // TODO. adding !space <- Dunno what this is about. May remove
+samedent =
   | ' '+
   | ''
   { level }
 
-dedent = // TODO. adding !space <- Dunno what this is about. May remove
+dedent =
   | ' '+
   | ''
   { level }
@@ -253,14 +253,14 @@ nextline =
   | newline (spaces? newline)*
 
 linecontinuation =
-  | spaces? '.' nospace '.' nospace '.' spaces? nextline samedent
+  | spaces? '.' nospace '.' nospace '.' spaces? nextcodeline samedent
 
 _ =
   | linecontinuation
   | spaces // Can eat others cake
 
 nextcodeline =
-  | (spaces? nextline)+ spaces? eoi?
+  | (spaces? nextline)+
 
 dedentoreoiend =
   | nextcodeline dedent
