@@ -115,6 +115,14 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
+- highlight ::[^;]+ as comment
+    let name :: Str; let age :: Int
+
+    :: (Int, Int) -> T where T::Str
+    fun arc(a, b) = domagic()
+
+    type Person(name, age) :: Int, Str
+
 - highlight fallthrough keyword
     fallthrough
 
