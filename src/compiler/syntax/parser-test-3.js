@@ -17,7 +17,7 @@ const {
   dotNotationLine,
   dotNotationBlock,
   subExpression,
-  // expression,
+  expression,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -2371,6 +2371,146 @@ test(
       ast: {
         kind: 'integeroctalliteral',
         value: '711',
+      },
+    },
+  },
+);
+
+print('============== EXPRESSION ==============');
+lexer = new Lexer('[1].name(2).{ a + b }? ; 500 ;');
+parser = new Parser(lexer.lex());
+result = expression(parser);
+test(
+  String.raw`[1].name(2).{ a + b }? ; 500 ;`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 17,
+      column: 30,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'expression',
+        expressions: [
+          {
+            kind: 'nillable',
+            expression: {
+              kind: 'cascade',
+              leftExpression: {
+                kind: 'call',
+                expression: {
+                  kind: 'dot',
+                  expression: {
+                    kind: 'listliteral',
+                    transposed: false,
+                    expressions: [
+                      {
+                        kind: 'integerdecimalliteral',
+                        value: '1',
+                      },
+                    ],
+                  },
+                  name: {
+                    kind: 'identifier',
+                    value: 'name',
+                  },
+                },
+                mutative: false,
+                vectorized: false,
+                arguments: [
+                  {
+                    key: null,
+                    value: {
+                      kind: 'integerdecimalliteral',
+                      value: '2',
+                    },
+                  },
+                ],
+              },
+              rightExpression: null,
+              expressions: [
+                {
+                  kind: 'identifier',
+                  value: 'a',
+                },
+                {
+                  kind: 'identifier',
+                  value: 'b',
+                },
+              ],
+              operators: [
+                {
+                  vectorized: false,
+                  operator: {
+                    kind: 'operator',
+                    value: '+',
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: 'integerdecimalliteral',
+            value: '500',
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('return 45_000; break 200 @name ; fallthrough');
+parser = new Parser(lexer.lex());
+result = expression(parser);
+test(
+  String.raw`return 45_000; break 200 @name ; fallthrough`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 44,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'expression',
+        expressions: [
+          {
+            kind: 'returnexpression',
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '45000',
+            },
+          },
+          {
+            kind: 'breakexpression',
+            label: {
+              kind: 'identifier',
+              value: 'name',
+            },
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '200',
+            },
+          },
+          {
+            kind: 'fallthroughexpression',
+            label: null,
+          },
+        ],
       },
     },
   },

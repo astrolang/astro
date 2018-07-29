@@ -806,7 +806,7 @@ const nextline = (parser) => {
 // captured between '...' and a newline. For example, the following doesn't make too much sense.
 // ```astro
 // let x = 5 + ...
-// #: Integer
+// :: Integer
 // (4 * 5)
 // ```
 // linecontinuation =
@@ -2673,7 +2673,7 @@ const dotNotationLine = (parser) => {
 // eslint-disable-next-line no-unused-vars
 const get = fn => (parser) => {
   const res = fn(parser);
-  print(`get ${fn.name} ---> `);
+  print(`get ${fn.name} - ${parser.column} ---> `);
   print(res);
   return res;
 };
@@ -2786,6 +2786,40 @@ const subExpression = (parser) => {
   return result;
 };
 
+// expression =
+//   | subexpression ((nextcodeline samedent | _? ';' _?) subexpression)* (nextcodeline samedent | _? ';')?
+//   { kind, expressions }
+const expression = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'expression';
+  const result = {
+    success: false,
+    ast: { kind, expressions: [] },
+  };
+  const parseResult = parse(
+    subExpression,
+    optmore(alt(parse(nextCodeLine, samedent), parse(opt(_), ';', opt(_))), subExpression),
+    opt(alt(parse(nextCodeLine, samedent), parse(opt(_), ';'))),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Get first subexpresion.
+    result.ast.expressions.push(parseResult.ast[0]);
+
+    // Get remaining subexpressions
+    for (let i = 0; i < parseResult.ast[1].length; i += 1) {
+      result.ast.expressions.push(parseResult.ast[1][i][1]);
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2883,5 +2917,5 @@ module.exports = {
   dotNotationLine,
   dotNotationBlock,
   subExpression,
-  // expression,
+  expression,
 };
