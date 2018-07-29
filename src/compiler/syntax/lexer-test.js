@@ -1744,9 +1744,8 @@ test(
   String.raw`#--#`,
   result,
   {
-    token: '#--#',
+    token: '',
     kind: 'innermultilinecomment',
-    indentations: [],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1760,9 +1759,8 @@ test(
   String.raw`#- hello # world -#`,
   result,
   {
-    token: '#- hello # world -#',
+    token: '',
     kind: 'innermultilinecomment',
-    indentations: [],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1776,9 +1774,8 @@ test(
   String.raw`#- hello #- inner hello -# world -#`,
   result,
   {
-    token: '#- hello #- inner hello -# world -#',
+    token: '',
     kind: 'innermultilinecomment',
-    indentations: [],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1792,9 +1789,8 @@ test(
   String.raw`#- hello \n    #- inner hello \r\n #- \n   another nest -#        -# world -#`,
   result,
   {
-    token: '#- hello \n    #- inner hello \r\n #- \n   another nest -#        -# world -#',
+    token: '',
     kind: 'innermultilinecomment',
-    indentations: [4, 1, 3],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1822,9 +1818,16 @@ test(
 lexer = new Lexer('#- name -# hello');
 result = lexer.multiLineComment();
 test(
-  String.raw`#- name -# hello--------->FAIL`,
+  String.raw`#- name -# hello`,
   result,
-  null,
+  {
+    token: '',
+    kind: 'multilinecomment',
+    startLine: 1,
+    stopLine: 1,
+    startColumn: 0,
+    stopColumn: 10,
+  },
 );
 
 lexer = new Lexer('#- outer\n#- inner -# #');
@@ -1843,7 +1846,6 @@ test(
   {
     token: '',
     kind: 'multilinecomment',
-    indentations: [],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1857,9 +1859,8 @@ test(
   String.raw`#- hello # world -#`,
   result,
   {
-    token: ' hello # world ',
+    token: '',
     kind: 'multilinecomment',
-    indentations: [],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1873,9 +1874,8 @@ test(
   String.raw`#- hello #- inner hello -# world -#`,
   result,
   {
-    token: ' hello #- inner hello -# world ',
+    token: '',
     kind: 'multilinecomment',
-    indentations: [],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1889,9 +1889,8 @@ test(
   String.raw`#- hello \n    #- inner hello \r\n #- \n   another nest -#        -# world -#`,
   result,
   {
-    token: ' hello \n    #- inner hello \r\n #- \n   another nest -#        -# world ',
+    token: '',
     kind: 'multilinecomment',
-    indentations: [4, 1, 3],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
@@ -1899,19 +1898,18 @@ test(
   },
 );
 
-lexer = new Lexer('#- hello #-\n   inner hello\n -# world -#   \r\n');
+lexer = new Lexer('#- hello #-\n   inner hello\n -# world -#');
 result = lexer.multiLineComment();
 test(
-  String.raw`#- hello #-\n   inner hello\n -# world -#   \r\n`,
+  String.raw`#- hello #-\n   inner hello\n -# world -#`,
   result,
   {
-    token: ' hello #-\n   inner hello\n -# world ',
+    token: '',
     kind: 'multilinecomment',
-    indentations: [3, 1],
     startLine: 1,
     stopLine: 1,
     startColumn: 0,
-    stopColumn: 42,
+    stopColumn: 39,
   },
 );
 
@@ -2023,7 +2021,6 @@ test(
 
 lexer = new Lexer('hello 45');
 result = lexer.lex();
-print(result);
 test(
   String.raw`hello 45`,
   result,
@@ -2089,6 +2086,70 @@ test(
         stopLine: 1,
         startColumn: 11,
         stopColumn: 13,
+      },
+    ],
+  },
+);
+
+lexer = new Lexer('ident #- hello -# 45');
+result = lexer.lex();
+test(
+  String.raw`ident #- hello -# 45`,
+  result,
+  {
+    error: null,
+    tokens: [
+      {
+        token: 'ident',
+        kind: 'identifier',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 0,
+        stopColumn: 5,
+      },
+      {
+        token: '45',
+        kind: 'integerdecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 18,
+        stopColumn: 20,
+      },
+    ],
+  },
+);
+
+lexer = new Lexer('hello # hello\n 45');
+result = lexer.lex();
+test(
+  String.raw`hello # hello\n 45`,
+  result,
+  {
+    error: null,
+    tokens: [
+      {
+        token: 'hello',
+        kind: 'identifier',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 0,
+        stopColumn: 5,
+      },
+      {
+        token: '',
+        kind: 'newline',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 13,
+        stopColumn: 14,
+      },
+      {
+        token: '45',
+        kind: 'integerdecimalliteral',
+        startLine: 1,
+        stopLine: 1,
+        startColumn: 15,
+        stopColumn: 17,
       },
     ],
   },

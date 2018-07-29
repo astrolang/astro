@@ -8,6 +8,7 @@ const { print } = require('../../utils');
  *
  * #### NOTE:
  * * Directive rules don't return meaningful ast result.
+ *   When caching them make sure `isDirective` argument is set to true
  * * Some directive rules do not return an ast and they don't consume tokens. This means even if the
  *   rule fails, it won't advance tokenPosition. So rules like `more(spaces)` will be recursive.
  * * Rules like indent and dedent change certain parser state (i.e. lastIndentCount), ensure that
@@ -290,9 +291,6 @@ const singleLineStringLiteral = parser => parseTerminalRule(parser, 'singlelines
 const multiLineStringLiteral = parser => parseTerminalRule(parser, 'multilinestringliteral');
 const booleanLiteral = parser => parseTerminalRule(parser, 'booleanliteral');
 const regexLiteral = parser => parseTerminalRule(parser, 'regexliteral');
-const singleLineComment = parser => parseTerminalRule(parser, 'singlelinecomment');
-// TODO: Proper multiLineComment parsing. Mutilinecomment should also be inilineable
-const multiLineComment = parser => parseTerminalRule(parser, 'multilinecomment');
 
 /**
  * Redirects to parser.parse.
@@ -587,30 +585,6 @@ const stringLiteral = (parser) => {
   return result;
 };
 
-// comment =
-//   | multilinecomment
-//   | singlelinecomment // Accepts others failed cake. Rectified with predicate.
-//   { kind, value }
-const comment = (parser) => {
-  const { tokenPosition } = parser;
-  const kind = 'comment';
-  const result = { success: false, ast: { kind } };
-  const parseResult = alt(
-    multiLineComment,
-    singleLineComment,
-  )(parser);
-
-  if (parseResult.success) {
-    result.success = parseResult.success;
-    result.ast = parseResult.ast.ast;
-  }
-
-  // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, parseResult, result);
-
-  return result;
-};
-
 // >>>>> DIRECTIVES >>>>>
 
 // indent = // TODO. adding !space <- Dunno what this is about. May remove
@@ -809,13 +783,6 @@ const nextline = (parser) => {
   return result;
 };
 
-// NOTE: I deliberately made `linecontinuation` not use nextcodeline. Comments shouldn't be
-// captured between '...' and a newline. For example, the following doesn't make too much sense.
-// ```astro
-// let x = 5 + ...
-// :: Integer
-// (4 * 5)
-// ```
 // linecontinuation =
 //   | spaces? '.' '.' '.' spaces? nextline samedent
 // TODO: Change nextline to nextcodeline and write tests for it.
@@ -845,7 +812,6 @@ const lineContinuation = (parser) => {
 //   | linecontinuation
 //   | spaces // Can eat others cake
 // TODO: Fix tests.
-// TODO: Add inline multiline comment
 const _ = (parser) => {
   const { tokenPosition } = parser;
   const kind = '_';
@@ -865,43 +831,20 @@ const _ = (parser) => {
   return result;
 };
 
-// <<<<< DIRECTIVES <<<<<
-
 // nextcodeline =
-//   | spaces? nextline (samedent comment (nextline | eoi))*
-//   { kind, comments }
-// TODO: Change spaces? to _? and write tests for it.
+//   | (spaces? nextline)+ spaces?
 const nextCodeLine = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'nextcodeline';
-  const result = { success: false, ast: { kind } };
-  const parseResult = parse(
-    opt(spaces),
-    nextline,
-    optmore(
-      samedent,
-      comment,
-      alt(newline, eoi),
-    ),
-  )(parser);
+  const result = { success: false, directive: true };
+  const parseResult = parse(more(opt(spaces), newline), opt(spaces))(parser);
 
   if (parseResult.success) {
     result.success = true;
-    const comments = [];
-
-    // Check if optmore returned a non-empty array
-    if (parseResult.ast[1].length > 0) {
-      const optmoreArr = parseResult.ast[1];
-      for (let i = 0; i < optmoreArr.length; i += 1) {
-        comments.push(optmoreArr[i][0]);
-      }
-    }
-
-    result.ast = { kind, comments };
   }
 
   // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
+  parser.cacheRule(kind, tokenPosition, parseResult, result, true);
 
   return result;
 };
@@ -909,44 +852,13 @@ const nextCodeLine = (parser) => {
 // dedentoreoiend =
 //   | nextcodeline dedent
 //   | nextcodeline? _? eoi
-//   { kind, comments }
 const dedentOrEoiEnd = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'dedentoreoiend';
-  const result = { success: false, ast: { kind, comments: [] } };
+  const result = { success: false, directive: true };
   const parseResult = alt(
     parse(nextCodeLine, dedent),
     parse(opt(nextCodeLine), opt(_), eoi),
-  )(parser);
-
-  if (parseResult.success) {
-    result.success = true;
-
-    if (parseResult.ast.alternative === 1) {
-      result.ast.comments = parseResult.ast.ast[0].comments;
-    } else if (parseResult.ast.ast[0].length > 0) {
-      result.ast.comments = parseResult.ast.ast[0][0].comments;
-    }
-  }
-
-  // Cache parse result if not already cached.
-  parser.cacheRule(kind, tokenPosition, parseResult, result, false);
-
-  return result;
-};
-
-// comma =
-//   | _? ',' _? (nextline samedent)?
-// Change nextline to nextcodeline and write tests for it.
-const comma = (parser) => {
-  const { tokenPosition } = parser;
-  const kind = 'comma';
-  const result = { success: false, directive: true };
-  const parseResult = parse(
-    opt(_),
-    ',',
-    opt(_),
-    opt(nextline, samedent),
   )(parser);
 
   if (parseResult.success) {
@@ -958,6 +870,32 @@ const comma = (parser) => {
 
   return result;
 };
+
+// comma =
+//   | _? ',' _? (nextcodeline samedent)?
+// Change nextline to nextcodeline and write tests for it.
+const comma = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'comma';
+  const result = { success: false, directive: true };
+  const parseResult = parse(
+    opt(_),
+    ',',
+    opt(_),
+    opt(nextCodeLine, samedent),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = true;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result, true);
+
+  return result;
+};
+
+// <<<<< DIRECTIVES <<<<<
 
 // listarguments =
 //   | simpleexpression (comma simpleexpression)* comma?
@@ -1011,7 +949,7 @@ const listArgumentsMultiple = (parser) => {
       result.ast.expressions.push(parseResult.ast.ast[0]);
 
       for (let i = 0; i < parseResult.ast.ast[1].length; i += 1) {
-        result.ast.expressions.push(parseResult.ast.ast[1][i][1]);
+        result.ast.expressions.push(parseResult.ast.ast[1][i][0]);
       }
 
     // Alternative 2 passed.
@@ -1065,8 +1003,8 @@ const listLiteral = (parser) => {
 
     // Alternative 3 passed.
     } else {
-      result.ast.expressions = parseResult.ast.ast[2].expressions;
-      if (parseResult.ast.ast[5].length > 0) result.ast.transposed = true;
+      result.ast.expressions = parseResult.ast.ast[1].expressions;
+      if (parseResult.ast.ast[3].length > 0) result.ast.transposed = true;
     }
   }
 
@@ -1108,7 +1046,7 @@ const dictArgument = (parser) => {
     // Alternative 1 passed.
     if (parseResult.ast.alternative === 1) {
       result.ast.key = parseResult.ast.ast[0];
-      result.ast.value = { kind: 'dictliteral', expressions: parseResult.ast.ast[5].expressions };
+      result.ast.value = { kind: 'dictliteral', expressions: parseResult.ast.ast[4].expressions };
 
     // Alternative 2 passed.
     } else if (parseResult.ast.alternative === 2) {
@@ -1185,7 +1123,7 @@ const dictLiteral = (parser) => {
 
     // Alternative 3 passed.
     } else if (parseResult.ast.alternative === 3) {
-      result.ast.expressions = parseResult.ast.ast[2].expressions;
+      result.ast.expressions = parseResult.ast.ast[1].expressions;
     }
   }
 
@@ -1270,7 +1208,7 @@ const tupleLiteral = (parser) => {
 
     // Alternative 3 passed.
     } else if (parseResult.ast.alternative === 3) {
-      result.ast.expressions = parseResult.ast.ast[2].expressions;
+      result.ast.expressions = parseResult.ast.ast[1].expressions;
     }
   }
 
@@ -1456,7 +1394,7 @@ const callPostfix = (parser) => {
     } else if (parseResult.ast.alternative === 3) {
       if (parseResult.ast.ast[0].length > 0) result.ast.mutative = true;
       if (parseResult.ast.ast[1].length > 0) result.ast.vectorized = true;
-      result.ast.arguments = parseResult.ast.ast[4].expressions;
+      result.ast.arguments = parseResult.ast.ast[3].expressions;
     }
   }
 
@@ -1780,7 +1718,7 @@ const indexPostfix = (parser) => {
       result.ast.arguments = parseResult.ast.ast[2].expressions;
     // Alternative 2 passed.
     } else if (parseResult.ast.alternative === 2) {
-      result.ast.arguments = parseResult.ast.ast[2].expressions;
+      result.ast.arguments = parseResult.ast.ast[1].expressions;
     }
   }
 
@@ -1845,17 +1783,13 @@ const ternaryOperator = (parser) => {
   const parseResult = alt(
     parse(
       '(', opt(_), numericLiteral, opt(_), ')',
-      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)),
-      numericLiteral,
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)),
-      numericLiteral,
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), numericLiteral,
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), numericLiteral,
     ),
     parse(
       '(', nextCodeLine, indent, numericLiteral, nextCodeLine, dedent, ')',
-      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)),
-      numericLiteral,
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)),
-      numericLiteral,
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), numericLiteral,
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), numericLiteral,
     ),
   )(parser);
 
@@ -1869,9 +1803,9 @@ const ternaryOperator = (parser) => {
       result.ast.falsebody = parseResult.ast.ast[8];
     // Alternative 2 passed.
     } else if (parseResult.ast.alternative === 2) {
-      result.ast.condition = parseResult.ast.ast[2];
-      result.ast.truebody = parseResult.ast.ast[6];
-      result.ast.falsebody = parseResult.ast.ast[8];
+      result.ast.condition = parseResult.ast.ast[1];
+      result.ast.truebody = parseResult.ast.ast[4];
+      result.ast.falsebody = parseResult.ast.ast[6];
     }
   }
 
@@ -1911,9 +1845,12 @@ const coefficientExpression = (parser) => {
 
   if (parseResult.success) {
     result.success = parseResult.success;
-    if (parseResult.ast.alternative === 7 || parseResult.ast.alternative === 8) {
+    if (parseResult.ast.alternative === 7) {
       result.ast.coefficient = parseResult.ast.ast[2];
       result.ast.identifier = parseResult.ast.ast[5];
+    } else if (parseResult.ast.alternative === 8) {
+      result.ast.coefficient = parseResult.ast.ast[1];
+      result.ast.identifier = parseResult.ast.ast[3];
     } else {
       result.ast.coefficient = parseResult.ast.ast[0];
       result.ast.identifier = parseResult.ast.ast[1];
@@ -2139,8 +2076,10 @@ const subAtom = (parser) => {
     result.success = parseResult.success;
 
     // Alternative 3 or 4 passed.
-    if (parseResult.ast.alternative === 3 || parseResult.ast.alternative === 4) {
+    if (parseResult.ast.alternative === 3) {
       result.ast = parseResult.ast.ast[2];
+    } else if (parseResult.ast.alternative === 4) {
+      result.ast = parseResult.ast.ast[1];
     } else {
       result.ast = parseResult.ast.ast;
     }
@@ -2719,7 +2658,7 @@ const dotNotationBlock = (parser) => {
     dedentOrEoiEnd,
   )(parser);
 
-  // [0:{atom}, 1:[nextC], 2:{dot}, 3:[[[], {dot}], [], ..], 4:[], ]
+  // [0:{atom}, 1:{dot}, 2:[[0:{dot}], [], ..], 3:[], 4:[] ]
   // Function for merging expressions in dotnotationline
   const merge = (headExpression, postfixes) => {
     let expression = headExpression;
@@ -2746,17 +2685,17 @@ const dotNotationBlock = (parser) => {
     let expression = parseResult.ast[0];
 
     // Get first dotnotationline
-    let line = parseResult.ast[2];
+    let line = parseResult.ast[1];
     expression = merge(expression, line.postfixes, line.cascade);
 
     // Get the other dotnotationline.
-    for (let i = 0; i < parseResult.ast[3].length; i += 1) {
-      line = parseResult.ast[3][i][1];
+    for (let i = 0; i < parseResult.ast[2].length; i += 1) {
+      line = parseResult.ast[2][i][0];
       expression = merge(expression, line.postfixes, line.cascade);
     }
 
     // Check for cascade postfix.
-    const cascade = parseResult.ast[4];
+    const cascade = parseResult.ast[3];
     if (cascade.length > 0) {
       // Add existing expression to the cascade.
       cascade[0].leftExpression = expression;
@@ -2766,7 +2705,7 @@ const dotNotationBlock = (parser) => {
     }
 
     // Check for nil operator at the end.
-    if (parseResult.ast[5].length > 0) {
+    if (parseResult.ast[4].length > 0) {
       result.ast = { kind: 'nillable', expression };
     } else {
       result.ast = expression;
@@ -2873,13 +2812,10 @@ module.exports = {
   multiLineStringLiteral,
   booleanLiteral,
   regexLiteral,
-  singleLineComment,
-  multiLineComment,
   integerLiteral,
   floatLiteral,
   numericLiteral,
   stringLiteral,
-  comment,
   indent,
   samedent,
   dedent,

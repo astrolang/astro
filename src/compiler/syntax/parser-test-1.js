@@ -21,7 +21,6 @@ const {
   floatLiteral,
   numericLiteral,
   stringLiteral,
-  comment,
   indent,
   samedent,
   dedent,
@@ -29,6 +28,9 @@ const {
   noSpace,
   nextline,
   lineContinuation,
+  nextCodeLine,
+  dedentOrEoiEnd,
+  comma,
   _,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
@@ -1481,93 +1483,6 @@ test(
   },
 );
 
-print('============== COMMENT ==============');
-lexer = new Lexer('#- hello world');
-parser = new Parser(lexer.lex().tokens);
-result = comment(parser);
-test(
-  String.raw`#- hello world--------->FAIL`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: -1,
-      line: 1,
-      column: 0,
-    },
-    result: {
-      success: false,
-      ast: {
-        kind: 'comment',
-      },
-    },
-  },
-);
-
-lexer = new Lexer('# 78.f hello');
-parser = new Parser(lexer.lex().tokens);
-result = comment(parser);
-test(
-  String.raw`# 78.f hello--------->FAIL`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 0,
-      line: 1,
-      column: 12,
-    },
-    result: {
-      success: true,
-      ast: {
-        kind: 'singlelinecomment',
-        value: ' 78.f hello',
-      },
-    },
-  },
-);
-
-lexer = new Lexer('#- hello \r\n 78f -#');
-parser = new Parser(lexer.lex().tokens);
-result = comment(parser);
-test(
-  String.raw`'#- hello \r\n 78f -#`,
-  {
-    parser: {
-      tokenPosition: parser.tokenPosition,
-      line: parser.line,
-      column: parser.column,
-    },
-    result,
-  },
-  {
-    parser: {
-      tokenPosition: 0,
-      line: 1,
-      column: 18,
-    },
-    result: {
-      success: true,
-      ast: {
-        kind: 'multilinecomment',
-        value: ' hello \r\n 78f ',
-      },
-    },
-  },
-);
-
 print('============== INDENT ==============');
 lexer = new Lexer('');
 parser = new Parser(lexer.lex().tokens);
@@ -2605,6 +2520,280 @@ test(
     result: {
       success: true,
       directive: true,
+    },
+  },
+);
+
+print('============== NEXTCODELINE ==============');
+lexer = new Lexer('    \r\n# hello\n#- world -#\n');
+parser = new Parser(lexer.lex().tokens);
+result = nextCodeLine(parser);
+test(
+  String.raw`    \r\n# hello\n#- world -#\n`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 26,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+lexer = new Lexer('    \r\n    \n     ');
+parser = new Parser(lexer.lex().tokens);
+result = nextCodeLine(parser);
+test(
+  String.raw`    \r\n    \n     `,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 11,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+
+lexer = new Lexer('\r\n    \n');
+parser = new Parser(lexer.lex().tokens);
+result = nextCodeLine(parser);
+test(
+  String.raw`\r\n    \n`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 7,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+print('============== DEDENTOREOIEND ==============');
+lexer = new Lexer('');
+parser = new Parser(lexer.lex().tokens);
+result = dedentOrEoiEnd(parser);
+test(
+  String.raw``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+lexer = new Lexer('    \r\n# hello\n#- world -#\n');
+parser = new Parser(lexer.lex().tokens);
+result = dedentOrEoiEnd(parser);
+test(
+  String.raw`    \r\n# hello\n#- world -#\n`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 26,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+lexer = new Lexer('    \r\n    \n     ');
+parser = new Parser(lexer.lex().tokens);
+parser.lastIndentCount = 1;
+result = dedentOrEoiEnd(parser);
+test(
+  String.raw`    \r\n    \n     `,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 11,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+result = print('============== COMMA ==============');
+lexer = new Lexer('    ,');
+parser = new Parser(lexer.lex().tokens);
+result = comma(parser);
+test(
+  String.raw`    ,`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+lexer = new Lexer('... \r\n,');
+parser = new Parser(lexer.lex().tokens);
+result = comma(parser);
+test(
+  String.raw`... \r\n,`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 4,
+      column: 7,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+lexer = new Lexer(',  ');
+parser = new Parser(lexer.lex().tokens);
+result = comma(parser);
+test(
+  String.raw`,  `,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 1,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+lexer = new Lexer('  ,   \nworld');
+parser = new Parser(lexer.lex().tokens);
+result = comma(parser);
+test(
+  String.raw`'  ,   \nworld`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 1,
+      column: 7,
+    },
+    result: {
+      success: true,
+      directive: true,
+    },
+  },
+);
+
+lexer = new Lexer('  ,\n  \nident');
+parser = new Parser(lexer.lex().tokens);
+result = parse(comma, identifier)(parser);
+test(
+  String.raw`  ,\n  \nident`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 3,
+      column: 12,
+    },
+    result: {
+      success: true,
+      ast: [
+        {
+          kind: 'identifier',
+          value: 'ident',
+        },
+      ],
     },
   },
 );

@@ -137,7 +137,7 @@ innermultilinecomment =
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 multilinecomment =
-  | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#' _? &(newline | eoi)
+  | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
   { token, kind, startLine, stopLine, startColumn, stopColumn }
 
 
@@ -222,7 +222,7 @@ stringliteral =
 comment =
   | multilinecomment
   | singlelinecomment // Accepts others failed cake. Rectified with predicate.
-  { kind, value }
+  { kind }
 
 // >>>>> DIRECTIVES >>>>>
 
@@ -259,20 +259,19 @@ _ =
   | linecontinuation
   | spaces // Can eat others cake
 
-// <<<<< DIRECTIVES <<<<<
-
-/************** TEST 2 ***************/
 nextcodeline =
-  | spaces? nextline (samedent comment (nextline | eoi))*
-  { kind, comments }
+  | (spaces? nextline)+ spaces? eoi?
 
 dedentoreoiend =
   | nextcodeline dedent
   | nextcodeline? _? eoi
-  { kind, comments }
 
 comma =
-  | _? ',' _? (nextline samedent)?
+  | _? ',' _? (nextcodeline samedent)?
+
+// <<<<< DIRECTIVES <<<<<
+
+/************** TEST 2 ***************/
 
 listarguments =
   | simpleexpression (comma simpleexpression)* comma?
@@ -327,15 +326,15 @@ comprehensionhead =
 
 generatorcomprehension =
   | '(' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)?  _? ')'
-  { kind, expression, iterators:[{ lhs, rhs }], guard }
+  { kind, expression, iterators: [{ lhs, rhs }], guard }
 
 listcomprehension =
   | '[' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? ']'
-  { kind, expression, iterators:[{ lhs, rhs }], guard }
+  { kind, expression, iterators: [{ lhs, rhs }], guard }
 
 dictcomprehension =
   | '{' _? (simpleexpression _? ':' _? simpleexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? '}'
-  { kind, key, value, iterators:[{ lhs, rhs }], guard }
+  { kind, key, value, iterators: [{ lhs, rhs }], guard }
 
 comprehension =
   | generatorcomprehension

@@ -1577,7 +1577,6 @@ class Lexer {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'innermultilinecomment';
-    const indentations = [];
     const startLine = line;
     const startColumn = column;
 
@@ -1587,10 +1586,12 @@ class Lexer {
 
       // Consume (multilinecommentchars: (!('#-' | '-#') .)+)?.
       let closeTag = this.eatToken('-#');
-      let openTag = this.eatToken('#-');
       while (true) {
         if (this.lastReached()) break;
         if (closeTag) break;
+
+
+        const openTag = this.eatToken('#-');
 
         // Check innermultilinecomment?.
         if (openTag) {
@@ -1598,34 +1599,17 @@ class Lexer {
           this.revert(this.lastPosition - 2, this.column - 2, line);
           const lexedInnerMultiLineComment = this.innerMultiLineComment();
           if (lexedInnerMultiLineComment) {
-            token += lexedInnerMultiLineComment.token;
-            indentations.push(...lexedInnerMultiLineComment.indentations);
+            // Don't save token
           } else {
             token = null;
             break;
           }
-        }
-
-        const char = this.eatChar();
-        token += char;
-
-        // Check for indentation.
-        if (char === '\n') {
-          let position = this.lastPosition + 1;
-          let spaceCount = 0;
-
-          while (this.code[position] === ' ') {
-            spaceCount += 1;
-            position += 1;
-          }
-
-          if (spaceCount > 0) {
-            indentations.push(spaceCount);
-          }
+        } else {
+          // Don't save token
+          this.eatChar();
         }
 
         closeTag = this.eatToken('-#');
-        openTag = this.eatToken('#-');
       }
 
       // Check if '-#' was consumed.
@@ -1638,25 +1622,22 @@ class Lexer {
       return null;
     }
 
-    token = `#-${token}-#`;
-
     // Add stop line and column.
     const stopLine = this.line;
     const stopColumn = this.column;
 
     return {
-      token, kind, indentations, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startLine, stopLine, startColumn, stopColumn,
     };
   }
 
   // multilinecomment =
-  //   | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#' spaces? &(newline | eoi)
+  //   | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
   //   { token, kind, startLine, stopLine, startColumn, stopColumn }
   multiLineComment() {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'multilinecomment';
-    const indentations = [];
     const startLine = line;
     const startColumn = column;
 
@@ -1666,10 +1647,11 @@ class Lexer {
 
       // Consume (multilinecommentchars: (!('#-' | '-#') .)+)?.
       let closeTag = this.eatToken('-#');
-      let openTag = this.eatToken('#-');
       while (true) {
         if (this.lastReached()) break;
         if (closeTag) break;
+
+        const openTag = this.eatToken('#-');
 
         // Check innermultilinecomment?.
         if (openTag) {
@@ -1677,45 +1659,21 @@ class Lexer {
           this.revert(this.lastPosition - 2, this.column - 2, line);
           const lexedInnerMultiLineComment = this.innerMultiLineComment();
           if (lexedInnerMultiLineComment) {
-            token += lexedInnerMultiLineComment.token;
-            indentations.push(...lexedInnerMultiLineComment.indentations);
+            // Don't save token
           } else {
             token = null;
             break;
           }
-        }
-
-        const char = this.eatChar();
-        token += char;
-
-        // Check for indentation.
-        if (char === '\n') {
-          let position = this.lastPosition + 1;
-          let spaceCount = 0;
-
-          while (this.code[position] === ' ') {
-            spaceCount += 1;
-            position += 1;
-          }
-
-          if (spaceCount > 0) {
-            indentations.push(spaceCount);
-          }
+        } else {
+          // Don't save token
+          this.eatChar();
         }
 
         closeTag = this.eatToken('-#');
-        openTag = this.eatToken('#-');
       }
 
-
-      // Check if '-#' was consumed.
-      if (closeTag) {
-        // Consume spaces?
-        this.spaces();
-
-        // Check &(newline | eoi)
-        if (this.peekChar() !== '\n' && this.peekChar() !== '\r' && !this.lastReached()) token = null;
-      } else token = null;
+      // Check if '-#' was not consumed.
+      if (!closeTag) token = null;
     }
 
     // Check if lexing failed.
@@ -1729,7 +1687,7 @@ class Lexer {
     const stopColumn = this.column;
 
     return {
-      token, kind, indentations, startLine, stopLine, startColumn, stopColumn,
+      token, kind, startLine, stopLine, startColumn, stopColumn,
     };
   }
 
@@ -1762,8 +1720,10 @@ class Lexer {
         this.punctuator();
 
       if (token) {
-        // Ignore spaces
-        if (token.kind !== 'spaces') tokens.push(token);
+        // Ignore spaces and comments
+        if (token.kind !== 'spaces' && token.kind !== 'singlelinecomment' && token.kind !== 'multilinecomment') {
+          tokens.push(token);
+        }
       // TODO: Enclosures should be much more clever. `"abc` expects a closing `"`
       } else {
         return { error: { line: this.line, column: this.column }, tokens };
