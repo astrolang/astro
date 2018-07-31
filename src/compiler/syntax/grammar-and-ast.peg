@@ -403,6 +403,8 @@ extendednotation
   { kind, expression }
 
 ternaryoperator =
+  | '(' _? simpleexpression _? ')' (nospace '?' nospace | _ '?' _) (prefixatom | atom) (nospace '||' nospace | _ '||' _) primitiveexpression
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _)  (prefixatom | atom) (nospace '||' nospace | _ '||' _) primitiveexpression
   | '(' _? simpleexpression _? ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
   { kind, condition, truebody, falsebody }

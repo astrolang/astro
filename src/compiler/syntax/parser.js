@@ -1722,10 +1722,11 @@ const extendedNotation = (parser) => {
 };
 
 // ternaryoperator =
-//   | '(' _? simpleexpression _? ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
-//   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' ('?' | _ '?' _) primitiveexpression ('||' | _ '||' _) primitiveexpression
+//   | '(' _? simpleexpression _? ')' (nospace '?' nospace | _ '?' _) (prefixatom | atom) (nospace '||' nospace | _ '||' _) primitiveexpression
+//   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _)  (prefixatom | atom) (nospace '||' nospace | _ '||' _) primitiveexpression
+//   | '(' _? simpleexpression _? ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
+//   | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
 //   { kind, condition, truebody, falsebody }
-// TODO: Fix postfix/infix operator issue
 const ternaryOperator = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'ternaryoperator';
@@ -1736,6 +1737,16 @@ const ternaryOperator = (parser) => {
     },
   };
   const parseResult = alt(
+    parse(
+      '(', opt(_), simpleExpression, opt(_), ')',
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), get(alt(prefixAtom, atom)),
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
+    ),
+    parse(
+      '(', nextCodeLine, indent, simpleExpression, nextCodeLine, dedent, ')',
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), alt(prefixAtom, atom),
+      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
+    ),
     parse(
       '(', opt(_), simpleExpression, opt(_), ')',
       alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), get(primitiveExpression),
@@ -1754,10 +1765,20 @@ const ternaryOperator = (parser) => {
     // Alternative 1 passed.
     if (parseResult.ast.alternative === 1) {
       result.ast.condition = parseResult.ast.ast[2];
-      result.ast.truebody = parseResult.ast.ast[6];
+      result.ast.truebody = parseResult.ast.ast[6].ast;
       result.ast.falsebody = parseResult.ast.ast[8];
     // Alternative 2 passed.
     } else if (parseResult.ast.alternative === 2) {
+      result.ast.condition = parseResult.ast.ast[1];
+      result.ast.truebody = parseResult.ast.ast[4].ast;
+      result.ast.falsebody = parseResult.ast.ast[6];
+    // Alternative 4 passed.
+    } else if (parseResult.ast.alternative === 3) {
+      result.ast.condition = parseResult.ast.ast[2];
+      result.ast.truebody = parseResult.ast.ast[6];
+      result.ast.falsebody = parseResult.ast.ast[8];
+    // Alternative 3 passed.
+    } else if (parseResult.ast.alternative === 4) {
       result.ast.condition = parseResult.ast.ast[1];
       result.ast.truebody = parseResult.ast.ast[4];
       result.ast.falsebody = parseResult.ast.ast[6];

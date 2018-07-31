@@ -4622,6 +4622,53 @@ test(
   },
 );
 
+lexer = new Lexer('(  \n    5_000\n) ? +0b10.001||0x7_EFF8');
+parser = new Parser(lexer.lex().tokens);
+result = ternaryOperator(parser);
+print(result);
+test(
+  String.raw`(  \n    5_000\n) ? +0b10.001||0x7_EFF8`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 9,
+      column: 37,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'ternaryoperator',
+        condition: {
+          kind: 'integerdecimalliteral',
+          value: '5000',
+        },
+        truebody: {
+          kind: 'prefixatom',
+          vectorized: false,
+          operator: {
+            kind: 'operator',
+            value: '+',
+          },
+          expression: {
+            kind: 'floatbinaryliteral',
+            value: '10.001',
+          },
+        },
+        falsebody: {
+          kind: 'integerhexadecimalliteral',
+          value: '7EFF8',
+        },
+      },
+    },
+  },
+);
+
 print('============== COEFFICIENTEXPRESSION ==============');
 lexer = new Lexer('0x78ff');
 parser = new Parser(lexer.lex().tokens);
