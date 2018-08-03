@@ -18,6 +18,8 @@ const {
   dotNotationBlock,
   subExpression,
   expression,
+  subExpressionNoBlock,
+  expressionNoBlock,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -2555,6 +2557,347 @@ test(
               kind: 'integerdecimalliteral',
               value: '200',
             },
+          },
+          {
+            kind: 'fallthroughexpression',
+            label: null,
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('return 45_000\nbreak 200; 567\nfallthrough');
+parser = new Parser(lexer.lex().tokens);
+result = expression(parser);
+test(
+  String.raw`return 45_000\nbreak 200; 567\nfallthrough`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 40,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'expression',
+        expressions: [
+          {
+            kind: 'returnexpression',
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '45000',
+            },
+          },
+          {
+            kind: 'breakexpression',
+            label: null,
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '200',
+            },
+          },
+          {
+            kind: 'integerdecimalliteral',
+            value: '567',
+          },
+          {
+            kind: 'fallthroughexpression',
+            label: null,
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== SUBEXPRESSIONNOBLOCK ==============');
+lexer = new Lexer('[1]\n    .name(2).{ a + b }');
+parser = new Parser(lexer.lex().tokens);
+result = subExpressionNoBlock(parser);
+test(
+  String.raw`[1]\n    .name(2).{ a + b }--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 2,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'listliteral',
+        transposed: false,
+        expressions: [{ kind: 'integerdecimalliteral', value: '1' }],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('5, [3, 1]');
+parser = new Parser(lexer.lex().tokens);
+result = subExpressionNoBlock(parser);
+test(
+  String.raw`5, [3, 1]`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 6,
+      column: 9,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'tupleexpression',
+        expressions: [
+          {
+            kind: 'integerdecimalliteral',
+            value: '5',
+          },
+          {
+            kind: 'listliteral',
+            transposed: false,
+            expressions: [
+              {
+                kind: 'integerdecimalliteral',
+                value: '3',
+              },
+              {
+                kind: 'integerdecimalliteral',
+                value: '1',
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('0o711');
+parser = new Parser(lexer.lex().tokens);
+result = subExpressionNoBlock(parser);
+test(
+  String.raw`0o711`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 5,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'integeroctalliteral',
+        value: '711',
+      },
+    },
+  },
+);
+
+print('============== EXPRESSIONNOBLOCK ==============');
+lexer = new Lexer('[1].name(2).{ a + b } ; 500 ;');
+parser = new Parser(lexer.lex().tokens);
+result = expressionNoBlock(parser);
+test(
+  String.raw`[1].name(2).{ a + b } ; 500 ;`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 16,
+      column: 29,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'expression',
+        expressions: [
+          {
+            kind: 'cascade',
+            leftExpression: {
+              kind: 'call',
+              expression: {
+                kind: 'dot',
+                expression: {
+                  kind: 'listliteral',
+                  transposed: false,
+                  expressions: [
+                    {
+                      kind: 'integerdecimalliteral',
+                      value: '1',
+                    },
+                  ],
+                },
+                name: {
+                  kind: 'identifier',
+                  value: 'name',
+                },
+              },
+              mutative: false,
+              vectorized: false,
+              arguments: [
+                {
+                  key: null,
+                  value: {
+                    kind: 'integerdecimalliteral',
+                    value: '2',
+                  },
+                },
+              ],
+            },
+            rightExpression: null,
+            expressions: [
+              {
+                kind: 'identifier',
+                value: 'a',
+              },
+              {
+                kind: 'identifier',
+                value: 'b',
+              },
+            ],
+            operators: [
+              {
+                vectorized: false,
+                operator: {
+                  kind: 'operator',
+                  value: '+',
+                },
+              },
+            ],
+          },
+          {
+            kind: 'integerdecimalliteral',
+            value: '500',
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('return 45_000; break 200 @name ; fallthrough');
+parser = new Parser(lexer.lex().tokens);
+result = expressionNoBlock(parser);
+test(
+  String.raw`return 45_000; break 200 @name ; fallthrough`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 44,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'expression',
+        expressions: [
+          {
+            kind: 'returnexpression',
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '45000',
+            },
+          },
+          {
+            kind: 'breakexpression',
+            label: {
+              kind: 'identifier',
+              value: 'name',
+            },
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '200',
+            },
+          },
+          {
+            kind: 'fallthroughexpression',
+            label: null,
+          },
+        ],
+      },
+    },
+  },
+);
+
+lexer = new Lexer('return 45_000\nbreak 200; 567\nfallthrough');
+parser = new Parser(lexer.lex().tokens);
+result = expressionNoBlock(parser);
+test(
+  String.raw`return 45_000\nbreak 200; 567\nfallthrough`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 8,
+      column: 40,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'expression',
+        expressions: [
+          {
+            kind: 'returnexpression',
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '45000',
+            },
+          },
+          {
+            kind: 'breakexpression',
+            label: null,
+            expression: {
+              kind: 'integerdecimalliteral',
+              value: '200',
+            },
+          },
+          {
+            kind: 'integerdecimalliteral',
+            value: '567',
           },
           {
             kind: 'fallthroughexpression',

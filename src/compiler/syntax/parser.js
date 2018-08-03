@@ -15,11 +15,8 @@ const { print } = require('../../utils');
  *   when using their cached value you update the parser's lastIndentCount.
  * #### TODO:
  * * Parse multilinestring properly
- * * Comments to be removed from parser and lexer. Should be done separately
  * * Handle block end punctuators
  * * Handle macros
- * * Remove line attribute
- * * Remove comments saving
  */
 class Parser {
   constructor(tokens) {
@@ -2739,6 +2736,65 @@ const expression = (parser) => {
   return result;
 };
 
+// // subexpressionnoblock =
+// //   | controlprimitive
+// //   | tupleexpression
+const subExpressionNoBlock = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'subexpression';
+  const result = {
+    success: false,
+    ast: { kind },
+  };
+  const parseResult = alt(
+    controlPrimitive,
+    tupleExpression,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// expressionnoblock =
+//   | subexpressionnoblock ((nextcodeline | _? ';' _?) subexpressionnoblock)* (nextcodeline | _? ';')?
+const expressionNoBlock = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'expression';
+  const result = {
+    success: false,
+    ast: { kind, expressions: [] },
+  };
+  const parseResult = parse(
+    subExpressionNoBlock,
+    optmore(alt(parse(nextCodeLine, samedent), parse(opt(_), ';', opt(_))), subExpressionNoBlock),
+    opt(alt(parse(nextCodeLine, samedent), parse(opt(_), ';'))),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Get first subexpresion.
+    result.ast.expressions.push(parseResult.ast[0]);
+
+    // Get remaining subexpressions
+    for (let i = 0; i < parseResult.ast[1].length; i += 1) {
+      result.ast.expressions.push(parseResult.ast[1][i][1]);
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
 module.exports = {
   Parser,
   parse,
@@ -2833,4 +2889,6 @@ module.exports = {
   dotNotationBlock,
   subExpression,
   expression,
+  subExpressionNoBlock,
+  expressionNoBlock,
 };
