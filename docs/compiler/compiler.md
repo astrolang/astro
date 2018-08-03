@@ -45,7 +45,34 @@ Names can only be used if they declared in current or parent scope.
 Types and functions can be used before their declaration point.
 
 ## Cascading Notation Object Association
-Stray cascading notation, like `~name`, are associated with their object to make subsequent semantic analysis easier.
+Cascading notation, e.g. `:name`, are associated with their object early on in the semantic analysis phase.
+
+
+## The Cycle Problem
+Astro does not have the need for forward declaration because it all referenced types are included before their use and this means
+Astro has to deal with cyclic inclusion/dependency problem.
+
+There are three main cyclic inclusions in Astro
+* Reference Cycle
+* Call Cycle
+* Construction Cycle
+
+Reference cycle is effectively handled by Astro's deallocation scheme.
+Call cycle appears to be a reasonable property although a warning should probably be given when a recursive call has no an escape hatch (base condtion).
+Construction cycles, on the other hand, need to be prevented whether there is a base condition or not.
+
+### Construction Cycle [Unfinished]
+```kotlin
+fun A() = { b: B() }
+fun B() = { a: A() }
+```
+
+For each type constructor, the sema phase check for construction cycle.
+```kotlin
+fun A(a) = { a }
+fun A() = A(1)
+```
+
 
 ## Type Inference
 Unlike `Crystal`, type uncertainty cannot be caused by a branching control flow.
@@ -79,12 +106,12 @@ In typical ARC implementation, only subject pointers are counted. In Astro, only
 #### Deallocation Schemes
 In the following code sample, it is evident that the object that `c` points to is last referenced at the call to `bar`, therefore it needs to be deallocated somewhere after the last point of reference.
 
-```python
+```nim
 fun foo():
     var c = 'Hello'
     bar(c)
     # Deallocate `c` here
-    for i in ..max:
+    for i in 1..max:
        print(i)
 ```
 There are several ways of going about this, each with its own set of problems.
@@ -112,8 +139,10 @@ There are several ways of going about this, each with its own set of problems.
         do_something()
         # Free resources
         free_locals()
-        if (bitflag bitand 0b1000_0000) == 0b1000_0000: free(a)
-        if (bitflag bitand 0b0100_0000) == 0b0100_0000: free(b)
+        if (bitflag bitand 0b1000_0000) == 0b1000_0000:
+            free(a)
+        if (bitflag bitand 0b0100_0000) == 0b0100_0000:
+            free(b)
 
     fun main():
         let x, y = "Hi", Car("Camaro", 2009)
@@ -123,55 +152,129 @@ There are several ways of going about this, each with its own set of problems.
 
     This scheme has runtime execution overhead.
 
-3. *Deallocation Bundle*
+4. *Deallocation Bundle*
 
     With _Deallocation Checks_ scheme, knowing which object to delete requires checks, which can become expensive when a function has many arguments and is called often. So I discarded this scheme in favor of the first scheme, but after spending more time on it lately, I think I may have found the right solution. There is still runtime overhead, but it should be significantly lesser than the previous scheme.
 
     This scheme allocates an array on the stack, just before a call to a function. The array holds pointers to arguments the function is allowed to destroy and the array is passed as an argument to the function. At the end of the function, the array is passed to `free_externals` function, which releases the pointers in the array.
 
     ```python
+    # Synchronous
     fun foo(a, b, heapvars):
-        let m, n = 5, 6
         do_something(a, b)
-        # Free resources
-        free_locals(anyptr(m), anyptr(n))
+        free_locals()
         free_externals(heapvars) # Can be inlined.
 
     fun main():
-        let m, y = "Hi", Car("Camaro", 2009)
-        let heapvars = stackalloc{(AnyPtr, Type)}(2)
-        heapvars[1] = (anyptr x, typeof x)
-        heapvars[2] = (anyptr y, typeof y)
-        foo(x, y, heapvars) # Release x and y at this point.
+        let x, y = "Hi", Car("Camaro", 2009)
+        let heapvars = stackalloc{AnyPtr}(2)
+        heapvars[1] = anyptr x
+        heapvars[2] = anyptr y
+        foo(x, y, heapvars) # Release x and y after function call.
         print("Hello")
         print("World")
 
     @unsafe
     fun free_externals(heapvars):
-        if heapvars: for p, t in heapvars:
-            destruct(t, p)
+        if heapvars: for p in heapvars:
+            free(p)
+
+    # Asynchronous
+    fun foo(a, b, concurrent_heapvars):
+        let x, y = "Hi", Car('Camaro', 2009)
+        free_locals()
+        free_externals_concurrent(concurrent_heapvars)
+
+    fun free_externals_concurrent(concurrent_heapvars):
+        if concurrent_heapvars: for i, c in concurrent_heapvars:
+            @atomic:
+                if c > 0:
+                    heapvars[i, 3] -= 1
+                else:
+                    destruct(t, i)
+
+    fun main():
+        let a, b = "Hi", Car('Camaro', 2009)
+        let concurrent_heapvars = stackalloc{(AnyPtr, Int)}(2)
+        concurrent_heapvars[1] = (anyptr x, 0)
+        concurrent_heapvars[2] = (anyptr y, 0)
+        async foo(a, b, inc_ref_count(concurrent_heapvars))
+        async foo(a, b, inc_ref_count(concurrent_heapvars))
+        do_something()
     ```
 
     This is nice because, unlike the _Deallocation Checks_ scheme, it knows what arguments to destroy, so it's not making checks on each argument. It also doesn't exhibit cache spill problem of traditional ref counting because there is no counting done at runtime (for a non-concurrent program). But it still has the same cascading deallocation problem and it still has some runtime overhead.
+
+5. *Final Functions*
+
+    Came up with a new deallocation strategy on August 4, 2018. This deallocation scheme relies on final functions _(will be explained below)_. With final functions, all that is needed is a metadata on each heap object specifying whether it can be freed or not. A function containing the entire lifetime of an object can then specify whether such object can be freed by an inner final/non-final function call.
+
+    A final function is a function that doesn't pass at least one of its argument to another function call.
+
+    ```julia
+    # Synchronous / Asynchronous
+    fun baz(x):
+        let y = "Hi"
+        foo(x, y) # Final (x: declined)
+        # should_free tells the next final function it should free x
+        # This only applies if there is a can_free on the object
+        should_free(x)
+        foo(x, y) # Final (x: allowed)
+
+    fun bar(x):
+        let y = "Hello"
+        should_free(x)
+        foo(x, y) # Final (x: allowed)
+
+    fun foo(x, y): # Final (x)
+        let z = x + y
+        #>>>>>>>>>>
+        free x
+        #<<<<<<<<<<
+        print(z, y)
+
+    fun main():
+        let t0 = "000"
+        can_free(t0) # Tells the next non-final function it can free t0
+        bar(t0) # t0 last used here
+        let t1 = "111"
+        can_free(t1)
+        baz(t1) # t1 last used here
+
+    # Free Function
+    fun free(x): jmp get_flag(x):
+        @(0): # No Free Flag
+            return
+        @(1): # Can Free Flag
+            return
+        @(2): # Should Free Synchronously Flag
+            free_sync x
+        @(3): # Should Free Asynchronously Flag
+            free_async x
+    ```
+
+    This deallocation scheme is nice because it does not add an additional argument to a function signature and call to free function only happens in final functions. And given that it doesn't loop through heapvars, it is likely to be more efficient than deallocation bundle scheme.
 
 #### Possible Optimizations
 I will have to benchmark each scheme to be sure how they perform under different conditions. A mix of some of the schemes may be the ideal approach.
 
 The first scheme can be classified under `late deallocation schemes`, while the last two can be classified under `early deallocation schemes`.
 
-There can only be one subject pointer to an object.
 
-References can only be passed by assignment or by argument.
+#### Notes
+* There can only be one subject pointer to an object.
 
-Subject pointers are discarded when associated objects are no longer needed.
+* References can only be passed by assignment or by argument.
 
-When there is no concurrency, deallocation points of objects can be entirely determined at compile-time.
+* Subject pointers are discarded when associated objects are no longer needed.
 
-When concurrency is involved, a count is maintained for concurrent coroutines that share an object and once one of the coroutine no longer needs an object, it decrements the count and checks if it can deallocate the object.
+* When there is no concurrency, deallocation points of objects can be entirely determined at compile-time.
+
+* When concurrency is involved, a count is maintained for concurrent coroutines that share an object and once one of the coroutine no longer needs an object, it decrements the count and checks if it can deallocate the object.
 
 ## Poymorphism
 ### Structural Polymorphism
-Astro's polymorphism is designed around structural typing. This means the shape of a type or object determines if such type can be passed to a function. If a type has the field names referenced inside the function body, then it is structurally compliant to the function's interface.
+Astro's polymorphism is designed around structural typing. This means the shape of a type or object determines if such type can be passed to a function. If a type has the fields used by a function, then it is structurally compliant to the function's interface.
 
 ```python
 fun foo(a, b):
@@ -198,7 +301,7 @@ In the example above, the function interface is constrained to a specific leaf t
 show :: (Ptr{Person}) -> None
 ```
 
-However if the function interface is generic or polymorphic, the implementation will only expect
+However if the function interface is generic or polymorphic, the implementation will only expect structural (and nominal) compliance.
 ```nim
 fun show(a): :: Any -> None
     print(a.name, :age)
@@ -222,13 +325,53 @@ let object2 = (ptr(object2.name), ptr(object2.age))
 show(object2)
 ```
 
-
-
-
 There are other alternative implementations given below, but the implementation described above should be better.
 
 
-### Subtype Polymorphism [Old]
+### Type Specialization
+Here is an example of how specializations are generated depending on the specificty or genericity of a function's type.
+```julia
+type B <: A
+
+fun foo(a, b):
+    do_something(a, b)
+
+fun foo(a, b): :: A, A -> A
+    do_something(a, b)
+
+fun foo(a, b): :: B, B -> B
+    do_something(a, b)
+```
+
+#### Generated functions
+```julia
+foo :: Any, Any -> Any # For untyped functions or functions called with subtypes that have diverged structurally from parent
+foo :: A, A -> A # Specific functions are always generated
+foo :: B, B -> B # Specific functions are always generated
+```
+
+## Construction
+A `type constructor` must return a new object. The returned object will be considered an instance of the type.
+
+```nim
+type Person: var name, age
+
+# constructor
+fun Person(name, age) = { name, age }
+```
+
+A `type constructor` must return an object with all introduced and inherited fields inititialized.
+
+```nim
+type Person:
+    var name, age
+    var sex = "female"
+
+# constructor
+fun Person(name, age) = { name } # error! `age` field not initialized.
+```
+
+### Subtype Polymorphism [Stale]
 Subtype polymorphism relies on Astro structural typing properties. Astro supports multiple inheritance, but unlike C++, it doesn't duplicate same-name fields inherited from different parent types. This is enforced through `constructor chaining`.
 
                        [O] { name }
@@ -329,29 +472,6 @@ foo(a[1][2], a[3][2], a[1][1][1], a[3][1][1])
 #### Possible Optimizations
 A witness table may not include common fields that are not accessed.
 If the types of arguments passed to a functions are known at compile-time, the function may be specialized for that type signature.
-
-
-## Construction
-A `type constructor` must return a new object. The returned object will be considered an instance of the type.
-
-```nim
-type Person: var name, age
-
-# constructor
-fun Person(name, age) = { name, age }
-```
-
-A `type constructor` must return an object with all introduced and inherited fields inititialized.
-
-```nim
-type Person:
-    var name, age
-    var sex = "female"
-
-# constructor
-fun Person(name, age) = { name } # error! `age` field not initialized.
-```
-
 
 #### Constructor Chain
 A `constructor chain` is an hierarchical chain of construction in which a type is responsible for initializing the fields it introduced.
