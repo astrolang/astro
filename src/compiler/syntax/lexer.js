@@ -34,7 +34,7 @@ class Lexer {
     this.keywords = [
       'import', 'export', 'let', 'var', 'const', 'fun', 'type', 'async',
       'ref', 'iso', 'if', 'elif', 'else', 'while', 'for', 'try',
-      'except', 'ensure', 'defer', 'loop', 'end', 'match', 'fallthrough', 'return', 'raise', 'break',
+      'except', 'ensure', 'defer', 'loop', 'end', 'fallthrough', 'return', 'raise', 'break',
       'continue', 'yield', 'from', 'await', 'where', 'is', 'not', 'in', 'as',
       'mod', 'typeof', 'super',
     ];
