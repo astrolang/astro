@@ -741,8 +741,8 @@ MATCH EXPRESSION
     | { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
     | [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
     | (x, y) => x # Matches if object is a tuple of two elements.
-    | 75 or 90 => 3 # Matches if object has a value `75` or `67`
-    | 75 to 90 => 3 # Matches if object has a value between `75` and value `67`
+    | 75 | 90 => 3 # Matches if object has a value `75` or `67`
+    | 75..90 => 3 # Matches if object has a value between `75` and value `67`
     | 75 => fallthrough # `fallthrough` keyword means the control flow should unconditionaly move to the next match condition.
     | n => 6 # Matches. Binds `n` to the object.
     | _ => 7 # Matches.
