@@ -67,7 +67,7 @@ IDENTIFIERS
     type XMLParser <: Parser
 
     # Kebab case for module names
-    import my-module { foo, bar }
+    import my_module { foo, bar }
 
     # if a name remains readable and unambiguous without underscores, then the underscores can be ommitted.
     iseven 45
@@ -1167,10 +1167,10 @@ MODULES & IMPORT
     import csv, dataframes
 
     # Module path can be specified following the Unix style. In that case, they need to be enclosed in quotes.
-    import 'nypro/../my-cool-project'
+    import 'nypro/../my_cool_project'
 
     # Renaming can help disambiguate imports.
-    import fastmath: 'nypro/fast-math' { cosine: cos, sine: sin, π: pi }
+    import fastmath: 'nypro/fast_math' { cosine: cos, sine: sin, π: pi }
     let b = fastmath.tan(45)
     let d = cosine(30)
 
