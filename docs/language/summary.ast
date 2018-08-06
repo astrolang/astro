@@ -941,7 +941,7 @@
         var year
 
     # The block begin punctuator, `:`, can be replaced with `=` for single expression definitions.
-    type Car = var make, year
+    type Car = var make; var year
 
     # Types need constructors for object creation. A constructor always has the same name as the type.
     # TConstructors return new objects that are associated with the constructor's type.
@@ -1232,7 +1232,7 @@
 - OPERATOR OVERLOADING & CUSTOM OPERATOR
     # Existing operators can be overloaded just like regular functions.
     fun +(x, y): :: (Dual, Dual) -> Dual
-        Dual({ x + y }.vl, { x + y }.adj)
+        Dual({ x + y }.val, { x + y }.adj)
 
     # New operators can also be created by combining operators as a name.
     fun ++(x): :: (Real, Real) -> Real
