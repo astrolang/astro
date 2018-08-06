@@ -398,8 +398,8 @@ indexpostfix =
 
 extendednotation
   | ':' nospace atom
-  | ':' callpostfix
-  | ':' indexpostfix
+  | ':' nospace callpostfix
+  | ':' nospace indexpostfix
   { kind, expression }
 
 ternaryoperator =
