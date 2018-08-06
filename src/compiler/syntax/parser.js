@@ -1684,8 +1684,8 @@ const indexPostfix = (parser) => {
 
 // extendednotation
 //   | ':' nospace atom
-//   | ':' callpostfix
-//   | ':' indexpostfix
+//   | ':' nospace callpostfix
+//   | ':' nospace indexpostfix
 //   { kind, expression }
 const extendedNotation = (parser) => {
   const { tokenPosition } = parser;
@@ -1693,8 +1693,8 @@ const extendedNotation = (parser) => {
   const result = { success: false, ast: { kind, expression: null } };
   const parseResult = alt(
     parse(':', noSpace, atom),
-    parse(':', callPostfix),
-    parse(':', indexPostfix),
+    parse(':', noSpace, callPostfix),
+    parse(':', noSpace, indexPostfix),
   )(parser);
 
   if (parseResult.success) {
@@ -2736,9 +2736,10 @@ const expression = (parser) => {
   return result;
 };
 
-// // subexpressionnoblock =
-// //   | controlprimitive
-// //   | tupleexpression
+// subexpressionnoblock =
+//   | controlprimitive
+//   | tupleexpression
+// TODO: Refactor: Uncomment the commented out expressions and write tests for them.
 const subExpressionNoBlock = (parser) => {
   const { tokenPosition } = parser;
   const kind = 'subexpression';
@@ -2774,6 +2775,72 @@ const expressionNoBlock = (parser) => {
   const parseResult = parse(
     subExpressionNoBlock,
     optmore(alt(parse(nextCodeLine, samedent), parse(opt(_), ';', opt(_))), subExpressionNoBlock),
+    opt(alt(parse(nextCodeLine, samedent), parse(opt(_), ';'))),
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+
+    // Get first subexpresion.
+    result.ast.expressions.push(parseResult.ast[0]);
+
+    // Get remaining subexpressions
+    for (let i = 0; i < parseResult.ast[1].length; i += 1) {
+      result.ast.expressions.push(parseResult.ast[1][i][1]);
+    }
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// subexpressionsecondinline =
+//   | dotnotationblock
+//   | declarationsecondinline
+//   | conditionalexpressionsecondinline
+//   | controlprimitive
+//   | tupleexpression
+// TODO: Refactor: Uncomment the commented out expressions and write tests for them.
+const subExpressionSecondInline = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'subexpression';
+  const result = {
+    success: false,
+    ast: { kind },
+  };
+  const parseResult = alt(
+    dotNotationBlock,
+    // declarationSecondInline,
+    // conditionalExpressionSecondInline,
+    controlPrimitive,
+    tupleExpression,
+  )(parser);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+    result.ast = parseResult.ast.ast;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
+
+// expressionsecondinline =
+//   | subexpressionsecondinline ((nextcodeline | _? ';' _?) subexpressionsecondinline)* (nextcodeline | _? ';')?
+const expressionSecondInline = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'expression';
+  const result = {
+    success: false,
+    ast: { kind, expressions: [] },
+  };
+  const parseResult = parse(
+    subExpressionSecondInline,
+    optmore(alt(parse(nextCodeLine, samedent), parse(opt(_), ';', opt(_))), subExpressionSecondInline),
     opt(alt(parse(nextCodeLine, samedent), parse(opt(_), ';'))),
   )(parser);
 
@@ -2891,4 +2958,6 @@ module.exports = {
   expression,
   subExpressionNoBlock,
   expressionNoBlock,
+  subExpressionSecondInline,
+  expressionSecondInline,
 };
