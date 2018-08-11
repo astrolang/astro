@@ -28,7 +28,7 @@ class Lexer {
     this.digitHexadecimal = '0123456789ABCDEFabcdef';
     this.identifierBeginChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'; // Unicode?
     this.identifierEndChar = `${this.identifierBeginChar}${this.digitDecimal}`;
-    this.operatorChar = "+'-*/\\^%&|!><=÷×≠≈¹²³√?~"; // Unicode?
+    this.operatorChar = "+'`-*/\\^%&|!><=÷×≠≈¹²³√?~"; // Unicode?
     this.punctuatorChar = '(){}[],.;:@$'; // Unicode?
     this.importNameChar = `${this.identifierEndChar}-`; // Unicode?
     this.keywords = [
@@ -1484,6 +1484,52 @@ class Lexer {
     };
   }
 
+  // regexchars =
+  //   | (!(newline | '`') .)+ // TODO
+  // regexliteral =
+  //   | '`' regexchars? '`'
+  //   { token, kind, startColumn, stopColumn }
+  regexLiteral2() {
+    const { lastPosition, column, line } = this;
+    let token = null;
+    const kind = 'regexliteral';
+    const startColumn = column;
+
+    // Consume '`'.
+    if (this.peekChar() === '`') {
+      this.eatChar();
+      token = ''; // Make token a string.
+
+      // Consume (singlequotestringchars: (!(newline | '`') .)+)?.
+      while (
+        this.peekChar() !== '\n' &&
+        this.peekChar() !== '\r' &&
+        this.peekChar() !== '`' &&
+        this.peekChar() !== null
+      ) {
+        token += this.eatChar();
+      }
+
+      // Consume '`'.
+      if (this.peekChar() === '`') {
+        this.eatChar();
+      } else { token = null; }
+    }
+
+    // Check if lexing failed.
+    if (token === null) {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop column.
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startColumn, stopColumn,
+    };
+  }
+
   // singlelinecommentchars =
   //   | (!(newline | eoi) .)+ // TODO
   // singlelinecomment =
@@ -1671,7 +1717,7 @@ class Lexer {
         this.integerDecimalLiteral() ||
         this.multiLineStringLiteral() ||
         this.singleLineStringLiteral() ||
-        this.regexLiteral() ||
+        this.regexLiteral2() ||
         this.multiLineComment() ||
         this.singleLineComment() ||
         this.operator() ||
