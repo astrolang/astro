@@ -1422,74 +1422,11 @@ class Lexer {
   }
 
   // regexchars =
-  //   | (!(newline | '/') .)+ // TODO
-  // regexliteral =
-  //   | '/' regexchars? '/'
-  //   { token, kind, startColumn, stopColumn }
-  // NOTE: /regex/ (?!(\s*[\{\[\(a-zA-Z0-9@$])|{operatorChar})
-  regexLiteral() {
-    const { lastPosition, column, line } = this;
-    let token = null;
-    const kind = 'regexliteral';
-    const startColumn = column;
-
-    if (this.peekChar() === '/') {
-      // Consume "/".
-      this.eatChar();
-      token = ''; // Make token a string.
-
-      // Consume (singlequotestringchars: (!(newline | "/") .)+)?.
-      while (!this.lastReached() && this.peekChar() !== '/' && this.peekChar() !== '\n' && this.peekChar() !== '\r') {
-        token += this.eatChar();
-      }
-
-      // Consume "/".
-      if (this.peekChar() !== '/') {
-        token = null;
-      } else {
-        this.eatChar();
-      }
-
-      // Check (?!(\s*[\{\[\(a-zA-Z0-9@$])|{operatorChar})
-      if (!this.lastReached()) {
-        const lastPos = this.lastPosition;
-        const col = this.column;
-        const ln = this.line;
-        // !operatorChar
-        if (this.operatorChar.indexOf(this.peekChar()) > -1) {
-          token = null;
-        // !(identifierBeginChar | '{' | '[' | '(' | '@' | '$')
-        } else {
-          this.spaces();
-          if (this.identifierEndChar.indexOf(this.peekChar()) > -1 || '{[(@$'.indexOf(this.peekChar()) > -1) {
-            token = null;
-          }
-        }
-
-        this.revert(lastPos, col, ln);
-      }
-    }
-
-    // Check if lexing failed.
-    if (token === null) {
-      this.revert(lastPosition, column, line);
-      return null;
-    }
-
-    // Add stop column.
-    const stopColumn = this.column;
-
-    return {
-      token, kind, startColumn, stopColumn,
-    };
-  }
-
-  // regexchars =
   //   | (!(newline | '`') .)+ // TODO
   // regexliteral =
   //   | '`' regexchars? '`'
   //   { token, kind, startColumn, stopColumn }
-  regexLiteral2() {
+  regexLiteral() {
     const { lastPosition, column, line } = this;
     let token = null;
     const kind = 'regexliteral';
@@ -1717,7 +1654,7 @@ class Lexer {
         this.integerDecimalLiteral() ||
         this.multiLineStringLiteral() ||
         this.singleLineStringLiteral() ||
-        this.regexLiteral2() ||
+        this.regexLiteral() ||
         this.multiLineComment() ||
         this.singleLineComment() ||
         this.operator() ||

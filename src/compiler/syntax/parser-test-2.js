@@ -5812,11 +5812,11 @@ test(
   },
 );
 
-lexer = new Lexer('/regex/');
+lexer = new Lexer('`regex`');
 parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
-  String.raw`/regex/`,
+  String.raw`\`regex\``,
   {
     parser: {
       tokenPosition: parser.tokenPosition,

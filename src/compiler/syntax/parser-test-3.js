@@ -1319,11 +1319,11 @@ test(
   },
 );
 
-lexer = new Lexer(' /hello/.meta');
+lexer = new Lexer(' `hello`.meta');
 parser = new Parser(lexer.lex().tokens);
 result = commandNotationArgument(parser);
 test(
-  String.raw` /hello/.meta`,
+  String.raw` \`hello\`.meta`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -1397,11 +1397,11 @@ test(
 );
 
 print('============== COMMANDNOTATION ==============');
-lexer = new Lexer('foo /  hello/.bar()');
+lexer = new Lexer('foo `  hello`.bar()');
 parser = new Parser(lexer.lex().tokens);
 result = commandNotation(parser);
 test(
-  String.raw`foo /  hello/.bar()`,
+  String.raw`foo \`  hello\`.bar()`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,

@@ -1365,74 +1365,42 @@ test(
 );
 
 print('============== REGEXLITERAL ==============');
-lexer = new Lexer('/ regex / id');
+lexer = new Lexer('` regex');
 result = lexer.regexLiteral();
 test(
-  String.raw`/ regex / id--------->FAIL`,
+  '` regex--------->FAIL',
   result,
   null,
 );
 
-lexer = new Lexer('/ regex / 5');
+lexer = new Lexer('`');
 result = lexer.regexLiteral();
 test(
-  String.raw`/ regex / 5--------->FAIL`,
+  '`--------->FAIL',
   result,
   null,
 );
 
-lexer = new Lexer('/ regex / @macro');
+lexer = new Lexer('`hello\nworld`');
 result = lexer.regexLiteral();
 test(
-  String.raw`/ regex / @macro--------->FAIL`,
+  String.raw`\`hello\nworld\`--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('/ regex /$symbol');
+lexer = new Lexer('`hello\\\\');
 result = lexer.regexLiteral();
 test(
-  String.raw`/ regex /$symbol--------->FAIL`,
+  String.raw`\`hello\\--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('/ regex /{');
+lexer = new Lexer('``');
 result = lexer.regexLiteral();
 test(
-  String.raw`/ regex /{--------->FAIL`,
-  result,
-  null,
-);
-
-lexer = new Lexer('/');
-result = lexer.regexLiteral();
-test(
-  String.raw`/--------->FAIL`,
-  result,
-  null,
-);
-
-lexer = new Lexer('/hello\nworld/');
-result = lexer.regexLiteral();
-test(
-  String.raw`/hello\nworld/--------->FAIL`,
-  result,
-  null,
-);
-
-lexer = new Lexer('/hello\\\\');
-result = lexer.regexLiteral();
-test(
-  String.raw`/hello\\--------->FAIL`,
-  result,
-  null,
-);
-
-lexer = new Lexer('//');
-result = lexer.regexLiteral();
-test(
-  String.raw`//`,
+  String.raw`\`\``,
   result,
   {
     token: '',
@@ -1442,10 +1410,10 @@ test(
   },
 );
 
-lexer = new Lexer('/Wanna (eat){3} Π*/');
+lexer = new Lexer('`Wanna (eat){3} Π*`');
 result = lexer.regexLiteral();
 test(
-  String.raw`/Wanna (eat){3} Π*/`,
+  String.raw`\`Wanna (eat){3} Π*\``,
   result,
   {
     token: 'Wanna (eat){3} Π*',
@@ -1455,10 +1423,10 @@ test(
   },
 );
 
-lexer = new Lexer('/ regex / + y');
+lexer = new Lexer('` regex ` + y');
 result = lexer.regexLiteral();
 test(
-  String.raw`/ regex / + y`,
+  String.raw`\` regex \` + y`,
   result,
   {
     token: ' regex ',
