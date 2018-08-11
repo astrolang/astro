@@ -99,22 +99,23 @@
 - COMMAND NOTATION
     # If a function call takes just one argument, the parens can be ommitted given the argument is not a list, dict, set or regex literal or preceded by a prefix operator.
     # This is necessary due to ambiguities that may otherwise be caused when parsing or reading the code.
-    print (x | x in z)
-    print { x: y | x in z }
-    print [x | y in z]
-    print (x > y) ? x || y
-    print (x, y) => x
-    print 1..2
-    print "Hello"
-    print name
-    print $name
-    print 56
-    print /9/
-    print @set { x, y }
+    print (x | x in z) # Comprehensions
+    print { x: y | x in z } # Comprehensions
+    print [x | y in z] # Comprehensions
+    print (x > y) ? x || y # Ternary operators
+    print (x, y) => x # Lambdas
+    print 1..2 # Ranges
+    print "Hello" # Strings
+    print name # Identifiers
+    print $name # Synmbols
+    print 56 # Numbers
+    print @set { x, y } # Macros
+    print `regex`
 
     print [9] # Invalid!
     print {9} # Invalid!
     print +5 # Invalid!
+    print (2, 3, 5) # Invalid!
 
 - TYPE DEFINITION (1)
     # A type is synonymous with `struct` in C. It holds the blueprint of what an object can contain.
@@ -639,7 +640,7 @@
         return i
 
     # The `else` block executes when a loop completes without interruption from `break`, `return` or `throw`.
-    for line in file where /lagbaja/ in line:
+    for line in file where `lagbaja` in line:
         print "name found!"
         break
     else:
@@ -667,7 +668,7 @@
 - BREAK WITH
     # Break-with breaks a loop and returns a value.
     let name =
-        for name in register where /tony/ in name:
+        for name in register where `tony` in name:
             break name
         else:
             ""
@@ -682,8 +683,8 @@
         print 'Aaargh! Everyone hates me'
 
     # Regex matching.
-    if /dollar[s]?/ in sentence:
-        sentence.replace(/dollar[s]?/, 'pounds')
+    if `dollar[s]?` in sentence:
+        sentence.replace(`dollar[s]?`, 'pounds')
 
 - MOD
     # `mod` is a keyword-based infix operator alias of `%` operator.
@@ -729,7 +730,7 @@
     ..
 
     # Like `for` loops, `while` and `loop` can have a closing `else` block.
-    while file.has_next() where /\t+/ in file.next():
+    while file.has_next() where `\t+` in file.next():
         break 'File contains tabs!'
     else: 'File is clean!'
 
@@ -1282,11 +1283,11 @@
 
 - REGEX
     # Regex are used to find and/or capture patterns in strings.
-    var number_pattern = /\d+(.\d+)?/
+    var number_pattern = `\d+(.\d+)?`
     number_pattern in 'π = 3.14159265' # true
 
     # Regex operations.
-    var = /\d/ + /[a-z]/ + /\d/ # Concatenation
+    var = `\d` + `[a-z]` + `\d` # Concatenation
 
 - COEFFICIENT EXPRESSION
     # Coefficient expression as the name implies allows coefficients to be taken as multiplication.
