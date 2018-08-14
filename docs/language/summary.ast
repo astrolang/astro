@@ -102,20 +102,21 @@
     print (x | x in z) # Comprehensions
     print { x: y | x in z } # Comprehensions
     print [x | y in z] # Comprehensions
-    print (x > y) ? x || y # Ternary operators
+    print (x > y) ? x : y # Ternary operators
     print (x, y) => x # Lambdas
     print 1..2 # Ranges
     print "Hello" # Strings
+    print `a` # Character
     print name # Identifiers
     print $name # Synmbols
     print 56 # Numbers
     print @set { x, y } # Macros
-    print `regex`
+    print ||regex||
 
-    print [9] # Invalid!
-    print {9} # Invalid!
-    print +5 # Invalid!
+    print [9, 5] # Invalid!
+    print { name: 'John' } # Invalid!
     print (2, 3, 5) # Invalid!
+    print +5 # Invalid!
 
 - TYPE DEFINITION (1)
     # A type is synonymous with `struct` in C. It holds the blueprint of what an object can contain.
@@ -474,8 +475,9 @@
     Hello, World!
     '''
 
-    # Char is 32-bit datatype that represents a single Unicode codepoint.
-    var chars = char "π" # Char("π")
+    # A single character single quotes is not a string but a Char.
+    # Char is a 32-bit datatype that represents a single Unicode codepoint.
+    var pi_char = `π`
 
     # String operations.
     var concatenate = 'ab' + 'c' # 'abc'
@@ -558,7 +560,7 @@
       return s.split(/\s/).join() # Invalid!
 
 - IF EXPRESSION
-    # Coonditional branches using `if`, `elif` and `else`.
+    # Conditional branches using `if`, `elif` and `else`.
     if is_adrian_rich:
         spendall('on parties')
     elif is_orobo_rich:
@@ -579,7 +581,7 @@
     let cmp = if a > b: 0 else: 1
 
     # Astro requires parens around the condition.
-    let cmp = (a > b) ? 0 || 1
+    let cmp = (a > b) ? 0 : 1
 
 - NIL
     # Sometimes, it can be useful to represent an empty or a missing state.
@@ -640,7 +642,7 @@
         return i
 
     # The `else` block executes when a loop completes without interruption from `break`, `return` or `throw`.
-    for line in file where `lagbaja` in line:
+    for line in file where ||lagbaja|| in line:
         print "name found!"
         break
     else:
@@ -668,7 +670,7 @@
 - BREAK WITH
     # Break-with breaks a loop and returns a value.
     let name =
-        for name in register where `tony` in name:
+        for name in register where ||tony|| in name:
             break name
         else:
             ""
@@ -683,8 +685,8 @@
         print 'Aaargh! Everyone hates me'
 
     # Regex matching.
-    if `dollar[s]?` in sentence:
-        sentence.replace(`dollar[s]?`, 'pounds')
+    if ||dollar[s]?|| in sentence:
+        sentence.replace(||dollar[s]?||, 'pounds')
 
 - MOD
     # `mod` is a keyword-based infix operator alias of `%` operator.
@@ -730,7 +732,7 @@
     ..
 
     # Like `for` loops, `while` and `loop` can have a closing `else` block.
-    while file.has_next() where `\t+` in file.next():
+    while file.has_next() where ||\t+|| in file.next():
         break 'File contains tabs!'
     else: 'File is clean!'
 
@@ -750,8 +752,8 @@
 
     # A match expression can also be used to match against the arguments of a function, if, for, loop or while expressions.
     fun ischosen(option):
-        | 'y' or 'Y' => true
-        | 'n' or 'N' => false
+        | `y` or `Y` => true
+        | `n` or `N` => false
         | _ => raise Error('Invalid choice!')
 
 - ASSIGNMENT DESTRUCTURING
@@ -895,7 +897,7 @@
 
     # Recursive lambda.
     # An anonymous function or lambda can be recursively called within its body using the `_(...)`.
-    list.aggregate((0, a) => (a == 0) ? 1 || a + _(a - 1))
+    list.aggregate((0, a) => (a == 0) ? 1 : a + _(a - 1))
 
     # Immediately-invoked function.
     ((a, b) => a + b)(2, 3)
@@ -911,7 +913,7 @@
     # Partially applied functions are function calls with one or more of their argument not applied.
     fun multiply(a, b) = a × b
 
-    # Unapplied arguments are represented with the placeholder, `$`.
+    # Unapplied arguments are represented with the placeholder, `_`.
     let multiply3by = multiply(3, _)
 
     # Applying missing arguments.
@@ -921,8 +923,8 @@
 - COROUTINES
     # A coroutine is a type of function that can pause and resume its execution.
     # `yield` marks an execution pause and resumption point.
-    fun count(num):
-        for x in 1..num: yield x
+    fun count(num): for x in 1..num:
+        yield x
 
     # Instantiating the coroutine.
     var counter = count(25)
@@ -1245,31 +1247,40 @@
     fun getindex(sequence, index): :: (Sequence, Signed) -> T
         return sequence.items[index]
 
-- TRY, EXCEPT & ENSURE
+- TRY & ENSURE [UNFINISHED]
     # Raising an exception with the `raise` keyword.
-    if numerator & denominator == 0:
+    if numerator and denominator == 0:
         raise DomainError('division by zero!')
 
+    # In Astro, all exceptions must be handled or re-raised.
+    # Re-raising an exception
+    let amount = try withdraw(amount)
+
     # Handling an exception
-    # Ensure block is optional, but when it is present, it is always run.
-    try:
-        process big_data
-    except IncompleteDataError:
-        print error.message # the error object can always accessed in `except` block.
+    try process! data:
+        | PermissionError(message) => print message
+        | DataCorruptError(message) => print message
+
+    # Panics abort the program and they are done with `try!`
+    let file = try! open('dancing-masquerade.txt')
+
+    # Ensure blocks are run whether an error is raised in the preceding expression or not
+    try process! data:
+        | PermissionError(message) => print message
+        | DataCorruptError(message) => print message
     ensure:
-        restore big_data
+        reset! data
 
-    # The except body can be ommitted if it's only printing the error message.
-    try: process big_data
-    except IncompleteDataError
+    # When adding type annotation to a function, the errors it can raise must be included in the type signature
+    fun can_raise_errors(data): :: BigData -> BigData !DataCorruptError, PermissionError
+        print(try process! data)
+        return data
 
-    # A single except can catch mutiple error types.
-    try: process big_data
-    except IncompleteDataError, CorruptDataError
-
-    # An object defined in the try's header always has it's at the end of the try block.
-    try file = open('dancing-masquerade.txt'):
-        for line in file: print line
+    # Astro objects don't need special syntax for context managers
+    # Destructor are automatically called when a function raises an error.
+    let file = try! open('dancing-masquerade.txt')
+    for line in file:
+        print line
 
 - SYMBOL
     # Symbols are static data types that hold their content as-is.
