@@ -300,12 +300,12 @@
 - ARRAYS # Needs redesign work
     # Array is a supertype of List and works a bit differently from List.
     # Arrays are not preallocated and their dimension must be specified.
-    # If the element type is not specified, the element type will default to F64
+    # If the element type is not specified, the element type will default to Float64
     let matrix = 5×5 [] # A 5 by 5 array.
     let matrix = 5*5 [] # Alternative syntax.
 
     # Specifying element type.
-    let matrix = 5*5 Int32[]
+    let matrix = 5*5 [] :: [Int32, 3]
 
     # Because Arrays are typically used to represent matrices.
     let a = 2×4 [
@@ -320,7 +320,7 @@
     ]
 
     # Using a constructor to create an Array.
-    var matrix = Array{Int}(2, 2)
+    var matrix = Array{Int, 2}(2, 2)
 
     # Setting the indices of a multi-dimensional Array.
     matrix[,] = [
@@ -1010,6 +1010,9 @@
     # Varargs type annotation.
     fun total(first, ...rem): :: (Int, ...Int) -> Int
         return first + sum rem
+
+    # Value generics
+    let arr = Array{Int, 3}()
 
     # Higher Kinded Types
     map :: F{A}, (A -> B) -> F{B}
