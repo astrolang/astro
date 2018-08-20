@@ -1,3 +1,35 @@
+# TABLE OF CONTENT
+* Compilation Phases
+* Compilation Methods
+    * Static Compilation
+    * REPL
+    * Dynamic Compilation
+* Semantic Analysis
+    * Prelude Inclusion
+    * Name Checking
+    * Cascading Notation Expansion
+    * The Cycle Problem
+        * Construction Cycle
+    * Type Inference
+    * Reference Counting
+* Dellocations Schemes
+    * Deallocation at Original Scope
+    * Specialized Functions
+    * Deallocation Checks
+    * Deallocation Bundle
+    * Final Functions
+* Polymorphism
+    * Specialization
+    * Structural Polymorphism
+    * Subtype Polymorphism
+* Generics
+* Indexing
+    * Base Pointer
+    * Bounds Checking
+* Construction
+    * Type Constructor
+    * Constructor Chain
+
 # COMPILATION PHASES
     Source Code
         ↓
@@ -40,11 +72,11 @@ Extending the AST with imports of essential modules.
 ## Name Checking
 Checking if a name has been declared before its use.
 
-Names can only be used if they declared in current or parent scope.
+Names can only be used if they are declared in current or parent scope.
 
 Types and functions can be used before their declaration point.
 
-## Cascading Notation Object Association
+## Cascading Notation Expansion
 Cascading notation, e.g. `:name`, are associated with their object early on in the semantic analysis phase.
 
 
@@ -103,7 +135,7 @@ else:
 
 In typical ARC implementation, only subject pointers are counted. In Astro, only the object pointers are counted and the counting is all done at compile time.
 
-#### Deallocation Schemes
+# DEALLOCATION SCHEMES
 In the following code sample, it is evident that the object that `c` points to is last referenced at the call to `bar`, therefore it needs to be deallocated somewhere after the last point of reference.
 
 ```nim
@@ -211,7 +243,7 @@ There are several ways of going about this, each with its own set of problems.
 
     A final function is a function that doesn't pass at least one of its argument to another function call.
 
-    ```julia
+    ```python
     # Synchronous / Asynchronous
     fun baz(x):
         let y = "Hi"
@@ -272,233 +304,191 @@ The first scheme can be classified under `late deallocation schemes`, while the 
 
 * When concurrency is involved, a count is maintained for concurrent coroutines that share an object and once one of the coroutine no longer needs an object, it decrements the count and checks if it can deallocate the object.
 
-## Poymorphism
-### Structural Polymorphism
-Astro's polymorphism is designed around structural typing. This means the shape of a type or object determines if such type can be passed to a function. If a type has the fields used by a function, then it is structurally compliant to the function's interface.
+# POLYMORPHISM
+Astro polymorphic multiple dispatch system is designed around nominal and structural typing this allows some algorithms to be expressed in intuitive and flexible ways. There are different ways of implementing the polymorphism and some are listed below.
+1. *Specialization*
+    , however rather than having very generic functions, we choose to specialize a function for each set of types it is called with.
 
-```python
-fun foo(a, b):
-    print(a.name, b.age)
-```
+    Here is an example of how specializations are generated depending on the specificty or genericity of a function's type.
+    ```julia
+    type B <: A
 
-In the example above, `foo`'s structural interface would look like this `foo({ name }, { age })`. It accepts two objects, where the first object has a `name` field and the second object has an `age` field.
+    fun foo(a, b):
+        do_something(a, b)
 
-#### Implementation
-Where the function is not explicitly constrained to take **specific leaf types** as arguments, the function should have a generic implementation so that it can allow different types that conform structurally to its interface.
+    fun foo(a, b): :: A, A -> A
+        do_something(a, b)
 
-```nim
-type Person:
-    var name :: Str
-    var age :: Int
+    fun foo(a, b): :: B, B -> B
+        do_something(a, b)
 
-fun show(p): :: Person -> None
-    print(p.name, :age)
-```
+    # Generated
+    foo :: Any, Any -> Any # For untyped functions or functions called with subtypes that have diverged structurally from parent
+    foo :: A, A -> A # Specific functions are always generated
+    foo :: B, B -> B # Specific functions are always generated
+    ```
 
-In the example above, the function interface is constrained to a specific leaf type, so the implementation would look something like this
 
-```nim
-show :: (Ptr{Person}) -> None
-```
+2. *Structural Polymorphism*
+    Astro's polymorphism is designed around structural typing. This means the shape of a type or object determines if such type can be passed to a function. If a type has the fields used by a function, then it is structurally compliant to the function's interface.
 
-However if the function interface is generic or polymorphic, the implementation will only expect structural (and nominal) compliance.
-```nim
-fun show(a): :: Any -> None
-    print(a.name, :age)
+    ```python
+    fun foo(a, b):
+        print(a.name, b.age)
+    ```
 
-let object1 = { name: 'John', age: 20 }
-let object2 = { name: 'John', gender: 'male' age: 20 }
+    In the example above, `foo`'s structural interface would look like this `foo({ name }, { age })`. It accepts two objects, where the first object has a `name` field and the second object has an `age` field.
 
-show(object1)
-show(object2)
-```
+    ## Implementation
+    Where the function is not explicitly constrained to take **specific leaf types** as arguments, the function should have a generic implementation so that it can allow different types that conform structurally to its interface.
 
-The implementation of the function above should be similar to this:
+    ```nim
+    type Person:
+        var name :: Str
+        var age :: Int
 
-```nim
-show :: (Tuple{Ptr{Str}, Ptr{Int}}) -> Person
+    fun show(p): :: Person -> None
+        print(p.name, :age)
+    ```
 
-let object1 = (ptr(object1.name), ptr(object1.age))
-show(object1)
+    In the example above, the function interface is constrained to a specific leaf type, so the implementation would look something like this
 
-let object2 = (ptr(object2.name), ptr(object2.age))
-show(object2)
-```
+    ```nim
+    show :: (Ptr{Person}) -> None
+    ```
 
-There are other alternative implementations given below, but the implementation described above should be better.
+    However if the function interface is generic or polymorphic, the implementation will only expect structural (and nominal) compliance.
+    ```nim
+    fun show(a): :: Any -> None
+        print(a.name, :age)
 
+    let object1 = { name: 'John', age: 20 }
+    let object2 = { name: 'John', gender: 'male' age: 20 }
 
-### Type Specialization
-Here is an example of how specializations are generated depending on the specificty or genericity of a function's type.
-```julia
-type B <: A
+    show(object1)
+    show(object2)
+    ```
 
-fun foo(a, b):
-    do_something(a, b)
+    The implementation of the function above should be similar to this:
 
-fun foo(a, b): :: A, A -> A
-    do_something(a, b)
+    ```nim
+    show :: (Tuple{Ptr{Str}, Ptr{Int}}) -> Person
 
-fun foo(a, b): :: B, B -> B
-    do_something(a, b)
-```
+    let object1 = (ptr(object1.name), ptr(object1.age))
+    show(object1)
 
-#### Generated functions
-```julia
-foo :: Any, Any -> Any # For untyped functions or functions called with subtypes that have diverged structurally from parent
-foo :: A, A -> A # Specific functions are always generated
-foo :: B, B -> B # Specific functions are always generated
-```
+    let object2 = (ptr(object2.name), ptr(object2.age))
+    show(object2)
+    ```
 
-## Construction
-A `type constructor` must return a new object. The returned object will be considered an instance of the type.
+    There are other alternative implementations given below, but the implementation described above should be better.
 
-```nim
-type Person: var name, age
+    NOTE: In addition to interface compliance, the field types must match, otherwise functions will be monomorphised.
 
-# constructor
-fun Person(name, age) = { name, age }
-```
+3. *Subtype Polymorphism*
+    Subtype polymorphism relies on Astro structural typing properties. Astro supports multiple inheritance, but unlike C++, it doesn't duplicate same-name fields inherited from different parent types. This is enforced through `constructor chaining`.
 
-A `type constructor` must return an object with all introduced and inherited fields inititialized.
+                        [O] { name }
+                        / \
+                        /   \
+        { name, score } [A]   [B] { name, age }
+                        \   /
+                        \ /
+                        [C] { name, score, age }
 
-```nim
-type Person:
-    var name, age
-    var sex = "female"
+    In the above diagram, if a `C` object is constructed with ```{}.A(name, score).B(_, age)```, it will only get one `name` field, even though its supertypes both have a name field each.
 
-# constructor
-fun Person(name, age) = { name } # error! `age` field not initialized.
-```
+    Having duplicates helps the C++ compiler implement subtype polymorphism easily on functions but at the cost of unintuitive multiple inheritance behavior. So if type `C` had duplicated the fields, a `C` object would look like this. ```{ name, age, name, score }```.
 
-### Subtype Polymorphism [Stale]
-Subtype polymorphism relies on Astro structural typing properties. Astro supports multiple inheritance, but unlike C++, it doesn't duplicate same-name fields inherited from different parent types. This is enforced through `constructor chaining`.
+    ```python
+    let c = C("John", 45, 24)
 
-                       [O] { name }
-                       / \
-                      /   \
-    { name, score } [A]   [B] { name, age }
-                      \   /
-                       \ /
-                       [C] { name, score, age }
+    # (A) -> None
+    fun foo(obj) = obj.name
 
-In the above diagram, if a `C` object is constructed with ```{}.A(name, score).B(_, age)```, it will only get one `name` field, even though its supertypes both have a name field each.
+    foo(c) # References first `name` in `c`.
 
-Having duplicates helps the C++ compiler implement subtype polymorphism easily on functions but at the cost of unintuitive multiple inheritance behavior. So if type `C` had duplicated the fields, a `C` object would look like this. ```{ name, age, name, score }```.
+    # (B) -> None
+    fun bar(obj) = obj.name
 
-```python
-let c = C("John", 45, 24)
+    bar(c) # References second `name` in `c`.
+    ```
 
-# (A) -> None
-fun foo(obj) = obj.name
+    This way, each parent type is laid out inside `C` and a function for a parent type can also be a function for `C`, since `C` shares similar field offsets with its parent types.
 
-foo(c) # References first `name` in `c`.
+    In Astro, where field duplication is not allowed, each parent type may not be necessarily laid out in `C`.
 
-# (B) -> None
-fun bar(obj) = obj.name
+        A -> { name, age }
 
-bar(c) # References second `name` in `c`.
-```
+        B -> { name, score }
 
-This way, each parent type is laid out inside `C` and a function for a parent type can also be a function for `C`, since `C` shares similar field offsets with its parent types.
+        C -> { name, age, score }
 
-In Astro, where field duplication is not allowed, each parent type may not be necessarily laid out in `C`.
+    In the above example, `A` is laid out in `C`, but `B` is not laid out in `C` (`score` is not second to `name`). Therefore, to implement subtype polymorphism in Astro, the offset of each field of a parent type as used in the function body, is passed to the function.
 
-    A -> { name, age }
+    ```python
+    let b = B("Daniel", 33)
+    let c = C("John", 45, 24)
 
-    B -> { name, score }
+    # (B) -> None
+    fun foo(obj, objscoreoffset) = obj[objscoreoffset]
 
-    C -> { name, age, score }
+    foo(b, 2) # References b.score
+    foo(c, 3) # References c.score
+    ```
 
-In the above example, `A` is laid out in `C`, but `B` is not laid out in `C` (`score` is not second to `name`). Therefore, to implement subtype polymorphism in Astro, the offset of each field of a parent type as used in the function body, is passed to the function.
+    The problem with this technique is that it increases the number of parameters a function takes.
 
-```python
-let b = B("Daniel", 33)
-let c = C("John", 45, 24)
+    ### Array of Any and Multiple Dispatch
+    Like I always say, arrays are blackboxes and their blackbox nature complicates multiple dispatch implementations.
+    As a result of this, the compiler keeps a union of an array's element types even if the array has an explicit element type of `Any`.
+    This is used among other things to reduce multiple dispatch overhead.
 
-# (B) -> None
-fun foo(obj, objscoreoffset) = obj[objscoreoffset]
+    ```python
+    let a = [Car(name: 'chevrolet'), Person(name: 'John', age: 56), Product(kind: 'drink', name: 'Coke')]
+    a :: Array{Any}
+    a :: Array{Car|Person|Product}
+    ```
 
-foo(b, 2) # References b.score
-foo(c, 3) # References c.score
-```
+    While the Array type instantiation above has a type of `Array{Car|Person|Product}`, note that the element type is actually `Car&Person&Product`.
 
-The problem with this technique is that it increases the number of parameters a function takes.
+    An `Array{Any}` is a contiguous list of _typed pointers_ that point to the actual elements of the array.
 
-### Array of Any and Multiple Dispatch
-Like I always say, arrays are blackboxes and their blackbox nature complicates multiple dispatch implementations.
-As a result of this, the compiler keeps a union of an array's element types even if the array has an explicit element type of `Any`.
-This is used among other things to reduce multiple dispatch overhead.
+        [typeid, ptr] -> Car(name: 'chevrolet')
+        [typeid, ptr] -> Person(name: 'John', age: 56)
+        [typeid, ptr] -> Product(kind: 'drink', name: 'Coke')
 
-```python
-let a = [Car(name: 'chevrolet'), Person(name: 'John', age: 56), Product(kind: 'drink', name: 'Coke')]
-a :: Array{Any}
-a :: Array{Car|Person|Product}
-```
+    For every `Array{Any}`, each element type of the array is given an id and the id serves as the index
+    into a `type witness table` which will be discussed later.
 
-While the Array type instantiation above has a type of `Array{Car|Person|Product}`, note that the element type is actually `Car&Person&Product`.
+    `Astro` is a __statically-typed language__ and even though it allows polymorphic structures like `Array{Any}`,
+    it will throw a __compile-time error__ if you try to access a field that is not common to all the array's element types.
 
-An `Array{Any}` is a contiguous list of _typed pointers_ that point to the actual elements of the array.
+    ```python
+    print a[i].name # Ok. `name` field is common to all of a's element types
+    print a[i].age # Error. `age` field is not common to all of a's element types
+    ```
 
-    [typeid, ptr] -> Car(name: 'chevrolet')
-    [typeid, ptr] -> Person(name: 'John', age: 56)
-    [typeid, ptr] -> Product(kind: 'drink', name: 'Coke')
+    A `type witness table` is constructed based on the fields common to all the element types. This can be written as `Car&Person&Product` for the example above. A witness table simply
+    allows one to choose the right _field offset_ at runtime when the type of an element has been determined.
 
-For every `Array{Any}`, each element type of the array is given an id and the id serves as the index
-into a `type witness table` which will be discussed later.
+                typeid    name_offset
+        Car     [1]  ->   [1]
+        Person  [2]  ->   [1]
+        Product [3]  ->   [5]
 
-`Astro` is a __statically-typed language__ and even though it allows polymorphic structures like `Array{Any}`,
-it will throw a __compile-time error__ if you try to access a field that is not common to all the array's element types.
+    ```python
+    fun foo(a, b) = a.name, b.name :: (Any, Any) -> (T, T)
+    foo(a[1]::Car, a[3]::Product, 1, 5)
+    foo(a[1][2], a[3][2], a[1][1][1], a[3][1][1])
+    ```
 
-```python
-print a[i].name # Ok. `name` field is common to all of a's element types
-print a[i].age # Error. `age` field is not common to all of a's element types
-```
+    #### Possible Optimizations
+    A witness table may not include common fields that are not accessed.
+    If the types of arguments passed to a functions are known at compile-time, the function may be specialized for that type signature.
 
-A `type witness table` is constructed based on the fields common to all the element types. This can be written as `Car&Person&Product` for the example above. A witness table simply
-allows one to choose the right _field offset_ at runtime when the type of an element has been determined.
-
-            typeid    name_offset
-    Car     [1]  ->   [1]
-    Person  [2]  ->   [1]
-    Product [3]  ->   [5]
-
-```python
-fun foo(a, b) = a.name, b.name :: (Any, Any) -> (T, T)
-foo(a[1]::Car, a[3]::Product, 1, 5)
-foo(a[1][2], a[3][2], a[1][1][1], a[3][1][1])
-```
-
-#### Possible Optimizations
-A witness table may not include common fields that are not accessed.
-If the types of arguments passed to a functions are known at compile-time, the function may be specialized for that type signature.
-
-#### Constructor Chain
-A `constructor chain` is an hierarchical chain of construction in which a type is responsible for initializing the fields it introduced.
-
-```nim
-type Person: var name, age
-type Student <: Person: var score
-
-# constructors
-fun Person(name, age) = { name, age }
-fun Student(name, age, score) = { score }.Person(name, age)
-```
-
-A `type constructor` must not initialize or assign to fields not introduced by it's type.
-
-```nim
-type Person(name, age)
-type Student <: Person: var score
-
-# constructor
-fun Student(name, age, score) = { name, age, score } # error! initialized `age` and `name` fields.
-```
-
-A `type constructor` can only be defined in the same file as the type.
-
-## Generics
-#### Generic Type Arguments
+# GENERICS
+## Generic Type Arguments
 It is true that types can be inferred from assignments and arguments passed to a function, and this means generic type arguments are redundant in many cases.
 
 ```julia
@@ -523,7 +513,7 @@ fun List(len): :: {T}
     { buffer: malloc{T}(len) }
 ```
 
-## GENERATOR
+# GENERATOR
 In Astro, generators are passed around by reference.
 ```nim
 let gen = (i | i in 1..500)
@@ -546,7 +536,7 @@ next(another_gen) # 3
 next(gen) # 4
 ```
 
-#### Implementation
+## Implementation
 ```nim
 fun foo():
     let a, b, c = 1, 'Hello', 5.0
@@ -577,9 +567,8 @@ If the generator is instantiated multiple times, an array of teh different insta
 foo_global_array = [  { ... }, ... ]
 
 
-## Indexing
-### 0-Based Indexing vs 1-Based Indexing
-#### Base Pointer
+# INDEXING [0-Based Indexing vs 1-Based Indexing]
+## Base Pointer
 0-based
 ```
 base pointer      [•][a][b][c][d]
@@ -602,7 +591,7 @@ offset            [•][a][b][c][d]
                      ptr[1]
 ```
 
-#### Bounds Checking
+## Bounds Checking
 0-based
 ```julia
     -1 < index < len
@@ -614,3 +603,49 @@ offset            [•][a][b][c][d]
     0 < index ≤ len
     1 > index > len
 ```
+
+# CONSTRUCTION
+## Type Constructor
+A `type constructor` must return a new object. The returned object will be considered an instance of the type.
+
+```nim
+type Person: var name, age
+
+# constructor
+fun Person(name, age) = { name, age }
+```
+
+A `type constructor` must return an object with all introduced and inherited fields inititialized.
+
+```nim
+type Person:
+    var name, age
+    var sex = "female"
+
+# constructor
+fun Person(name, age) = { name } # error! `age` field not initialized.
+```
+
+## Constructor Chain
+A `constructor chain` is an hierarchical chain of construction in which a type is responsible for initializing the fields it introduced.
+
+```nim
+type Person: var name, age
+type Student <: Person: var score
+
+# constructors
+fun Person(name, age) = { name, age }
+fun Student(name, age, score) = { score }.Person(name, age)
+```
+
+A `type constructor` must not initialize or assign to fields not introduced by it's type.
+
+```nim
+type Person(name, age)
+type Student <: Person: var score
+
+# constructor
+fun Student(name, age, score) = { name, age, score } # error! initialized `age` and `name` fields.
+```
+
+A `type constructor` can only be defined in the same file as the type.
