@@ -29,6 +29,7 @@
 * Construction
     * Type Constructor
     * Constructor Chain
+* Reference and Value Types
 
 # COMPILATION PHASES
     Source Code
@@ -649,3 +650,11 @@ fun Student(name, age, score) = { name, age, score } # error! initialized `age` 
 ```
 
 A `type constructor` can only be defined in the same file as the type.
+
+
+# REFERENCE AND VALUE TYPES
+```python
+print(ref 5) # (*ptr(5))
+print(5) # (5)
+print("Hello") # (ptr("Hello"))
+```
