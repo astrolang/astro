@@ -87,6 +87,13 @@ floatLiteralnomantissa =
   | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier | '.')
   { token, kind, startColumn, stopColumn }
 
+chars =
+  | (!(newline | '`') .) // TODO
+
+charliteral =
+  | '`' chars '`'
+  { token, kind, startColumn, stopColumn }
+
 singlequotestringchars =
   | (!(newline | "'") .)+ // TODO
 
@@ -344,6 +351,7 @@ comprehension =
 literal =
   | numericliteral
   | booleanliteral
+  | charliteral
   | stringliteral
   | regexliteral
   | listliteral
@@ -516,6 +524,7 @@ commandnotationargument =
       lambdaexpression |
       ternaryoperator |
       range |
+      charliteral |
       stringliteral |
       identifier |
       symbolliteral |
