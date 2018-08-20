@@ -15,7 +15,7 @@ Current Version: 0.1.14
 
 ### What is Astro?
 Astro is a fun programming language designed for safe _high-performance applications_. It is essentially a statically-typed systems language that
-- encourages rapid prototyping,
+- facilitates rapid prototyping,
 - features high-level abstractions with zero overhead,
 - ensures memory safety without a (tracing) Garbage Collector, and
 - supports data-race-free concurrency.
@@ -24,8 +24,6 @@ Astro is a fun programming language designed for safe _high-performance applicat
 The language creator had a set of requirements (listed above) not met by any language ([Rust](https://en.wikipedia.org/wiki/Rust_(programming_language)) comes close). Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and other proposals for GPU Compute will make the web a desirable HPC target in the near future. Astro is, for this reason, designed for high-performance apps that are expected to run on the server or in the browser.
-
-As part of targeting the high-performance community, Astro has features that benefit numerical computing environment. For example, it has builtin support for matrices, vectorization, unicode identifiers, etc. It also has no runtime-based [Garbage Collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) (GC) as it is expected to be fast enough for real-time software like games.
 
 In order to match up with the expressiveness and productivity of dynamic programming languages, Astro adds full type inference, structural typing, and some other high-level abstractions that reduce boilerplate code commonly associated with statically-typed languages. It feels like a scripting language for the most part.
 
@@ -46,14 +44,16 @@ fun times(a, b):
     return sum
 ```
 
+Astro is supposed to be high-level enough to write python-like scripts but also low-level enough to write an operating system kernel. Therefore, it doesn't have a traditional [garbage collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) instead it relies on lifetime analysis at compile-time that free memory once they are no longer referenced.
+
 Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets. Astro has built-in facilities for writing concurrent programs. A [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
 
 ### What is Astro automatic memory management like? Rust's or Swift's?
 Neither.
 Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting) (ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
-It's also unlike Rust current memory management model as it puts lesser restrictions on how references are moved around while still being memory safe. It's, however, very similar to the _non-lexical lifetime_ mechanism that's now being developed for Rust.
+It's also unlike Rust current memory management model beacause it doesn't have a strict borrow chcker that requires some mental shift to get used to.
 
-Astro simply stays out of your way; lets you write your code like you would in any other GC'ed language.
+Astro simply stays out of your way; lets you write your code like you would in any other GC'ed language while still being memory safe.
 
 ### How close is Astro to being ready for use?
 Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
