@@ -412,10 +412,7 @@
     # Empty dictionary.
     var empty_dict = {}
 
-    # A dictionary whose keys are symbols and are known at compile-time is considered an object
-    # and they are optimized for space and memory.
-    # Using a dictionary as an object also means keys should not be dynamically removed from the structure
-    # and regular dictionary should not be splat inside the object
+    # A dictionary whose keys are symbols and key-value pairs specified at initialization are optimized
     var object = { name: 'James', age: 6 }
 
 - SET
@@ -782,7 +779,7 @@
 - FUNCTION DEFINITION (2)
     # If a function returns nothing, it can either be annotated with None or return type can be left empty.
     fun show(point): :: (Point) -> None
-        print(point.{ a, b })
+        print(point.a, :b)
 
     # The normal order of arguments in a function call can be changed if the parameter name is specified.
     fun say(msg, name): :: (Str, Str)
