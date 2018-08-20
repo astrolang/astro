@@ -210,7 +210,7 @@ astro --help
 astro --evaluate '1 + 2'
 ```
 
-### LIBRARY FUNCTIONS
+## LIBRARY FUNCTIONS
 #### Arrays, Lists and Strings
 ##### Common
 ```
@@ -229,3 +229,9 @@ any, all, none,
 sin, cos, atan, atan2, log
 mean,
 ```
+
+## STRING IMPLEMENTATION
+#### Internal Representation
+* ptr
+* length (unicode length)
+* capacity (bytes length + fixed-offset, string type flag)
