@@ -283,6 +283,7 @@ const floatOctalLiteral = parser => parseTerminalRule(parser, 'floatoctalliteral
 const floatHexadecimalLiteral = parser => parseTerminalRule(parser, 'floathexadecimalliteral');
 const floatDecimalLiteral = parser => parseTerminalRule(parser, 'floatdecimalliteral');
 const floatLiteralNoMantissa = parser => parseTerminalRule(parser, 'floatLiteralnomantissa');
+const charLiteral = parser => parseTerminalRule(parser, 'charliteral');
 const singleLineStringLiteral = parser => parseTerminalRule(parser, 'singlelinestringliteral');
 // TODO: Proper multiLineStringLiteral parsing
 const multiLineStringLiteral = parser => parseTerminalRule(parser, 'multilinestringliteral');
@@ -1243,6 +1244,7 @@ const symbolLiteral = (parser) => {
 // literal =
 //   | numericliteral
 //   | booleanliteral
+//   | charliteral
 //   | stringliteral
 //   | regexliteral
 //   | listliteral
@@ -1258,6 +1260,7 @@ const literal = (parser) => {
   const parseResult = alt(
     numericLiteral,
     booleanLiteral,
+    charLiteral,
     stringLiteral,
     regexLiteral,
     listLiteral,
@@ -1736,7 +1739,7 @@ const ternaryOperator = (parser) => {
   const parseResult = alt(
     parse(
       '(', opt(_), simpleExpression, opt(_), ')',
-      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), get(alt(prefixAtom, atom)),
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), alt(prefixAtom, atom),
       alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
     ),
     parse(
@@ -1746,7 +1749,7 @@ const ternaryOperator = (parser) => {
     ),
     parse(
       '(', opt(_), simpleExpression, opt(_), ')',
-      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), get(primitiveExpression),
+      alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), primitiveExpression,
       alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
     ),
     parse(
@@ -2382,6 +2385,7 @@ const range = (parser) => {
 //       lambdaexpression |
 //       ternaryoperator |
 //       range |
+//       charliteral |
 //       stringliteral |
 //       identifier |
 //       symbolliteral |
@@ -2407,6 +2411,7 @@ const commandNotationArgument = (parser) => {
       // lambdaExpression,
       ternaryOperator,
       range,
+      get(charLiteral),
       stringLiteral,
       identifier,
       symbolLiteral,
@@ -2415,6 +2420,8 @@ const commandNotationArgument = (parser) => {
     )),
     simpleExpression,
   )(parser);
+
+  print(parseResult);
 
   if (parseResult.success) {
     result.success = parseResult.success;
@@ -2864,6 +2871,30 @@ const expressionSecondInline = (parser) => {
 
 // block =
 //   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
+const block = (parser) => {
+  const { tokenPosition } = parser;
+  const kind = 'expression';
+  const result = {
+    success: false,
+    ast: { kind, expressions: [] },
+  };
+  const parseResult = parse(
+    optmore(nextCodeLine, indent, expression),
+    optmore(nextCodeLine, samedent, expression),
+    dedentOrEoiEnd,
+  )(parser);
+
+  print(parseResult);
+
+  if (parseResult.success) {
+    result.success = parseResult.success;
+  }
+
+  // Cache parse result if not already cached.
+  parser.cacheRule(kind, tokenPosition, parseResult, result);
+
+  return result;
+};
 
 module.exports = {
   Parser,
@@ -2888,6 +2919,7 @@ module.exports = {
   floatHexadecimalLiteral,
   floatDecimalLiteral,
   floatLiteralNoMantissa,
+  charLiteral,
   singleLineStringLiteral,
   multiLineStringLiteral,
   booleanLiteral,
@@ -2963,4 +2995,5 @@ module.exports = {
   expressionNoBlock,
   subExpressionSecondInline,
   expressionSecondInline,
+  block,
 };

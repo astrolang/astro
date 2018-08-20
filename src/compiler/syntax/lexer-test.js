@@ -1129,6 +1129,52 @@ test(
   },
 );
 
+print('============== CHARLITERAL ==============');
+lexer = new Lexer('`c');
+result = lexer.charLiteral();
+test(
+  '`c--------->FAIL',
+  result,
+  null,
+);
+
+lexer = new Lexer('`');
+result = lexer.charLiteral();
+test(
+  '`--------->FAIL',
+  result,
+  null,
+);
+
+lexer = new Lexer('`string`');
+result = lexer.charLiteral();
+test(
+  String.raw`\`string\`--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('``');
+result = lexer.charLiteral();
+test(
+  String.raw`\`\`--------->FAIL`,
+  result,
+  null,
+);
+
+lexer = new Lexer('`c`');
+result = lexer.charLiteral();
+test(
+  String.raw`\`c\``,
+  result,
+  {
+    token: 'c',
+    kind: 'charliteral',
+    startColumn: 0,
+    stopColumn: 3,
+  },
+);
+
 print('============== SINGLELINESTRINGLITERAL ==============');
 lexer = new Lexer("'hello\"");
 result = lexer.singleLineStringLiteral();
@@ -1365,74 +1411,74 @@ test(
 );
 
 print('============== REGEXLITERAL ==============');
-lexer = new Lexer('` regex');
+lexer = new Lexer('|| regex');
 result = lexer.regexLiteral();
 test(
-  '` regex--------->FAIL',
+  '|| regex--------->FAIL',
   result,
   null,
 );
 
-lexer = new Lexer('`');
+lexer = new Lexer('||');
 result = lexer.regexLiteral();
 test(
-  '`--------->FAIL',
+  '||--------->FAIL',
   result,
   null,
 );
 
-lexer = new Lexer('`hello\nworld`');
+lexer = new Lexer('||hello\nworld||');
 result = lexer.regexLiteral();
 test(
-  String.raw`\`hello\nworld\`--------->FAIL`,
+  String.raw`||hello\nworld||--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('`hello\\\\');
+lexer = new Lexer('||hello\\\\');
 result = lexer.regexLiteral();
 test(
-  String.raw`\`hello\\--------->FAIL`,
+  String.raw`||hello\\--------->FAIL`,
   result,
   null,
 );
 
-lexer = new Lexer('``');
+lexer = new Lexer('||||');
 result = lexer.regexLiteral();
 test(
-  String.raw`\`\``,
+  String.raw`||||`,
   result,
   {
     token: '',
     kind: 'regexliteral',
     startColumn: 0,
-    stopColumn: 2,
+    stopColumn: 4,
   },
 );
 
-lexer = new Lexer('`Wanna (eat){3} Π*`');
+lexer = new Lexer('||Wanna (eat){3} Π*||');
 result = lexer.regexLiteral();
 test(
-  String.raw`\`Wanna (eat){3} Π*\``,
+  String.raw`||Wanna (eat){3} Π*||`,
   result,
   {
     token: 'Wanna (eat){3} Π*',
     kind: 'regexliteral',
     startColumn: 0,
-    stopColumn: 19,
+    stopColumn: 21,
   },
 );
 
-lexer = new Lexer('` regex ` + y');
+lexer = new Lexer('|| regex || + y');
 result = lexer.regexLiteral();
 test(
-  String.raw`\` regex \` + y`,
+  String.raw`|| regex || + y`,
   result,
   {
     token: ' regex ',
     kind: 'regexliteral',
     startColumn: 0,
-    stopColumn: 9,
+    stopColumn: 11,
   },
 );
 

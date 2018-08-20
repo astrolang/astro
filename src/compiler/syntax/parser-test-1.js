@@ -16,6 +16,7 @@ const {
   integerHexadecimalLiteral,
   integerDecimalLiteral,
   floatDecimalLiteral,
+  charLiteral,
   singleLineStringLiteral,
   integerLiteral,
   floatLiteral,
@@ -1271,6 +1272,60 @@ test(
       ast: {
         kind: 'integerhexadecimalliteral',
         value: 'ff0e11',
+      },
+    },
+  },
+);
+
+print('============== CHARLITERAL ==============');
+lexer = new Lexer('`');
+parser = new Parser(lexer.lex().tokens);
+result = charLiteral(parser);
+test(
+  String.raw`'--------->FAIL`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: -1,
+      column: 0,
+    },
+    result: {
+      success: false,
+      ast: {
+        kind: 'charliteral',
+      },
+    },
+  },
+);
+
+lexer = new Lexer('`ẹ`');
+parser = new Parser(lexer.lex().tokens);
+result = charLiteral(parser);
+test(
+  String.raw`\`ẹ\``,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'charliteral',
+        value: 'ẹ',
       },
     },
   },

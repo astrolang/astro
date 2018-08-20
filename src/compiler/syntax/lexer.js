@@ -1256,6 +1256,51 @@ class Lexer {
     };
   }
 
+  // chars =
+  //   | (!(newline | '`') .) // TODO
+  // charliteral =
+  //   | '`' chars '`'
+  //   { token, kind, startColumn, stopColumn }
+  charLiteral() {
+    const { lastPosition, column, line } = this;
+    let token = '';
+    const kind = 'charliteral';
+    const startColumn = column;
+
+    // Consume '`'.
+    if (this.peekChar() === '`') {
+      this.eatChar();
+
+      // Consume (singlequotestringchars: (!(newline | '`') .))?.
+      if (
+        this.peekChar() !== '\n' &&
+        this.peekChar() !== '\r' &&
+        this.peekChar() !== '`' &&
+        this.peekChar() !== null
+      ) {
+        token += this.eatChar();
+      }
+
+      // Consume '`'.
+      if (this.peekChar() === '`') {
+        this.eatChar();
+      } else { token = ''; }
+    }
+
+    // Check if lexing failed.
+    if (token === '') {
+      this.revert(lastPosition, column, line);
+      return null;
+    }
+
+    // Add stop column.
+    const stopColumn = this.column;
+
+    return {
+      token, kind, startColumn, stopColumn,
+    };
+  }
+
   // doublequotestringchars =
   //   | (!(newline | '"') .)+ // TODO
   // singlequotestringchars =
@@ -1422,9 +1467,9 @@ class Lexer {
   }
 
   // regexchars =
-  //   | (!(newline | '`') .)+ // TODO
+  //   | (!(newline | '||') .)+ // TODO
   // regexliteral =
-  //   | '`' regexchars? '`'
+  //   | '||' regexchars? '||'
   //   { token, kind, startColumn, stopColumn }
   regexLiteral() {
     const { lastPosition, column, line } = this;
@@ -1432,23 +1477,25 @@ class Lexer {
     const kind = 'regexliteral';
     const startColumn = column;
 
-    // Consume '`'.
-    if (this.peekChar() === '`') {
+    // Consume '||'.
+    if (this.peekToken('||')) {
+      this.eatChar();
       this.eatChar();
       token = ''; // Make token a string.
 
-      // Consume (singlequotestringchars: (!(newline | '`') .)+)?.
+      // Consume (singlequotestringchars: (!(newline | '||') .)+)?.
       while (
         this.peekChar() !== '\n' &&
         this.peekChar() !== '\r' &&
-        this.peekChar() !== '`' &&
+        !this.peekToken('||') &&
         this.peekChar() !== null
       ) {
         token += this.eatChar();
       }
 
-      // Consume '`'.
-      if (this.peekChar() === '`') {
+      // Consume '||'.
+      if (this.peekToken('||')) {
+        this.eatChar();
         this.eatChar();
       } else { token = null; }
     }
@@ -1652,6 +1699,7 @@ class Lexer {
         this.integerOctalLiteral() ||
         this.integerHexadecimalLiteral() ||
         this.integerDecimalLiteral() ||
+        this.charLiteral() ||
         this.multiLineStringLiteral() ||
         this.singleLineStringLiteral() ||
         this.regexLiteral() ||

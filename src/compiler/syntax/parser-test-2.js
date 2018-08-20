@@ -2161,6 +2161,33 @@ test(
   },
 );
 
+lexer = new Lexer('`z`');
+parser = new Parser(lexer.lex().tokens);
+result = literal(parser);
+test(
+  '`z`',
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 3,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'charliteral',
+        value: 'z',
+      },
+    },
+  },
+);
+
 
 lexer = new Lexer('${.357}');
 parser = new Parser(lexer.lex().tokens);
@@ -5812,11 +5839,11 @@ test(
   },
 );
 
-lexer = new Lexer('`regex`');
+lexer = new Lexer('||regex||');
 parser = new Parser(lexer.lex().tokens);
 result = subAtom(parser);
 test(
-  String.raw`\`regex\``,
+  String.raw`||regex||`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -5827,7 +5854,7 @@ test(
   {
     parser: {
       tokenPosition: 0,
-      column: 7,
+      column: 9,
     },
     result: {
       success: true,
