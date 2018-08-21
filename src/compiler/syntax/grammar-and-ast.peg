@@ -607,8 +607,6 @@ expressionsecondinline =
 block =
   | nextcodeline indent expression dedentoreoiend
 
-// NOW: FIX OLD REPLACEMENTS!
-
 lhsname
   | noname
   | identifier
