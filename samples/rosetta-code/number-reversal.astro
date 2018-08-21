@@ -7,7 +7,7 @@ while data == sort data:
 
 while data != sort data:
     trials += 1
-    flip = int input '#$trials: LIST: ${join data} Flip how many?: '
+    flip = int input '#${trials}: LIST: ${join data} Flip how many?: '
     data[:flip] = data[end:-1:flip]
 
-print '\nYou took $trials attempts to put digits in order!'
+print '\nYou took ${trials} attempts to put digits in order!'
