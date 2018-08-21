@@ -605,7 +605,7 @@ expressionsecondinline =
   | subexpressionsecondinline ((nextcodeline | _? ';' _?) subexpressionsecondinline)* (nextcodeline | _? ';')?
 
 block =
-  | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
+  | nextcodeline indent expression dedentoreoiend
 
 // NOW: FIX OLD REPLACEMENTS!
 

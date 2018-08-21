@@ -2411,7 +2411,7 @@ const commandNotationArgument = (parser) => {
       // lambdaExpression,
       ternaryOperator,
       range,
-      get(charLiteral),
+      charLiteral,
       stringLiteral,
       identifier,
       symbolLiteral,
@@ -2420,8 +2420,6 @@ const commandNotationArgument = (parser) => {
     )),
     simpleExpression,
   )(parser);
-
-  print(parseResult);
 
   if (parseResult.success) {
     result.success = parseResult.success;
@@ -2870,24 +2868,22 @@ const expressionSecondInline = (parser) => {
 };
 
 // block =
-//   | nextcodeline indent expression (nextcodeline samedent expression)* dedentoreoiend
+//   | nextcodeline indent expression dedentoreoiend
 const block = (parser) => {
   const { tokenPosition } = parser;
-  const kind = 'expression';
+  const kind = 'block';
   const result = {
     success: false,
     ast: { kind, expressions: [] },
   };
   const parseResult = parse(
-    optmore(nextCodeLine, indent, expression),
-    optmore(nextCodeLine, samedent, expression),
+    nextCodeLine, indent, expression,
     dedentOrEoiEnd,
   )(parser);
 
-  print(parseResult);
-
   if (parseResult.success) {
     result.success = parseResult.success;
+    result.ast = parseResult.ast[0];
   }
 
   // Cache parse result if not already cached.

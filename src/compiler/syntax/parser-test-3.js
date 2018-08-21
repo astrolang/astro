@@ -2,6 +2,7 @@
 const Lexer = require('./lexer');
 const {
   Parser,
+  parse,
   prefixAtom,
   postfixAtom,
   prePostfixAtom,
@@ -22,6 +23,7 @@ const {
   expressionNoBlock,
   subExpressionSecondInline,
   expressionSecondInline,
+  block,
 } = require('./parser');
 const { print, createTest } = require('../../utils');
 
@@ -1319,11 +1321,41 @@ test(
   },
 );
 
-lexer = new Lexer(' `hello`.meta');
+lexer = new Lexer(' `a`');
 parser = new Parser(lexer.lex().tokens);
 result = commandNotationArgument(parser);
 test(
-  String.raw` \`hello\`.meta`,
+  ' `a`',
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 0,
+      column: 4,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'commandnotationargument',
+        argument: {
+          kind: 'charliteral',
+          value: 'a',
+        },
+      },
+    },
+  },
+);
+
+lexer = new Lexer(' ||hello||.meta');
+parser = new Parser(lexer.lex().tokens);
+result = commandNotationArgument(parser);
+test(
+  String.raw` ||hello||.meta`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -1334,7 +1366,7 @@ test(
   {
     parser: {
       tokenPosition: 2,
-      column: 13,
+      column: 15,
     },
     result: {
       success: true,
@@ -1397,11 +1429,11 @@ test(
 );
 
 print('============== COMMANDNOTATION ==============');
-lexer = new Lexer('foo `  hello`.bar()');
+lexer = new Lexer('foo ||  hello||.bar()');
 parser = new Parser(lexer.lex().tokens);
 result = commandNotation(parser);
 test(
-  String.raw`foo \`  hello\`.bar()`,
+  String.raw`foo ||  hello||.bar()`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -1412,7 +1444,7 @@ test(
   {
     parser: {
       tokenPosition: 5,
-      column: 19,
+      column: 21,
     },
     result: {
       success: true,
@@ -3243,6 +3275,85 @@ test(
           {
             kind: 'fallthroughexpression',
             label: null,
+          },
+        ],
+      },
+    },
+  },
+);
+
+print('============== BLOCK ==============');
+lexer = new Lexer('print ||regex||\n    cost + price; break\n    [1, 2].name');
+parser = new Parser(lexer.lex().tokens);
+expression(parser);
+result = block(parser);
+print(result);
+test(
+  String.raw`print ||regex||\n    cost + price; break\n    [1, 2].name`,
+  {
+    parser: {
+      tokenPosition: parser.tokenPosition,
+      column: parser.column,
+    },
+    result,
+  },
+  {
+    parser: {
+      tokenPosition: 15,
+      column: 55,
+    },
+    result: {
+      success: true,
+      ast: {
+        kind: 'expression',
+        expressions: [
+          {
+            kind: 'infixexpression',
+            expressions: [
+              {
+                kind: 'identifier',
+                value: 'cost',
+              },
+              {
+                kind: 'identifier',
+                value: 'price',
+              },
+            ],
+            operators: [
+              {
+                vectorized: false,
+                operator: {
+                  kind: 'operator',
+                  value: '+',
+                },
+              },
+            ],
+          },
+          {
+            kind: 'breakexpression',
+            label: null,
+            expression: null,
+          },
+          {
+            kind: 'dot',
+            expression: {
+              kind: 'listliteral',
+              transposed: false,
+              expressions: [
+                {
+                  kind: 'integerdecimalliteral',
+                  value: '1',
+                },
+                {
+                  kind: 'integerdecimalliteral',
+                  value: '2',
+                },
+              ],
+            },
+            name: {
+              kind: 'identifier',
+              value: 'name',
+            },
           },
         ],
       },
