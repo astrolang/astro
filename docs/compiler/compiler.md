@@ -677,6 +677,11 @@ let math = compile readfile("math.astro")
 print math.cos(45)
 ```
 
-I intend for the jit to be lightweight; it doesn't really need to have the fastest runtime but I expect it to compile code very fast.
+I intend for the jit to be compile fast; it doesn't really need to have the fastest runtime but I expect it to compile code very fast. Another route would be to allow extra arguments to specify the optimization level desired.
+
+```python
+let math = compile(code_String)
+let math = compile(code_String, optimize_level=3)
+```
 
 Neither the standard library nor the AOT compiler will rely on the presence of the jit, but later down the line, an `astrojit` command may be made available to allow code to run straight through the jit.
