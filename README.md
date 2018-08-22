@@ -11,7 +11,7 @@
 Current Version: 0.1.14
 
 
-![astro screenshot](https://github.com/astrolang/astro/blob/ch-implement-packrat-parser-156977411/media/images/astro-syntax.png?raw=true)
+![astro screenshot](https://github.com/astrolang/astro/blob/ch-implement-packrat-parser-156977411/media/images/astro_syntax.png?raw=true)
 
 ### What is Astro?
 Astro is a fun programming language designed for safe _high-performance applications_. It is essentially a statically-typed systems language that

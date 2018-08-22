@@ -2,7 +2,6 @@
 const Lexer = require('./lexer');
 const {
   Parser,
-  parse,
   prefixAtom,
   postfixAtom,
   prePostfixAtom,

@@ -333,14 +333,17 @@ comprehensionhead =
 
 generatorcomprehension =
   | '(' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)?  _? ')'
+  | '(' nextcodeline indent simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? nextcodeline dedent ')'
   { kind, expression, iterators: [{ lhs, rhs }], guard }
 
 listcomprehension =
   | '[' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? ']'
+  | '[' nextcodeline indent simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? nextcodeline dedent ']'
   { kind, expression, iterators: [{ lhs, rhs }], guard }
 
 dictcomprehension =
   | '{' _? (simpleexpression _? ':' _? simpleexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? '}'
+  | '{' nextcodeline indent (simpleexpression _? ':' _? simpleexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? nextcodeline dedent '}'
   { kind, key, value, iterators: [{ lhs, rhs }], guard }
 
 comprehension =
@@ -405,7 +408,7 @@ indexpostfix =
   { kind, expression, arguments: [{ key, value }] }
 
 extendednotation
-  | ':' nospace atom
+  | ':' nospace identifier
   | ':' nospace callpostfix
   | ':' nospace indexpostfix
   { kind, expression }
@@ -606,6 +609,8 @@ expressionsecondinline =
 
 block =
   | nextcodeline indent expression dedentoreoiend
+
+
 
 lhsname
   | noname

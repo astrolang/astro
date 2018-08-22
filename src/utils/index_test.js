@@ -1,4 +1,4 @@
-const { equal, print, createTest } = require('../utils');
+const { equal, print, createTest } = require('.');
 
 const test = createTest();
 

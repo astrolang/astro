@@ -4379,7 +4379,7 @@ lexer = new Lexer(':foo.name');
 parser = new Parser(lexer.lex().tokens);
 result = extendedNotation(parser);
 test(
-  String.raw`:foo.name`,
+  String.raw`:foo.name--------->MID`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -4389,23 +4389,16 @@ test(
   },
   {
     parser: {
-      tokenPosition: 3,
-      column: 9,
+      tokenPosition: 1,
+      column: 4,
     },
     result: {
       success: true,
       ast: {
         kind: 'extendednotation',
         expression: {
-          kind: 'dot',
-          expression: {
-            kind: 'identifier',
-            value: 'foo',
-          },
-          name: {
-            kind: 'identifier',
-            value: 'name',
-          },
+          kind: 'identifier',
+          value: 'foo',
         },
       },
     },

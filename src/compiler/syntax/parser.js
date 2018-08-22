@@ -1686,7 +1686,7 @@ const indexPostfix = (parser) => {
 };
 
 // extendednotation
-//   | ':' nospace atom
+//   | ':' nospace identifier
 //   | ':' nospace callpostfix
 //   | ':' nospace indexpostfix
 //   { kind, expression }
@@ -1695,7 +1695,7 @@ const extendedNotation = (parser) => {
   const kind = 'extendednotation';
   const result = { success: false, ast: { kind, expression: null } };
   const parseResult = alt(
-    parse(':', noSpace, atom),
+    parse(':', noSpace, identifier),
     parse(':', noSpace, callPostfix),
     parse(':', noSpace, indexPostfix),
   )(parser);
