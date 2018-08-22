@@ -34,11 +34,11 @@ fun print({ name, age }) = print(name, age)
 print(ironman)
 
 # ALGEBRAIC DATA TYPES
-abst Traffic = Amber | Red | Green
+type Traffic = Amber | Red | Green
 
 # REGEX LITERAL
 fun wordcount(text):
-    let words = text.split(/[ \n\t\-.,:;]+/)
+    let words = text.split(||[ \n\t\-.,:;]+||)
     var counts = {}
     for w in words:
         counts[w] = (counts[w] ?? 0) + 1

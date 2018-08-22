@@ -458,7 +458,7 @@
     let language, year = 'Astro', 2015
 
     # String interpolation.
-    var story = "$language was started in the $year"
+    var story = "${language} was started in the ${year}"
 
     # Both single and double quotes can be used to represent a string literal.
     let calc = '5 * 50 = ${5 * 50}'

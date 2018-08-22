@@ -4,7 +4,7 @@ fun bottles(n):
     | _ => "$n bottles"
 
 for n in 99..-1..1:
-    print """
+    print @format """
     ${bottles n} of beer on the wall
     ${bottles n} of beer
     Take one down, pass it around
