@@ -661,8 +661,12 @@ print("Hello") # (ptr("Hello"))
 ```
 
 # THE LIGHTWEIGHT JIT
-My opinion on an alternative Astro JIT compiler has not been clear. Earlier this year I decided I want to have one for Astro even though I was aware of the community dichotomy it may cause, however recently my stand against such dichotomy became stronger and I decided I won't create the JIT.
-I know the benefits of having a JIT and I still really want one, I'm just afraid of the fault it may cause in the community.
+My opinion on an alternative Astro JIT compiler has not been clear. Earlier this year I decided I wanted one even though I was aware of the community dichotomy it may cause, however recently my stand against such dichotomy became stronger and I decided I won't create the JIT.
+
+I know the benefits of having a JIT and I still really want one, I'm just afraid of the fault it may cause in the community. Here are some of the benefits of having a JIT:
+    1. It can optimize specifically for the target machine
+    2. It can lazy-compile functions. This means a function won't be generated until it is called which help reduce the number of generated functions in type uncertainty scenarios.
+    3. It makes interop with dynamic languages easy.
 
 Recently though, I've been experimenting with the idea of `JIT as an import` (I assume that's how cling works). Instead of having the entire program run straight in a jit vm, the jit can be imported into a statically-compiled code and the jit can be used to jit-compile any astro code at runtime. To make this integration as easy as possible, the AOT compiler needs to have some ideas about the imported jit object and the static code it interacts with.
 
@@ -673,6 +677,6 @@ let math = compile readfile("math.astro")
 print math.cos(45)
 ```
 
-I intend for the jit to be lightweight yet fast. It doesn't necessarily need to be the fastest thing since it is expected to compile code very fast.
+I intend for the jit to be lightweight; it doesn't really need to have the fastest runtime but I expect it to compile code very fast.
 
-Later down the line, an `astrojit` command may be made available to allow code to run straight through the jit.
+Neither the standard library nor the AOT compiler will rely on the presence of the jit, but later down the line, an `astrojit` command may be made available to allow code to run straight through the jit.
