@@ -1,5 +1,0 @@
-let words = ["Enjoy", "Rosetta", "Code"]
-for word in words:
-    async (word) =>
-        sleep(random())
-        print(word)

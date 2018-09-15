@@ -1,0 +1,10 @@
+fun caesar(s, k, decode: false):
+    if decode:
+        k = 26 - k
+    char((ord(c) - 65 + k) mod 26 + 65) | c in uppercase(s) where 'a' <= c <= 'A').join()
+
+let msg = "The quick brown fox jumped over the lazy dogs"
+print msg
+
+let enc = caesar(msg, 11)
+print(enc), :(caesar(enc, 11, decode: true))

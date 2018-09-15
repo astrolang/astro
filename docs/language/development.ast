@@ -1,4 +1,92 @@
 # Astro 0.1.14a
+# July 16, 2018
+# MULTILINE COMMENTS
+#- Hello there -#
+#* Hello There *#
+#[ Hello there ]#
+
+#* Hello there
+ * Hello there
+ *#
+
+#[ Hello there
+ * Hello there
+]#
+
+#- Hello there
+ - This is another point
+ -#
+
+
+# Astro 0.1.14a
+# July 14, 2018
+fun merge_sort(a):
+    if a.length >= 1: return a
+    let m = a.length / 2
+    let lt = merge_sort(a[:m])
+    let rt = merge_sort(a[m+1:])
+    return merge(lt, rt)
+
+fun merge(lt, rt):
+    let result = []
+    while not (lt.isempty or rt.isempty):
+        result.push! {lt.first > lt.first: shift!(lt) || shift!(rt)}
+    return result.join(lt).join(rt)
+
+# Astro 0.1.14a
+# July 6, 2018
+AOT
+- Static Import - Tree Shaking
+- Static Linking
+- Dynamic Linking
+
+JIT
+- Static Import - Tree Shaking
+- Dynamic Import
+- Static Linking
+- Dynamic Linking
+
+# Exporting for linking requires that type annotation be specifed.
+export {
+    foo :: (Int, Int) -> Str,
+    List :: {Int}
+}
+
+# Astro 0.1.14a
+# June 26, 2018
+# Astro supports trailing optional arguments
+fun show(name, age?):
+    if name:
+        print 'Hi $name, your age is $age'
+    else:
+        print 'Hi $name'
+..
+
+show('Ademola', 54)
+show('Ademola')
+
+# Astro 0.1.14a
+# June 23, 2018
+a.name, :age, :gender = 5, 6
+age[2], :[3], :[4] = 1, 2, 3
+
+# Astro 0.1.14a
+# June 22, 2018
+# Assignment Pattern
+x, y = 4, 5
+x[1], y[2] = 4, 5
+a.name, b.name = 5, 6
+a.name, :age, :gender = 5, 6
+age[2], :[3], :[4] = 1, 2, 3
+x = y = 4
+{ x, y } = obj
+[x, y] = arr
+{ x, y }.name = obj
+a.{ x, y } = obj
+a.{ x, y }.name = obj
+x = y = 4
+
+# Astro 0.1.14a
 # 20/03/18
 # Change unsafe block to macro
 @unsafe
@@ -27,84 +115,131 @@ john.{
 # Astro 0.1.14a
 # 16/03/18
 # FIX: SYNTAX HIGHLIGHT
-- highlight multiple assignment
-    cost price total = 4_000
+- highlight ::[^;$]+ as comment ✔
+    let name :: Str; let age :: Int
 
-- remove highlight on unsafe keyword
+    :: (Int, Int) -> T where T::Str
+    fun arc(a, b) = domagic()
+
+    type Person(name, age) :: Int, Str
+
+- highlight fallthrough keyword ✔
+    fallthrough
+
+- remove highlight on val, at, spill, abst, acq, new  ✔
+    val at acq spill abst new macro src no
+
+- fix highlight for macro ✔
+    @(a + y).mac
+    @ya.mac
+
+- highlight new multiline comments syntax ✔
+    #- Bam! -# hello
+
+- remove highlight on current multiline comments ✔
+    #= Bam! =# hello
+
+- highlight just the type arguments ╳
+    Dict{Int64, Abstract}
+    Dict{Array{Int64}, (Str, Int)}
+
+- highlight function call with multiline comment in the middle ╳
+    print #- -# name
+
+- highlight the : in :( as a function call ✔
+    print(name), :(age), :(game)
+
+- highlight command notation ✔
+    print /9/
+    print @dict{x, y}
+    print $name
+    print { x: y | x in z }
+    print [x | y in z]
+
+- highlight as dot notation ✔
+    :age
+
+- highlight lambda syntax (?<!\|)\s+[a-zA-Z0-9]+(\s+\.([a-zA-Z0-9])/)?\s+\=\>  ✔
+    (a, b) => print a + b
+    x => print x
+
+- remove highlight on prev lambda syntax  ✔
+    |a, b| => print a + b
+
+- highlight multiple assignment ✔
+    cost price total = 4_000
+    let cost price price = 4_500
+
+- highlight regex syntax properly /[^/]/\s+(?!(\s*[\{\[\(a-zA-Z0-9@$])|{operatorChar})  ✔
+    var regex = /regex/
+    var regex =
+        /regex/
+    print(/regex/)
+    let regex = /\d/ + re.'\[a-z]' + /\d/
+
+    a / b / c
+    a /= b
+
+- remove highlight on unsafe keyword  ✔
     unsafe
 
-- remove highlight on mapped fieldnames
+- remove highlight on mapped fieldnames ✔
     array.$name
 
-- remove highlight on typenames
+- remove highlight on typenames ✔
     type Person
     Person
 
-- fix highlight on regex literal when around operators
-    let op = 1//i + 1//d
-
-- remove highlight on ns literals
+- remove highlight on ns literals ✔
     ns.()
     ns.{}
     ns.[]
     ns.""
     ns.//
 
-- highlight new vectorized function call syntax
+- highlight new vectorized function call syntax ✔
     ciel.(M)
 
-- highlight mutative function call
+- highlight mutative function call ✔
     bogosort!(v)
 
-- highlight new vectorized string format and remove highlight on old format
-    let leftPadding = 'left padding: ${>10}(string)'
-    let rightPadding = 'right padding: ${<10}(string)'
-    let placeholderPadding = 'placeholder padding: ${_<10}(string)'
-    let centering = 'centering: ${^10}(string)'
+- highlight new vectorized string format and remove highlight on old format ✔
+    let left_padding = 'left padding: $|>10|{string}'
+    let right_padding = 'right padding: $|<10|{string}'
+    let placeholder_padding = 'placeholder padding: $|_<10|{string}'
+    let centering = 'centering: $|^10|{string}'
+    let no_format = 'centering: ${string}'
 
     let leftPadding = 'left padding: $:>10(string)'
     let rightPadding = 'right padding: $:<10(string)'
     let placeholderPadding = 'placeholder padding: $:_<10(string)'
     let centering = 'centering: $:^10(string)'
 
-- highlight functions with type arguments
+- highlight functions with type arguments ✔
     add{Int}(2, 4)
 
-- remove highlight on old functions with type arguments
+- remove highlight on old functions with type arguments ✔
     add[Int](2, 3)
 
-- remove highlight on `del` and `super`
+- remove highlight on `del` and `super` ✔
     del super
 
-- highlight imported filename
-    import my-new-project
-
-- change name pattern, can have trailing underscores
+- change name pattern, can have trailing underscores ✔
     x._name_ | _name_() | @_name_
     x.name_ | name_() | @name_
     x._name | _name() | @_name
     x.name | name() | @name
 
-- remove highlight on `at` keyword
+- remove highlight on `at` keyword ✔
     break 45 at top
 
-- remove highlight on `do` keyword
-    do: x
-    while x > y
-
-- remove highlight on `extend` keyword
+- remove highlight on `extend` keyword ✔
     extend MyType
 
-- remove highlight on nonstandard numeric literals
+- remove highlight on nonstandard numeric literals ✔
     2344'f32 #'
     2344.f32
 
-- fix regex highlight (/[^/]+/)
-    let x = /\d/ + re.'\[a-z]' + /\d/
-
-- highlight dot n0tation member call and function call.
-    john~name, ~age
-    print~('hello')~('world')
 
 # TYPE
 Int64 :: Type{Int64}
