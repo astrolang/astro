@@ -3,7 +3,7 @@
   "version": "0.1.14-5",
   "description": "A fun safe programming language for rapid prototyping and high performance applications",
   "scripts": {
-    "test:compiler": "nyc --reporter=lcov --reporter=text node src/compiler/all-tests.js",
+    "test:compiler": "nyc --reporter=lcov --reporter=text node src/compiler/all_tests.js",
     "lex": "node bin/astro.js",
     "lint": "eslint --config .eslintrc.json ./src ./tests"
   },
