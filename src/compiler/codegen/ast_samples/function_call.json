@@ -1,0 +1,42 @@
+{
+    "program": [
+        {
+            "kind": "function",
+            "name": "add",
+            "argumenttypes": [ "int64", "int64", "int64" ],
+            "body": [
+                {
+                    "kind": "return",
+                    "expression":  {
+                        "kind": "call",
+                        "name": "__add__",
+                        "arguments": [
+                            { "kind": "variable", "name": "$0" },
+                            { "kind": "variable", "name": "$1" }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "function",
+            "name": "main",
+            "argumenttypes": [ "int*", "int", "void" ],
+            "body": [
+                {
+                    "kind": "call",
+                    "name": "add",
+                    "arguments": [
+                        { "kind": "temp", "value": "1" },
+                        { "kind": "temp", "value": "23" }
+                    ]
+                },
+                {
+                    "kind": "return",
+                    "expression": { "kind": "int64", "value": "0" }
+                }
+            ]
+        }
+    ]
+}
+

@@ -1,0 +1,1059 @@
+/*************** LEXER ***************/
+/************** TEST 1 ***************/
+spacechar =
+  | [ \t] // Unicode?
+
+spaces =
+  | space+
+
+newline =
+  | '\r'? '\n'
+
+noname =
+  | '_'
+
+identifierbeginchar =
+  | [a-zA-Z_] // Unicode?
+
+identifierendchar =
+  | identifierbeginchar
+  | digit
+
+identifier =
+  | identifierbeginchar identifierendchar* // Contains keyword check
+  { token, kind, startColumn, stopColumn } :: identifier
+  { token, kind, startColumn, stopColumn } :: keyword
+  { token, kind, startColumn, stopColumn } :: booleanliteral
+
+operatorchar =
+  | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
+
+operator =
+  | operatorchar+
+  { token, kind, startColumn, stopColumn }
+
+punctuator =
+  | [(){}[\],.~] // TODO: Incomplete
+
+digitbinary =
+  | [0-1]
+
+digitoctal =
+  | [0-7]
+
+digitdecimal =
+  | [0-9]
+
+digithexadecimal =
+  | [0-9a-fA-F]
+
+integerbinaryliteral =
+  | '0b' '_'? digitbinary ('_'? digitbinary)*
+  { token, kind, startColumn, stopColumn }
+
+integeroctalliteral =
+  | '0o' '_'? digitoctal ('_'? digitoctal)*
+  { token, kind, startColumn, stopColumn }
+
+integerhexadecimalliteral =
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)*
+  { token, kind, startColumn, stopColumn }
+
+integerdecimalliteral =
+  | digitdecimal ('_'? digitdecimal)*
+  { token, kind, startColumn, stopColumn }
+
+floatbinaryliteral =
+  | '0b' '_'? digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+  | '0b' '_'? digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+  { token, kind, startColumn, stopColumn }
+
+floatoctalliteral =
+  | '0o' '_'? digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+  | '0o' '_'? digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+  { token, kind, startColumn, stopColumn }
+
+floathexadecimalliteral =
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
+  { token, kind, startColumn, stopColumn }
+
+floatdecimalliteral =
+  | (digitdecimal ('_'? digitdecimal)*)? !('.' nospace '.') '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
+  | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
+  { token, kind, startColumn, stopColumn }
+
+floatLiteralnomantissa =
+  | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier | '.')
+  { token, kind, startColumn, stopColumn }
+
+chars =
+  | (!(newline | '`') .) // TODO
+
+charliteral =
+  | '`' chars '`'
+  { token, kind, startColumn, stopColumn }
+
+singlequotestringchars =
+  | (!(newline | "'") .)+ // TODO
+
+doublequotestringchars =
+  | (!(newline | '"') .)+ // TODO
+
+singlelinestringliteral =
+  | "'" singlequotestringchars? "'"
+  | '"' doublequotestringchars? '"'
+  { token, kind, startColumn, stopColumn }
+
+triplesinglequotestringchars =
+  | (!"'''" .)+ // TODO
+
+tripledoublequotestringchars =
+  | (!'"""' .)+ // TODO
+
+multilinestringliteral =
+  | "'''" triplesinglequotestringchars? (nextline samedent triplesinglequotestringchars?)* "'''"
+  | '"""' tripledoublequotestringchars? (nextline samedent tripledoublequotestringchars?)* '"""'
+  { token, kind, startColumn, stopColumn }
+
+regexchars =
+  | (!(newline | '`') .)+ // TODO
+
+regexliteral =
+  | '`' regexchars? '`'
+  { token, kind, startColumn, stopColumn }
+
+booleanliteral =
+  | 'true'
+  | 'false'
+  { token, kind, startColumn, stopColumn }
+
+singlelinecommentchars =
+  | (!(newline) .)+ // TODO
+  { token }
+
+singlelinecomment =
+  | "#" !('-') singlelinecommentchars? &(newline | eoi)
+  { token, kind, startColumn, stopColumn }
+
+multilinecommentchars =
+  | (!('#-' | '-#') .)+ // TODO
+
+innermultilinecomment =
+  | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
+  { token, kind, startColumn, stopColumn }
+
+multilinecomment =
+  | "#-" multilinecommentchars? (innermultilinecomment multilinecommentchars?)* '-#'
+  { token, kind, startColumn, stopColumn }
+
+
+/*************** PARSER ***************/
+operator =
+  { kind, value }
+
+punctuator =
+  { kind, value }
+
+integerbinaryliteral =
+  { kind, value }
+
+integeroctalliteral =
+  { kind, value }
+
+integerhexadecimalliteral =
+  { kind, value }
+
+integerdecimalliteral =
+  { kind, value }
+
+floatbinaryliteral =
+  { kind, value }
+
+floatoctalliteral =
+  { kind, value }
+
+floathexadecimalliteral =
+  { kind, value }
+
+floatdecimalliteral =
+  { kind, value }
+
+floatliteralnomantissa =
+  { kind, value }
+
+singlelinestringliteral =
+  { kind, value }
+
+// NOTE: multilinestringliteral has a special parsing stage
+multilinestringliteral
+
+regexliteral =
+  { kind, value }
+
+booleanliteral =
+  { kind, value }
+
+singlelinecomment =
+  { kind, value }
+
+// NOTE: multilinestringliteral has a special parsing stage
+multilinecomment =
+  { kind, value }
+
+integerliteral =
+  | integerbinaryliteral
+  | integeroctalliteral
+  | integerhexadecimalliteral
+  | integerdecimalliteral // Can eat others cake
+  { kind, value }
+
+floatliteral =
+  | floatliteralnomantissa
+  | floatbinaryliteral
+  | floatoctalliteral
+  | floathexadecimalliteral
+  | floatdecimalliteral // Can eat others cake
+  { kind, value }
+
+numericliteral =
+  | floatliteral
+  | integerliteral  // Can eat others cake
+  { kind, value }
+
+stringliteral =
+  | multilinestringliteral
+  | singlelinestringliteral // Can eat others cake
+  { kind, value }
+
+comment =
+  | multilinecomment
+  | singlelinecomment // Accepts others failed cake. Rectified with predicate.
+  { kind }
+
+// >>>>> DIRECTIVES >>>>>
+
+eoi =
+  | !.
+
+indent =
+  | ' '+
+  { level }
+
+samedent =
+  | ' '+
+  | ''
+  { level }
+
+dedent =
+  | ' '+
+  | ''
+  { level }
+
+spaces =
+  | space+
+
+nospace
+  | !spaces
+
+nextline =
+  | newline (spaces? newline)*
+
+linecontinuation =
+  | spaces? '.' nospace '.' nospace '.' spaces? nextcodeline samedent
+
+_ =
+  | linecontinuation
+  | spaces // Can eat others cake
+
+nextcodeline =
+  | (spaces? nextline)+
+
+dedentoreoiend =
+  | nextcodeline dedent
+  | nextcodeline? _? eoi
+
+comma =
+  | _? ',' _? (nextcodeline samedent)?
+
+// <<<<< DIRECTIVES <<<<<
+
+/************** TEST 2 ***************/
+
+listarguments =
+  | simpleexpression (comma simpleexpression)* comma?
+  { expressions }
+
+listargumentsmultiple =
+  | listliteral (nextcodeline samedent listliteral)+
+  | listarguments (_? ';' _? listarguments)+ (_? ';')?
+  { expressions }
+
+listliteral =
+  | '[' _? ']' '\''?
+  | '[' _? listargumentsmultiple _? ']' \''?
+  | '[' nextcodeline indent listargumentsmultiple nextcodeline dedent ']' \''?
+  { kind, transposed, expressions }
+
+dictargument =
+  | simpleexpression _? ':' nextcodeline indent dictarguments nextcodeline dedent !comma
+  | simpleexpression _? ':' _? simpleexpression &(comma | _? '}' | nextcodeline dedent)
+  | identifier &(comma | _? '}' | nextcodeline dedent)
+  { key, value }
+
+dictarguments =
+  | dictargument (comma dictargument)* comma?
+  { expressions: [{ key, value }] }
+
+dictliteral =
+  | '{' _? '}'
+  | '{' _? dictarguments _? '}'
+  | '{' nextcodeline indent dictarguments nextcodeline dedent '}'
+  { kind, expressions: [{ key, value }] }
+
+tuplearguments =
+  | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)+ comma?
+  | simpleexpression comma
+  { expressions }
+
+tupleliteral =
+  | '(' _? ')'
+  | '(' _? tuplearguments _? ')'
+  | '(' nextcodeline indent tuplearguments nextcodeline dedent ')'
+  { kind, expressions: [{ key, value }] }
+
+symbolliteral =
+  | '$' nospace identifier
+  | '$' nospace '{' _? expression _? '}'
+  | '$' nospace '{' block '}'
+  { kind, expression }
+
+comprehensionhead =
+  | lhspattern _ 'in' _ simpleexpression
+
+generatorcomprehension =
+  | '(' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)?  _? ')'
+  | '(' nextcodeline indent simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? nextcodeline dedent ')'
+  { kind, expression, iterators: [{ lhs, rhs }], guard }
+
+listcomprehension =
+  | '[' _? simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? ']'
+  | '[' nextcodeline indent simpleexpression (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? nextcodeline dedent ']'
+  { kind, expression, iterators: [{ lhs, rhs }], guard }
+
+dictcomprehension =
+  | '{' _? (simpleexpression _? ':' _? simpleexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? _? '}'
+  | '{' nextcodeline indent (simpleexpression _? ':' _? simpleexpression | identifier) (nospace '|' nospace | _ '|' _) comprehensionhead (_? ',' _? comprehensionhead)* (_ 'where' _ simpleexpression)? nextcodeline dedent '}'
+  { kind, key, value, iterators: [{ lhs, rhs }], guard }
+
+comprehension =
+  | generatorcomprehension
+  | listcomprehension
+  | dictcomprehension
+
+literal =
+  | numericliteral
+  | booleanliteral
+  | charliteral
+  | stringliteral
+  | regexliteral
+  | listliteral
+  | dictliteral
+  | tupleliteral
+  | symbolliteral
+  | comprehension
+
+callarguments =
+  | (identifier _? ':' _?)? simpleexpression (comma (identifier _? ':' _?)? simpleexpression)* comma?
+  { expressions: [{ key, value }] }
+
+callpostfix =
+  | nospace ('!' nospace)?  ('.' nospace)? '(' _? ')'
+  | nospace ('!' nospace)?  ('.' nospace)? '(' _? callarguments _? ')'
+  | nospace ('!' nospace)?  ('.' nospace)? '(' nextcodeline indent callarguments nextcodeline dedent ')'
+  { kind, expression, mutative, vectorized, arguments: [{ key, value }] }
+
+dotnotationpostfix =
+  | nospace '.' nospace identifier
+  { kind, expression, name }
+
+cascadenotationarguments =
+  | &(identifier) atom nospace ('.' nospace)? operator nospace (cascadenotationarguments | &(identifier) atom)
+  | &(identifier) atom _ (('.' nospace)? operator | keywordoperator) _ (cascadenotationarguments | &(identifier) atom)
+  { expressions, operators }
+
+cascadenotationpostfix = // Unfurl
+  | nospace '.' nospace '{' _? cascadenotationarguments _? '}' (nospace '.' nospace &(identifier) atom)?
+  { kind, leftexpression, rightexpression, expressions, operators }
+
+cascadenotationprefix = // Unfurl
+  | '{' _? cascadenotationarguments _? '}' nospace '.' nospace &(identifier) atom
+  { kind, leftexpression, rightexpression, expressions, operators }
+
+indexargument =
+  | (simpleexpression _?)? ':' (_? simpleexpression? _? ':')? _? simpleexpression?
+  | '::' _? simpleexpression? // To prevent prefixatom clash. `::1`
+  | atom _? '::' _? simpleexpression? // To prevent postfixatom and infixatom clash. `1::`
+  | simpleexpression _? '::' _? simpleexpression?
+  | simpleexpression
+  { begin, step, end } | { index }
+
+indexarguments =
+  | indexargument (comma indexargument)* comma?
+  { expressions: [{ begin, step, end } | { index }] }
+
+indexpostfix =
+  | nospace '[' _? indexarguments _? ']'
+  | nospace '[' nextcodeline indent indexarguments nextcodeline dedent ']'
+  { kind, expression, arguments: [{ key, value }] }
+
+extendednotation
+  | ':' nospace identifier
+  | ':' nospace callpostfix
+  | ':' nospace indexpostfix
+  { kind, expression }
+
+ternaryoperator =
+  | '(' _? simpleexpression _? ')' (nospace '?' nospace | _ '?' _) (prefixatom | atom) (nospace '||' nospace | _ '||' _) primitiveexpression
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _)  (prefixatom | atom) (nospace '||' nospace | _ '||' _) primitiveexpression
+  | '(' _? simpleexpression _? ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' (nospace '?' nospace | _ '?' _) primitiveexpression (nospace '||' nospace | _ '||' _) primitiveexpression
+  { kind, condition, truebody, falsebody }
+
+coefficientexpression = // Unfurl
+  | floatbinaryliteral nospace identifier
+  | floatoctalliteral nospace identifier
+  | floatdecimalliteral nospace identifier
+  | integerbinaryliteral nospace identifier
+  | integeroctalliteral nospace identifier
+  | !('§0b' | '§0o' | '§0x') integerdecimalliteral nospace identifier // Accepts others failed cake, e.g. will parse 0b01 as '0' and 'b01'. Rectified with predicate.
+  | '(' _? simpleexpression _? ')' nospace identifier
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')' nospace identifier
+  { kind, coefficient, expression }
+
+returnexpression =
+  | 'return' (_ subexpression)?
+  { kind, expression }
+
+yieldexpression =
+  | 'yield' ((_ 'from')? _ subexpression)?
+  { kind, expression, redirect }
+
+raiseexpression =
+  | 'raise' (_ subexpression)?
+  { kind, expression }
+
+continueexpression =
+  | 'continue' (_ '@' nospace identifier)?
+  { kind, label }
+
+breakexpression =
+  | 'break' (_ subexpression)?  (_ '@' nospace identifier)?
+  { kind, expression, label }
+
+fallthroughexpression =
+  | 'fallthrough' (_ '@' nospace identifier)?
+  { kind, label }
+
+controlprimitive =
+  | returnexpression
+  | yieldexpression
+  | continueexpression
+  | breakexpression
+  | raiseexpression
+  | fallthroughexpression
+
+subatompostfix =
+  | callpostfix
+  | dotnotationpostfix
+  | indexpostfix
+
+subatom =
+  | coefficientexpression
+  | extendednotation
+  | '(' _? simpleexpression _? ')'
+  | '(' nextcodeline indent simpleexpression nextcodeline dedent ')'
+  | literal
+  | noname
+  | identifier
+  | operator
+
+atom =
+  | subatom subatompostfix* cascadenotationpostfix? (nospace '?')?
+  | cascadenotationprefix (nospace '?')?
+
+/************** TEST 3 ***************/
+prefixatom =
+  | operator nospace atom
+  { kind, vectorized, operator, expression }
+
+postfixatom =
+  | atom nospace ('.' nospace)? operator
+  { kind, vectorized, operator, expression }
+
+prepostfixatom =
+  | prefixatom
+  | postfixatom
+  | atom
+
+keywordoperator =
+  | 'is' _ 'not'
+  | 'not' _ 'in'
+  | 'in'
+  | 'mod'
+  | 'is'
+  | 'not'
+  | 'and'
+  | 'or'
+  { kind, value }
+
+infixexpression =
+  | (prefixatom | atom) nospace ('.' nospace)? operator nospace (infixexpression | prepostfixatom)
+  | prepostfixatom _ (('.' nospace)? operator | keywordoperator) _ (infixexpression | prepostfixatom)
+  { kind, expressions, operators: [{ vectorized, operator }] }
+
+spreadexpression =
+  | '.' nospace '.' nospace '.' nospace atom nospace atom
+  { kind, expression }
+
+range =
+  | prepostfixatom? (nospace '.' nospace '.' nospace | _ '.' nospace '.' _) (prepostfixatom (nospace '.' nospace '.' nospace | _ '.' nospace '.' _))? prepostfixatom
+  { kind, begin, step, end }
+
+commandnotationargument =
+  | _
+    &(
+      comprehension |
+      lambdaexpression |
+      ternaryoperator |
+      range |
+      charliteral |
+      stringliteral |
+      identifier |
+      symbolliteral |
+      numericliteral |
+      regexliteral
+    )
+    simpleexpression
+  { argument }
+
+commandnotation =
+  | !(operator | numericliteral) atom (nopspace '!')? commandnotationargument
+  { kind, expression, mutative, vectorized, arguments: [{ key, value }] }
+
+primitiveexpression =
+  | spreadexpression
+  | range
+  | lambdaexpression
+  | infixexpression
+  | commandnotation
+  | prepostfixatom
+
+simpleexpression =
+  | ternaryoperator
+  | primitiveexpression
+
+tupleexpression =
+  | simpleexpression (comma simpleexpression)*
+  { kind, expressions }
+
+dotnotationline =
+  | '.' nospace identifier subatompostfix*
+  { postfixes }
+
+dotnotationblock =
+  | atom nextcodeline indent dotnotationline (nextcodeline samedent dotnotationline)* cascadenotationpostfix? (nospace '?')? dedentoreoiend
+  { kind, expression }
+
+subexpression =
+  | dotnotationblock
+  | declaration
+  | conditionalexpression
+  | controlprimitive
+  | tupleexpression
+
+expression =
+  | subexpression ((nextcodeline samedent | _? ';' _?) subexpression)* (nextcodeline samedent | _? ';')?
+  { kind, expressions }
+
+// Used in declarations and conditional expressions.
+// allows
+// - `primitiveexp`
+// does not allow
+// - `if ... : exp`
+// - `if ... : exp else: exp`
+subexpressionnoblock =
+  | controlprimitive
+  | tupleexpression
+
+expressionnoblock =
+  | subexpressionnoblock ((nextcodeline | _? ';' _?) subexpressionnoblock)* (nextcodeline | _? ';')?
+
+// Used in declarations and conditional expressions.
+// allows
+// - `if ... : block`
+// - `if ... : noblock`
+// - `if ... : noblock else: noblock`
+// does not allow
+// - `if ... : for ... : exp`
+// - `if ... : for ... : exp else ... : exp`
+subexpressionsecondinline =
+  | dotnotationblock
+  | declarationsecondinline
+  | conditionalexpressionsecondinline
+  | controlprimitive
+  | tupleexpression
+
+expressionsecondinline =
+  | subexpressionsecondinline ((nextcodeline | _? ';' _?) subexpressionsecondinline)* (nextcodeline | _? ';')?
+
+block =
+  | nextcodeline indent expression dedentoreoiend
+
+
+
+lhsname
+  | noname
+  | identifier
+  | '...' identifier?
+
+lhsarguments =
+  | lhsname (comma lhsname)* comma?
+  { expressions }
+
+lhspattern =
+  | '[' _? lhsarguments _? ']'
+  | '[' nextcodeline indent lhsarguments nextcodeline dedent ']'
+  | '{' _? lhsarguments _? '}'
+  | '{' nextcodeline indent lhsarguments nextcodeline dedent '}'
+  | '(' _? lhsarguments _? ')'
+  | '(' nextcodeline indent lhsarguments nextcodeline dedent ')'
+  |  lhsname (comma lhsname)*
+  { destructuretype, arguments }
+
+guard =
+  | _ 'where' _ simpleexpression
+  { condition }
+
+declarationassignmentoperator =
+  | _ '=' _
+  | '=' !operator
+
+ifheaddeclaration =
+  | subjecthead declarationassignmentoperator tupleexpression
+  { immutable, lhs, value }
+
+ifhead =
+  | (ifheaddeclaration | simpleexpression) guard?
+  { head, guard }
+
+ifexpression =
+  | 'if' _ ifhead _? ':' _? subexpressionnoblock _ elseexpressionsecondinline
+  | 'if' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent elifexpression* elseexpression)?
+  | 'if' _ ifhead _? ':' block (elifexpression* elseexpression)?
+  { kind, head, guard, body, elifs, elsebody }
+
+ifexpressionsecondinline =
+  | 'if' _ ifhead _? ':' _? subexpressionnoblock
+  | 'if' _ ifhead _? ':' block
+  { kind, head, guard, body, elifs, elsebody }
+
+elifexpression =
+  | 'elif' _ ifhead _? ':' _? subexpressionsecondinline nextcodeline samedent
+  | 'elif' _ ifhead _? ':' block
+  { head, guard, body }
+
+elseexpression =
+  | 'else' _? ':' _? subexpressionsecondinline
+  | 'else' _? ':' block
+  { body }
+
+elseexpressionsecondinline =
+  | 'else' _? ':' _? subexpressionnoblock
+  | 'else' _? ':' block
+  { body }
+
+whileexpression =
+  | 'while' _ ifhead _? ':' _? subexpressionnoblock _ endexpressionsecondinline
+  | 'while' _ ifhead _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+  | 'while' _ ifhead _? ':' block endexpression?
+  { kind, head, guard, body, endbody }
+
+whileexpressionsecondinline =
+  | 'while' _ ifhead _? ':' _? subexpressionnoblock
+  | 'while' _ ifhead _? ':' block
+  { kind, head, guard, body, endbody }
+
+endexpression =
+  | 'end' _? ':' _? subexpressionsecondinline
+  | 'end' _? ':' block
+  { body }
+
+endexpressionsecondinline =
+  | 'end' _? ':' _? subexpressionnoblock
+  | 'end' _? ':' block
+  { body }
+
+dowhileexpression =
+  | 'do' _? ':'  _? subexpressionsecondinline _? 'while' _ ifhead
+  | 'do' _? ':' block 'while' _ ifhead
+  | 'do' _? ':' subexpressionnoblock 'while' _ ifhead
+  { kind, head, guard, body }
+
+loopexpression =
+  | 'loop' _? ':' _? subexpressionnoblock _ endexpressionsecondinline
+  | 'loop' _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+  | 'loop' _? ':' block endexpression?
+  { kind, body, endbody }
+
+loopexpressionsecondinline =
+  | 'loop' _? ':' _? subexpressionnoblock
+  | 'loop' _? ':' block
+  { kind, body, endbody }
+
+forhead =
+  | ('var' _)? lhspattern _ 'in' _ simpleexpression (_ 'where' _ simpleexpression)?
+  { immutable, lhs, value, guard }
+
+forexpression =
+  | 'for' _ forhead _? ':' _? subexpressionnoblock _ endexpressionsecondinline
+  | 'for' _ forhead _? ':' _? subexpressionsecondinline (nextcodeline samedent endexpression)?
+  | 'for' _ forhead _? ':' block endexpression?
+  { kind, head, guard, body, endbody }
+
+forexpressionsecondinline =
+  | 'for' _ forhead _? ':' _? subexpressionnoblock
+  | 'for' _ forhead _? ':' block
+  { kind, head, guard, body, endbody }
+
+tryexpression =
+  | 'try' _? ':' _? subexpressionnoblock _ exceptexpressionsecondinline
+  | 'try' _? ':' _? subexpressionsecondinline nextcodeline samedent exceptexpression+ ensureexpression?
+  | 'try' _? ':' block exceptexpression+ ensureexpression?
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ simpleexpression | '=' !(operator) simpleexpression) ':' _? subexpressionnoblock exceptexpressionsecondinline
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ simpleexpression | '=' !(operator) simpleexpression) ':' _? subexpressionsecondinline (_? exceptexpression)+ (_? ensureexpression)?
+  | 'try' _ ('var' _)? lhspattern (_ '=' _ simpleexpression | '=' !(operator) simpleexpression) ':' block (_? exceptexpression)+ (_? ensureexpression)?
+
+ensureexpression =
+  | 'ensure' _? ':' _? subexpressionsecondinline
+  | 'ensure' _? ':' block
+
+exceptexpression =
+  | 'except' _ identifier _? ':' _? subexpressionsecondinline
+  | 'except' _ identifier _? ':' block
+
+exceptexpressionsecondinline =
+  | 'except' _ identifier _? ':' _? subexpressionnoblock
+  | 'except' _ identifier _? ':' block
+
+matchargument
+  | identifier _? ':' _? simpleexpression
+  | noname
+  | identifier
+  | '...' identifier?
+
+typerelationoperator =
+  | _ ('::' | '<:' | '>:') _
+  | ('::' | '<:' | '>:') !operator
+
+// TODO: REDESIGN
+// { x: { a }, b, c: 2 } :: Int where x > 5
+// ( x: 5, b, _, 10 ) :: Int where x > 5
+// 24
+// _
+// value to value
+// value or value
+// | _ => exp (; | \n?) | _ => exp
+// match x: | _ => exp (; | \n?) | _ => exp
+matchpattern =
+  | '[' _? matchargument (comma matchargument)* comma? _? ']'
+  | '[' nextcodeline indent  matchargument (comma matchargument)* comma? nextcodeline dedent ']'
+  | '{' _? matchargument (comma matchargument)* comma? _? '}' (typerelationoperator identifier)?
+  | '{' nextcodeline indent matchargument (comma matchargument)* comma? nextcodeline dedent '}' (typerelationoperator identifier)?
+
+matchexpression =
+  | ('|' | '!') _? matchpattern (comma matchpattern)* _? '=>' _? subexpressionnoblock nextcodeline samedent (matchexpression | '')
+  | ('|' | '!') _? matchpattern (comma matchpattern)* _? '=>' block (matchexpression | '')
+
+callparens =
+  | '(' _? ')'
+  | '(' _? callarguments _? ')'
+  | '(' nextcodeline indent callarguments nextcodeline dedent ')'
+  { arguments: [{ key, value }] }
+
+iifexpression =
+  | callparens _? '=>' _? subexpressionsecondinline
+  | callparens _? '=>' block
+  { kind, arguments: [{ key, value }] }
+
+iifexpressionsecondinline =
+  | callparens _? '=>' _? subexpressionnoblock
+  | callparens _? '=>' block
+  { kind, arguments: [{ key, value }] }
+
+lambdaexpression =
+  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionsecondinline
+  | '|' _? functionparameters _? '|' _? '=>' block
+  { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+lambdaexpressionsecondinline =
+  | '|' _? functionparameters _? '|' _? '=>' _? subexpressionnoblock
+  | '|' _? functionparameters _? '|' _? '=>' block
+  { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+importnamechar =
+  | identifierendchar | [\-] // TODO
+
+importpath =
+  | importnamechar+
+  | stringliteral
+
+importargument =
+  | (_? identifier _? ':')? _? (identifier | operator)
+  | '...'
+  { key, value }
+
+importarguments =
+  | importargument (comma importargument )* comma?
+  { members: [{ key, value }] }
+
+importdeclaration =
+  | 'import' (_ identifier _? ':') _ importpath  '{' _? importarguments _? '}'
+  | 'import' (_ identifier _? ':') _ importpath  '{' nextcodeline indent importarguments nextcodeline dedent '}'
+  | 'import' (_ identifier _? ':') _ importpath
+  { kind, modulealias, modulename, path, all, members: [{ key, value }] }
+
+exportarguments =
+  | (identifier | operator) (comma (identifier | operator))* comma?
+  | '...'
+  { members: [{ key, value }] }
+
+exportdeclaration =
+  | 'export' _ '{' _? exportarguments _? '}'
+  | 'export' _ '{' nextcodeline indent exportarguments nextcodeline dedent '}'
+  { kind, members: [{ key, value }] }
+
+conditionalexpression =
+  | matchexpression
+  | ifexpression
+  | whileexpression
+  | dowhileexpression
+  | loopexpression
+  | forexpression
+  | tryexpression
+
+conditionalexpressionsecondinline =
+  | matchexpressionsecondinline
+  | ifexpressionsecondinline
+  | whileexpressionsecondinline
+  | loopexpressionsecondinline
+  | forexpressionsecondinline
+
+declaration =
+  | iifeexpression
+  | lambdaexpression
+  | subjectdeclaration
+  | functiondeclaration
+  | typedeclaration
+  | abstdeclaration
+  | importdeclaration
+  | exportdeclaration
+
+declarationsecondinline =
+  | iifeexpressionsecondinline
+  | lambdaexpressionsecondinline
+  | subjectdeclarationsecondinline
+  | functiondeclarationonrsecondinlinenest
+  | typedeclarationsecondinline
+  | abstdeclarationsecondinline
+
+fieldlhsname
+  | noname
+  | identifier '*'
+  | '...' identifier? '*'
+  { internal, expression }
+
+fieldlhsarguments =
+  | fieldlhsname (comma fieldlhsname)* comma?
+  { expressions }
+
+fieldlhspattern =
+  | '[' _? fieldlhsarguments _? ']'
+  | '[' nextcodeline indent fieldlhsarguments nextcodeline dedent ']'
+  | '{' _? fieldlhsarguments _? '}'
+  | '{' nextcodeline indent fieldlhsarguments nextcodeline dedent '}'
+  | '(' _? fieldlhsarguments _? ')'
+  | '(' nextcodeline indent fieldlhsarguments nextcodeline dedent ')'
+  |  fieldlhsname (comma fieldlhsname)*
+  { destructuretype, arguments }
+
+fieldhead =
+  | ('let' | 'var') _ fieldlhspattern
+  { immutable, lhs }
+
+fielddeclaration =
+  | fieldhead (_ '=' _ | '=' !operator) subexpressionsecondinline
+  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
+  | fieldhead
+  { kind, immutable, lhs, value }
+
+fielddeclarationsecondinline =
+  | fieldhead (_ '=' _ | '=' !operator) subexpressionnoblock
+  | fieldhead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
+  | fieldhead
+  { kind, immutable, lhs, value }
+
+typename =
+  | identifier '{' _? (typeset | typename) _? '}' '?'?
+  | identifier '{' nextcodeline indent (typeset | typename) nextcodeline dedent '}' '?'?
+  | identifier '?'?
+
+typesetoperator =
+  | _ ('|' | '&') _
+  | ('|' | '&') !operator
+
+typeset =
+  | typename (typesetoperator typename)+ '?'?
+
+typesignatureargment =
+  | typeset
+  | typename
+  | noname
+
+typesignatureargments =
+  | typesignatureargment (comma typesignatureargment)* comma?
+
+typeconstraintargument =
+  | (typeset | typename) typerelationoperator (typeset | typename)
+
+typeconstraintarguments =
+  | typeconstraintargument (comma typeconstraintargument)*
+
+typesignature =
+  | '(' _? typesignatureargments _? ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
+  | '(' nextcodeline indent typesignatureargments nextcodeline dedent ')' _? '->' _? (_ '~' _ | '~' !operator) typeconstraintarguments
+  | typeset
+  | typename
+
+lambdaexpression =
+  | identifier _? '=>' _? subexpressionsecondinline
+  | identifier _? '=>' block
+  | '(' _? functionparameters _? ')' _? '=>' _? subexpressionsecondinline
+  | '(' _? functionparameters _? ')' _? '=>' block
+  { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+lambdaexpressionsecondinline =
+  | identifier _? '=>' _? subexpressionnoblock
+  | identifier _? '=>' block
+  | '(' _? functionparameters _? ')' _? '=>' _? subexpressionnoblock
+  | '(' _? functionparameters _? ')' _? '=>' block
+  { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+blockoperator =
+  | _ '=' _
+  | '=' !operator
+  | _? ':' _?
+
+typehead =
+  | 'kind' _ identifier
+
+typeconstructor =
+  | '(' _? parameters _?')'
+  | '(' nextcodeline indent parameters nextcodeline dedent ')'
+
+typeparents =
+  | (_ '<:' _| '<:') identifier (comma identifier)*
+  { parenttypes }
+
+typeblock =
+  | nextcodeline indent fielddeclaration (nextcodeline samedent fielddeclaration)* dedentoreoiend
+
+typedeclaration =
+  | typehead (_ typeconstructor)? typeparents? blockoperator _? fielddeclaration
+  | typehead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { kind, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
+
+typedeclarationsecondinline =
+  | typehead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { kind, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
+
+typealias = // Also secondinline
+  | typehead blockoperator _? typesignature
+  | typehead blockoperator nextcodeline indent typesignature dedentoreoiend
+  { kind, name, typesignature }
+
+absthead =
+  | 'abst' _ identifier
+
+subtypedeclaration =
+  | identifier (_? '(' _? functionparameters _? ')')?
+  | identifier (_? '(' nextcodeline indent functionparameters nextcodeline dedent ')')?
+
+abstsubtypeinline =
+  | subtypedeclaration ((_ '|' _ | '|' !operator) subtypedeclaration)*
+
+abstsubtypeblock =
+  | nextcodeline indent ('|' _?)? subtypedeclaration (nextcodeline samedent '|' _? subtypedeclaration)* dedentoreoiend
+
+abstdeclaration =
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? fielddeclaration
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { kind, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
+
+abstdeclarationsecondinline =
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? typeblock
+  { kind, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, fields }
+
+abstsubtypedeclaration = // Also secondinline
+  | absthead (_ typeconstructor)? typeparents? blockoperator _? abstsubtypeinline
+  | absthead (_ typeconstructor)? typeparents? blockoperator abstsubtypeblock
+  { kind, name, constructorparameters: [{ immutable, alias, lhs, value }], supertypes, subtypes }
+
+functionparameter =
+  | identifier ('.' lhspattern?)? _? ':' _? simpleexpression
+  | lhspattern
+  | identifier
+
+functionparameters =
+  | functionparameter (comma functionparameter)* comma?
+
+functionhead =
+  | 'fun' _ (identifier | operator) _? '(' _? functionparameters _?')'
+  | 'fun' _ (identifier | operator) _? '(' nextcodeline indent functionparameters nextcodeline dedent ')'
+
+functiondeclaration =
+  | functionhead blockoperator subexpressionsecondinline
+  | functionhead blockoperator block
+  { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+functiondeclarationsecondinline =
+  | functionhead blockoperator subexpressionnoblock
+  | functionhead blockoperator block
+  { kind, name, parameters: [{ immutable, alias, lhs, value }], body }
+
+subjecthead =
+  | ('let' | 'var') _ lhspattern
+  { immutable, lhs }
+
+subjectdeclaration =
+  | subjecthead (_ '=' _ | '=' !operator) subexpressionsecondinline
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
+  | subjecthead
+  { kind, immutable, lhs, value }
+
+subjectdeclarationsecondinline =
+  | subjecthead (_ '=' _ | '=' !operator) subexpressionnoblock
+  | subjecthead (_ '=' _ | '=' !operator) nextcodeline indent subexpression dedentoreoiend
+  | subjecthead
+  { kind, immutable, lhs, value }
+
+programexpression =
+  | importdeclaration
+  | exportdeclaration
+  | expression
+
+program =
+  | nextcodeline? (samedent programexpression (nextcodeline eoi? | _? eoi))+
+  | nextcodeline eoi
+  | ''
+
