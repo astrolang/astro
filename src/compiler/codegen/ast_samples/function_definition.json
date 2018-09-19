@@ -1,0 +1,54 @@
+{
+    "program": [
+        {
+            "kind": "function",
+            "name": "add",
+            "argumenttypes": [ "int64", "int64", "int64" ],
+            "body": [
+                { "kind": "isize*_value", "value": "0562" },
+                { "kind": "int64_value", "value": "8700" },
+                {
+                    "kind": "intrinsic_add",
+                    "reference": "",
+                    "arguments": [
+                        { "kind": "argument", "index": "0" },
+                        { "kind": "argument", "index": "1" }
+                    ]
+                },
+                {
+                    "kind": "intrinsic_add",
+                    "reference": "add.var1",
+                    "arguments": [
+                        { "kind": "int64_value", "value": "44" },
+                        { "kind": "argument", "index": "1" }
+                    ]
+                },
+                {
+                    "kind": "return",
+                    "expression": { "kind": "argument", "index": "0" }
+                }
+            ]
+        },
+        {
+            "kind": "function",
+            "name": "main",
+            "argumenttypes": [ "isize*", "isize", "isize" ],
+            "body": [
+                {
+                    "kind": "call",
+                    "name": "add",
+                    "reference": "main.sum",
+                    "arguments": [
+                        { "kind": "int64_value", "value": "5300" },
+                        { "kind": "argument", "index": "1" }
+                    ]
+                },
+                {
+                    "kind": "return",
+                    "expression": { "kind": "variable", "name": "main.sum" }
+                }
+            ]
+        }
+    ]
+}
+
