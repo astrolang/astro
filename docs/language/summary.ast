@@ -63,7 +63,7 @@
 
     # Pascal case for concrete and abstract type names.
     type InventoryManager(name, id)
-    abst LightSource: SpotLight | Directional | Ambient
+    type LightSource: SpotLight | Directional | Ambient
     type XMLParser <: Parser
 
     # Kebab case for module names
@@ -1069,8 +1069,8 @@
     foo(4, 5.0) # generic
     foo(4, 5) # specific
 
-    # The compiler can be made to call a less specific version of a function using the `as` keyword.
-    foo(4, 5 as Real) # generic
+    # The compiler can be made to call a less specific version of a function using the `:=` keyword.
+    foo(4, 5 := Real) # generic
 
 - METHOD AMBIGUITIES
     # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
@@ -1252,35 +1252,21 @@
     if numerator and denominator == 0:
         raise DomainError('division by zero!')
 
-    # In Astro, all exceptions must be handled or re-raised.
-    # Re-raising an exception
-    let amount = try withdraw(amount)
-
     # Handling an exception
-    try process! data:
-        | PermissionError(message) => print message
-        | DataCorruptError(message) => print message
-
-    # Panics abort the program and they are done with `try!`
-    let file = try! open('dancing-masquerade.txt')
+    try:
+        let data = get_data()
+        process! data
+    except DataCorruptError as error:
+        print error.message
 
     # Ensure blocks are run whether an error is raised in the preceding expression or not
-    try process! data:
-        | PermissionError(message) => print message
-        | DataCorruptError(message) => print message
+    try:
+        let data = get_data()
+        process! data
+    except DataCorruptError as error:
+        print error.message
     ensure:
         reset! data
-
-    # When adding type annotation to a function, the errors it can raise must be included in the type signature
-    fun can_raise_errors(data): :: BigData -> BigData !DataCorruptError, PermissionError
-        print(try process! data)
-        return data
-
-    # Astro objects don't need special syntax for context managers
-    # Destructor are automatically called when a function raises an error.
-    let file = try! open('dancing-masquerade.txt')
-    for line in file:
-        print line
 
 - SYMBOL
     # Symbols are static data types that hold their content as-is.
