@@ -1069,8 +1069,8 @@
     foo(4, 5.0) # generic
     foo(4, 5) # specific
 
-    # The compiler can be made to call a less specific version of a function using the `:=` keyword.
-    foo(4, 5 := Real) # generic
+    # The compiler can be made to call a less specific version of a function using the `as` keyword.
+    foo(4 as Int32, 5 as Real) # generic
 
 - METHOD AMBIGUITIES
     # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
@@ -1256,23 +1256,27 @@
     try:
         let data = get_data()
         process! data
-    except DataCorruptError as error:
+    except error = DataCorruptError:
         print error.message
 
     # Ensure blocks are run whether an error is raised in the preceding expression or not
     try:
         let data = get_data()
         process! data
-    except DataCorruptError as error:
+    except error = DataCorruptError | PermissionError:
         print error.message
     ensure:
         reset! data
+
+    # You can have context management
+    try file = open file:
+        print read file
 
 - SYMBOL
     # Symbols are static data types that hold their content as-is.
     let symbol = ${2 + 3}
 
-    # A symbol can be interpolated with another symbol using back ticks.
+    # A symbol can be interpolated in another symbol.
     let addition = ${let five = $symbol}
 
     # A symbol can be evaluated with the 'eval' keyword.
