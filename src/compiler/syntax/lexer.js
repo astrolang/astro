@@ -266,24 +266,22 @@ class Lexer {
     const kind = 'operator';
     const startColumn = column;
 
-    // Check if subsequent chars in input code are valid operator character.
-    while (this.operatorChar.indexOf(this.peekChar()) > -1) {
+    // First check for special operators like "::", ">:", and "<:".
+    if (this.peekToken('::') || this.peekToken('>:') || this.peekToken('<:')) {
       token += this.eatChar();
-
-      // NOTE: Only these infix operators with '//' in them are allowed: a // b, a //= b
-      // Other operator names with '//' in them are invalid: a +// b, a //+ b
-      ({ lastPosition, column, line } = this);
-      if (this.eatToken('//') || this.eatToken('//=')) {
-        this.revert(lastPosition, column, line);
-        break;
-      }
-    }
-
-    // Check for special operators like "::".
-    if (token === '') {
-      if (this.peekToken('::') || this.peekToken('<:') || this.peekToken('<:')) {
+      token += this.eatChar();
+    } else {
+      // Check if subsequent chars in input code are valid operator character.
+      while (this.operatorChar.indexOf(this.peekChar()) > -1) {
         token += this.eatChar();
-        token += this.eatChar();
+
+        // NOTE: Only these infix operators with '//' in them are allowed: a // b, a //= b
+        // Other operator names with '//' in them are invalid: a +// b, a //+ b
+        ({ lastPosition, column, line } = this);
+        if (this.eatToken('//') || this.eatToken('//=')) {
+          this.revert(lastPosition, column, line);
+          break;
+        }
       }
     }
 
