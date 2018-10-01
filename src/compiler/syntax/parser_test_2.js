@@ -4508,11 +4508,11 @@ test(
 );
 
 print('============== TERNARYOPERATOR ==============');
-lexer = new Lexer('(5_000)? 0b10.001 || 0x7_EFF8');
+lexer = new Lexer('(5_000)? 0b10.001 : 0x7_EFF8');
 parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
-  String.raw`(5_000)? 0b10.001 || 0x7_EFF8--------->FAIL`,
+  String.raw`(5_000)? 0b10.001 : 0x7_EFF8--------->FAIL`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -4537,11 +4537,11 @@ test(
   },
 );
 
-lexer = new Lexer('(5_000) ? 0b10.001 ||0x7_EFF8');
+lexer = new Lexer('(5_000) ? 0b10.001 :0x7_EFF8');
 parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
-  String.raw`(5_000)? 0b10.001 ||0x7_EFF8--------->FAIL`,
+  String.raw`(5_000)? 0b10.001 ;0x7_EFF8--------->FAIL`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -4566,11 +4566,11 @@ test(
   },
 );
 
-lexer = new Lexer('(5_000) ? 0b10.001 || 0x7_EFF8');
+lexer = new Lexer('(5_000) ? 0b10.001 : 0x7_EFF8');
 parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
-  String.raw`(5_000) ? 0b10.001 || 0x7_EFF8`,
+  String.raw`(5_000) ? 0b10.001 : 0x7_EFF8`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -4581,7 +4581,7 @@ test(
   {
     parser: {
       tokenPosition: 6,
-      column: 30,
+      column: 29,
     },
     result: {
       success: true,
@@ -4604,11 +4604,11 @@ test(
   },
 );
 
-lexer = new Lexer('(  \n    5_000\n) ? 0b10.001 || 0x7_EFF8');
+lexer = new Lexer('(  \n    5_000\n) ? 0b10.001 : 0x7_EFF8');
 parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 test(
-  String.raw`(  \n    5_000\n) ? 0b10.001 || 0x7_EFF8`,
+  String.raw`(  \n    5_000\n) ? 0b10.001 : 0x7_EFF8`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -4619,7 +4619,7 @@ test(
   {
     parser: {
       tokenPosition: 8,
-      column: 38,
+      column: 37,
     },
     result: {
       success: true,
@@ -4642,12 +4642,12 @@ test(
   },
 );
 
-lexer = new Lexer('(  \n    5_000\n) ? +0b10.001||0x7_EFF8');
+lexer = new Lexer('(  \n    5_000\n) ? +0b10.001:0x7_EFF8');
 parser = new Parser(lexer.lex().tokens);
 result = ternaryOperator(parser);
 print(result);
 test(
-  String.raw`(  \n    5_000\n) ? +0b10.001||0x7_EFF8`,
+  String.raw`(  \n    5_000\n) ? +0b10.001:0x7_EFF8`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -4658,7 +4658,7 @@ test(
   {
     parser: {
       tokenPosition: 9,
-      column: 37,
+      column: 36,
     },
     result: {
       success: true,

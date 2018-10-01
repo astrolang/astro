@@ -1793,11 +1793,11 @@ test(
   },
 );
 
-lexer = new Lexer('(2) ? 4 || 7');
+lexer = new Lexer('(2) ? 4 : 7');
 parser = new Parser(lexer.lex().tokens);
 result = simpleExpression(parser);
 test(
-  String.raw`(2) ? 4 || 7`,
+  String.raw`(2) ? 4 : 7`,
   {
     parser: {
       tokenPosition: parser.tokenPosition,
@@ -1808,7 +1808,7 @@ test(
   {
     parser: {
       tokenPosition: 6,
-      column: 12,
+      column: 11,
     },
     result: {
       success: true,
@@ -1877,7 +1877,7 @@ test(
   },
 );
 
-lexer = new Lexer('1 + 2, \n(2) ? 4 || 5_000');
+lexer = new Lexer('1 + 2, \n(2) ? 4 : 5_000');
 parser = new Parser(lexer.lex().tokens);
 result = tupleExpression(parser);
 test(
@@ -1892,7 +1892,7 @@ test(
   {
     parser: {
       tokenPosition: 11,
-      column: 24,
+      column: 23,
     },
     result: {
       success: true,

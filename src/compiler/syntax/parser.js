@@ -1740,22 +1740,22 @@ const ternaryOperator = (parser) => {
     parse(
       '(', opt(_), simpleExpression, opt(_), ')',
       alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), alt(prefixAtom, atom),
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
+      alt(parse(noSpace, ':', noSpace), parse(_, ':', _)), primitiveExpression,
     ),
     parse(
       '(', nextCodeLine, indent, simpleExpression, nextCodeLine, dedent, ')',
       alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), alt(prefixAtom, atom),
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
+      alt(parse(noSpace, ':', noSpace), parse(_, ':', _)), primitiveExpression,
     ),
     parse(
       '(', opt(_), simpleExpression, opt(_), ')',
       alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), primitiveExpression,
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
+      alt(parse(noSpace, ':', noSpace), parse(_, ':', _)), primitiveExpression,
     ),
     parse(
       '(', nextCodeLine, indent, simpleExpression, nextCodeLine, dedent, ')',
       alt(parse(noSpace, '?', noSpace), parse(_, '?', _)), primitiveExpression,
-      alt(parse(noSpace, '||', noSpace), parse(_, '||', _)), primitiveExpression,
+      alt(parse(noSpace, ':', noSpace), parse(_, ':', _)), primitiveExpression,
     ),
   )(parser);
 
