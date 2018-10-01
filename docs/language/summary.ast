@@ -1263,7 +1263,7 @@
     try:
         let data = get_data()
         process! data
-    except error = DataCorruptError | PermissionError:
+    except error :: DataCorruptError | PermissionError:
         print error.message
     ensure:
         reset! data
