@@ -464,7 +464,7 @@
     let calc = '5 * 50 = ${5 * 50}'
 
     # Raw strings don't have escape sequences nor expression interpolation.
-    var verbatim_string = @raw "Use '\t' to represent tab"
+    var verbatim_string = @r"Use '\t' to represent tab"
 
     # Multiline strings are enclosed in triple `'` or `"` quotes and they ignore all escapes and interpolation
     # The first and last newlines are always ignored in multiline strings.
@@ -736,22 +736,22 @@
 - MATCH EXPRESSION
     # Match expression is like a chain of if-elif-else expressions.
     # If a match pattern fails, it goes to the next pattern.
-    (object)
-    | { x, y } :: Some => 0 # Matches if object is of `Some` type.
-    | { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
-    | [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
-    | (x, y) => x # Matches if object is a tuple of two elements.
-    | 75 | 90 => 3 # Matches if object has a value `75` or `67`
-    | 75..90 => 3 # Matches if object has a value between `75` and value `67`
-    | 75 => fallthrough # `fallthrough` keyword means the control flow should unconditionaly move to the next match condition.
-    | n => 6 # Matches. Binds `n` to the object.
-    | _ => 7 # Matches.
+    match object:
+        { x, y } :: Some => 0 # Matches if object is of `Some` type.
+        { x: 2, y: 3 } :: Some => 0 # Matches if object is of `Some` type.
+        [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
+        (x, y) => x # Matches if object is a tuple of two elements.
+        75 | 90 => 3 # Matches if object has a value `75` or `67`
+        75..90 => 3 # Matches if object has a value between `75` and value `67`
+        75 => fallthrough # `fallthrough` keyword means the control flow should unconditionaly move to the next match condition.
+        n => 6 # Matches. Binds `n` to the object.
+        _ => 7 # Matches.
 
     # A match expression can also be used to match against the arguments of a function, if, for, loop or while expressions.
-    fun ischosen(option):
-        | `y` or `Y` => true
-        | `n` or `N` => false
-        | _ => raise Error('Invalid choice!')
+    fun ischosen(option): match __args__:
+        (`y`) | (`Y`) => true
+        (`n`) | (`N`) => false
+        (_) => raise Error('Invalid choice!')
 
 - ASSIGNMENT DESTRUCTURING
     # Instead of separately binding subjects to objects fields, it can be done in a single expression with destructuring.
@@ -1169,11 +1169,11 @@
     # Importing multiple modules
     import csv, dataframes
 
-    # Module path can be specified following the Unix style. In that case, they need to be enclosed in quotes.
-    import 'nypro/../my_cool_project'
+    # Module path can be specified following a style similar to Unix.
+    import ../my_cool_project
 
     # Renaming can help disambiguate imports.
-    import fastmath: 'nypro/fast_math' { cosine: cos, sine: sin, π: pi }
+    import fastmath: nypro/fast_math { cosine: cos, sine: sin, π: pi }
     let b = fastmath.tan(45)
     let d = cosine(30)
 
