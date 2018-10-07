@@ -7,10 +7,10 @@ elif x == 2:
 else:
     qux()
 
-(x)
-| 0 => foo()
-| 1 => bar()
-| 2 => baz()
-| _ => qux()
+match x:
+    0 => foo()
+    1 => bar()
+    2 => baz()
+    _ => qux()
 
-(a) ? b || c
+(a) ? b : c

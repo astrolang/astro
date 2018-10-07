@@ -13,10 +13,10 @@ fun mainframe(puz):
     print('+-----+-----+-----+-----+')
 
 fun format(puz, ch):
-    (ch.trim().length)
-    | 1 => '  $ch  '
-    | 2 => '  $ch '
-    | 0 => '     '
+    match ch.trim().length:
+        1 => '  $ch  '
+        2 => '  $ch '
+        0 => '     '
 
 fun change(puz, to):
     let fro = puz.position
@@ -38,11 +38,10 @@ fun buildboard(puz, difficulty):
             break
 
     puz.position = tmp
-    let diff =
-        (difficulty)
-        | 0 => 10
-        | 1 => 50
-        | _ => 100
+    let diff = match difficulty:
+        0 => 10
+        1 => 50
+        _ => 100
 
     for i in 1..diff:
         let lst = puz.validmoves()
@@ -52,25 +51,25 @@ fun buildboard(puz, difficulty):
         puz.change(lst1[random(1, lst1.length - 1)])
 
 fun validmoves(puz):
-    let pos = puz.position
-    | 6 | 7 | 10 | 11 =>
-        puz.items[pos - 4], :[pos - 1], :[pos + 1], :[pos + 4]
-    | 5 | 9 =>
-        puz.items[pos - 4], :[pos + 4], :[pos + 1]
-    | 8 | 12 =>
-        puz.items[pos - 4], :[pos + 4], :[pos - 1]
-    | 2 | 3 =>
-        puz.items[pos - 1], :[pos + 1], :[pos + 4]
-    | 14 | 15 =>
-        puz.items[pos - 1], :[pos + 1], :[pos - 4]
-    | 1 =>
-        puz.items[pos + 1], :[pos + 4]
-    | 4 =>
-        puz.items[pos - 1], :[pos + 4]
-    | 13 =>
-        puz.items[pos + 1], :[pos - 4]
-    | 16 =>
-        puz.items[pos - 1], :[pos - 4]
+    match puz.position:
+        6 | 7 | 10 | 11 =>
+            puz.items[pos - 4], :[pos - 1], :[pos + 1], :[pos + 4]
+        5 | 9 =>
+            puz.items[pos - 4], :[pos + 4], :[pos + 1]
+        8 | 12 =>
+            puz.items[pos - 4], :[pos + 4], :[pos - 1]
+        2 | 3 =>
+            puz.items[pos - 1], :[pos + 1], :[pos + 4]
+        14 | 15 =>
+            puz.items[pos - 1], :[pos + 1], :[pos - 4]
+        1 =>
+            puz.items[pos + 1], :[pos + 4]
+        4 =>
+            puz.items[pos - 1], :[pos + 4]
+        13 =>
+            puz.items[pos + 1], :[pos - 4]
+        16 =>
+            puz.items[pos - 1], :[pos - 4]
 
 fun mainframe(puz):
     var flag = false
