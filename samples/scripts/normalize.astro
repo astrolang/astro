@@ -1,0 +1,12 @@
+# Using for loop
+fun norm(a):
+    var result = 0
+    for i in a:
+        result += i²
+    √(result)
+
+# Using map function
+fun norm(a) = √sum a.map(x => x²)
+
+# Using vectorization
+fun norm(a) = √sum(a.²)

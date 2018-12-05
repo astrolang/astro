@@ -1,0 +1,7 @@
+var num = 12
+var pointer = ptr(num) # get pointer
+
+print pointer # print address
+
+@unsafe # bad idea!
+pointer.addr = 0xFFFE # set the address

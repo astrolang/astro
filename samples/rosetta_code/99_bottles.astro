@@ -1,0 +1,12 @@
+fun bottles(n): match __args__:
+    (0) => "No more bottles"
+    (1) => "1 bottle"
+    (_) => "$n bottles"
+
+for n in 99..-1..1:
+    print @format"""
+    {bottles n} of beer on the wall
+    {bottles n} of beer
+    Take one down, pass it around
+    {bottles n-1} of beer on the wall\n
+    """

@@ -1,0 +1,13 @@
+fun caesar(s, k, decode: false):
+    if decode:
+        k = 26 - k
+    result = ''
+    for i in s.uppercase() where 65 <= ord(i) <= 90:
+        result.push! char(ord(i) - 65 + k) mod 26 + 65
+    return result
+
+let message = "The quick brown fox jumped over the lazy dogs"
+let encrypted = caesar(msg, 11)
+let decrypted = caesar(enc, 11, decode: true)
+
+print(message, encrypted, decrypted, sep: '\n')

@@ -1,0 +1,12 @@
+fun abc(s, ls):
+    if ls.isempty:
+        return true
+    for i in indices(list) where s[end] in list[i]:
+        return abc(s[:end-1], remove!(copy(list), at: i))
+    false
+
+let test = ["A", "BARK","BOOK","TREAT","COMMON","SQUAD","CONFUSE"]
+let ls = ["BO","XK","DQ","CP","NA","GT","RE","TG","QD","FS", "JW","HU","VI","AN","OB","ER","FS","LY","PC","ZM"]
+
+for s in test:
+    print "($|>8|{s} ${abc(s, list)})"

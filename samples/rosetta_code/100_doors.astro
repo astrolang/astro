@@ -1,0 +1,7 @@
+var doors = falses(100)
+
+for a in 1..100, b in a..a..100:
+    doors[b] = not doors[b]
+
+for a in 1..100:
+    print "Door $a is ${(doors[a]) ? 'open.' : 'closed.'}"
