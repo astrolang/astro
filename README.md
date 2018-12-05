@@ -64,16 +64,7 @@ For now, Astro can compile its source code to ast format. It is not ready for ev
 There is no throrough documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](docs/language/summary.ast).
 
 ### How do I install it?
-If you don't have `node` installed already, download and install it [here](https://nodejs.org/en/download/).
-##### _USERS_
-* Install astro by typing ```npm i -g astrolang``` in the terminal.
-* You can start using astro with ```astro -h```.
-
-##### _DEVELOPERS_
-* Clone repository ➡ ```git clone https://github.com/appcypher/astro.git```.
-* Move to astro directory ➡ ```cd astro```.
-* Install necessary dependencies ➡ ```npm i```.
-* Run tests ➡ ```npm run test:compiler```.
+N/A
 
 ### <a name="tasks"></a> What are the important tasks to complete?
 - [x] ~Improve project structure~
