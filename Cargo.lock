@@ -1,0 +1,11 @@
+[[package]]
+name = "astro"
+version = "0.1.0"
+dependencies = [
+ "astro-lexer 0.1.0",
+]
+
+[[package]]
+name = "astro-lexer"
+version = "0.1.0"
+
