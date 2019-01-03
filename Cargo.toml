@@ -9,5 +9,5 @@ edition = "2018"
 astro-lexer = { path = "lib/lexer", version = "0.1.0" }
 
 [[bin]]
-name = "astro-test"
-path = "src/astro_test.rs"
+name = "astro-example"
+path = "src/astro_example.rs"

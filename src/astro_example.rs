@@ -4,7 +4,7 @@ fn main() {
     println!("Welcome to Astro!");
 
     let code = String::from(
-        "  "
+        "  \r\n"
     );
 
     let lexer_result = Lexer::new(code).lex();
