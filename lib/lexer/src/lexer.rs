@@ -1,6 +1,12 @@
+#[macro_use]
+use crate::macros;
+
 use crate::{ErrorKind, LexerError, TokenKind};
 
+/************************* TOKEN *************************/
+
 #[derive(Debug, Clone, PartialEq)]
+/// Token object.
 pub struct Token {
     kind: TokenKind,
     token: Option<String>,
@@ -56,22 +62,28 @@ impl Lexer {
     pub fn new(code: String) -> Self {
         Self {
             code: code.chars().collect(),
-            // Cursor starts at the position of next character to be consumed.
+            // Cursor starts at the position of the next character to be consumed.
             cursor: 0,
             indent_level: 0,
-            space_char: String::from(" \t"), // TODO: Unicode
+            // TODO: Support certain Unicode characters.
+            space_char: String::from(" \t"),
             digit_binary: String::from("01"),
             digit_octal: String::from("01234567"),
             digit_decimal: String::from("0123456789"),
             digit_hexadecimal: String::from("0123456789ABCDEFabcdef"),
+            // TODO: Support certain Unicode characters.
             identifier_begin_char: String::from(
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",
-            ), // TODO: Unicode
+            ),
+            // TODO: Support certain Unicode characters.
             identifier_end_char: String::from(
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
-            ), // TODO: Unicode
-            operator_char: String::from(":+'-*/\\^%&|!><=÷×≠≈¹²³√?~"), // TODO: Unicode
-            punctuator_char: String::from("(){}[],.;@$"),                         // TODO: Unicode
+            ),
+            // TODO: Support certain Unicode characters.
+            operator_char: String::from(":+'-*/\\^%&|!><=÷×≠≈¹²³√?~"),
+            // TODO: Support certain Unicode characters.
+            punctuator_char: String::from("(){}[],.;@$"),
+            // Valid Astro keywords
             keywords: vec![
                 String::from("import"),
                 String::from("export"),
@@ -89,6 +101,9 @@ impl Lexer {
                 String::from("except"),
                 String::from("ensure"),
                 String::from("defer"),
+                String::from("for"),
+                String::from("try"),
+                String::from("while"),
                 String::from("loop"),
                 String::from("end"),
                 String::from("fallthrough"),
@@ -106,6 +121,7 @@ impl Lexer {
                 String::from("as"),
                 String::from("mod"),
                 String::from("typeof"),
+                String::from("sizeof"),
                 String::from("super"),
             ],
         }
@@ -197,7 +213,7 @@ impl Lexer {
         false
     }
 
-    /// Consumes the spaces in code if they come next.
+    /// Consumes spaces in code if they come next.
     fn spaces(&mut self) -> Result<Token, LexerError> {
         let kind = TokenKind::Spaces;
         let token: Option<String> = None;
@@ -227,7 +243,7 @@ impl Lexer {
         Ok(Token::new(kind, token, cursor))
     }
 
-    /// Consume the newline in code if it comes next.
+    /// Consume newline in code if it comes next.
     fn newline(&mut self) -> Result<Token, LexerError> {
         let kind = TokenKind::Newline;
         let token: Option<String> = None;
@@ -255,6 +271,118 @@ impl Lexer {
         Ok(Token::new(kind, token, cursor))
     }
 
+    /// Consumes '_' in code if it comes next.
+    fn no_name(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::NoName;
+        let mut token: Option<String> = None;
+        let cursor = self.cursor;
+
+        // Get next character without consuming it.
+        let character = self.peek_char(None);
+
+        // Check if the character is a space character.
+        if character.is_some() && character.unwrap() == '_' {
+            // Save character.
+            token = Some(self.eat_char().to_string());
+        } else {
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, token, cursor))
+    }
+
+    /// Consumes identifier in code if it comes next.
+    fn identifier(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::Identifier;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Get next character without consuming it.
+        let character = self.peek_char(None);
+
+        // Check if next character is an identifier character.
+        if character.is_some() && self.identifier_begin_char.find(character.unwrap()).is_some() {
+            // Save first character.
+            token = self.eat_char().to_string();
+            loop {
+                let character = self.peek_char(None);
+                if character.is_some() && self.identifier_end_char.find(character.unwrap()).is_some() {
+                    // Append subsequent identifier character.
+                    token.push(self.eat_char());
+                } else {
+                    break
+                }
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        // Check if identifier is a boolean literal
+        if token == "true" || token == "false" {
+            Ok(Token::new(TokenKind::BooleanLiteral, Some(token), cursor))
+        } else if self.keywords.contains(&token) {
+            // Or if it is a keyword.
+            Ok(Token::new(TokenKind::Keyword, Some(token), cursor))
+        } else {
+            // Otherwise it's just an identifier.
+            Ok(Token::new(kind, Some(token), cursor))
+        }
+    }
+
+    /// Consumes operator in code if it comes next.
+    fn operator(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::Operator;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Check if next character is an operator character.
+        loop {
+            let character = self.peek_char(None);
+            if character.is_some() && self.operator_char.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
+            } else {
+                break
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes punctuator in code if it comes next.
+    fn punctuator(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::Punctuator;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Check if next character is an punctuator character.
+        loop {
+            let character = self.peek_char(None);
+            if character.is_some() && self.punctuator_char.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
+            } else {
+                break
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
     /// Advance through code and generate tokens based on Astro syntax.
     pub fn lex(&mut self) -> Result<Vec<Token>, LexerError> {
         // A list of generated token.
@@ -274,9 +402,9 @@ impl Lexer {
             let token = token.unwrap();
 
             // Push tokens that are not spaces, ...
-            // if token.kind != TokenKind::Spaces {
+            if token.kind != TokenKind::Spaces {
                 tokens.push(token);
-            // }
+            }
         }
 
         Ok(tokens)
@@ -286,19 +414,43 @@ impl Lexer {
     fn lex_next(&mut self) -> Result<Token, LexerError> {
         // Consume spaces.
         let token = self.spaces();
-
-        // Return token if lexing was successful or if some terminable errors occured
-        if token.is_ok() || token.clone().unwrap_err().error != ErrorKind::CantConsume {
-            return token;
-        }
+        return_on_ok_or_terminable_error!(token);
 
         // Consume newline.
         let token = self.newline();
+        return_on_ok_or_terminable_error!(token);
 
-        // Return token if lexing was successful or if some terminable errors occured
-        if token.is_ok() || token.clone().unwrap_err().error != ErrorKind::CantConsume {
-            return token;
-        }
+        // Consume no_name.
+        let token = self.no_name();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume identifier.
+        let token = self.identifier();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume identifier.
+        let token = self.operator();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume punctuator.
+        let token = self.punctuator();
+        return_on_ok_or_terminable_error!(token);
+
+        // // Consume identifier.
+        // let token = self.identifier();
+        // return_on_ok_or_terminable_error!(token);
+
+        // // Consume identifier.
+        // let token = self.identifier();
+        // return_on_ok_or_terminable_error!(token);
+
+        // // Consume identifier.
+        // let token = self.identifier();
+        // return_on_ok_or_terminable_error!(token);
+
+        // // Consume identifier.
+        // let token = self.identifier();
+        // return_on_ok_or_terminable_error!(token);
 
         // Unsupported character.
         Err(LexerError::new(
