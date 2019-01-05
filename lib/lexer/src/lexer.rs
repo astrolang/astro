@@ -383,6 +383,116 @@ impl Lexer {
         Ok(Token::new(kind, Some(token), cursor))
     }
 
+//   integerBinaryLiteral() {
+//     const kind = 'integerbinaryliteral';
+//     let token = '';
+//     const errno = 0;
+//     const { cursor, indentLevel} = this;
+
+//     // Consume '0b'.
+//     if (this.eatToken('0b')) {
+//       // Consume '_'?.
+//       if (this.peekChar() === '_') this.eatChar();
+
+//       // Consume digitbinary.
+//       if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+//         token += this.eatChar();
+
+//         // Consume ('_'? digitbinary)*.
+//         while (true) {
+//           const char = this.peekChar();
+
+//           // Try consume '_' digitbinary.
+//           if (char === '_') {
+//             // Consume '_'.
+//             this.eatChar();
+
+//             // If '_' is consumed, a digitbinary must follow.
+//             if (this.digitBinary.indexOf(this.peekChar()) > -1) {
+//               token += this.eatChar();
+//             // Otherwise spit out '_' and break.
+//             } else {
+//               this.lastPosition -= 1;
+//               this.column -= 1;
+//               break;
+//             }
+
+//           // Otherwise consume digitbinary.
+//           } else if (this.digitBinary.indexOf(char) > -1) {
+//             token += this.eatChar();
+//           } else break;
+//         }
+//       }
+//     }
+
+    /// Consumes punctuator in code if it comes next.
+    fn integer_binary_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::IntegerBinaryLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume '0b'.
+        let string = self.eat_token(String::from("0b"));
+        if string.is_some() && string.unwrap() == "0b" {
+            // Consume '_'?.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '_' {
+                self.eat_char();
+            }
+
+            // Consume digitbinary.
+            let character = self.peek_char(None);
+            if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
+
+                // Consume ('_'? digitbinary)*.
+                loop {
+                    let character = self.peek_char(None);
+
+                    // Try consume '_' digitbinary.
+                    if character.is_some() && character.unwrap() == '_' {
+                        // Consume '_'.
+                        self.eat_char();
+
+                        let character = self.peek_char(None);
+                        // If '_' is consumed, a digitbinary must follow.
+                        if character.is_some() {
+                            let character = character.unwrap();
+                            if self.digit_binary.find(character).is_some() {
+                                token.push(character);
+                            }
+                        } else { // Otherwise spit out '_' and break.
+                            self.cursor -= 1;
+                            break;
+                        }
+                    } else if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
+                        token.push(self.eat_char());
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+
+//     // Reverting if lexing failed
+//     if (token === '') {
+//       this.cursor = cursor;
+//       return null;
+//     }
+
+//     return { kind, token, cursor, errno }
+//   }
+
     /// Advance through code and generate tokens based on Astro syntax.
     pub fn lex(&mut self) -> Result<Vec<Token>, LexerError> {
         // A list of generated token.
@@ -436,9 +546,9 @@ impl Lexer {
         let token = self.punctuator();
         return_on_ok_or_terminable_error!(token);
 
-        // // Consume identifier.
-        // let token = self.identifier();
-        // return_on_ok_or_terminable_error!(token);
+        // Consume integer_binary_literal.
+        let token = self.integer_binary_literal();
+        return_on_ok_or_terminable_error!(token);
 
         // // Consume identifier.
         // let token = self.identifier();
