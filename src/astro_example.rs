@@ -4,7 +4,8 @@ fn main() {
     println!("Welcome to Astro!");
 
     let code = String::from(
-        "  \r\n  \n _ name false for +/ ,0b100_1"
+        // "  \r\n  \n _ name false for +/ ,0b100_1"
+        "0b100_1"
     );
 
     let lexer_result = Lexer::new(code).lex();

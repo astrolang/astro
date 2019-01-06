@@ -181,7 +181,7 @@ impl Lexer {
         // Compare token argument with the next set of characters.
         if token_chars == slice {
             // Advance cursor.
-            self.cursor += 1;
+            self.cursor = end;
             return Some(token);
         }
 
@@ -383,48 +383,6 @@ impl Lexer {
         Ok(Token::new(kind, Some(token), cursor))
     }
 
-//   integerBinaryLiteral() {
-//     const kind = 'integerbinaryliteral';
-//     let token = '';
-//     const errno = 0;
-//     const { cursor, indentLevel} = this;
-
-//     // Consume '0b'.
-//     if (this.eatToken('0b')) {
-//       // Consume '_'?.
-//       if (this.peekChar() === '_') this.eatChar();
-
-//       // Consume digitbinary.
-//       if (this.digitBinary.indexOf(this.peekChar()) > -1) {
-//         token += this.eatChar();
-
-//         // Consume ('_'? digitbinary)*.
-//         while (true) {
-//           const char = this.peekChar();
-
-//           // Try consume '_' digitbinary.
-//           if (char === '_') {
-//             // Consume '_'.
-//             this.eatChar();
-
-//             // If '_' is consumed, a digitbinary must follow.
-//             if (this.digitBinary.indexOf(this.peekChar()) > -1) {
-//               token += this.eatChar();
-//             // Otherwise spit out '_' and break.
-//             } else {
-//               this.lastPosition -= 1;
-//               this.column -= 1;
-//               break;
-//             }
-
-//           // Otherwise consume digitbinary.
-//           } else if (this.digitBinary.indexOf(char) > -1) {
-//             token += this.eatChar();
-//           } else break;
-//         }
-//       }
-//     }
-
     /// Consumes punctuator in code if it comes next.
     fn integer_binary_literal(&mut self) -> Result<Token, LexerError> {
         let kind = TokenKind::IntegerBinaryLiteral;
@@ -439,7 +397,6 @@ impl Lexer {
             if character.is_some() && character.unwrap() == '_' {
                 self.eat_char();
             }
-
             // Consume digitbinary.
             let character = self.peek_char(None);
             if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
@@ -482,7 +439,6 @@ impl Lexer {
 
         Ok(Token::new(kind, Some(token), cursor))
     }
-
 
 //     // Reverting if lexing failed
 //     if (token === '') {
