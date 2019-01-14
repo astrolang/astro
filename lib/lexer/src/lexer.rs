@@ -33,8 +33,6 @@ pub struct Lexer {
     code: Vec<char>,
     // Holds the position the lexer is at in the code.
     cursor: usize,
-    // Holds the curent indentation level as the lexer passes through the code.
-    indent_level: usize,
     // Supported space characters.
     space_char: String,
     // Supported binary digits.
@@ -64,7 +62,6 @@ impl Lexer {
             code: code.chars().collect(),
             // Cursor starts at the position of the next character to be consumed.
             cursor: 0,
-            indent_level: 0,
             // TODO: Support certain Unicode characters.
             space_char: String::from(" \t"),
             digit_binary: String::from("01"),
@@ -81,7 +78,6 @@ impl Lexer {
             ),
             // TODO: Support certain Unicode characters.
             operator_char: String::from(":+'-*/\\^%&|!><=÷×≠≈¹²³√?~"),
-            // TODO: Support certain Unicode characters.
             punctuator_char: String::from("(){}[],.;@$"),
             // Valid Astro keywords
             keywords: vec![
@@ -383,7 +379,7 @@ impl Lexer {
         Ok(Token::new(kind, Some(token), cursor))
     }
 
-    /// Consumes punctuator in code if it comes next.
+    /// Consumes integer binary literal in code if it comes next.
     fn integer_binary_literal(&mut self) -> Result<Token, LexerError> {
         let kind = TokenKind::IntegerBinaryLiteral;
         let mut token = String::from("");
@@ -440,40 +436,166 @@ impl Lexer {
         Ok(Token::new(kind, Some(token), cursor))
     }
 
-//     // Reverting if lexing failed
-//     if (token === '') {
-//       this.cursor = cursor;
-//       return null;
-//     }
+    /// Consumes integer octal literal in code if it comes next.
+    fn integer_octal_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::IntegerOctalLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
 
-//     return { kind, token, cursor, errno }
-//   }
-
-    /// Advance through code and generate tokens based on Astro syntax.
-    pub fn lex(&mut self) -> Result<Vec<Token>, LexerError> {
-        // A list of generated token.
-        let mut tokens = vec![];
-
-        // Iteratively advance through code and lex it.
-        while self.is_inbounds(None) {
-            // Lex the next set of characters.
-            let token = self.lex_next();
-
-            // Check for lexing error.
-            if token.is_err() {
-                return Err(token.unwrap_err());
+        // Consume '0o'.
+        let string = self.eat_token(String::from("0o"));
+        if string.is_some() && string.unwrap() == "0o" {
+            // Consume '_'?.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '_' {
+                self.eat_char();
             }
+            // Consume digitoctal.
+            let character = self.peek_char(None);
+            if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
 
-            // If there isno error, get the token value.
-            let token = token.unwrap();
+                // Consume ('_'? digitoctal)*.
+                loop {
+                    let character = self.peek_char(None);
 
-            // Push tokens that are not spaces, ...
-            if token.kind != TokenKind::Spaces {
-                tokens.push(token);
+                    // Try consume '_' digitoctal.
+                    if character.is_some() && character.unwrap() == '_' {
+                        // Consume '_'.
+                        self.eat_char();
+
+                        let character = self.peek_char(None);
+                        // If '_' is consumed, a digitoctal must follow.
+                        if character.is_some() {
+                            let character = character.unwrap();
+                            if self.digit_octal.find(character).is_some() {
+                                token.push(character);
+                            }
+                        } else { // Otherwise spit out '_' and break.
+                            self.cursor -= 1;
+                            break;
+                        }
+                    } else if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
+                        token.push(self.eat_char());
+                    } else {
+                        break;
+                    }
+                }
             }
         }
 
-        Ok(tokens)
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes integer hexadecimal literal in code if it comes next.
+    fn integer_hexadecimal_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::IntegerHexadecimalLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume '0x'.
+        let string = self.eat_token(String::from("0x"));
+        if string.is_some() && string.unwrap() == "0x" {
+            // Consume '_'?.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '_' {
+                self.eat_char();
+            }
+            // Consume digithexadecimal.
+            let character = self.peek_char(None);
+            if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
+
+                // Consume ('_'? digithexadecimal)*.
+                loop {
+                    let character = self.peek_char(None);
+
+                    // Try consume '_' digithexadecimal.
+                    if character.is_some() && character.unwrap() == '_' {
+                        // Consume '_'.
+                        self.eat_char();
+
+                        let character = self.peek_char(None);
+                        // If '_' is consumed, a digithexadecimal must follow.
+                        if character.is_some() {
+                            let character = character.unwrap();
+                            if self.digit_hexadecimal.find(character).is_some() {
+                                token.push(character);
+                            }
+                        } else { // Otherwise spit out '_' and break.
+                            self.cursor -= 1;
+                            break;
+                        }
+                    } else if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                        token.push(self.eat_char());
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes integer decimal literal in code if it comes next.
+    fn integer_decimal_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::IntegerDecimalLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume digitdecimal.
+        let character = self.peek_char(None);
+        if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
+            token.push(self.eat_char());
+
+            // Consume ('_'? digitdecimal)*.
+            loop {
+                let character = self.peek_char(None);
+
+                // Try consume '_' digitdecimal.
+                if character.is_some() && character.unwrap() == '_' {
+                    // Consume '_'.
+                    self.eat_char();
+
+                    let character = self.peek_char(None);
+                    // If '_' is consumed, a digitdecimal must follow.
+                    if character.is_some() {
+                        let character = character.unwrap();
+                        if self.digit_decimal.find(character).is_some() {
+                            token.push(character);
+                        }
+                    } else { // Otherwise spit out '_' and break.
+                        self.cursor -= 1;
+                        break;
+                    }
+                } else if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+                } else {
+                    break;
+                }
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
     }
 
     /// Lexes the next set of characters based on defined rules.
@@ -506,6 +628,18 @@ impl Lexer {
         let token = self.integer_binary_literal();
         return_on_ok_or_terminable_error!(token);
 
+        // Consume integer_octal_literal.
+        let token = self.integer_octal_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume integer_hexadecimal_literal.
+        let token = self.integer_hexadecimal_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume integer_decimal_literal.
+        let token = self.integer_decimal_literal();
+        return_on_ok_or_terminable_error!(token);
+
         // // Consume identifier.
         // let token = self.identifier();
         // return_on_ok_or_terminable_error!(token);
@@ -524,5 +658,32 @@ impl Lexer {
             TokenKind::None,
             self.cursor,
         ))
+    }
+
+    /// Advance through code and generate tokens based on Astro syntax.
+    pub fn lex(&mut self) -> Result<Vec<Token>, LexerError> {
+        // A list of generated token.
+        let mut tokens = vec![];
+
+        // Iteratively advance through code and lex it.
+        while self.is_inbounds(None) {
+            // Lex the next set of characters.
+            let token = self.lex_next();
+
+            // Check for lexing error.
+            if token.is_err() {
+                return Err(token.unwrap_err());
+            }
+
+            // If there isno error, get the token value.
+            let token = token.unwrap();
+
+            // Push tokens that are not spaces, ...
+            if token.kind != TokenKind::Spaces {
+                tokens.push(token);
+            }
+        }
+
+        Ok(tokens)
     }
 }
