@@ -893,14 +893,14 @@
         list[index]
     }
 
-    let buf = Buffer{Int}(50)
+    let buf = Buffer[Int](50)
 
     # Nillable type annotation.
     let language: String | Nil
     let language: String?
 
     # List type annotation.
-    let languages: List{String} = []
+    let languages: List[String] = []
     let languages: [String] = []
 
     # Varargs type annotation.
@@ -912,10 +912,10 @@
     let arr = Array{Int, 3}()
 
     # Higher Kinded Types
-    map :: (F{A}, (A -> B)) -> F{B}
+    map :: (F[A], (A -> B)) -> F[B]
 
     # Types can have generic type parameters too
-    type Buffer{T} {
+    type Buffer[T] {
         buffer_pointer: *var Int,
         capacity: Int,
         length = delegated!()
@@ -924,7 +924,7 @@
     # Functions can have generic type parameters and the parameters can have default values.
     fun init{T: Int}(length: T) -> Buffer {
         Buffer {
-            buffer: malloc{T}(length)
+            buffer: malloc[T](length)
         }
     }
 
@@ -946,15 +946,15 @@
 
 - TYPES AS FIRST-CLASS CITIZENS
     # Types can be passed around and specialized on like regular objects in Astro.
-    Int64 :: Type{Int64}
+    Int64 :: Type[Int64]
     Int64 :: Type
 
     # Having type be objects themselves allows us to overload functions based on the type of a type
-    fun zero(t: Type{Float}) -> Float {
+    fun zero(t: Type[Float]) -> Float {
         0.0
     }
 
-    fun zero(t: Type{Int}) -> Int {
+    fun zero(t: Type[Int]) -> Int {
         0
     }
 
@@ -1211,13 +1211,13 @@
     *pointer = 57
 
     # Allocating memory on the heap.
-    let memory: *var Byte = malloc{Byte}(5) # Allocates 5 bytes on the heap.
+    let memory: *var Byte = malloc[Byte](5) # Allocates 5 bytes on the heap.
 
     # Freeing memory.
     free(memory) # Compile-time error will be thrown if there is a possible dangling pointer.
 
     # Pointer arithmetic is only allowed on pointers that point to a block of memory and such operations are always bounds-checked.
-    let memory: *var Byte = malloc{Int}(20)
+    let memory: *var Byte = malloc[Int](20)
     let pointer: = ptr(memory[2])
 
     pointer.offset(5)
