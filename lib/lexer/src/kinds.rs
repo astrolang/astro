@@ -28,10 +28,8 @@ pub enum TokenKind {
     FloatDecimalLiteral,
     CharLiteral,
     RegexLiteral,
+    StringLiteral,
     SingleLineComment,
-    InnerMultiLineComment,
     MultiLineComment,
-    Dedent,
-    Indent,
     LineContinuation,
 }

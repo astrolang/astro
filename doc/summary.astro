@@ -117,7 +117,7 @@
     print "Hello" # Strings
     print `a` # Character
     print name # Identifiers
-    print $name # Synmbols
+    print :name # Synmbols
     print 56 # Numbers
     print ||regex||
 
@@ -414,9 +414,9 @@
 
     # Multiline strings are enclosed in triple `'` or `"` quotes and they ignore all escapes and interpolation
     # The first and last newlines are always ignored in multiline strings.
-    var verbatim_str = '''
+    var verbatim_str = "
     Hello, World!
-    '''
+    "
 
     # A single character single quotes is not a string but a Char.
     # Char is a 32-bit datatype that represents a single Unicode codepoint.
@@ -676,8 +676,9 @@
     # Varargs takes variable number of arguments.
     fun arith_mean(...numbers) {
         var total = 0
-        for number in numbers:
+        for number in numbers {
             total += number
+        }
         total / numbers.length
     }
 
@@ -854,6 +855,14 @@
 
     let my_ride = Car('Camaro', 2016)
 
+    # Default values
+    type Car {
+        make: String = "Toyota",
+        year: Int,
+    }
+
+    let ride = Car { year: 1990 }
+
 - GENERICS
     # Uppercase single letter identifiers in type annotation are taken as type variable declaration.
     # Declaring a generic type T.
@@ -876,7 +885,7 @@
         false
     }
 
-    fun startequal(c: C, d: D) -> Bool where |C, D|<:Collection, C.Element::D.Element, C.Element<:Equatable {
+    fun startequal(c: C, d: D) -> Bool where |C, D| <: Collection, C.Element :: D.Element, C.Element <: Equatable {
         c.first == d.first
     }
 
@@ -884,22 +893,15 @@
         list[index]
     }
 
-    # Functions can have generic type parameters and the parameters can have default values.
-    fun init{T: Int}(length: T) -> Buffer {
-        Buffer {
-            buffer: malloc{T}(length)
-        }
-    }
-
     let buf = Buffer{Int}(50)
 
     # Nillable type annotation.
-    let language: String|Nil
+    let language: String | Nil
     let language: String?
 
     # List type annotation.
-    let languages: List{String}
-    let languages: [String]
+    let languages: List{String} = []
+    let languages: [String] = []
 
     # Varargs type annotation.
     fun total(first: Int, ...rem: Int) -> Int {
@@ -910,7 +912,21 @@
     let arr = Array{Int, 3}()
 
     # Higher Kinded Types
-    map :: F{A}, (A -> B) -> F{B}
+    map :: (F{A}, (A -> B)) -> F{B}
+
+    # Types can have generic type parameters too
+    type Buffer{T} {
+        buffer_pointer: *var Int,
+        capacity: Int,
+        length = delegated!()
+    }
+
+    # Functions can have generic type parameters and the parameters can have default values.
+    fun init{T: Int}(length: T) -> Buffer {
+        Buffer {
+            buffer: malloc{T}(length)
+        }
+    }
 
 - ENUMS
     enum PaymentMethod {
@@ -1112,12 +1128,13 @@
 
 - PRIVATE ACCESS MODIFIER FOR FIELDS
     # When a type is exported, its fields are made public by default.
-    # To prevent a field from exposure to external modules, it must be marked with `*`.
-    type Student:
+    # To prevent a field from exposure to external modules, it must be marked with `priv`.
+    type Student {
         var name
-        var scores* # field is private to module
+        priv var scores # field is private to module
+    }
 
-    type Student(name, scores*)
+    type Student { name, priv scores }
 
 - OPERATOR OVERLOADING
     # Existing operators can be overloaded just like regular functions.
@@ -1187,24 +1204,22 @@
 
 - POINTERS
     # Creating a pointer to a primitive object address.
-    let num = 55
-    let pointer = ptr(num)
+    let num: Int = 55
+    let pointer: *var Int = ptr(num)
 
     # Changing value of pointed address.
-    pointer.value = 57
-
-    # Changing pointer address is not permitted.
-    pointer.addr = 0xFFFE # Invalid!
+    *pointer = 57
 
     # Allocating memory on the heap.
-    let memory = malloc{Byte}(5) # Allocates 5 bytes on the heap.
+    let memory: *var Byte = malloc{Byte}(5) # Allocates 5 bytes on the heap.
 
     # Freeing memory.
     free(memory) # Compile-time error will be thrown if there is a possible dangling pointer.
 
     # Pointer arithmetic is only allowed on pointers that point to a block of memory and such operations are always bounds-checked.
-    let memory = malloc{Int}(20)
-    let pointer = memory[2]
+    let memory: *var Byte = malloc{Int}(20)
+    let pointer: = ptr(memory[2])
+
     pointer.offset(5)
     pointer.offset(500) # Error!
 

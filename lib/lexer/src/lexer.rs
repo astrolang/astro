@@ -144,6 +144,11 @@ impl Lexer {
         // Get end of slice.
         let end = start + token.len();
 
+        // Check if token length does not go beyond code length
+        if end > self.code.len() {
+            return false;
+        }
+
         // Get the slice from code
         let slice = &self.code[start..end];
 
@@ -166,6 +171,11 @@ impl Lexer {
 
         // Get end of slice.
         let end = start + token.len();
+
+        // Check if token length does not go beyond code length
+        if end > self.code.len() {
+            return None;
+        }
 
         // Get the slice from code
         let slice = &self.code[start..end];
@@ -379,6 +389,31 @@ impl Lexer {
         Ok(Token::new(kind, Some(token), cursor))
     }
 
+    // Consume ('_'? digit)*.
+    fn consume_digits(&mut self, digit_characters: String, token: &mut String) {
+        loop {
+            // Try consume '_' digit.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '_' {
+                // Consume '_'.
+                self.eat_char();
+
+                // If '_' is consumed, a digit must follow.
+                let character = self.peek_char(None);
+                if character.is_some() && digit_characters.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+                } else { // Otherwise spit out '_' and break.
+                    self.cursor -= 1;
+                    break;
+                }
+            } else if character.is_some() && digit_characters.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
+            } else {
+                break;
+            }
+        }
+    }
+
     /// Consumes integer binary literal in code if it comes next.
     fn integer_binary_literal(&mut self) -> Result<Token, LexerError> {
         let kind = TokenKind::IntegerBinaryLiteral;
@@ -393,37 +428,14 @@ impl Lexer {
             if character.is_some() && character.unwrap() == '_' {
                 self.eat_char();
             }
+
             // Consume digitbinary.
             let character = self.peek_char(None);
             if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
 
                 // Consume ('_'? digitbinary)*.
-                loop {
-                    let character = self.peek_char(None);
-
-                    // Try consume '_' digitbinary.
-                    if character.is_some() && character.unwrap() == '_' {
-                        // Consume '_'.
-                        self.eat_char();
-
-                        let character = self.peek_char(None);
-                        // If '_' is consumed, a digitbinary must follow.
-                        if character.is_some() {
-                            let character = character.unwrap();
-                            if self.digit_binary.find(character).is_some() {
-                                token.push(character);
-                            }
-                        } else { // Otherwise spit out '_' and break.
-                            self.cursor -= 1;
-                            break;
-                        }
-                    } else if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
-                        token.push(self.eat_char());
-                    } else {
-                        break;
-                    }
-                }
+                self.consume_digits(self.digit_binary.clone(), &mut token);
             }
         }
 
@@ -456,31 +468,7 @@ impl Lexer {
                 token.push(self.eat_char());
 
                 // Consume ('_'? digitoctal)*.
-                loop {
-                    let character = self.peek_char(None);
-
-                    // Try consume '_' digitoctal.
-                    if character.is_some() && character.unwrap() == '_' {
-                        // Consume '_'.
-                        self.eat_char();
-
-                        let character = self.peek_char(None);
-                        // If '_' is consumed, a digitoctal must follow.
-                        if character.is_some() {
-                            let character = character.unwrap();
-                            if self.digit_octal.find(character).is_some() {
-                                token.push(character);
-                            }
-                        } else { // Otherwise spit out '_' and break.
-                            self.cursor -= 1;
-                            break;
-                        }
-                    } else if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
-                        token.push(self.eat_char());
-                    } else {
-                        break;
-                    }
-                }
+                self.consume_digits(self.digit_octal.clone(), &mut token);
             }
         }
 
@@ -513,31 +501,7 @@ impl Lexer {
                 token.push(self.eat_char());
 
                 // Consume ('_'? digithexadecimal)*.
-                loop {
-                    let character = self.peek_char(None);
-
-                    // Try consume '_' digithexadecimal.
-                    if character.is_some() && character.unwrap() == '_' {
-                        // Consume '_'.
-                        self.eat_char();
-
-                        let character = self.peek_char(None);
-                        // If '_' is consumed, a digithexadecimal must follow.
-                        if character.is_some() {
-                            let character = character.unwrap();
-                            if self.digit_hexadecimal.find(character).is_some() {
-                                token.push(character);
-                            }
-                        } else { // Otherwise spit out '_' and break.
-                            self.cursor -= 1;
-                            break;
-                        }
-                    } else if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
-                        token.push(self.eat_char());
-                    } else {
-                        break;
-                    }
-                }
+                self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
             }
         }
 
@@ -562,27 +526,500 @@ impl Lexer {
             token.push(self.eat_char());
 
             // Consume ('_'? digitdecimal)*.
+            self.consume_digits(self.digit_decimal.clone(), &mut token);
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes floating-point binary literal in code if it comes next.
+    fn float_binary_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::FloatBinaryLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume integerpart: ('0b' '_'? digitbinary) ('_'? digitbinary)*.
+        let integer_part = self.integer_binary_literal();
+        if integer_part.is_ok() {
+            token.push_str(integer_part.unwrap().token.unwrap().as_str());
+
+            // Consume '.'.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '.' {
+                token.push(self.eat_char());
+                // Consume digitbinary.
+                let character = self.peek_char(None);
+                if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+
+                    // Consume ('_'? digitbinary)*.
+                    self.consume_digits(self.digit_binary.clone(), &mut token);
+
+                    // Consume ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+                    let character = self.peek_char(None);
+                    if character.is_some() && character.unwrap() == 'e' {
+                        token.push(self.eat_char());
+
+                        // Consume [-+]?
+                        let sign = self.peek_char(None);
+                        if sign.is_some() && (sign.unwrap() == '-' || sign.unwrap() == '+') {
+                            token.push(self.eat_char());
+                        }
+
+                        // Consume digitbinary.
+                        let character = self.peek_char(None);
+                        if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
+                            token.push(self.eat_char());
+
+                            // Consume ('_'? digitbinary)*.
+                            self.consume_digits(self.digit_binary.clone(), &mut token);
+                        } else { // Failed if can't consume digitbinary.
+                            token = String::new();
+                        }
+                    }
+                } else { // Failed if can't consume digitbinary.
+                    token = String::new();
+                }
+
+            } else if character.is_some() && character.unwrap() == 'e' {
+                // Consume [-+]?
+                let sign = self.peek_char(None);
+                if character.is_some() && (character.unwrap() == '-' || character.unwrap() == '+') {
+                    token.push(self.eat_char());
+                }
+
+                // Consume digitbinary.
+                let character = self.peek_char(None);
+                if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+
+                    // Consume ('_'? digitbinary)*.
+                    self.consume_digits(self.digit_binary.clone(), &mut token);
+                } else { // Failed if can't consume digitbinary.
+                    token = String::new();
+                }
+            } else { // Failed if can't consume digitbinary.
+                token = String::new();
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes floating-point octal literal in code if it comes next.
+    fn float_octal_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::FloatOctalLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume integerpart: ('0o' '_'? digitoctal) ('_'? digitoctal)*.
+        let integer_part = self.integer_octal_literal();
+        if integer_part.is_ok() {
+            token.push_str(integer_part.unwrap().token.unwrap().as_str());
+
+            // Consume '.'.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '.' {
+                token.push(self.eat_char());
+                // Consume digitoctal.
+                let character = self.peek_char(None);
+                if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+
+                    // Consume ('_'? digitoctal)*.
+                    self.consume_digits(self.digit_octal.clone(), &mut token);
+
+                    // Consume ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+                    let character = self.peek_char(None);
+                    if character.is_some() && character.unwrap() == 'e' {
+                        token.push(self.eat_char());
+
+                        // Consume [-+]?
+                        let sign = self.peek_char(None);
+                        if sign.is_some() && (sign.unwrap() == '-' || sign.unwrap() == '+') {
+                            token.push(self.eat_char());
+                        }
+
+                        // Consume digitoctal.
+                        let character = self.peek_char(None);
+                        if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
+                            token.push(self.eat_char());
+
+                            // Consume ('_'? digitoctal)*.
+                            self.consume_digits(self.digit_octal.clone(), &mut token);
+                        } else { // Failed if can't consume digitoctal.
+                            token = String::new();
+                        }
+                    }
+                } else { // Failed if can't consume digitoctal.
+                    token = String::new();
+                }
+
+            } else if character.is_some() && character.unwrap() == 'e' {
+                // Consume [-+]?
+                let sign = self.peek_char(None);
+                if character.is_some() && (character.unwrap() == '-' || character.unwrap() == '+') {
+                    token.push(self.eat_char());
+                }
+
+                // Consume digitoctal.
+                let character = self.peek_char(None);
+                if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+
+                    // Consume ('_'? digitoctal)*.
+                    self.consume_digits(self.digit_octal.clone(), &mut token);
+                } else { // Failed if can't consume digitoctal.
+                    token = String::new();
+                }
+            } else { // Failed if can't consume digitoctal.
+                token = String::new();
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes floating-point hexadecimal literal in code if it comes next.
+    fn float_hexadecimal_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::FloatHexadecimalLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume integerpart: ('0o' '_'? digithexadecimal) ('_'? digithexadecimal)*.
+        let integer_part = self.integer_hexadecimal_literal();
+        if integer_part.is_ok() {
+            token.push_str(integer_part.unwrap().token.unwrap().as_str());
+
+            // Consume '.'.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '.' {
+                token.push(self.eat_char());
+                // Consume digithexadecimal.
+                let character = self.peek_char(None);
+                if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+
+                    // Consume ('_'? digithexadecimal)*.
+                    self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
+
+                    // Consume ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+                    let character = self.peek_char(None);
+                    if character.is_some() && character.unwrap() == 'p' {
+                        token.push(self.eat_char());
+
+                        // Consume [-+]?
+                        let sign = self.peek_char(None);
+                        if sign.is_some() && (sign.unwrap() == '-' || sign.unwrap() == '+') {
+                            token.push(self.eat_char());
+                        }
+
+                        // Consume digithexadecimal.
+                        let character = self.peek_char(None);
+                        if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                            token.push(self.eat_char());
+
+                            // Consume ('_'? digithexadecimal)*.
+                            self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
+                        } else { // Failed if can't consume digithexadecimal.
+                            token = String::new();
+                        }
+                    }
+                } else { // Failed if can't consume digithexadecimal.
+                    token = String::new();
+                }
+
+            } else if character.is_some() && character.unwrap() == 'e' {
+                // Consume [-+]?
+                let sign = self.peek_char(None);
+                if character.is_some() && (character.unwrap() == '-' || character.unwrap() == '+') {
+                    token.push(self.eat_char());
+                }
+
+                // Consume digithexadecimal.
+                let character = self.peek_char(None);
+                if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                    token.push(self.eat_char());
+
+                    // Consume ('_'? digithexadecimal)*.
+                    self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
+                } else { // Failed if can't consume digithexadecimal.
+                    token = String::new();
+                }
+            } else { // Failed if can't consume digithexadecimal.
+                token = String::new();
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes floating-point decimal literal in code if it comes next.
+    fn float_decimal_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::FloatDecimalLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume integerpart: digitdecimal ('_'? digitdecimal)*..
+        let integer_part = self.integer_decimal_literal();
+        if integer_part.is_ok() {
+            token.push_str(integer_part.clone().unwrap().token.unwrap().as_str());
+        }
+
+        // Consume [^.]  '.'.
+        let character = self.peek_char(None);
+        if character.is_some() && character.unwrap() == '.' {
+            if integer_part.is_err() {
+                token.push('0');
+            }
+
+            token.push(self.eat_char());
+
+            // Check for [^.] '.'.
+            // A preceding '.' means that this is not a float literal but an integer in a range literal.
+            // Ex. a..120.
+            let mut followingDot = false;
+            if self.cursor > 0 && self.code[self.cursor - 2] == '.' {
+                followingDot = true;
+            }
+
+            // Consume digitdecimal.
+            let character = self.peek_char(None);
+            if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() && !followingDot {
+                token.push(self.eat_char());
+
+                // Consume ('_'? digitdecimal)*.
+                self.consume_digits(self.digit_decimal.clone(), &mut token);
+
+                // Consume ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
+                let character = self.peek_char(None);
+                if character.is_some() && character.unwrap() == 'e' {
+                    token.push(self.eat_char());
+
+                    // Consume [-+]?
+                    let sign = self.peek_char(None);
+                    if sign.is_some() && (sign.unwrap() == '-' || sign.unwrap() == '+') {
+                        token.push(self.eat_char());
+                    }
+
+                    // Consume digitdecimal.
+                    let character = self.peek_char(None);
+                    if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
+                        token.push(self.eat_char());
+
+                        // Consume ('_'? digitdecimal)*.
+                        self.consume_digits(self.digit_decimal.clone(), &mut token);
+                    } else { // Failed if can't consume digitdecimal.
+                        token = String::new();
+                    }
+                }
+            } else { // Failed if can't consume digitdecimal.
+                token = String::new();
+            }
+
+        } else if character.is_some() && character.unwrap() == 'e' {
+            // Consume [-+]?
+            let sign = self.peek_char(None);
+            if character.is_some() && (character.unwrap() == '-' || character.unwrap() == '+') {
+                token.push(self.eat_char());
+            }
+
+            // Consume digitdecimal.
+            let character = self.peek_char(None);
+            if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
+
+                // Consume ('_'? digitdecimal)*.
+                self.consume_digits(self.digit_decimal.clone(), &mut token);
+            } else { // Failed if can't consume digitdecimal.
+                token = String::new();
+            }
+        } else { // Failed if can't consume digitdecimal.
+            token = String::new();
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes char literal in code if it comes next.
+    fn char_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::CharLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume '`'.
+        let character = self.peek_char(None);
+        if character.is_some() && character.unwrap() == '`' {
+            self.eat_char();
+
+            // Consume (singlequotestringchars: (!(newline | '`') .))?.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() != '\n' && character.unwrap() != '\r' && character.unwrap() != '`' {
+                token.push(self.eat_char());
+            }
+
+            // Consume '`'.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '`' {
+                self.eat_char();
+            } else {
+                token = String::new();
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes regex literal in code if it comes next.
+    fn regex_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::RegexLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume '||'.
+        let word = self.eat_token("||".into());
+        if word.is_some() {
+
+            // Consume (singlequotestringchars: (!(newline | '||') .)+)?.
             loop {
                 let character = self.peek_char(None);
-
-                // Try consume '_' digitdecimal.
-                if character.is_some() && character.unwrap() == '_' {
-                    // Consume '_'.
-                    self.eat_char();
-
-                    let character = self.peek_char(None);
-                    // If '_' is consumed, a digitdecimal must follow.
-                    if character.is_some() {
-                        let character = character.unwrap();
-                        if self.digit_decimal.find(character).is_some() {
-                            token.push(character);
-                        }
-                    } else { // Otherwise spit out '_' and break.
-                        self.cursor -= 1;
-                        break;
-                    }
-                } else if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
+                let word = self.peek_token("||".into());
+                if character.is_some() && character.unwrap() != '\n' && character.unwrap() != '\r' && !word {
                     token.push(self.eat_char());
+                } else {
+                    break;
+                }
+            }
+
+            // Consume '||'.
+            let word = self.eat_token("||".into());
+            if word.is_none() {
+                token = String::new();
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes string literal in code if it comes next.
+    fn string_literal(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::StringLiteral;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Consume "'".
+        let character = self.peek_char(None);
+        if character.is_some() && character.unwrap() == '\'' {
+            self.eat_char();
+
+            // Consume (singlequotestringchars: (!("'") .)+)?.
+            loop {
+                let character = self.peek_char(None);
+                if character.is_some() && character.unwrap() != '\'' {
+                    token.push(self.eat_char());
+                } else {
+                    break;
+                }
+            }
+
+            // Consume "'".
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '\'' {
+                self.eat_char();
+            } else {
+                token = String::new();
+            }
+        } else if character.is_some() && character.unwrap() == '"' {
+            self.eat_char();
+
+            // Consume (singlequotestringchars: (!('"') .)+)?.
+            loop {
+                let character = self.peek_char(None);
+                if character.is_some() && character.unwrap() != '"' {
+                    token.push(self.eat_char());
+                } else {
+                    break;
+                }
+            }
+
+            // Consume '"'.
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '"' {
+                self.eat_char();
+            } else {
+                token = String::new();
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes single-line comment  in code if it comes next.
+    fn single_line_comment(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::SingleLineComment;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        let mut is_comment = false;
+
+        // Consume '//'.
+        let word = self.eat_token("//".into());
+        if word.is_some() {
+            is_comment = true;
+
+            // Consume (singlequotestringchars: (!(newline | eoi) .)+)?..
+            loop {
+                let character = self.peek_char(None);
+                if character.is_some() && character.unwrap() != '\n' && character.unwrap() != '\r' {
+                    self.eat_char();
                 } else {
                     break;
                 }
@@ -590,7 +1027,78 @@ impl Lexer {
         }
 
         // Revert cursor value if no character consumed.
-        if token.is_empty() {
+        if !is_comment {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes multi-line comment  in code if it comes next.
+    /// FIXME: This has recursion and can crash with highly nested comments.
+    fn multi_line_comment(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::MultiLineComment;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        let mut is_comment = false;
+
+        // Consume '/*'.
+        let word = self.eat_token("/*".into());
+        if word.is_some() {
+            // Consume (multilinecommentchars: (!('/*' | '*/') .)+)?.
+            loop {
+                let character = self.peek_char(None);
+                let close_tag = self.peek_token("*/".into());
+                if character.is_some() && character.unwrap() != '\n' && character.unwrap() != '\r' && !close_tag {
+                    // Check for nested multiline comment
+                    let open_tag = self.peek_token("/*".into());
+                    if open_tag {
+                        self.multi_line_comment();
+                    } else {
+                        self.eat_char();
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            // Consume '*/'.
+            let word = self.eat_token("*/".into());
+            if word.is_some() {
+                is_comment = true;
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if !is_comment {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes a line continuation  in code if it comes next.
+    fn line_continuation(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::LineContinuation;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        let mut is_line_continued = false;
+
+        // Consume '...'.
+        let symbol = self.eat_token("...".into());
+        if symbol.is_some() {
+            // Consume \r?\n.
+            if self.newline().is_ok() {
+                is_line_continued = true;
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if !is_line_continued {
             self.cursor = cursor;
             return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
         }
@@ -608,20 +1116,60 @@ impl Lexer {
         let token = self.newline();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume no_name.
-        let token = self.no_name();
-        return_on_ok_or_terminable_error!(token);
-
         // Consume identifier.
         let token = self.identifier();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume identifier.
+        // Consume no_name.
+        let token = self.no_name();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume line_continuation.
+        let token = self.line_continuation();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume regex_literal.
+        let token = self.regex_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume char_literal.
+        let token = self.char_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume string_literal.
+        let token = self.string_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume single_line_comment.
+        let token = self.single_line_comment();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume multi_line_comment.
+        let token = self.multi_line_comment();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume operator.
         let token = self.operator();
         return_on_ok_or_terminable_error!(token);
 
         // Consume punctuator.
         let token = self.punctuator();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume float_binary_literal.
+        let token = self.float_binary_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume float_octal_literal.
+        let token = self.float_octal_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume float_hexadecimal_literal.
+        let token = self.float_hexadecimal_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume float_decimal_literal.
+        let token = self.float_decimal_literal();
         return_on_ok_or_terminable_error!(token);
 
         // Consume integer_binary_literal.
@@ -639,18 +1187,6 @@ impl Lexer {
         // Consume integer_decimal_literal.
         let token = self.integer_decimal_literal();
         return_on_ok_or_terminable_error!(token);
-
-        // // Consume identifier.
-        // let token = self.identifier();
-        // return_on_ok_or_terminable_error!(token);
-
-        // // Consume identifier.
-        // let token = self.identifier();
-        // return_on_ok_or_terminable_error!(token);
-
-        // // Consume identifier.
-        // let token = self.identifier();
-        // return_on_ok_or_terminable_error!(token);
 
         // Unsupported character.
         Err(LexerError::new(
@@ -679,7 +1215,7 @@ impl Lexer {
             let token = token.unwrap();
 
             // Push tokens that are not spaces, ...
-            if token.kind != TokenKind::Spaces {
+            if token.kind != TokenKind::Spaces && token.kind != TokenKind::SingleLineComment && token.kind != TokenKind::MultiLineComment && token.kind != TokenKind::LineContinuation {
                 tokens.push(token);
             }
         }
