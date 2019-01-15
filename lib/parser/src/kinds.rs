@@ -1,0 +1,6 @@
+enum ErrorKind {
+}
+
+
+enum Rule {
+}
