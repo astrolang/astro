@@ -691,7 +691,7 @@
     }
 
     # Default parameter values.
-    fun login(username: 'demo', password: 'demo') {
+    fun login(username = 'demo', password = 'demo') {
         access Account(username, password)
     }
 
@@ -711,7 +711,7 @@
         print((message + recipient).upper())
     }
 
-    send('Hello', to:'Cantell')
+    send('Hello', to = 'Cantell')
 
     # Compulsory named parameters can also be apllied on varargs, which would then be a named tuple.
     fun total(start, ...rest.) {
@@ -740,11 +740,11 @@
     show('Ademola')
 
     # A function's arguments can be accessed as a named tuple via _args.
-    fun printperson(name, age) {
+    fun print_person(name, age) {
         print(_args)
     }
 
-    printperson('John', 25) # (name: 'John', age: 25)
+    print_person('John', 25) # (name: 'John', age: 25)
 
     # Astro supports Unified Function Call Syntax (UFCS), so a function can be called with using the dot notation.
     print(500)
@@ -916,17 +916,19 @@
 
     # Types can have generic type parameters too
     type Buffer[T] {
-        buffer_pointer: *var Int,
-        capacity: Int,
-        length = delegated!()
+        data: *var T,
+        length: UInt,
     }
 
     # Functions can have generic type parameters and the parameters can have default values.
-    fun init{T: Int}(length: T) -> Buffer {
+    fun init[T: Int](length: T) -> Buffer {
         Buffer {
-            buffer: malloc[T](length)
+            data: malloc[T](length),
+            length,
         }
     }
+
+    let buffer: Buffer[Int] = Buffer(25);
 
 - ENUMS
     enum PaymentMethod {
