@@ -8,5 +8,5 @@ pub mod lexer;
 pub use self::{
     errors::LexerError,
     kinds::{ErrorKind, TokenKind},
-    lexer::Lexer,
+    lexer::{Lexer, Token},
 };

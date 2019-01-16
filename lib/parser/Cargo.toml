@@ -3,5 +3,8 @@ name = "astro-parser"
 version = "0.1.0"
 authors = ["Steve Akinyemi <appcypher@outlook.com>"]
 license = "Apache-2.0 WITH LLVM-exception"
-edition = "2019"
+edition = "2018"
 
+[dependencies]
+astro-lexer = { path = "../../lib/lexer", version = "0.1.0" }
+astro-codegen = { path = "../../lib/codegen", version = "0.1.0" }

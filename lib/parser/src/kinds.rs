@@ -1,6 +1,6 @@
-enum ErrorKind {
+pub enum ErrorKind {
 }
 
 
-enum Rule {
+pub enum Rule {
 }

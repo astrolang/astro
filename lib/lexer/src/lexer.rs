@@ -8,9 +8,9 @@ use crate::{ErrorKind, LexerError, TokenKind};
 #[derive(Debug, Clone, PartialEq)]
 /// Token object.
 pub struct Token {
-    kind: TokenKind,
-    token: Option<String>,
-    cursor: usize,
+    pub kind: TokenKind,
+    pub token: Option<String>,
+    pub cursor: usize,
 }
 
 impl Token {
