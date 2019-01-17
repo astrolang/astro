@@ -276,9 +276,9 @@
     stuffs[1] # 500
 
     # Slicing a list.
-    contestants[2:6] # 2nd to the 6th index.
+    contestants[2:7] # 2nd to the 6th index.
     contestants[2:] # 2nd to the last index.
-    contestants[:6] # first to the 6th index.
+    contestants[:7] # first to the 6th index.
     contestants[:] # first to the last index.
 
     # A slice can have a step value.
@@ -289,7 +289,7 @@
     var reversed = contestants[end:]
 
     # Using a constructor to create a List.
-    let number = List(4, 4, '')
+    let number = List[String]('')
 
     fun average(students) {
         sum(getfield.(students, :gpa)) / students.length
@@ -632,15 +632,18 @@
     # Match expression is like a chain of if-elif-else expressions.
     # If a match pattern fails, it goes to the next pattern.
     match object {
-        Some { x, y } => 0 # Matches if object is of `Some` type.
-        Some { x: 2, y: 3 } => 0 # Matches if object is of `Some` type.
-        [1, 2, ...s] => 0 # Matches if object is a list or an array that has values `1`, and `2` at beginning.
-        (x, y) => x # Matches if object is a tuple of two elements.
-        75 | 90 => 3 # Matches if object has a value `75` or `67`
-        75..90 => 3 # Matches if object has a value between `75` and value `67`
-        75 => fallthrough # `fallthrough` keyword means the control flow should unconditionaly move to the next match condition.
-        n => 6 # Matches. Binds `n` to the object.
-        _ => 7 # Matches.
+        Some { x, y } => 0, # Matches if object is of `Some` type.
+        Some { x: 2, y: 3 } => 0, # Matches if object is of `Some` type.
+        [1, 2, ...s] => 0, # Matches if object is a list or an array that has values `1`, and `2` at beginning.
+        (x, y) => x, # Matches if object is a tuple of two elements.
+        75 | 90 => 3, # Matches if object has a value `75` or `67`
+        75..90 => 3, # Matches if object has a value between `75` and value `67`
+        75 => {
+            print("Hello")
+            fallthrough # `fallthrough` keyword means the control flow should unconditionaly move to the next match condition.
+        },
+        n => 6, # Matches. Binds `n` to the object.
+        _ => 7, # Matches.
     }
 
 - ASSIGNMENT DESTRUCTURING
@@ -749,34 +752,6 @@
     # Astro supports Unified Function Call Syntax (UFCS), so a function can be called with using the dot notation.
     print(500)
     500.print()
-
-- MUTATIVE FUNCTIONS
-    # Mutative functions are functions that mutate the arguments passed to them.
-    # Astro supports overloading of functions based on argument mutation.
-    fun reverse(iterable: T) {
-        let reversed = cast(List, {
-            buffer: malloc{T.T}(iterable.length),
-            length: delegate(length(self)),
-            capacity: 10
-        })
-
-        for i, e in enumerate iterable {
-            reversed[end + 1 - i] = e
-        }
-
-        reversed
-    }
-
-    fun reverse(var iterable) {
-        let mid = iterable.middleindex
-        for var i, e in iterable[:mid] {
-            let temp = iterable[end + 1 - i]
-            e = temp
-        };
-    }
-
-    let reversed = reverse(list) # Calls the first `reverse`
-    let reversed = reverse!(list) # Calls the second `reverse`
 
 - LAMBDAS
     # Functions are first-class objects and can be passed around just like regular objects.
@@ -916,7 +891,7 @@
 
     # Types can have generic type parameters too
     type Buffer[T] {
-        data: *var T,
+        var data: *T,
         length: UInt,
     }
 
@@ -1006,7 +981,7 @@
     foo(4, 5) # specific
 
     # The compiler can be made to call a less specific version of a function using the `as` keyword.
-    foo(4 as Int32, 5 as Real) # generic
+    foo(4, 5) as (Int32, Real) -> () # generic
 
 - METHOD AMBIGUITIES
     # There are some ambiguities that can arise in multiple inheritance and multiple dispatch.
@@ -1207,23 +1182,30 @@
 - POINTERS
     # Creating a pointer to a primitive object address.
     let num: Int = 55
-    let pointer: *var Int = ptr(num)
+    var pointer: *Int = ptr(num)
 
     # Changing value of pointed address.
     *pointer = 57
 
     # Allocating memory on the heap.
-    let memory: *var Byte = malloc[Byte](5) # Allocates 5 bytes on the heap.
+    var memory: *Byte = malloc[Byte](5) # Allocates 5 bytes on the heap.
 
     # Freeing memory.
     free(memory) # Compile-time error will be thrown if there is a possible dangling pointer.
 
     # Pointer arithmetic is only allowed on pointers that point to a block of memory and such operations are always bounds-checked.
-    let memory: *var Byte = malloc[Int](20)
+    var memory: *Byte = malloc[Int](20)
     let pointer: = ptr(memory[2])
 
     pointer.offset(5)
     pointer.offset(500) # Error!
+
+- COERCION
+    # Extending and coercing a primitive type to another can be done with `as`
+    let int_number = 45
+    let uint_number = int_number as UInt
+    let pointer = unsafe { int_number as *Int }
+
 
 - RESERVED KEYWORDS
     import, export, let, var, const, fun, type, async,
