@@ -2,13 +2,14 @@
 use astro_lexer::Token;
 use astro_codegen::AST;
 
+use crate::errors::ParserError;
+
 use crate::{
     combinator::Combinator,
-    errors::ParserError,
 };
 
 pub struct Parser {
-    combinator: Combinator,
+    combinator: Combinator<AST, ParserError>,
 }
 
 impl Parser {

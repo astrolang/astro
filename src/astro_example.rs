@@ -4,7 +4,7 @@ use astro_parser::{Parser};
 // enum, not_func {, $not_valid_interp, $not_symbol, (<:, ::, >: as operators),
 // # and #--# not comment, priv, : block indentation,
 // // and /**/ as comment, func :symbol,
-// correct snippets
+// [correct snippets], no_mutative_call!(), ident(. ident?)?: type
 fn main() {
     println!("Welcome to Astro!");
 

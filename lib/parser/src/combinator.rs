@@ -9,17 +9,15 @@ use crate::{
 
 #[derive(Debug, Clone)]
 ///
-struct CacheData {
-    cursor: usize,
-    data: Result<AST, ParserError>,
+struct CacheData<T, Error> {
+    data: Result<T, Error>,
     skip: usize,
 }
 
 ///
-impl CacheData {
-    fn new(cursor: usize, data: Result<AST, ParserError>, skip: usize) -> Self {
+impl<T, Error> CacheData<T, Error> {
+    fn new(data: Result<T, Error>, skip: usize) -> Self {
         Self {
-            cursor,
             data,
             skip,
         }
@@ -28,14 +26,14 @@ impl CacheData {
 
 #[derive(Debug, Clone)]
 ///
-pub struct Combinator {
+pub struct Combinator<T, Error> {
     tokens: Vec<Token>,
     cursor: usize,
-    cache: HashMap<usize, Result<CacheData, ParserError>>,
+    cache: HashMap<usize, HashMap<Rule, CacheData<T, Error>>>,
 }
 
 ///
-impl Combinator {
+impl<T, Error> Combinator<T, Error> {
     /// Creates a new combinator object from the tokens passed in.
     pub fn new(tokens: Vec<Token>) -> Self {
         Self {
@@ -83,8 +81,41 @@ impl Combinator {
     }
 
     /// Stores result of parse in cache if it does not already exist.
-    fn cache_rule(&mut self, kind: Rule, ast: AST) {
-        unimplemented!()
+    fn cache_rule(&mut self, cursor: usize, rule: Rule, result: Result<T, Error>) {
+        // Check if the cursor already exists in map.
+        match self.cache.get_mut(&cursor) {
+            Some(rules) => { // Cursor position exists in map.
+                match rules.get(&rule) { // Check if rule already exists for cursor.
+                    Some(_) => {}, // Do nothing if the rule contains some data.
+                    None => { // Otherwise
+                        // Create cache data.
+                        let cache_data = CacheData::new(
+                            result,
+                            self.cursor - cursor,
+                        );
+
+                        // Associate provided result with rule.
+                        rules.insert(rule, cache_data);
+                    }
+                }
+            },
+            None => { // Cursor position does not exist in map.
+                // Create new rules for cursor.
+                let mut rules = HashMap::new();
+
+                // Create cache data
+                let cache_data = CacheData::new(
+                    result,
+                    self.cursor - cursor,
+                );
+
+                // Associate provided result with rule.
+                rules.insert(rule, cache_data);
+
+                // Add rules for cursor.
+                self.cache.insert(cursor, rules);
+            }
+        }
     }
 }
 
