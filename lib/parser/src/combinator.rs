@@ -124,8 +124,7 @@ impl<T> Combinator<T> {
     pub fn parse<'a>(args: Vec<CombinatorArg<'a, T>>) -> impl Fn (&'a mut Combinator<T>) -> Result<Output<T>, ParserError>
         where
             T: Debug,
-            Output<T>: Debug,
-            Result<Output<T>, ParserError>: Clone,
+            CacheData<T>: Clone,
     {
         return move |combinator| {
             // Get cursor.
@@ -142,18 +141,13 @@ impl<T> Combinator<T> {
                         // Get function address // TODO: Maybe if I can store arg as is
                         // Sprinkling in ome ungodly closure casting. Don't try this at home kids!
                         let func_addr = unsafe { std::mem::transmute::<&for<'c> fn(&'c mut Combinator<T>) -> Result<Output<T>, ParserError>, *const usize>(func) };
-                        // let func_addr = func as *const usize;
 
                         // Check if there are rules for current cursor position
                         // and that resulting rules map contain the function address.
                         let rules = combinator.cache.get(&cursor);
                         if rules.is_some() && rules.unwrap().get(&func_addr).is_some() {
-                            let CacheData { data, skip } = rules.unwrap().get(&func_addr).unwrap();
-
-                            println!("data = {:?}, skip = {:?}", data, skip);
-                            // let data: &mut Result<Output<T>, ParserError> = data.clone();
-                            let data = (*data).clone();
-                            let skip = *skip;
+                            // Get previously stored result.
+                            let CacheData { data, skip } = (*rules.unwrap().get(&func_addr).unwrap()).clone();
 
                             // Check if data in cached data is an error.
                             if data.is_err() {
