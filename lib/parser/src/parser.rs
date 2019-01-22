@@ -9,7 +9,7 @@ use crate::{
 };
 
 pub struct Parser {
-    combinator: Combinator<AST, ParserError>,
+    combinator: Combinator<AST>,
 }
 
 impl Parser {
@@ -20,8 +20,20 @@ impl Parser {
         }
     }
 
-    ///
+    /// Takes and parses valid tokens from Astro code.
     pub fn parse(&mut self) -> Result<AST, ParserError> {
+        let combinator = &mut self.combinator;
+
+        // Combinator::parse([...])(combinator);
+
+        // parse!(
+        //     str!("String"),
+        //     or!(
+        //         func!(string_literal),
+        //         str!("hello")
+        //     )
+        // );
+
         unimplemented!()
     }
 }

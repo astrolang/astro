@@ -1,6 +1,5 @@
+#[derive(Debug, Clone)]
 pub enum ErrorKind {
-}
-
-#[derive(Debug, Clone, PartialEq, Hash, Eq)]
-pub enum Rule {
+    IncompleteParse,
+    UnexpectedToken
 }

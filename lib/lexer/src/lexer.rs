@@ -55,6 +55,9 @@ pub struct Lexer {
     keywords: Vec<String>,
 }
 
+/// TODO:
+/// - symbols => `:identifier` and `:(`
+/// - coefficient expression => `5f`, `0x34num`, `)f`
 impl Lexer {
     /// Creates a new lexer object from the code passed in.
     pub fn new(code: String) -> Self {

@@ -66,7 +66,7 @@
         Ambient
     }
 
-    type XMLParser (Parser)
+    type XMLParser: Parser
 
     import my_module {
         foo,
@@ -173,6 +173,17 @@
 
     # Intersection types.
     var pegasus: Horse & Wing
+
+    # If any parameter type is not specified, return type may be omitted.
+    fun add(a, b) {
+        a + b
+    }
+
+    # If all parameter types are specified, return type must be specified as well
+    # unless the function returns nothing.
+    fun add(a: Int, b: Int) -> Int {
+        a + b
+    }
 
 - SOME BUILT-IN TYPES
     var index = UInt(2_000) # Unsigned integer type.
@@ -838,6 +849,56 @@
 
     let ride = Car { year: 1990 }
 
+    # Specifying parent types
+    type Person: Human {
+        name,
+        age
+    }
+
+    # Tuple types
+    type Person(String, _): Human
+
+    match person {
+        Person(_, 67) => person,
+        Person("Damien", _) => person,
+    }
+
+    enum Identification {
+        NationalID(_),
+        Name(String),
+    }
+
+- UNION TYPES
+    fun get_person() -> Person | Error {
+        if p.name {
+            return person
+        } else {
+            return Error()
+        }
+    }
+
+    let obj = get_person()!
+    let obj = get_person()!.name
+    let obj = get_person().expect("...")
+
+    # Less specific
+    fun get_name(p: Person | Error) -> String {
+        if p :: Person { return p.name }
+        panic(msg)
+    }
+
+    # Specific
+    fun get_name(p: Person) -> String { p.name }
+
+    let person = Person("James", 24)
+    let perhaps_person: Person | Error = Error()
+    let error = Error()
+
+    get_name(person) # (p: Person) -> String # (p: Person | Error) -> String
+    get_name(perhaps_person) # (p: Person | Error) -> String
+    get_name(error) # Panic!
+    get_name(perhaps_person as Person) # (p: Person) -> String # (p: Person | Error) -> String
+
 - GENERICS
     # Uppercase single letter identifiers in type annotation are taken as type variable declaration.
     # Declaring a generic type T.
@@ -890,7 +951,7 @@
     map :: (F[A], (A -> B)) -> F[B]
 
     # Types can have generic type parameters too
-    type Buffer[T] {
+    type Buffer[T]: Data {
         var data: *T,
         length: UInt,
     }
@@ -952,15 +1013,15 @@
 - TRAITS
     # Types can inherit from one or more parent types in Astro.
     type Person
-    type Parent1 (Person) # Parent1 type inherits fields from Person.
-    type Parent2 (Person)  # Parent2 type inherits fields from Person.
+    type Parent1: Person # Parent1 type inherits fields from Person.
+    type Parent2: Person  # Parent2 type inherits fields from Person.
 
     # Multiple inheritance is allowed as well.
-    type Child (Parent1 + Parent2)  # inherits Parent1, Parent2.
+    type Child: Parent1, Parent2  # inherits Parent1, Parent2.
 
     # Astro has ways of resolving diamond problems, dicussed in "Method Ambiguities" and "Constructor Train"
     # below, but it is advised to use composition where inheritance does not make sense.
-    type Car (Engine) # This makes no sense, a `Car` is not an `Engine`
+    type Car(Engine) # This makes no sense, a `Car` is not an `Engine`
 
     type Car { # This makes sense, a `Car` can have an `Engine`
         let engine
@@ -994,7 +1055,7 @@
         print('dad!')
     }
 
-    type Child (Parent1 + Parent2) # Error!
+    type Child: Parent1, Parent2 # Error!
 
     # To resolve this issue, the `sound` function need to be overloaded for `Child` type.
     fun speak(child: Child) {
@@ -1215,6 +1276,30 @@
     where,
     is, not, in, as, mod, typeof,
 
+- MACROS : TODO
+    # Rust macros vs Julia macros
+    macro func {
+        (param:ident) => {
+            :param
+        },
+        [param:ident :(, params:ident)* ,?] => {
+            Export.Function {
+                function: :func as _,
+                desc: GlobalDesc { ... }
+            }
+        },
+        (param:ident) fn:func => {
+            :(fn.proto) {
+                print :param;
+                :(fn.body)
+            }
+        }
+    }
+
+    @func(name)
+    @func(name, name)
+    @func(name) fun add(a, b) { a + b }
+
 - PREDEFINED TYPE HIERARCHY
     Type
     Any
@@ -1246,7 +1331,6 @@
 
 
 - REMOVED
-# Macros
 # Non-standard numeric literals
 # Special dictionary syntax
 # Arrays

@@ -1,7 +1,7 @@
 use crate::{ErrorKind, TokenKind};
 
 #[derive(Debug, Clone, PartialEq)]
-/// The error object a lexer function can return
+/// Error from lexing.
 pub struct LexerError {
     pub error: ErrorKind,
     pub kind: TokenKind,
