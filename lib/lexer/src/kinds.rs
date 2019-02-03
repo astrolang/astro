@@ -1,13 +1,13 @@
-#[derive(Debug, Clone, PartialEq)]
 /// The kinds of error a lexer can return
+#[derive(Debug, Clone, PartialEq)]
 pub enum ErrorKind {
     CantConsume,
     DoesNotMatchAnyRule,
     UnmatchedClosingCharacter,
 }
 
-#[derive(Debug, Clone, PartialEq)]
 /// The kinds of tokens we can ger from a lexer.
+#[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
     None,
     Spaces,

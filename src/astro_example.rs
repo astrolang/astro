@@ -1,5 +1,5 @@
 use astro_lexer::{Lexer, LexerError};
-use astro_parser::{Parser};
+use astro_parser::Parser;
 
 // enum, not_func {, $not_valid_interp, $not_symbol, (<:, ::, >: as operators),
 // # and #--# not comment, priv, : block indentation,
@@ -16,9 +16,7 @@ fn main() {
 
     let tokens = Lexer::new(valid_lexer_code).lex();
 
-    let valid_parser_code = String::from(
-        ""
-    );
+    let valid_parser_code = String::from("HELLO");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,

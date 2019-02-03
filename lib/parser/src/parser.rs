@@ -2,10 +2,13 @@
 use astro_lexer::Token;
 use astro_codegen::AST;
 
-use crate::errors::ParserError;
-
 use crate::{
-    combinator::Combinator,
+    errors::ParserError,
+    combinator::{
+        Combinator,
+        CombinatorArg,
+        Output,
+    }
 };
 
 pub struct Parser {
@@ -22,9 +25,31 @@ impl Parser {
 
     /// Takes and parses valid tokens from Astro code.
     pub fn parse(&mut self) -> Result<AST, ParserError> {
+        // The combinator to use.
         let combinator = &mut self.combinator;
 
-        // Combinator::parse([...])(combinator);
+        println!("Parser starts");
+
+        let hello_func = (
+            Combinator::alt as _,
+            vec![
+                CombinatorArg::Str("hello".into()),
+                CombinatorArg::Str("Hello".into()),
+                CombinatorArg::Str("HELLO".into()),
+            ]
+        );
+
+        let combinator_result = Combinator::parse(
+            vec![
+                CombinatorArg::Func(hello_func),
+            ],
+            combinator,
+        );
+
+        println!(
+            "combinator parser function result = {:?}",
+            combinator_result
+        );
 
         // parse!(
         //     str!("String"),
@@ -36,4 +61,9 @@ impl Parser {
 
         unimplemented!()
     }
+
+    //
+    // pub fn nextline(&mut self) -> Result<AST, ParserError> {
+
+    // }
 }

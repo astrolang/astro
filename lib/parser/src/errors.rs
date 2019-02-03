@@ -3,8 +3,8 @@ use crate::{
 };
 
 
-#[derive(Debug, Clone)]
 /// Error from lexing.
+#[derive(Debug, Clone)]
 pub struct ParserError {
     pub error: ErrorKind,
     pub cursor: usize,

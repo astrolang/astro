@@ -5,8 +5,8 @@ use crate::{ErrorKind, LexerError, TokenKind};
 
 /************************* TOKEN *************************/
 
-#[derive(Debug, Clone, PartialEq)]
 /// Token object.
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     pub kind: TokenKind,
     pub token: Option<String>,

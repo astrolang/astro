@@ -563,7 +563,7 @@
     let gen = (i | i in random(0, 200))
 
     # Extending a comprehension with `where`.
-    let list = list(x | x in 1..21 where x mod 2 != 0)
+    let list = list((x | x in 1..21 where x mod 2 != 0))
 
     # List comprehension
     let list = [x | x in 1..21 where x mod 2 != 0]
@@ -643,7 +643,8 @@
     # Match expression is like a chain of if-elif-else expressions.
     # If a match pattern fails, it goes to the next pattern.
     match object {
-        Some { x, y } => 0, # Matches if object is of `Some` type.
+        Some(x, y) => 0, # Matches if object is of `Some` type.
+        x :: Some => 0, # Matches if object is of `Some` type.
         Some { x: 2, y: 3 } => 0, # Matches if object is of `Some` type.
         [1, 2, ...s] => 0, # Matches if object is a list or an array that has values `1`, and `2` at beginning.
         (x, y) => x, # Matches if object is a tuple of two elements.
@@ -970,7 +971,7 @@
     enum PaymentMethod {
         Cash,
         Cheque { check_no: Int },
-        Card { card_type, card_no },
+        Card(String, Int),
     }
 
     # This can be used with pattern matching in the following ways.
@@ -978,7 +979,7 @@
         match method {
             Cash => print "Paid in cash",
             Cheque { check_no } => print "Paid by cheque: ${check_no}",
-            Card { card_type, card_no } => print "Paid with card: ${card_type} ${card_no}",
+            Card(card_type, card_no) => print "Paid with card: ${card_type} ${card_no}",
         }
     }
 
@@ -1108,12 +1109,6 @@
     }
 
     open('file').expect((error) => error.message)
-
-    fun expect(object: T | Error, callback: (Error) -> ()) {
-        if object :: Error {
-            callback()
-        }
-    }
 
 - REFERENCE EQUALITY
     # `is` operator can be used check if two operands refer to the same object representation.
@@ -1279,19 +1274,19 @@
 - MACROS : TODO
     # Rust macros vs Julia macros
     macro func {
-        (param:ident) => {
-            :param
+        ($param:ident) => {
+            $param
         },
-        [param:ident :(, params:ident)* ,?] => {
+        [$param:ident (, $params:ident)* ,?] => {
             Export.Function {
-                function: :func as _,
-                desc: GlobalDesc { ... }
+                function: $func as _,
+                desc: GlobalDesc { $(params ,)* }
             }
         },
-        (param:ident) fn:func => {
-            :(fn.proto) {
-                print :param;
-                :(fn.body)
+        ($param:ident) $fn:func => {
+            $(fn.proto) {
+                print $param;
+                $(fn.body)
             }
         }
     }

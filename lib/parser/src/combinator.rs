@@ -10,9 +10,9 @@ use crate::{
     errors::ParserError,
 };
 
-#[derive(Debug, Clone)]
 /// TODO: Use hash-brown crate for hash maps.
 /// This keeps the parser data for reuse.
+#[derive(Debug, Clone)]
 struct CacheData<T> {
     data: Result<Output<T>, ParserError>,
     skip: usize,
@@ -27,8 +27,8 @@ impl<T> CacheData<T> {
     }
 }
 
-#[derive(Debug, Clone)]
 /// A combinator for creating packrat parsers.
+#[derive(Debug, Clone)]
 pub struct Combinator<T> {
     tokens: Vec<Token>,
     cursor: usize,
@@ -49,10 +49,11 @@ impl<T> Combinator<T> {
     /// Checks if the cursor is still in bounds, i.e. if cursor
     /// hasn't reached the end of the tokens.
     fn is_inbounds(&self) -> bool {
-        if self.cursor > self.tokens.len() {
-            return false;
+        if self.cursor < self.tokens.len() {
+            return true;
         }
-        true
+
+        false
     }
 
     /// Updates parser positional information.
@@ -65,22 +66,23 @@ impl<T> Combinator<T> {
     }
 
     /// Compares the next token with argument string.
-    fn eat_token(&mut self, token: &str) -> bool {
+    fn eat_token(&mut self, token: &str) -> Result<(), ParserError> {
         let cursor = self.cursor;
-        let mut result = false;
 
         if self.is_inbounds() {
             if let Some(ref word) = self.tokens[cursor].token {
                 if word == token {
-                    // Save true in result.
-                    result = true;
                     // Update parser position.
                     self.update_state(None);
+
+                    return Ok(());
                 }
+
+                return Err(ParserError::new(ErrorKind::TokensDontMatch, self.cursor));
             }
         }
 
-        result
+        Err(ParserError::new(ErrorKind::InputExhausted, self.cursor))
     }
 
     /// Stores result of a parse function call in cache if it does not already exist.
@@ -120,117 +122,196 @@ impl<T> Combinator<T> {
         }
     }
 
-    /// Returns a closure that parses string and calls parxer function arguments
-    pub fn parse<'a>(args: Vec<CombinatorArg<'a, T>>) -> impl Fn (&'a mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where
-            T: Debug,
-            CacheData<T>: Clone,
+    /// Parses string and calls parser functions.
+    pub fn parse(args: Vec<CombinatorArg<T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+        where T: Debug + Clone,
     {
-        return move |combinator| {
-            // Get cursor.
-            let cursor = combinator.cursor;
-            let mut asts: Vec<Output<T>> = Vec::new();
-            let mut parsed_successfully = true;
-            let mut problem: Option<ParserError> = None;
+        // Get cursor.
+        let cursor = combinator.cursor;
+        let mut asts: Vec<Output<T>> = Vec::new();
+        let mut problem: Option<ParserError> = None;
 
-            // Loop through arguments.
-            for arg in &args {
-                // Check type of argument.
-                match arg {
-                    CombinatorArg::Func(func) => { // It is a function argument
-                        // Get function address // TODO: Maybe if I can store arg as is
-                        // Sprinkling in ome ungodly closure casting. Don't try this at home kids!
-                        let func_addr = unsafe { std::mem::transmute::<&for<'c> fn(&'c mut Combinator<T>) -> Result<Output<T>, ParserError>, *const usize>(func) };
+        // Loop through arguments.
+        for arg in args {
+            // Check type of argument.
+            match arg {
+                CombinatorArg::Func((func, arguments)) => { // It is a function argument
+                    // Get function address
+                    let func_addr = unsafe {
+                        std::mem::transmute::<
+                            &fn (Vec<CombinatorArg<T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>,
+                            *const usize
+                        >(&func)
+                    };
 
-                        // Check if there are rules for current cursor position
-                        // and that resulting rules map contain the function address.
-                        let rules = combinator.cache.get(&cursor);
-                        if rules.is_some() && rules.unwrap().get(&func_addr).is_some() {
-                            // Get previously stored result.
-                            let CacheData { data, skip } = (*rules.unwrap().get(&func_addr).unwrap()).clone();
+                    // Check if there are rules for current cursor position
+                    // and that resulting rules map contain the function address.
+                    let rules = combinator.cache.get(&cursor);
+                    if rules.is_some() && rules.unwrap().get(&func_addr).is_some() {
+                        // Get previously stored result.
+                        let CacheData { data, skip } = (*rules.unwrap().get(&func_addr).unwrap()).clone();
 
-                            // Check if data in cached data is an error.
-                            if data.is_err() {
-                                parsed_successfully = false;
-
-                                // Retrieve problem.
-                                problem = Some(data.unwrap_err());
-                                break;
-                            } else {
-                                // Add data to list.
-                                asts.push(data.unwrap());
-
-                                // Needed to advance the combinator state.
-                                combinator.update_state(Some(skip));
-                            }
-                        } else { // If rule is not already cached
-                            // Call the function with combinator as argument.
-                            let ast = func(combinator);
-
-                            // Check if result of parse function is an error.
-                            if ast.is_err() {
-                                parsed_successfully = false;
-
-                                // Retrieve problem.
-                                problem = Some(ast.unwrap_err());
-                                break;
-                            } else {
-                                // Add data to list.
-                                asts.push(ast.unwrap());
-                            }
-                        }
-                    },
-                    CombinatorArg::Str(token) => { // It is a string argument
-                        // Compare and consume token.
-                        let ast = combinator.eat_token(token);
-
-                        // Check if result of parse function is an error.
-                        if ast {
-                            parsed_successfully = false;
-
+                        // Check if data in cached data is an error.
+                        if data.is_err() {
                             // Retrieve problem.
-                            problem = Some(ParserError::new(ErrorKind::UnexpectedToken, combinator.cursor));
-                            break;
+                            problem = Some(data.unwrap_err());
+
+                            // Break out of loop.
+                            break
                         } else {
                             // Add data to list.
-                            asts.push(Output::Str((*token as &str).into()));
+                            asts.push(data.unwrap());
+
+                            // Needed to advance the combinator state.
+                            combinator.update_state(Some(skip));
                         }
+                    } else { // If rule is not already cached
+                        // Call the function with combinator as argument.
+                        let ast = func(arguments, combinator);
+
+                        // Check if result of parse function is an error.
+                        if ast.is_err() {
+                            // Retrieve problem.
+                            problem = Some(ast.unwrap_err());
+
+                            // Break out of loop.
+                            break
+                        } else {
+                            // Add data to list.
+                            asts.push(ast.unwrap());
+                        }
+                    }
+                },
+                CombinatorArg::Str(token) => { // It is a string argument
+                    // Compare and consume token.
+                    let result = combinator.eat_token(token.as_str());
+
+                    // Check if result of parse function is an error.
+                    if result.is_err() {
+                        // Retrieve problem.
+                        problem = Some(result.unwrap_err());
+
+                        // Break out of loop.
+                        break
+                    } else {
+                        // Add data to list.
+                        asts.push(Output::Str(token.clone()));
                     }
                 }
             }
-
-            // If there was a problem while parsing.
-            if problem.is_some() {
-                // Revert state.
-                combinator.cursor = cursor;
-                return Err(problem.unwrap());
-            }
-
-            Ok(Output::Values(asts))
         }
+
+        // If there was a problem while parsing.
+        if problem.is_some() {
+            // Revert state.
+            combinator.cursor = cursor;
+            return Err(problem.unwrap());
+        }
+
+        Ok(Output::Values(asts))
     }
+
+    /// Returns a closure that parses alternatives
+    pub fn alt(args: Vec<CombinatorArg<T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+        where T: Debug + Clone,
+    {
+        // Get cursor.
+        let cursor = combinator.cursor;
+        let mut asts: Vec<Output<T>> = Vec::new();
+        let mut parsed_successfully = false;
+
+        // Loop through arguments.
+        for arg in args {
+            // Check type of argument.
+            match arg {
+                CombinatorArg::Func((func, arguments)) => { // It is a function argument
+                    // Get function address
+                    let func_addr = unsafe {
+                        std::mem::transmute::<
+                            &fn (Vec<CombinatorArg<T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>,
+                            *const usize
+                        >(&func)
+                    };
+
+                    // Check if there are rules for current cursor position
+                    // and that resulting rules map contain the function address.
+                    let rules = combinator.cache.get(&cursor);
+                    if rules.is_some() && rules.unwrap().get(&func_addr).is_some() {
+                        // Get previously stored result.
+                        let CacheData { data, skip } = (*rules.unwrap().get(&func_addr).unwrap()).clone();
+
+                        // Check if data in cached data is ok.
+                        if data.is_ok() {
+                            // Parsing successful.
+                            parsed_successfully = true;
+
+                            // Add data to list.
+                            asts.push(data.unwrap());
+
+                            // Needed to advance the combinator state.
+                            combinator.update_state(Some(skip));
+
+                            // Break out of loop.
+                            break
+                        }
+                    } else { // If rule is not already cached
+                        // Call the function with combinator as argument.
+                        let ast = func(arguments, combinator);
+
+                        // Check if result of parse function is ok.
+                        if ast.is_ok() {
+                            // Parsing successful.
+                            parsed_successfully = true;
+
+                            // Add data to list.
+                            asts.push(ast.unwrap());
+
+                            // Break out of loop.
+                            break
+                        }
+                    }
+                },
+                CombinatorArg::Str(token) => { // It is a string argument
+                    // Compare and consume token.
+                    let result = combinator.eat_token(token.as_str());
+
+                    // Check if result of parse function is an error.
+                    if result.is_ok() {
+                        // Parsing successful.
+                        parsed_successfully = true;
+
+                        // Add data to list.
+                        asts.push(Output::Str(token.clone()));
+
+                        // Break out of loop.
+                        break
+                    }
+                }
+            }
+        }
+
+        // If there was a problem while parsing.
+        if !parsed_successfully {
+            // Revert state.
+            combinator.cursor = cursor;
+            return Err(ParserError::new(ErrorKind::AlternativesDontMatch, combinator.cursor))
+        }
+
+        Ok(Output::Values(asts))
+    }
+
 }
 
 /// The types of arguments a combinator function can take
-pub enum CombinatorArg <'a, T> {
-    Func(fn (&mut Combinator<T>) -> Result<Output<T>, ParserError>),
-    Str(&'a str),
+pub enum CombinatorArg<T> {
+    Func((fn (Vec<CombinatorArg<T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>, Vec<CombinatorArg<T>>)),
+    Str(String),
 }
 
-#[derive(Debug, Clone)]
 /// TODO: Think abt this impl thoroughly
+#[derive(Debug, Clone)]
 pub enum Output<T> {
-    Values(Vec<Output<T>>), // Outputs returned by combinator function.
-    Str(String), //
-    AST(T), // Outputs returned by a custom parser.
+    Values(Vec<Output<T>>), // A list of outputs returned by combinator function.
+    Str(String), // A token returned by combinator function.
+    AST(T), // Outputs returned by a custom parser function
 }
-
-// macro_rules!  {
-//     () => {
-
-//     };
-// }
-
-
-// let name = func_name!(arg);
-

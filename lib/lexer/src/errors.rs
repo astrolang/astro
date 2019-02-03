@@ -1,7 +1,7 @@
 use crate::{ErrorKind, TokenKind};
 
-#[derive(Debug, Clone, PartialEq)]
 /// Error from lexing.
+#[derive(Debug, Clone, PartialEq)]
 pub struct LexerError {
     pub error: ErrorKind,
     pub kind: TokenKind,
