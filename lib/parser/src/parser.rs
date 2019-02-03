@@ -8,7 +8,8 @@ use crate::{
         Combinator,
         CombinatorArg,
         Output,
-    }
+    },
+    macros,
 };
 
 pub struct Parser {
@@ -28,42 +29,18 @@ impl Parser {
         // The combinator to use.
         let combinator = &mut self.combinator;
 
-        println!("Parser starts");
+        println!("===== parser starts =====");
 
-        let hello_func = (
-            Combinator::alt as _,
-            vec![
-                CombinatorArg::Str("hello".into()),
-                CombinatorArg::Str("Hello".into()),
-                CombinatorArg::Str("HELLO".into()),
-            ]
-        );
-
-        let combinator_result = Combinator::parse(
-            vec![
-                CombinatorArg::Func(hello_func),
-            ],
+        let combinator_result = parse!(
             combinator,
+            alt!("hello", "Hello", "HELLO")
         );
 
         println!(
-            "combinator parser function result = {:?}",
+            "======= parser result = {:?}",
             combinator_result
         );
 
-        // parse!(
-        //     str!("String"),
-        //     or!(
-        //         func!(string_literal),
-        //         str!("hello")
-        //     )
-        // );
-
         unimplemented!()
     }
-
-    //
-    // pub fn nextline(&mut self) -> Result<AST, ParserError> {
-
-    // }
 }
