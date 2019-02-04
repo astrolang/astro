@@ -1,4 +1,6 @@
+use astro_lexer::kinds::TokenKind;
+
 #[derive(Debug, Clone)]
 pub enum AST {
-    // Parse(Vec<AST>),
+    Terminal(TokenKind, String),
 }

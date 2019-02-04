@@ -7,7 +7,7 @@ macro_rules! s {
 }
 
 #[macro_export]
-macro_rules! func {
+macro_rules! f {
     ($func:ident, $arg0:expr $(, $args:expr)* ) => {
         CombinatorArg::Func(
             (
@@ -15,7 +15,15 @@ macro_rules! func {
                 &vec![$arg0 $(, $args)*],
             )
         )
-    }
+    };
+    ($func:ident) => {
+        CombinatorArg::Func(
+            (
+                Parser::$func as _,
+                &vec![],
+            )
+        )
+    };
 }
 
 #[macro_export]
@@ -26,7 +34,14 @@ macro_rules! parse {
             $combinator,
         )
     };
-
+    ($arg0:expr $(, $args:expr)* ) => {
+        CombinatorArg::Func(
+            (
+                Combinator::parse as _,
+                &vec![$arg0 $(, $args)*],
+            )
+        )
+    };
 }
 
 #[macro_export]

@@ -97,11 +97,9 @@ impl Lexer {
                 String::from("if"),
                 String::from("elif"),
                 String::from("else"),
-                String::from("except"),
-                String::from("ensure"),
                 String::from("defer"),
                 String::from("for"),
-                String::from("try"),
+                String::from("match"),
                 String::from("while"),
                 String::from("loop"),
                 String::from("end"),
@@ -1083,32 +1081,6 @@ impl Lexer {
         Ok(Token::new(kind, Some(token), cursor))
     }
 
-    /// Consumes a line continuation  in code if it comes next.
-    fn line_continuation(&mut self) -> Result<Token, LexerError> {
-        let kind = TokenKind::LineContinuation;
-        let mut token = String::from("");
-        let cursor = self.cursor;
-
-        let mut is_line_continued = false;
-
-        // Consume '...'.
-        let symbol = self.eat_token("...".into());
-        if symbol.is_some() {
-            // Consume \r?\n.
-            if self.newline().is_ok() {
-                is_line_continued = true;
-            }
-        }
-
-        // Revert cursor value if no character consumed.
-        if !is_line_continued {
-            self.cursor = cursor;
-            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
-        }
-
-        Ok(Token::new(kind, Some(token), cursor))
-    }
-
     /// Lexes the next set of characters based on defined rules.
     fn lex_next(&mut self) -> Result<Token, LexerError> {
         // Consume spaces.
@@ -1119,16 +1091,12 @@ impl Lexer {
         let token = self.newline();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume identifier.
-        let token = self.identifier();
-        return_on_ok_or_terminable_error!(token);
-
         // Consume no_name.
         let token = self.no_name();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume line_continuation.
-        let token = self.line_continuation();
+        // Consume identifier.
+        let token = self.identifier();
         return_on_ok_or_terminable_error!(token);
 
         // Consume regex_literal.

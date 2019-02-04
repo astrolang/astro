@@ -10,6 +10,8 @@ use crate::{
     errors::ParserError,
 };
 
+/************************* CACHE DATA *************************/
+
 /// TODO: Use hash-brown crate for hash maps.
 /// This keeps the parser data for reuse.
 #[derive(Debug, Clone)]
@@ -26,6 +28,27 @@ impl<T> CacheData<T> {
         }
     }
 }
+
+/************************* COMBINATOR ARGUMENT *************************/
+
+/// The types of arguments a combinator function can take
+pub enum CombinatorArg<'a, T> {
+    Func((fn (&Vec<CombinatorArg<'a, T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>, &'a Vec<CombinatorArg<'a, T>>)),
+    Str(&'a str),
+}
+
+/************************* OUTPUT *************************/
+
+/// TODO: Think abt this impl thoroughly
+#[derive(Debug, Clone)]
+pub enum Output<T> {
+    Values(Vec<Output<T>>), // A list of outputs returned by combinator function.
+    Str(String), // A token returned by combinator function.
+    AST(T), // Outputs returned by a custom parser function
+    Empty,
+}
+
+/************************* COMBINATOR *************************/
 
 /// A combinator for creating packrat parsers.
 #[derive(Debug, Clone)]
@@ -57,7 +80,7 @@ impl<T> Combinator<T> {
     }
 
     /// Updates parser positional information.
-    fn update_state(&mut self, skip: Option<usize>) {
+    pub fn update_state(&mut self, skip: Option<usize>) {
         // Get offset value or set to one if not specified.
         let skip = skip.unwrap_or(1);
 
@@ -65,8 +88,26 @@ impl<T> Combinator<T> {
         self.cursor += skip;
     }
 
+    /// Gets the combinator cursor.
+    pub fn get_cursor(&mut self) -> usize {
+        self.cursor
+    }
+
+    /// Gets the next token if available.
+    pub fn eat_token(&mut self) -> Result<Token, ParserError> {
+        let cursor = self.cursor;
+
+        if self.is_inbounds() {
+            // Update parser position.
+            self.update_state(None);
+            return Ok(self.tokens[cursor].clone())
+        }
+
+        Err(ParserError::new(ErrorKind::InputExhausted, self.cursor))
+    }
+
     /// Compares the next token with argument string.
-    fn eat_token(&mut self, token: &str) -> Result<(), ParserError> {
+    pub fn check_token(&mut self, token: &str) -> Result<(), ParserError> {
         let cursor = self.cursor;
 
         if self.is_inbounds() {
@@ -121,7 +162,7 @@ impl<T> Combinator<T> {
         }
     }
 
-    /// Parses string and calls parser functions.
+    /// Parses its arguments.
     pub fn parse<'a>(args: &Vec<CombinatorArg<'a, T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
         where T: Debug + Clone,
     {
@@ -180,7 +221,7 @@ impl<T> Combinator<T> {
                 },
                 CombinatorArg::Str(token) => { // It is a string argument
                     // Compare and consume token.
-                    let result = combinator.eat_token(token);
+                    let result = combinator.check_token(token);
 
                     // Check if result of parse function is an error.
                     if result.is_err() {
@@ -266,7 +307,7 @@ impl<T> Combinator<T> {
                 },
                 CombinatorArg::Str(token) => { // It is a string argument
                     // Compare and consume token.
-                    let result = combinator.eat_token(token);
+                    let result = combinator.check_token(token);
 
                     // Check if result of parse function is an error.
                     if result.is_ok() {
@@ -293,7 +334,7 @@ impl<T> Combinator<T> {
         Ok(Output::Values(asts))
     }
 
-    /// Parses a its arguments at least once.
+    /// Parses its arguments at least once.
     pub fn more<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
         where T: Debug + Clone,
     {
@@ -327,7 +368,7 @@ impl<T> Combinator<T> {
         Ok(Output::Values(asts))
     }
 
-    /// Parses a its arguments at least once.
+    /// Parses its arguments at least once.
     /// Returns success if unable to parse.
     pub fn opt_more<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
         where T: Debug + Clone,
@@ -343,7 +384,7 @@ impl<T> Combinator<T> {
         Ok(asts)
     }
 
-    /// Parses a its arguments once.
+    /// Parses its arguments once.
     /// Returns success if unable to parse.
     pub fn opt<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
         where T: Debug + Clone,
@@ -359,7 +400,7 @@ impl<T> Combinator<T> {
         Ok(asts)
     }
 
-    /// Tries to parse a its arguments once.
+    /// Tries to parse its arguments once.
     /// Does not advance the combinator.
     pub fn and<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
         where T: Debug + Clone,
@@ -375,7 +416,7 @@ impl<T> Combinator<T> {
         result
     }
 
-    /// Tries to parse a its arguments once.
+    /// Tries to parse its arguments once.
     /// Expects parsing to fail.
     /// Does not advance the combinator.
     pub fn not<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
@@ -396,17 +437,7 @@ impl<T> Combinator<T> {
     }
 }
 
-/// The types of arguments a combinator function can take
-pub enum CombinatorArg<'a, T> {
-    Func((fn (&Vec<CombinatorArg<'a, T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>, &'a Vec<CombinatorArg<'a, T>>)),
-    Str(&'a str),
-}
+/// TODO
+mod tests {
 
-/// TODO: Think abt this impl thoroughly
-#[derive(Debug, Clone)]
-pub enum Output<T> {
-    Values(Vec<Output<T>>), // A list of outputs returned by combinator function.
-    Str(String), // A token returned by combinator function.
-    AST(T), // Outputs returned by a custom parser function
-    Empty,
 }
