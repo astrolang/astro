@@ -358,6 +358,42 @@ impl<T> Combinator<T> {
 
         Ok(asts)
     }
+
+    /// Tries to parse a its arguments once.
+    /// Does not advance the combinator.
+    pub fn and<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+        where T: Debug + Clone,
+    {
+        // Get cursor.
+        let cursor = combinator.cursor;
+
+        let result = Combinator::parse(args, combinator).map(|x| Output::Empty);
+
+        // Revert advancement.
+        combinator.cursor = cursor;
+
+        result
+    }
+
+    /// Tries to parse a its arguments once.
+    /// Expects parsing to fail.
+    /// Does not advance the combinator.
+    pub fn not<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+        where T: Debug + Clone,
+    {
+        // Get cursor.
+        let cursor = combinator.cursor;
+
+        let result = match Combinator::parse(args, combinator) {
+            Ok(_) => Err(ParserError::new(ErrorKind::ExpectedRuleToFail, combinator.cursor)),
+            Err(_) => Ok(Output::Empty),
+        };
+
+        // Revert advancement.
+        combinator.cursor = cursor;
+
+        result
+    }
 }
 
 /// The types of arguments a combinator function can take

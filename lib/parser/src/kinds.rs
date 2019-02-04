@@ -7,5 +7,5 @@ pub enum ErrorKind {
     AlternativesDontMatch,
     CantMatchAtLeastARule,
     OneOfRulesFailed,
-    RuleDoesNotFail,
+    ExpectedRuleToFail,
 }

@@ -101,23 +101,38 @@ macro_rules! opt {
     };
 }
 
-// #[macro_export]
-// macro_rules! or {
-//     ($arg0:expr (, $args:expr)* ) => {
-//         Combinator::or(vec![arg0 $(, $args)*])
-//     };
-// }
+#[macro_export]
+macro_rules! and {
+    ($combinator:ident, $arg0:expr $(, $args:expr)* ) => {
+        Combinator::and(
+            &vec![$arg0 $(, $args)*],
+            $combinator,
+        )
+    };
+    ($arg0:expr $(, $args:expr)* ) => {
+        CombinatorArg::Func(
+            (
+                Combinator::and as _,
+                &vec![$arg0 $(, $args)*],
+            )
+        )
+    };
+}
 
-// #[macro_export]
-// macro_rules! and {
-//     ($arg0:expr (, $args:expr)* ) => {
-//         Combinator::and(vec![arg0 $(, $args)*])
-//     };
-// }
-
-// #[macro_export]
-// macro_rules! not {
-//     ($arg0:expr (, $args:expr)* ) => {
-//         Combinator::not(vec![arg0 $(, $args)*])
-//     };
-// }
+#[macro_export]
+macro_rules! not {
+    ($combinator:ident, $arg0:expr $(, $args:expr)* ) => {
+        Combinator::not(
+            &vec![$arg0 $(, $args)*],
+            $combinator,
+        )
+    };
+    ($arg0:expr $(, $args:expr)* ) => {
+        CombinatorArg::Func(
+            (
+                Combinator::not as _,
+                &vec![$arg0 $(, $args)*],
+            )
+        )
+    };
+}
