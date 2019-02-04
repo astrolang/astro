@@ -33,7 +33,7 @@
     mutable = 50 # Subject value changed to 50.
 
     # Multiple subjects can be assigned the same value in a single expression.
-    let name: id: title = 'Janitor'
+    let |name, id, title| = 'Janitor'
     cost = price = total = 45
 
 - SHADOWING
@@ -145,7 +145,9 @@
 
     # Type definitions, function definitions, loops, etc. all return some value.
     # In the case of a for loop, the last expression on the final iteration is returned, if there is no break.
-    let cube = for i in 1..10: i³
+    let cube = for i in 1..10 {
+        i³
+    }
 
     # The last expression of a function is always returned.
     fun add(a, b) {
@@ -241,12 +243,10 @@
 - TUPLES
     # Tuple is an immutable datatype whose element types and length are determined statically.
     # Tuples cannot be appended to or removed from.
-    var name, age = 'Emeka Okorafor', 27 # Open tuple.
-    var game, year = ('Uncharted 4', 2016) # Closed tuple.
+    var (game, year) = ('Uncharted 4', 2016) # Closed tuple.
 
     # Tuple destructuring.
-    let person = 'Sam', 50
-    let name, age = person # name = 'Sam', age = 50
+    let person = ('Sam', 50)
     let (name, age) = person # name = 'Sam', age = 50
 
     # Tuple unpacking.
@@ -254,16 +254,10 @@
     add(...arguments)
 
     # Empty tuple.
-    let map = ()
+    let map = (,)
 
     # One-element tuple. Note the trailing comma.
     let map = (london,)
-
-    # Named tuple are tuples with keys.
-    let http = (status_code: 200, description: 'Ok')
-
-    # The contents of a named tuple can be accessed using the dot notation.
-    print http.status
 
     # Tuple indexing.
     let book = ('Harry Potter', 'J.K. Rowling', 1995)
@@ -400,7 +394,7 @@
 
 - SPREAD OPERATOR
     # Spread takes the remaining values in a destructure.
-    var a, ...b = 1, 2, 3, 4
+    var (a, ...b) = (1, 2, 3, 4)
     print(a) # 1
     print(b) # (2, 3, 4)
 
@@ -415,7 +409,7 @@
     let object = Object { ...object, extra: 5 }
 
 - STRINGS
-    let language, year = 'Astro', 2015
+    let (language, year) = ('Astro', 2015)
 
     # String interpolation.
     var story = "${language} was started in the ${year}"
@@ -464,13 +458,13 @@
     var zero = -100 ...
     + 100
 
-    # If an expression ends the line with a comma, it is expected to continue on the next line.
-    let brothers = 'James',
-    'Jackson'
-
-    # If an expression is inside a pair of brackets, it can span multiple lines until a matching closing bracket/brace is encountered.
-    let total = (1 + 2 + 3 + 4
+    # Even if an expression is inside a pair of brackets, you still need a line-continuation punctuator.
+    let total = (1 + 2 + 3 + 4 ...
     + 5 + 6 + 7)
+
+    # However if an expression ends the line with a comma, it is expected to continue on the next line.
+    let brothers = ('James',
+    'Jackson')
 
     # Chained dot notation can be written on subsequent lines but with an indentation.
     sentence
@@ -535,7 +529,7 @@
         print i
 
     # Destructuring in loop.
-    for kind, number in interesting_numbers {
+    for (kind, number) in interesting_numbers {
         print '$kind: $number'
     }
 
@@ -660,14 +654,12 @@
 
 - ASSIGNMENT DESTRUCTURING
     # Instead of separately binding subjects to objects fields, it can be done in a single expression with destructuring.
-    let name = person.name
-    let age = person.age
     let { name, age } = person
+    let Person { name, age } = person
 
     # Destructuring patterns for other data structures
     let [name, age, _, ...rest] = [1, 2, 3, 4, 5]
     let (a, b, _, ...c) = (1, 2, 3, 4, 5)
-    let a, b, c = (1, 2, 3, 4, 5)
 
 - MAIN FUNCTION
     # If a module contains a main function, it will be the module's entry point.
@@ -740,15 +732,6 @@
     # Destructuring parameters.
     fun show({ name, age }) {
         print(name, age)
-    }
-
-    # Astro supports trailing optional arguments
-    fun show(name, age?) {
-        if age {
-            print 'Hi $name, your age is $age'
-        } else {
-            print 'Hi $name'
-        }
     }
 
     show('Ademola', 54)
@@ -899,6 +882,9 @@
     get_name(perhaps_person) # (p: Person | Error) -> String
     get_name(error) # Panic!
     get_name(perhaps_person as Person) # (p: Person) -> String # (p: Person | Error) -> String
+
+    type ErrablePerson = Person!
+    type NillablePerson = Person?
 
 - GENERICS
     # Uppercase single letter identifiers in type annotation are taken as type variable declaration.
@@ -1274,10 +1260,10 @@
 - MACROS : TODO
     # Rust macros vs Julia macros
     macro func {
-        ($param:ident) => {
+        ($param:str) => {
             $param
         },
-        [$param:ident (, $params:ident)* ,?] => {
+        [$param:ident$(, $params:num)* ,?] => {
             Export.Function {
                 function: $func as _,
                 desc: GlobalDesc { $(params ,)* }
@@ -1291,8 +1277,8 @@
         }
     }
 
-    @func(name)
-    @func(name, name)
+    @func("hello")
+    @func(name, 1, 2, 3)
     @func(name) fun add(a, b) { a + b }
 
 - PREDEFINED TYPE HIERARCHY
