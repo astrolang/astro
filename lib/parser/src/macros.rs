@@ -83,6 +83,24 @@ macro_rules! optmore {
     };
 }
 
+#[macro_export]
+macro_rules! opt {
+    ($combinator:ident, $arg0:expr $(, $args:expr)* ) => {
+        Combinator::opt(
+            &vec![$arg0 $(, $args)*],
+            $combinator,
+        )
+    };
+    ($arg0:expr $(, $args:expr)* ) => {
+        CombinatorArg::Func(
+            (
+                Combinator::opt as _,
+                &vec![$arg0 $(, $args)*],
+            )
+        )
+    };
+}
+
 // #[macro_export]
 // macro_rules! or {
 //     ($arg0:expr (, $args:expr)* ) => {
