@@ -33,7 +33,7 @@ impl Parser {
 
         let combinator_result = parse!(
             combinator,
-            more!(s!("HELLO"), s!("hi"))
+            optmore!(s!("HELLO"), s!("hi"), more!(s!("New")))
         );
 
         println!("===== parser result ===== \n{:?}", combinator_result);

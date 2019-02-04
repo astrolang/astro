@@ -16,7 +16,7 @@ fn main() {
 
     let tokens = Lexer::new(valid_lexer_code).lex();
 
-    let valid_parser_code = String::from("HELLO hi HELLO hi");
+    let valid_parser_code = String::from("HELLO hi New HELLO hi New");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,

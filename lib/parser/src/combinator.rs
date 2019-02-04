@@ -302,19 +302,17 @@ impl<T> Combinator<T> {
         let mut asts: Vec<Output<T>> = Vec::new();
         let mut parsed_successfully = true;
 
+        // Loop and parse multiple times.
         loop {
             let result = Combinator::parse(args, combinator);
 
             // Check if result was successful.
             if result.is_err() {
-                println!("KABOOM", );
                 if asts.len() == 0 {
                     parsed_successfully = false;
                 }
                 break
             } else {
-                println!("BOOM", );
-                println!("tok = {}", combinator.cursor);
                 asts.push(result.unwrap());
             }
         }
@@ -327,6 +325,38 @@ impl<T> Combinator<T> {
         }
 
         Ok(Output::Values(asts))
+    }
+
+    /// Parses a its arguments at least once.
+    /// Returns success if unable to parse.
+    pub fn opt_more<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+        where T: Debug + Clone,
+    {
+        let mut asts: Output<T> = Output::Empty;
+
+        let result = Combinator::more(args, combinator);
+
+        if result.is_ok() {
+            asts = result.unwrap();
+        }
+
+        Ok(asts)
+    }
+
+    /// Parses a its arguments once.
+    /// Returns success if unable to parse.
+    pub fn opt<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+        where T: Debug + Clone,
+    {
+        let mut asts: Output<T> = Output::Empty;
+
+        let result = Combinator::parse(args, combinator);
+
+        if result.is_ok() {
+            asts = result.unwrap();
+        }
+
+        Ok(asts)
     }
 }
 
@@ -342,4 +372,5 @@ pub enum Output<T> {
     Values(Vec<Output<T>>), // A list of outputs returned by combinator function.
     Str(String), // A token returned by combinator function.
     AST(T), // Outputs returned by a custom parser function
+    Empty,
 }
