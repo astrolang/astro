@@ -5,4 +5,7 @@ pub enum ErrorKind {
     IncompleteParse,
     UnexpectedToken,
     AlternativesDontMatch,
+    CantMatchAtLeastARule,
+    OneOfRulesFailed,
+    RuleDoesNotFail,
 }

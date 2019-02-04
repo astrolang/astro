@@ -33,13 +33,10 @@ impl Parser {
 
         let combinator_result = parse!(
             combinator,
-            alt!("hello", "Hello", "HELLO")
+            more!(s!("HELLO"), s!("hi"))
         );
 
-        println!(
-            "======= parser result = {:?}",
-            combinator_result
-        );
+        println!("===== parser result ===== \n{:?}", combinator_result);
 
         unimplemented!()
     }

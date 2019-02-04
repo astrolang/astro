@@ -1,10 +1,18 @@
+
+#[macro_export]
+macro_rules! s {
+    ($string:tt) => {
+        CombinatorArg::Str($string.into())
+    };
+}
+
 #[macro_export]
 macro_rules! func {
     ($func:ident, $arg0:expr $(, $args:expr)* ) => {
         CombinatorArg::Func(
             (
-                Combinator::$func as _,
-                vec![arg!($arg0) $(, arg!($args))*],
+                Parser::$func as _,
+                &vec![$arg0 $(, $args)*],
             )
         )
     }
@@ -14,7 +22,7 @@ macro_rules! func {
 macro_rules! parse {
     ($combinator:ident, $arg0:expr $(, $args:expr)*) => {
         Combinator::parse(
-            vec![arg!($arg0) $(, arg!($args))*],
+            &vec![$arg0 $(, $args)*],
             $combinator,
         )
     };
@@ -25,7 +33,7 @@ macro_rules! parse {
 macro_rules! alt {
     ($combinator:ident, $arg0:expr $(, $args:expr)* ) => {
         Combinator::alt(
-            vec![arg!($arg0) $(, arg!($args))*],
+            &vec![$arg0 $(, $args)*],
             $combinator,
         )
     };
@@ -33,19 +41,27 @@ macro_rules! alt {
         CombinatorArg::Func(
             (
                 Combinator::alt as _,
-                vec![arg!($arg0) $(, arg!($args))*],
+                &vec![$arg0 $(, $args)*],
             )
         )
     };
 }
 
 #[macro_export]
-macro_rules! arg {
-    ($string:tt) => {
-        CombinatorArg::Str(stringify!($string).into())
+macro_rules! more {
+    ($combinator:ident, $arg0:expr $(, $args:expr)* ) => {
+        Combinator::more(
+            &vec![$arg0 $(, $args)*],
+            $combinator,
+        )
     };
-    ($function:expr) => {
-        $function
+    ($arg0:expr $(, $args:expr)* ) => {
+        CombinatorArg::Func(
+            (
+                Combinator::more as _,
+                &vec![$arg0 $(, $args)*],
+            )
+        )
     };
 }
 

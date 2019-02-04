@@ -58,8 +58,8 @@ impl<T> Combinator<T> {
 
     /// Updates parser positional information.
     fn update_state(&mut self, skip: Option<usize>) {
-        // Get offset value or set to zero if not specified.
-        let skip = skip.unwrap_or(0);
+        // Get offset value or set to one if not specified.
+        let skip = skip.unwrap_or(1);
 
         // Update cursor position.
         self.cursor += skip;
@@ -74,7 +74,6 @@ impl<T> Combinator<T> {
                 if word == token {
                     // Update parser position.
                     self.update_state(None);
-
                     return Ok(());
                 }
 
@@ -123,7 +122,7 @@ impl<T> Combinator<T> {
     }
 
     /// Parses string and calls parser functions.
-    pub fn parse(args: Vec<CombinatorArg<T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+    pub fn parse<'a>(args: &Vec<CombinatorArg<'a, T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
         where T: Debug + Clone,
     {
         // Get cursor.
@@ -138,10 +137,7 @@ impl<T> Combinator<T> {
                 CombinatorArg::Func((func, arguments)) => { // It is a function argument
                     // Get function address
                     let func_addr = unsafe {
-                        std::mem::transmute::<
-                            &fn (Vec<CombinatorArg<T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>,
-                            *const usize
-                        >(&func)
+                        std::mem::transmute::<_, *const usize>(&func)
                     };
 
                     // Check if there are rules for current cursor position
@@ -184,7 +180,7 @@ impl<T> Combinator<T> {
                 },
                 CombinatorArg::Str(token) => { // It is a string argument
                     // Compare and consume token.
-                    let result = combinator.eat_token(token.as_str());
+                    let result = combinator.eat_token(token);
 
                     // Check if result of parse function is an error.
                     if result.is_err() {
@@ -195,7 +191,7 @@ impl<T> Combinator<T> {
                         break
                     } else {
                         // Add data to list.
-                        asts.push(Output::Str(token.clone()));
+                        asts.push(Output::Str(token.to_string()));
                     }
                 }
             }
@@ -211,8 +207,8 @@ impl<T> Combinator<T> {
         Ok(Output::Values(asts))
     }
 
-    /// Returns a closure that parses alternatives
-    pub fn alt(args: Vec<CombinatorArg<T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+    /// Parses a set of alternatives.
+    pub fn alt<'a>(args: &Vec<CombinatorArg<'a, T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
         where T: Debug + Clone,
     {
         // Get cursor.
@@ -227,10 +223,7 @@ impl<T> Combinator<T> {
                 CombinatorArg::Func((func, arguments)) => { // It is a function argument
                     // Get function address
                     let func_addr = unsafe {
-                        std::mem::transmute::<
-                            &fn (Vec<CombinatorArg<T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>,
-                            *const usize
-                        >(&func)
+                        std::mem::transmute::<_, *const usize>(&func)
                     };
 
                     // Check if there are rules for current cursor position
@@ -273,15 +266,15 @@ impl<T> Combinator<T> {
                 },
                 CombinatorArg::Str(token) => { // It is a string argument
                     // Compare and consume token.
-                    let result = combinator.eat_token(token.as_str());
+                    let result = combinator.eat_token(token);
 
                     // Check if result of parse function is an error.
                     if result.is_ok() {
-                        // Parsing successful.
+                                                // Parsing successful.
                         parsed_successfully = true;
 
                         // Add data to list.
-                        asts.push(Output::Str(token.clone()));
+                        asts.push(Output::Str(token.to_string()));
 
                         // Break out of loop.
                         break
@@ -300,12 +293,47 @@ impl<T> Combinator<T> {
         Ok(Output::Values(asts))
     }
 
+    /// Parses a its arguments at least once.
+    pub fn more<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
+        where T: Debug + Clone,
+    {
+        // Get cursor.
+        let cursor = combinator.cursor;
+        let mut asts: Vec<Output<T>> = Vec::new();
+        let mut parsed_successfully = true;
+
+        loop {
+            let result = Combinator::parse(args, combinator);
+
+            // Check if result was successful.
+            if result.is_err() {
+                println!("KABOOM", );
+                if asts.len() == 0 {
+                    parsed_successfully = false;
+                }
+                break
+            } else {
+                println!("BOOM", );
+                println!("tok = {}", combinator.cursor);
+                asts.push(result.unwrap());
+            }
+        }
+
+        // If there was a problem while parsing.
+        if !parsed_successfully {
+            // Revert state.
+            combinator.cursor = cursor;
+            return Err(ParserError::new(ErrorKind::CantMatchAtLeastARule, combinator.cursor))
+        }
+
+        Ok(Output::Values(asts))
+    }
 }
 
 /// The types of arguments a combinator function can take
-pub enum CombinatorArg<T> {
-    Func((fn (Vec<CombinatorArg<T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>, Vec<CombinatorArg<T>>)),
-    Str(String),
+pub enum CombinatorArg<'a, T> {
+    Func((fn (&Vec<CombinatorArg<'a, T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>, &'a Vec<CombinatorArg<'a, T>>)),
+    Str(&'a str),
 }
 
 /// TODO: Think abt this impl thoroughly
