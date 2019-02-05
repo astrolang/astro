@@ -91,6 +91,7 @@ impl Lexer {
                 String::from("const"),
                 String::from("fun"),
                 String::from("type"),
+                String::from("enum"),
                 String::from("async"),
                 String::from("ref"),
                 String::from("iso"),
@@ -1186,7 +1187,7 @@ impl Lexer {
             let token = token.unwrap();
 
             // Push tokens that are not spaces, ...
-            if token.kind != TokenKind::Spaces && token.kind != TokenKind::SingleLineComment && token.kind != TokenKind::MultiLineComment && token.kind != TokenKind::LineContinuation {
+            if token.kind != TokenKind::Spaces && token.kind != TokenKind::SingleLineComment && token.kind != TokenKind::MultiLineComment {
                 tokens.push(token);
             }
         }
