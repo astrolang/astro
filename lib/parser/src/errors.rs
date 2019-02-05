@@ -1,7 +1,4 @@
-use crate::{
-    kinds::ErrorKind,
-};
-
+use crate::kinds::ErrorKind;
 
 /// Error from lexing.
 #[derive(Debug, Clone)]
@@ -12,9 +9,6 @@ pub struct ParserError {
 
 impl ParserError {
     pub fn new(error: ErrorKind, cursor: usize) -> Self {
-        Self {
-            error,
-            cursor,
-        }
+        Self { error, cursor }
     }
 }

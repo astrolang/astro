@@ -1,15 +1,8 @@
-use std::{
-    collections::HashMap,
-    fmt::Debug,
-};
-use astro_lexer::Token;
 use astro_codegen::AST;
+use astro_lexer::Token;
+use std::{collections::HashMap, fmt::Debug};
 
-use crate::{
-    kinds::ErrorKind,
-    errors::ParserError,
-    utils::get_func_addr,
-};
+use crate::{errors::ParserError, kinds::ErrorKind, utils::get_func_addr};
 
 /************************* CACHE DATA *************************/
 
@@ -23,10 +16,7 @@ struct CacheData<T> {
 
 impl<T> CacheData<T> {
     fn new(data: Result<Output<T>, ParserError>, skip: usize) -> Self {
-        Self {
-            data,
-            skip,
-        }
+        Self { data, skip }
     }
 }
 
@@ -34,7 +24,12 @@ impl<T> CacheData<T> {
 
 /// The types of arguments a combinator function can take
 pub enum CombinatorArg<'a, T> {
-    Func((fn (&Vec<CombinatorArg<'a, T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>, &'a Vec<CombinatorArg<'a, T>>)),
+    Func(
+        (
+            fn(&Vec<CombinatorArg<'a, T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>,
+            &'a Vec<CombinatorArg<'a, T>>,
+        ),
+    ),
     Str(&'a str),
 }
 
@@ -44,8 +39,8 @@ pub enum CombinatorArg<'a, T> {
 #[derive(Debug, Clone)]
 pub enum Output<T> {
     Values(Vec<Output<T>>), // A list of outputs returned by combinator function.
-    Str(String), // A token returned by combinator function.
-    AST(T), // Outputs returned by a custom parser function
+    Str(String),            // A token returned by combinator function.
+    AST(T),                 // Outputs returned by a custom parser function
     Empty,
 }
 
@@ -60,7 +55,8 @@ pub struct Combinator<T> {
 }
 
 impl<T> Combinator<T>
-    where T: Debug + Clone
+where
+    T: Debug + Clone,
 {
     /// Creates a new combinator object from the tokens passed in.
     pub fn new(tokens: Vec<Token>) -> Self {
@@ -107,7 +103,7 @@ impl<T> Combinator<T>
         if self.is_inbounds() {
             // Update parser position.
             self.update_state(None);
-            return Ok(self.tokens[cursor].clone())
+            return Ok(self.tokens[cursor].clone());
         }
 
         Err(ParserError::new(ErrorKind::InputExhausted, self.cursor))
@@ -134,31 +130,32 @@ impl<T> Combinator<T>
 
     /// Stores result of a parse function call in cache if it does not already exist.
     /// A parse function call corresponds to visiting a rule.
-    pub fn memoize(&mut self, cursor: usize, rule_func_addr: *const usize, result: Result<Output<T>, ParserError>) {
+    pub fn memoize(
+        &mut self,
+        cursor: usize,
+        rule_func_addr: *const usize,
+        result: Result<Output<T>, ParserError>,
+    ) {
         // Check if the cursor already exists in map.
         match self.cache.get_mut(&cursor) {
-            Some(rules) => { // Cursor position exists in map.
+            Some(rules) => {
+                // Cursor position exists in map.
                 // Check if rule doesn't already exists for cursor.
                 if rules.get(&rule_func_addr).is_none() {
                     // Create cache data.
-                    let cache_data = CacheData::new(
-                        result,
-                        self.cursor - cursor,
-                    );
+                    let cache_data = CacheData::new(result, self.cursor - cursor);
 
                     // Associate provided result with rule.
                     rules.insert(rule_func_addr, cache_data);
                 }
-            },
-            None => { // Cursor position does not exist in map.
+            }
+            None => {
+                // Cursor position does not exist in map.
                 // Create new rules for cursor.
                 let mut rules = HashMap::new();
 
                 // Create cache data
-                let cache_data = CacheData::new(
-                    result,
-                    self.cursor - cursor,
-                );
+                let cache_data = CacheData::new(result, self.cursor - cursor);
 
                 // Associate provided result with rule.
                 rules.insert(rule_func_addr, cache_data);
@@ -170,8 +167,12 @@ impl<T> Combinator<T>
     }
 
     /// Parses its arguments.
-    pub fn parse<'a>(args: &Vec<CombinatorArg<'a, T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where T: Debug + Clone,
+    pub fn parse<'a>(
+        args: &Vec<CombinatorArg<'a, T>>,
+        combinator: &mut Combinator<T>,
+    ) -> Result<Output<T>, ParserError>
+    where
+        T: Debug + Clone,
     {
         // Get cursor.
         let cursor = combinator.cursor;
@@ -182,7 +183,8 @@ impl<T> Combinator<T>
         for arg in args {
             // Check type of argument.
             match arg {
-                CombinatorArg::Func((func, arguments)) => { // It is a function argument
+                CombinatorArg::Func((func, arguments)) => {
+                    // It is a function argument
                     // Get function address
                     let func_addr = get_func_addr(func);
 
@@ -191,7 +193,8 @@ impl<T> Combinator<T>
                     let rules = combinator.cache.get(&cursor);
                     if rules.is_some() && rules.unwrap().get(&func_addr).is_some() {
                         // Get previously stored result.
-                        let CacheData { data, skip } = (*rules.unwrap().get(&func_addr).unwrap()).clone();
+                        let CacheData { data, skip } =
+                            (*rules.unwrap().get(&func_addr).unwrap()).clone();
 
                         // Check if data in cached data is an error.
                         if data.is_err() {
@@ -199,7 +202,7 @@ impl<T> Combinator<T>
                             problem = Some(data.unwrap_err());
 
                             // Break out of loop.
-                            break
+                            break;
                         } else {
                             // Add data to list.
                             asts.push(data.unwrap());
@@ -207,7 +210,8 @@ impl<T> Combinator<T>
                             // Needed to advance the combinator state.
                             combinator.update_state(Some(skip));
                         }
-                    } else { // If rule is not already cached
+                    } else {
+                        // If rule is not already cached
                         // Call the function with combinator as argument.
                         let ast = func(arguments, combinator);
 
@@ -217,14 +221,15 @@ impl<T> Combinator<T>
                             problem = Some(ast.unwrap_err());
 
                             // Break out of loop.
-                            break
+                            break;
                         } else {
                             // Add data to list.
                             asts.push(ast.unwrap());
                         }
                     }
-                },
-                CombinatorArg::Str(token) => { // It is a string argument
+                }
+                CombinatorArg::Str(token) => {
+                    // It is a string argument
                     // Compare and consume token.
                     let result = combinator.check_token(token);
 
@@ -234,7 +239,7 @@ impl<T> Combinator<T>
                         problem = Some(result.unwrap_err());
 
                         // Break out of loop.
-                        break
+                        break;
                     } else {
                         // Add data to list.
                         asts.push(Output::Str(token.to_string()));
@@ -254,8 +259,12 @@ impl<T> Combinator<T>
     }
 
     /// Parses a set of alternatives.
-    pub fn alt<'a>(args: &Vec<CombinatorArg<'a, T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where T: Debug + Clone,
+    pub fn alt<'a>(
+        args: &Vec<CombinatorArg<'a, T>>,
+        combinator: &mut Combinator<T>,
+    ) -> Result<Output<T>, ParserError>
+    where
+        T: Debug + Clone,
     {
         // Get cursor.
         let cursor = combinator.cursor;
@@ -266,7 +275,8 @@ impl<T> Combinator<T>
         for arg in args {
             // Check type of argument.
             match arg {
-                CombinatorArg::Func((func, arguments)) => { // It is a function argument
+                CombinatorArg::Func((func, arguments)) => {
+                    // It is a function argument
                     // Get function address
                     let func_addr = get_func_addr(func);
 
@@ -275,7 +285,8 @@ impl<T> Combinator<T>
                     let rules = combinator.cache.get(&cursor);
                     if rules.is_some() && rules.unwrap().get(&func_addr).is_some() {
                         // Get previously stored result.
-                        let CacheData { data, skip } = (*rules.unwrap().get(&func_addr).unwrap()).clone();
+                        let CacheData { data, skip } =
+                            (*rules.unwrap().get(&func_addr).unwrap()).clone();
 
                         // Check if data in cached data is ok.
                         if data.is_ok() {
@@ -289,9 +300,10 @@ impl<T> Combinator<T>
                             combinator.update_state(Some(skip));
 
                             // Break out of loop.
-                            break
+                            break;
                         }
-                    } else { // If rule is not already cached
+                    } else {
+                        // If rule is not already cached
                         // Call the function with combinator as argument.
                         let ast = func(arguments, combinator);
 
@@ -304,24 +316,25 @@ impl<T> Combinator<T>
                             asts.push(ast.unwrap());
 
                             // Break out of loop.
-                            break
+                            break;
                         }
                     }
-                },
-                CombinatorArg::Str(token) => { // It is a string argument
+                }
+                CombinatorArg::Str(token) => {
+                    // It is a string argument
                     // Compare and consume token.
                     let result = combinator.check_token(token);
 
                     // Check if result of parse function is an error.
                     if result.is_ok() {
-                                                // Parsing successful.
+                        // Parsing successful.
                         parsed_successfully = true;
 
                         // Add data to list.
                         asts.push(Output::Str(token.to_string()));
 
                         // Break out of loop.
-                        break
+                        break;
                     }
                 }
             }
@@ -331,15 +344,22 @@ impl<T> Combinator<T>
         if !parsed_successfully {
             // Revert state.
             combinator.cursor = cursor;
-            return Err(ParserError::new(ErrorKind::AlternativesDontMatch, combinator.cursor))
+            return Err(ParserError::new(
+                ErrorKind::AlternativesDontMatch,
+                combinator.cursor,
+            ));
         }
 
         Ok(Output::Values(asts))
     }
 
     /// Parses its arguments at least once.
-    pub fn more<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where T: Debug + Clone,
+    pub fn more<'a>(
+        args: &Vec<CombinatorArg<'a, T>>,
+        combinator: &mut Combinator<T>,
+    ) -> Result<Output<T>, ParserError>
+    where
+        T: Debug + Clone,
     {
         // Get cursor.
         let cursor = combinator.cursor;
@@ -355,7 +375,7 @@ impl<T> Combinator<T>
                 if asts.len() == 0 {
                     parsed_successfully = false;
                 }
-                break
+                break;
             } else {
                 asts.push(result.unwrap());
             }
@@ -365,7 +385,10 @@ impl<T> Combinator<T>
         if !parsed_successfully {
             // Revert state.
             combinator.cursor = cursor;
-            return Err(ParserError::new(ErrorKind::CantMatchAtLeastARule, combinator.cursor))
+            return Err(ParserError::new(
+                ErrorKind::CantMatchAtLeastARule,
+                combinator.cursor,
+            ));
         }
 
         Ok(Output::Values(asts))
@@ -373,8 +396,12 @@ impl<T> Combinator<T>
 
     /// Parses its arguments at least once.
     /// Returns success if unable to parse.
-    pub fn opt_more<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where T: Debug + Clone,
+    pub fn opt_more<'a>(
+        args: &Vec<CombinatorArg<'a, T>>,
+        combinator: &mut Combinator<T>,
+    ) -> Result<Output<T>, ParserError>
+    where
+        T: Debug + Clone,
     {
         let mut asts: Output<T> = Output::Empty;
 
@@ -389,8 +416,12 @@ impl<T> Combinator<T>
 
     /// Parses its arguments once.
     /// Returns success if unable to parse.
-    pub fn opt<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where T: Debug + Clone,
+    pub fn opt<'a>(
+        args: &Vec<CombinatorArg<'a, T>>,
+        combinator: &mut Combinator<T>,
+    ) -> Result<Output<T>, ParserError>
+    where
+        T: Debug + Clone,
     {
         let mut asts: Output<T> = Output::Empty;
 
@@ -405,8 +436,12 @@ impl<T> Combinator<T>
 
     /// Tries to parse its arguments once.
     /// Does not advance the combinator.
-    pub fn and<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where T: Debug + Clone,
+    pub fn and<'a>(
+        args: &Vec<CombinatorArg<'a, T>>,
+        combinator: &mut Combinator<T>,
+    ) -> Result<Output<T>, ParserError>
+    where
+        T: Debug + Clone,
     {
         // Get cursor.
         let cursor = combinator.cursor;
@@ -422,14 +457,21 @@ impl<T> Combinator<T>
     /// Tries to parse its arguments once.
     /// Expects parsing to fail.
     /// Does not advance the combinator.
-    pub fn not<'a>(args: &Vec<CombinatorArg<'a,T>>, combinator: &mut Combinator<T>) -> Result<Output<T>, ParserError>
-        where T: Debug + Clone,
+    pub fn not<'a>(
+        args: &Vec<CombinatorArg<'a, T>>,
+        combinator: &mut Combinator<T>,
+    ) -> Result<Output<T>, ParserError>
+    where
+        T: Debug + Clone,
     {
         // Get cursor.
         let cursor = combinator.cursor;
 
         let result = match Combinator::parse(args, combinator) {
-            Ok(_) => Err(ParserError::new(ErrorKind::ExpectedRuleToFail, combinator.cursor)),
+            Ok(_) => Err(ParserError::new(
+                ErrorKind::ExpectedRuleToFail,
+                combinator.cursor,
+            )),
             Err(_) => Ok(Output::Empty),
         };
 
@@ -441,6 +483,4 @@ impl<T> Combinator<T>
 }
 
 /// TODO
-mod tests {
-
-}
+mod tests {}
