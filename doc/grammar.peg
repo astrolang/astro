@@ -1,0 +1,143 @@
+/*************** LEXER ***************/
+
+spacechar =
+  | [ \t] // Unicode?
+
+spaces =
+  | space+
+
+newline =
+  | '\r'? '\n'
+
+noname =
+  | '_'
+
+identifierbeginchar =
+  | [a-zA-Z_] // Unicode?
+
+identifierendchar =
+  | identifierbeginchar
+  | digit
+
+identifier =
+  | identifierbeginchar identifierendchar* // Contains keyword check
+  identifier / keyword / booleanliteral
+
+operatorchar =
+  | [+\-*/\\^%!><=÷×≠≈¹²³√] // Unicode?
+
+operator =
+  | operatorchar+
+
+punctuator =
+  | [(){}[\],.~] // TODO: Incomplete
+
+digitbinary =
+  | [0-1]
+
+digitoctal =
+  | [0-7]
+
+digitdecimal =
+  | [0-9]
+
+digithexadecimal =
+  | [0-9a-fA-F]
+
+integerbinaryliteral =
+  | '0b' '_'? digitbinary ('_'? digitbinary)*
+
+integeroctalliteral =
+  | '0o' '_'? digitoctal ('_'? digitoctal)*
+
+integerhexadecimalliteral =
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)*
+
+integerdecimalliteral =
+  | digitdecimal ('_'? digitdecimal)*
+
+floatbinaryliteral =
+  | '0b' '_'? digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+  | '0b' '_'? digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+
+floatoctalliteral =
+  | '0o' '_'? digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+  | '0o' '_'? digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+
+floathexadecimalliteral =
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
+
+floatdecimalliteral =
+  | (digitdecimal ('_'? digitdecimal)*)? !('.' nospace '.') '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
+  | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
+
+floatLiteralnomantissa =
+  | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier | '.')
+
+chars =
+  | (!(newline | '`') .) // TODO
+
+charliteral =
+  | '`' chars '`'
+
+stringchars =
+  | (!("'") .)+ // TODO
+
+stringliteral =
+  | "'" stringchars? "'"
+  | '"' stringchars? '"'
+
+regexchars =
+  | (!(newline | '||') .)+ // TODO
+
+regexliteral =
+  | '||' regexchars? '||'
+
+booleanliteral =
+  | 'true'
+  | 'false'
+
+singlelinecommentchars =
+  | (!(newline) .)+ // TODO
+
+singlelinecomment =
+  | "//" singlelinecommentchars? &(newline | eoi)
+
+multilinecommentchars =
+  | (!('/*' | '*/') .)+ // TODO
+
+multilinecomment =
+  | "/*" multilinecommentchars? multilinecomment* multilinecommentchars? '*/'
+
+
+/*************** PARSER ***************/
+
+integerliteral =
+  | integerbinaryliteral
+  | integeroctalliteral
+  | integerhexadecimalliteral
+  | integerdecimalliteral // Can eat others cake
+
+floatliteral =
+  | floatliteralnomantissa
+  | floatbinaryliteral
+  | floatoctalliteral
+  | floathexadecimalliteral
+  | floatdecimalliteral // Can eat others cake
+
+numericliteral =
+  | floatliteral
+  | integerliteral  // Can eat others cake
+
+comma =
+  | ',' newline*
+
+listarguments =
+  | simpleexpression (comma simpleexpression)* comma?
+  { expressions }
+
+listliteral =
+  | '[' listarguments ']'
+  { kind, expressions }
+
