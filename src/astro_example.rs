@@ -16,7 +16,7 @@ fn main() {
 
     let tokens = Lexer::new(valid_lexer_code).lex();
 
-    let valid_parser_code = String::from("\n _ identifier true match , 0b10_100 0o71_230 0x10_45ffe 1_234 0b10_100.01e+11 0o71_2.30e+6 0x10_45.ffep-5 1.3_00e-5 `b` ||regex|| \"string\" ...\n");
+    let valid_parser_code = String::from("0b10_100 0o71_230 0x10_45ffe 1_234 0b10_100.01e+11 0o71_2.30e+6 0x10_45.ffep-5 1.3_00e-5 `b` ||regex|| \"string\" ...\n");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,
