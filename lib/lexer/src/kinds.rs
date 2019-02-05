@@ -31,5 +31,4 @@ pub enum TokenKind {
     StringLiteral,
     SingleLineComment,
     MultiLineComment,
-    LineContinuation,
 }
