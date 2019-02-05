@@ -1,9 +1,0 @@
-# Using for loop
-fun sum(a, start: 0):
-    var result = start
-    for i in a:
-        result += i
-    result
-
-# Using fold function
-fun sum(a, start: 0) = a.foldr(+, start)
