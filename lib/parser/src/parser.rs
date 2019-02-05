@@ -258,28 +258,50 @@ impl Parser {
         _args: &Vec<CombinatorArg<'a, AST>>,
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
-        let result = alt!(
+        // Get the cursor.
+        let cursor = combinator.get_cursor();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
+            ErrorKind::UnexpectedToken,
+            combinator.get_cursor(),
+        ));
+
+        // Get parser result.
+        // => Ok( Output::Values( [ Output::AST( AST::Terminal { kind, value } ) ] ) )
+        let parser_result = alt!(
             combinator,
             f!(integer_binary_literal),
             f!(integer_octal_literal),
             f!(integer_hexadecimal_literal),
             f!(integer_decimal_literal)
-        ); // Ok( Values( [ AST( Terminal { kind, value } ) ] ) )
+        );
 
-        println!("===== result ===== \n{:#?}", result);
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            // Pull out array from `Output::Values`.
+            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
 
-        unimplemented!()
+            // Pull out `AST` from the `Output::AST`.
+            let mut terminal_ast = variant_value!(parser_result_values.remove(0), Output::AST);
 
-        // // Check if result is okay.
-        // if result.is_ok() {
-        //     // Unwrap and get the val
-        //     let result = match result.unwrap() {
-        //         Output::Values(vals) => vals,
-        //         _ => ,
-        //     };
+            // Pull out fields from the `Terminal::AST`.
+            let (kind, value) = variant_fields!(terminal_ast, AST::Terminal, kind, value);
 
-        //     Ok(&result[0].clone());
-        // }
+            // Convert to `AST::Integer`.
+            let integer_ast = AST::Integer { kind, value };
+
+            result = Ok(Output::AST(integer_ast));
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(
+            cursor,
+            get_func_addr(&(Parser::integer_literal as _)),
+            result.clone(),
+        );
+
+        result
     }
 }
 
