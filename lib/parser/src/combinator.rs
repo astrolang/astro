@@ -8,6 +8,7 @@ use astro_codegen::AST;
 use crate::{
     kinds::ErrorKind,
     errors::ParserError,
+    utils::get_func_addr,
 };
 
 /************************* CACHE DATA *************************/
@@ -56,10 +57,11 @@ pub struct Combinator<T> {
     tokens: Vec<Token>,
     cursor: usize,
     cache: HashMap<usize, HashMap<*const usize, CacheData<T>>>,
-    // rule_map: HashMap<*const usize, String>,
 }
 
-impl<T> Combinator<T> {
+impl<T> Combinator<T>
+    where T: Debug + Clone
+{
     /// Creates a new combinator object from the tokens passed in.
     pub fn new(tokens: Vec<Token>) -> Self {
         Self {
@@ -91,6 +93,11 @@ impl<T> Combinator<T> {
     /// Gets the combinator cursor.
     pub fn get_cursor(&mut self) -> usize {
         self.cursor
+    }
+
+    /// Gets the combinator cache.
+    pub fn get_cache_string(&mut self) -> String {
+        format!("{:#?}", self.cache)
     }
 
     /// Gets the next token if available.
@@ -127,7 +134,7 @@ impl<T> Combinator<T> {
 
     /// Stores result of a parse function call in cache if it does not already exist.
     /// A parse function call corresponds to visiting a rule.
-    fn cache_rule(&mut self, cursor: usize, rule_func_addr: *const usize, result: Result<Output<T>, ParserError>) {
+    pub fn memoize(&mut self, cursor: usize, rule_func_addr: *const usize, result: Result<Output<T>, ParserError>) {
         // Check if the cursor already exists in map.
         match self.cache.get_mut(&cursor) {
             Some(rules) => { // Cursor position exists in map.
@@ -177,9 +184,7 @@ impl<T> Combinator<T> {
             match arg {
                 CombinatorArg::Func((func, arguments)) => { // It is a function argument
                     // Get function address
-                    let func_addr = unsafe {
-                        std::mem::transmute::<_, *const usize>(&func)
-                    };
+                    let func_addr = get_func_addr(func);
 
                     // Check if there are rules for current cursor position
                     // and that resulting rules map contain the function address.
@@ -263,9 +268,7 @@ impl<T> Combinator<T> {
             match arg {
                 CombinatorArg::Func((func, arguments)) => { // It is a function argument
                     // Get function address
-                    let func_addr = unsafe {
-                        std::mem::transmute::<_, *const usize>(&func)
-                    };
+                    let func_addr = get_func_addr(func);
 
                     // Check if there are rules for current cursor position
                     // and that resulting rules map contain the function address.
