@@ -141,4 +141,3 @@ listliteral =
   | '[' listarguments ']'
   { kind, expressions }
 
-// (2 + 6 \n - 5 + 6)
