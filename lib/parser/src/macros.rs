@@ -150,3 +150,23 @@ macro_rules! not {
         )
     };
 }
+
+#[macro_export]
+macro_rules! variant_value {
+    ($value:expr, $variant:path) => {
+        match $value {
+            $variant(val) => val,
+            _ => unreachable!(),
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! variant_fields {
+    ($value:expr, $variant:path, $field:ident $(, $fields:ident)* ) => {
+        match $value {
+            $variant { $field $(, $fields)* } => ($field $(, $fields)*),
+            _ => unreachable!(),
+        }
+    };
+}
