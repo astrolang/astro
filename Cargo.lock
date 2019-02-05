@@ -1,0 +1,27 @@
+[[package]]
+name = "astro"
+version = "0.1.0"
+dependencies = [
+ "astro-lexer 0.1.0",
+ "astro-parser 0.1.0",
+]
+
+[[package]]
+name = "astro-codegen"
+version = "0.1.0"
+dependencies = [
+ "astro-lexer 0.1.0",
+]
+
+[[package]]
+name = "astro-lexer"
+version = "0.1.0"
+
+[[package]]
+name = "astro-parser"
+version = "0.1.0"
+dependencies = [
+ "astro-codegen 0.1.0",
+ "astro-lexer 0.1.0",
+]
+

@@ -1,0 +1,14 @@
+engines:
+  duplication:
+    enabled: false
+checks:
+  method-complexity:
+    enabled: false
+  method-count:
+    enabled: false
+  return-statements:
+    enabled: false
+  complex-logic:
+    enabled: false
+  file-lines:
+    enabled: false

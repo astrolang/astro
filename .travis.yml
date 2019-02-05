@@ -1,0 +1,13 @@
+language: node_js
+    - "8"
+install:
+    - npm install
+cache:
+    directories:
+        - "node_modules"
+script: npm run test:compiler
+before_script:
+    - npm install nyc coveralls codeclimate-test-reporter -g
+after_script:
+    - nyc report --reporter=text-lcov | coveralls
+    - codeclimate-test-reporter < ./coverage/lcov.info
