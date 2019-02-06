@@ -72,9 +72,6 @@ floatdecimalliteral =
   | (digitdecimal ('_'? digitdecimal)*)? !('.' nospace '.') '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
   | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
 
-floatLiteralnomantissa =
-  | (integerbinaryliteral | integeroctalliteral | integerhexadecimalliteral | integerdecimalliteral) '.' !(operator | identifier | '.')
-
 chars =
   | (!(newline | '`') .) // TODO
 
@@ -120,7 +117,6 @@ integerliteral =
   | integerdecimalliteral // Can eat others cake
 
 floatliteral =
-  | floatliteralnomantissa
   | floatbinaryliteral
   | floatoctalliteral
   | floathexadecimalliteral
@@ -141,3 +137,20 @@ listliteral =
   | '[' listarguments ']'
   { kind, expressions }
 
+/*************** FUTURE ***************/
+
+floatwithoutmantissa = // LEXER PHASE
+  | integerliteral '.' '.' !(operator | identifier | '.')
+
+symbolidentifier = // LEXER PHASE
+  | ':' identifier
+
+commadnotation =
+  | identifier HASSPACE (comprehension | lambda | identifier | symbolliteral | stringliteral | charliteral | regexliteral | range | numericliteral)
+
+coefficientexpression =
+  | numericliteral NOSPACE identifier
+
+symbol =
+  | symbolidentifier
+  | ':(' expr ')'
