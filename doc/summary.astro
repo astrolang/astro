@@ -527,7 +527,7 @@
 
     // Destructuring in loop.
     for (kind, number) in interesting_numbers {
-        print '$kind: $number'
+        print '${kind}: ${number}'
     }
 
     // By default the for loop subjects are immutable, but they can be made mutable using the `var` keyword.
@@ -929,7 +929,7 @@
     }
 
     // Value generics
-    let arr = Array{Int, 3}()
+    let arr = Array[Int, 3]()
 
     // Higher Kinded Types
     map :: (F[A], (A -> B)) -> F[B]
@@ -1247,10 +1247,10 @@
 
 
 - RESERVED KEYWORDS
-    import, export, let, var, const, fun, type, async,
+    import, export, let, var, priv, const, fun, type, async, enum,
     ref, iso,
-    if, elif, else, while, for, try, except, ensure, defer, loop, end,
-    fallthrough, return, raise, break, continue, yield, from, await,
+    if, elif, else, while, for, loop, end, match,
+    fallthrough, return, break, continue, yield, from, await,
     where,
     is, not, in, as, mod, typeof,
 
