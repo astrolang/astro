@@ -9,5 +9,11 @@ pub enum AST {
     Integer {
         kind: TokenKind,
         value: String,
-    }
+    },
+    Float {
+        kind: TokenKind,
+        value: String,
+    },
+    Identifier(String),
+    Empty,
 }

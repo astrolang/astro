@@ -9,7 +9,6 @@ pub enum ErrorKind {
 /// The kinds of tokens we can ger from a lexer.
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
-    None,
     Spaces,
     Newline,
     NoName,
@@ -31,4 +30,5 @@ pub enum TokenKind {
     StringLiteral,
     SingleLineComment,
     MultiLineComment,
+    Empty,
 }

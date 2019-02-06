@@ -9,6 +9,8 @@ use astro_codegen::AST;
 use astro_lexer::{Token, TokenKind};
 
 // println!("===== cache ===== \n{}", combinator.get_cache_string());
+// println!("===== result ===== \n{:#?}", parse_result);
+// println!("===== float_binary_literal ===== \n{:#?}", get_func_addr(&(Parser::float_binary_literal as _)));
 
 /************************* PARSER *************************/
 
@@ -31,7 +33,10 @@ impl Parser {
 
         println!("===== parser starts =====");
 
-        let combinator_result = parse!(combinator, f!(integer_literal));
+        // let combinator_result = alt!(combinator, s!("Hi"));
+        let combinator_result = parse!(combinator, f!(comma));
+
+        println!("===== cache ===== \n{}", combinator.get_cache_string());
 
         println!("===== parser result ===== \n{:#?}", combinator_result);
 
@@ -47,13 +52,15 @@ impl Parser {
             combinator: &mut Combinator<AST>,
         ) -> Result<Output<AST>, ParserError>,
     ) -> Result<Output<AST>, ParserError> {
-        // Get the cursor.
+        // Get the cursor and columns.
         let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+        // println!("===== parse_terminal ===== \n{:#?}", kind.clone()); // RM
 
         // Holds the returning result.
         let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
             ErrorKind::UnexpectedToken,
-            combinator.get_cursor(),
+            column,
         ));
 
         // Get the next token.
@@ -65,10 +72,14 @@ impl Parser {
                 kind,
                 value: token.token.unwrap_or(String::new()),
             }));
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
         }
 
         // Cache parser result if not already cached.
         combinator.memoize(cursor, get_func_addr(&func), result.clone());
+        // println!("===== parse_terminal ===== \n{:#?}", get_func_addr(&func)); // RM
 
         result
     }
@@ -258,13 +269,14 @@ impl Parser {
         _args: &Vec<CombinatorArg<'a, AST>>,
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
-        // Get the cursor.
+        // Get the cursor and column.
         let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
 
         // Holds the returning result.
         let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::UnexpectedToken,
-            combinator.get_cursor(),
+            ErrorKind::ExpectedIntegerLiteral,
+            column,
         ));
 
         // Get parser result.
@@ -298,6 +310,151 @@ impl Parser {
         combinator.memoize(
             cursor,
             get_func_addr(&(Parser::integer_literal as _)),
+            result.clone(),
+        );
+
+        result
+    }
+
+    /// Parses float literal.
+    pub fn float_literal<'a>(
+        _args: &Vec<CombinatorArg<'a, AST>>,
+        combinator: &mut Combinator<AST>,
+    ) -> Result<Output<AST>, ParserError> {
+        // Get the cursor and column.
+        let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
+            ErrorKind::ExpectedFloatLiteral,
+            column,
+        ));
+
+        // Get parser result.
+        // => Ok( Output::Values( [ Output::AST( AST::Terminal { kind, value } ) ] ) )
+        let parser_result = alt!(
+            combinator,
+            f!(float_binary_literal),
+            f!(float_octal_literal),
+            f!(float_hexadecimal_literal),
+            f!(float_decimal_literal)
+        );
+
+        println!(">>> = {:#?}", parser_result);
+
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            // Pull out array from `Output::Values`.
+            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
+
+            // Pull out `AST` from the `Output::AST`.
+            let mut terminal_ast = variant_value!(parser_result_values.remove(0), Output::AST);
+
+            // Pull out fields from the `Terminal::AST`.
+            let (kind, value) = variant_fields!(terminal_ast, AST::Terminal, kind, value);
+
+            // Convert to `AST::Integer`.
+            let float_ast = AST::Float { kind, value };
+
+            result = Ok(Output::AST(float_ast));
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(
+            cursor,
+            get_func_addr(&(Parser::float_literal as _)),
+            result.clone(),
+        );
+
+        result
+    }
+
+    /// Parses numeric literal.
+    pub fn numeric_literal<'a>(
+        _args: &Vec<CombinatorArg<'a, AST>>,
+        combinator: &mut Combinator<AST>,
+    ) -> Result<Output<AST>, ParserError> {
+        // Get the cursor and column.
+        let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
+            ErrorKind::ExpectedFloatLiteral,
+            column,
+        ));
+
+        // Get parser result.
+        // => Ok( Output::Values( [ Output::AST( AST::_ { kind, value } ) ] ) )
+        let parser_result = alt!(
+            combinator,
+            f!(float_literal),
+            f!(integer_literal)
+        );
+
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            // Pull out array from `Output::Values`.
+            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
+
+            // Pull out `AST` from the `Output::AST`.
+            let mut number_ast = variant_value!(parser_result_values.remove(0), Output::AST);
+
+            result = Ok(Output::AST(number_ast));
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(
+            cursor,
+            get_func_addr(&(Parser::numeric_literal as _)),
+            result.clone(),
+        );
+
+        result
+    }
+
+    /// Parses comma: ',' newline*.
+    pub fn comma<'a>(
+        _args: &Vec<CombinatorArg<'a, AST>>,
+        combinator: &mut Combinator<AST>,
+    ) -> Result<Output<AST>, ParserError> {
+        // Get the cursor and column.
+        let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
+            ErrorKind::ExpectedComma,
+            column,
+        ));
+
+        // Get parser result.
+        // => Ok( Output::Values( [ Output::AST( AST::_ { kind, value } ) ] ) )
+        let parser_result = parse!(
+            combinator,
+            s!(","),
+            optmore!(f!(newline))
+        );
+
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            result = Ok(Output::AST(AST::Empty));
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(
+            cursor,
+            get_func_addr(&(Parser::comma as _)),
             result.clone(),
         );
 

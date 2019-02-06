@@ -8,4 +8,7 @@ pub enum ErrorKind {
     CantMatchAtLeastARule,
     OneOfRulesFailed,
     ExpectedRuleToFail,
+    ExpectedIntegerLiteral,
+    ExpectedFloatLiteral,
+    ExpectedComma,
 }

@@ -4,11 +4,11 @@ use crate::kinds::ErrorKind;
 #[derive(Debug, Clone)]
 pub struct ParserError {
     pub error: ErrorKind,
-    pub cursor: usize,
+    pub column: usize,
 }
 
 impl ParserError {
-    pub fn new(error: ErrorKind, cursor: usize) -> Self {
-        Self { error, cursor }
+    pub fn new(error: ErrorKind, column: usize) -> Self {
+        Self { error, column }
     }
 }

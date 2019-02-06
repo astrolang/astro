@@ -57,7 +57,7 @@ pub struct Lexer {
 
 /// TODO:
 /// - symbols => `:identifier` and `:(`
-/// - coefficient expression => `5f`, `0x34num`, `)f`
+/// - multiple `_` in numeric literals => `0x1___2345f`
 impl Lexer {
     /// Creates a new lexer object from the code passed in.
     pub fn new(code: String) -> Self {
@@ -88,13 +88,14 @@ impl Lexer {
                 String::from("export"),
                 String::from("let"),
                 String::from("var"),
+                String::from("ref"),
+                String::from("iso"),
                 String::from("const"),
+                String::from("macro"),
                 String::from("fun"),
                 String::from("type"),
                 String::from("enum"),
                 String::from("async"),
-                String::from("ref"),
-                String::from("iso"),
                 String::from("if"),
                 String::from("elif"),
                 String::from("else"),
@@ -1163,7 +1164,7 @@ impl Lexer {
         // Unsupported character.
         Err(LexerError::new(
             ErrorKind::DoesNotMatchAnyRule,
-            TokenKind::None,
+            TokenKind::Empty,
             self.cursor,
         ))
     }

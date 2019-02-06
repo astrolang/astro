@@ -2,7 +2,10 @@ use astro_codegen::AST;
 use astro_lexer::Token;
 use std::{collections::HashMap, fmt::Debug};
 
-use crate::{errors::ParserError, kinds::ErrorKind, utils::get_func_addr};
+use crate::{
+    macros,
+    errors::ParserError, kinds::ErrorKind, utils::get_func_addr
+};
 
 /************************* CACHE DATA *************************/
 
@@ -91,14 +94,33 @@ where
         self.cursor
     }
 
+    /// Sets the combinator cursor.
+    pub fn set_cursor(&mut self, cursor: usize) {
+        self.cursor = cursor;
+    }
+
+    /// Gets the column number the combinator is at.
+    pub fn get_column(&mut self) -> usize {
+        // Check if there is a next token.
+        if self.is_inbounds() {
+            self.tokens[self.cursor].cursor
+        } else {
+            // Get the ending column of the last token.
+            let token = &self.tokens[self.tokens.len() - 1];
+            let token_length = token.token.clone().unwrap_or(String::new()).len();
+            token.cursor + token_length + 1
+        }
+    }
+
     /// Gets the combinator cache.
     pub fn get_cache_string(&mut self) -> String {
         format!("{:#?}", self.cache)
     }
 
-    /// Gets the next token if available.
+    /// Gets and consumes the next token if available.
     pub fn eat_token(&mut self) -> Result<Token, ParserError> {
         let cursor = self.cursor;
+        let column = self.get_column();
 
         if self.is_inbounds() {
             // Update parser position.
@@ -106,12 +128,13 @@ where
             return Ok(self.tokens[cursor].clone());
         }
 
-        Err(ParserError::new(ErrorKind::InputExhausted, self.cursor))
+        Err(ParserError::new(ErrorKind::InputExhausted, column))
     }
 
-    /// Compares the next token with argument string.
-    pub fn check_token(&mut self, token: &str) -> Result<(), ParserError> {
+    /// Consumens and compares the next token with argument string.
+    pub fn eat_compared_token(&mut self, token: &str) -> Result<(), ParserError> {
         let cursor = self.cursor;
+        let column = self.get_column();
 
         if self.is_inbounds() {
             if let Some(ref word) = self.tokens[cursor].token {
@@ -121,15 +144,17 @@ where
                     return Ok(());
                 }
 
-                return Err(ParserError::new(ErrorKind::TokensDontMatch, self.cursor));
+                return Err(ParserError::new(ErrorKind::TokensDontMatch, column));
             }
         }
 
-        Err(ParserError::new(ErrorKind::InputExhausted, self.cursor))
+        Err(ParserError::new(ErrorKind::InputExhausted, column))
     }
 
     /// Stores result of a parse function call in cache if it does not already exist.
     /// A parse function call corresponds to visiting a rule.
+    /// TODO: Fix the changing function address issue.
+    /// TODO: Test properly.
     pub fn memoize(
         &mut self,
         cursor: usize,
@@ -174,8 +199,9 @@ where
     where
         T: Debug + Clone,
     {
-        // Get cursor.
+        // Get cursor and column.
         let cursor = combinator.cursor;
+        let column = combinator.get_column();
         let mut asts: Vec<Output<T>> = Vec::new();
         let mut problem: Option<ParserError> = None;
 
@@ -231,7 +257,7 @@ where
                 CombinatorArg::Str(token) => {
                     // It is a string argument
                     // Compare and consume token.
-                    let result = combinator.check_token(token);
+                    let result = combinator.eat_compared_token(token);
 
                     // Check if result of parse function is an error.
                     if result.is_err() {
@@ -251,7 +277,7 @@ where
         // If there was a problem while parsing.
         if problem.is_some() {
             // Revert state.
-            combinator.cursor = cursor;
+            combinator.set_cursor(cursor);
             return Err(problem.unwrap());
         }
 
@@ -266,8 +292,9 @@ where
     where
         T: Debug + Clone,
     {
-        // Get cursor.
+        // Get cursor and column.
         let cursor = combinator.cursor;
+        let column = combinator.get_column();
         let mut asts: Vec<Output<T>> = Vec::new();
         let mut parsed_successfully = false;
 
@@ -323,7 +350,7 @@ where
                 CombinatorArg::Str(token) => {
                     // It is a string argument
                     // Compare and consume token.
-                    let result = combinator.check_token(token);
+                    let result = combinator.eat_compared_token(token);
 
                     // Check if result of parse function is an error.
                     if result.is_ok() {
@@ -343,10 +370,10 @@ where
         // If there was a problem while parsing.
         if !parsed_successfully {
             // Revert state.
-            combinator.cursor = cursor;
+            combinator.set_cursor(cursor);
             return Err(ParserError::new(
                 ErrorKind::AlternativesDontMatch,
-                combinator.cursor,
+                column,
             ));
         }
 
@@ -361,8 +388,9 @@ where
     where
         T: Debug + Clone,
     {
-        // Get cursor.
+        // Get cursor and column.
         let cursor = combinator.cursor;
+        let column = combinator.get_column();
         let mut asts: Vec<Output<T>> = Vec::new();
         let mut parsed_successfully = true;
 
@@ -377,17 +405,18 @@ where
                 }
                 break;
             } else {
-                asts.push(result.unwrap());
+                // Pull out the value in parser result.
+                asts.push(variant_value!(result.unwrap(), Output::Values).remove(0));
             }
         }
 
         // If there was a problem while parsing.
         if !parsed_successfully {
             // Revert state.
-            combinator.cursor = cursor;
+            combinator.set_cursor(cursor);
             return Err(ParserError::new(
                 ErrorKind::CantMatchAtLeastARule,
-                combinator.cursor,
+                column,
             ));
         }
 
@@ -464,19 +493,20 @@ where
     where
         T: Debug + Clone,
     {
-        // Get cursor.
+        // Get cursor and column.
         let cursor = combinator.cursor;
+        let column = combinator.get_column();
 
         let result = match Combinator::parse(args, combinator) {
             Ok(_) => Err(ParserError::new(
                 ErrorKind::ExpectedRuleToFail,
-                combinator.cursor,
+                column,
             )),
             Err(_) => Ok(Output::Empty),
         };
 
         // Revert advancement.
-        combinator.cursor = cursor;
+        combinator.set_cursor(cursor);
 
         result
     }

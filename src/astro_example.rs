@@ -1,7 +1,7 @@
 use astro_lexer::{Lexer, LexerError};
 use astro_parser::Parser;
 
-// enum, not_func {, $not_valid_interp, $not_symbol, (<:, ::, >: as operators),
+// enum, match, not_func {, $not_valid_interp, $not_symbol, (<:, ::, >: as operators),
 // # and #--# not comment, priv, : block indentation,
 // // and /**/ as comment, func :symbol,
 // [correct snippets], no_mutative_call!(), ident(. ident?)?: type
@@ -16,7 +16,8 @@ fn main() {
 
     let tokens = Lexer::new(valid_lexer_code).lex();
 
-    let valid_parser_code = String::from("0b10_100 0o71_230 0x10_45ffe 1_234 0b10_100.01e+11 0o71_2.30e+6 0x10_45.ffep-5 1.3_00e-5 `b` ||regex|| \"string\" ...\n");
+    let valid_parser_code = String::from(", \n \n");
+    // let valid_parser_code = String::from("0x5.5");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,
