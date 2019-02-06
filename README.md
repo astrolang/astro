@@ -42,20 +42,13 @@ Astro is supposed to be high-level enough to write python-like scripts but also 
 
 Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets. Astro has built-in facilities for writing concurrent programs. A [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
 
-### What is Astro automatic memory management like? Rust's or Swift's?
-Neither.
-Astro uses a special [Automatic Reference Counting](https://en.m.wikipedia.org/wiki/Reference_counting) (ARC) system that automatically breaks reference cycles, so its unlike Swift's ARC which requires some special annotations in cases like that.
-It's also unlike Rust current memory management model beacause it doesn't have a strict borrow chcker that requires some mental shift to get used to.
-
-Astro simply stays out of your way; lets you write your code like you would in any other GC'ed language while still being memory safe.
-
 ### How close is Astro to being ready for use?
 Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
 
 For now, Astro can compile its source code to ast format. It is not ready for even the simplest application. It is also currently implemented in Javascript and C++, however, the plan is to bootstrap the compiler (implement it in Astro) once it is sufficiently well-featured.
 
 ### Where can I read about the language?
-There is no throrough documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](docs/language/summary.ast).
+There is no throrough documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](docs/summary.ast).
 
 ### How do I install it?
 N/A
@@ -73,9 +66,6 @@ N/A
 - [ ] Incorporate incremental compilation
 - [ ] Build REPL
 - [ ] Create specialized error handler
-
-### What are the technologies used?
-- [wast2wasm](https://www.npmjs.com/package/wast2wasm) - a tool for translating WebAssembly s-expression format to its binary-encoded format.
 
 ### Want to contribute to the project?
 Please read the [code of conduct](CODE_OF_CONDUCT.md) and contribution [guidelines](CONTRIBUTING.md). We welcome your ideas and contributions.
