@@ -5,7 +5,10 @@ use crate::{
     macros,
     utils::get_func_addr,
 };
-use astro_codegen::AST;
+use astro_codegen::asts::{
+    AST,
+    SimpleExpr,
+};
 use astro_lexer::{Token, TokenKind};
 
 // println!("===== cache ===== \n{}", combinator.get_cache_string());
@@ -34,6 +37,8 @@ impl Parser {
         println!("===== parser starts =====");
 
         // let combinator_result = alt!(combinator, s!("Hi"));
+        // let combinator_result = parse!(combinator, f!(integer_literal));
+        // let combinator_result = parse!(combinator, f!(numeric_literal));
         let combinator_result = parse!(combinator, f!(comma));
 
         println!("===== cache ===== \n{}", combinator.get_cache_string());
@@ -68,10 +73,12 @@ impl Parser {
 
         // Check if the token kind is the same as the one provided.
         if token.kind == kind {
-            result = Ok(Output::AST(AST::Terminal {
-                kind,
-                value: token.token.unwrap_or(String::new()),
-            }));
+            result = Ok(Output::AST(AST::SimpleExpr(
+                SimpleExpr::Terminal {
+                    kind,
+                    value: token.token.unwrap_or(String::new()),
+                }
+            )));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
@@ -295,15 +302,15 @@ impl Parser {
             let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
 
             // Pull out `AST` from the `Output::AST`.
-            let mut terminal_ast = variant_value!(parser_result_values.remove(0), Output::AST);
+            let mut ast = variant_value!(parser_result_values.remove(0), Output::AST);
 
-            // Pull out fields from the `Terminal::AST`.
-            let (kind, value) = variant_fields!(terminal_ast, AST::Terminal, kind, value);
+            // // Pull out fields from the `Terminal::AST`.
+            // let (kind, value) = variant_fields!(terminal_ast, AST::Terminal, kind, value);
 
-            // Convert to `AST::Integer`.
-            let integer_ast = AST::Integer { kind, value };
+            // // Convert to `AST::Integer`.
+            // let integer_ast = AST::Integer { kind, value };
 
-            result = Ok(Output::AST(integer_ast));
+            result = Ok(Output::AST(ast));
         }
 
         // Cache parser result if not already cached.
@@ -341,23 +348,21 @@ impl Parser {
             f!(float_decimal_literal)
         );
 
-        println!(">>> = {:#?}", parser_result);
-
         // Check if parser result is OK.
         if parser_result.is_ok() {
             // Pull out array from `Output::Values`.
             let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
 
             // Pull out `AST` from the `Output::AST`.
-            let mut terminal_ast = variant_value!(parser_result_values.remove(0), Output::AST);
+            let mut ast = variant_value!(parser_result_values.remove(0), Output::AST);
 
-            // Pull out fields from the `Terminal::AST`.
-            let (kind, value) = variant_fields!(terminal_ast, AST::Terminal, kind, value);
+            // // Pull out fields from the `Terminal::AST`.
+            // let (kind, value) = variant_fields!(terminal_ast, AST::Terminal, kind, value);
 
-            // Convert to `AST::Integer`.
-            let float_ast = AST::Float { kind, value };
+            // // Convert to `AST::Integer`.
+            // let float_ast = AST::Float { kind, value };
 
-            result = Ok(Output::AST(float_ast));
+            result = Ok(Output::AST(ast));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
@@ -402,9 +407,9 @@ impl Parser {
             let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
 
             // Pull out `AST` from the `Output::AST`.
-            let mut number_ast = variant_value!(parser_result_values.remove(0), Output::AST);
+            let mut ast = variant_value!(parser_result_values.remove(0), Output::AST);
 
-            result = Ok(Output::AST(number_ast));
+            result = Ok(Output::AST(ast));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);

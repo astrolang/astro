@@ -58,6 +58,7 @@ pub struct Lexer {
 /// TODO:
 /// - symbols => `:identifier` and `:(`
 /// - multiple `_` in numeric literals => `0x1___2345f`
+/// - linecontinuation => `...` \s* (\r?\n)*
 impl Lexer {
     /// Creates a new lexer object from the code passed in.
     pub fn new(code: String) -> Self {
