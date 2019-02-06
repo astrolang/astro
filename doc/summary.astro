@@ -1142,15 +1142,21 @@
 
     export random_string
 
-- PRIVATE ACCESS MODIFIER FOR FIELDS
-    // When a type is exported, its fields are made public by default.
-    // To prevent a field from exposure to external modules, it must be marked with `priv`.
+- PUBLIC ACCESS MODIFIER FOR FIELDS
+    // Types fields are private by default.
+    // To make a field visible to external modules, it must be marked with `pub`.
     type Student {
         var name
-        priv var scores // field is private to module
+        pub var scores // field is now public
     }
 
-    type Student { name, priv scores }
+    type Student { name, pub scores }
+
+    // Enum variants are always public. They cannot be made private.
+    enum Fruits {
+        Orange,
+        Mango
+    }
 
 - OPERATOR OVERLOADING
     // Existing operators can be overloaded just like regular functions.
@@ -1162,13 +1168,6 @@
     fun getindex(sequence: Sequence, index: Signed) -> T {
         sequence.items[index]
     }
-
-- SYMBOL
-    // Symbols are static data types that hold their content as-is.
-    let symbol = :name
-
-    // A symbol can be interpolated in another symbol.
-    let addition = :(let five = :symbol)
 
 - REGEX
     // Regex are used to find and/or capture patterns in strings.
@@ -1243,16 +1242,24 @@
     // Extending and coercing a primitive type to another can be done with `as`
     let int_number = 45
     let uint_number = int_number as UInt
+    // Coercing a unsigneg integer into a pointer.
     let pointer = unsafe { int_number as *Int }
 
-
 - RESERVED KEYWORDS
-    import, export, let, var, priv, const, fun, type, async, enum,
+    import, export, let, var, pub, const, fun, type, async, enum,
     ref, iso,
+    unsafe,
     if, elif, else, while, for, loop, end, match,
     fallthrough, return, break, continue, yield, from, await,
     where,
     is, not, in, as, mod, typeof,
+
+- SYMBOL : TODO
+    // Symbols are static data types that hold their content as-is.
+    let symbol = :name
+
+    // A symbol can be interpolated in another symbol.
+    let addition = :(let five = :symbol)
 
 - MACROS : TODO
     // Rust macros vs Julia macros
