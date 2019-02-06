@@ -3,8 +3,7 @@
 #### Work in Progress :construction:
 Current Version: 0.1.15
 
-
-![astro screenshot](https://github.com/astrolang/astro/blob/develop/media/images/astro_syntax.png)
+![astro screenshot](https://github.com/astrolang/astro/blob/develop/media/syntax_screenshot.png)
 
 ### What is Astro?
 Astro is a fun programming language designed for safe _high-performance applications_. It is essentially a statically-typed systems language that
