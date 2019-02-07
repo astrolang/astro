@@ -1,7 +1,7 @@
 use crate::kinds::ErrorKind;
 
 /// Error from lexing.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ParserError {
     pub error: ErrorKind,
     pub column: usize,

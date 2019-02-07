@@ -30,13 +30,6 @@ impl Parser {
 
         println!("===== parser starts =====");
 
-        // let combinator_result = alt!(combinator, s!("Hi"));
-        // let combinator_result = parse!(combinator, f!(integer_literal));
-        // let combinator_result = parse!(combinator, f!(float_literal));
-        // let combinator_result = parse!(combinator, f!(numeric_literal));
-        // let combinator_result = parse!(combinator, f!(comma));
-        // let combinator_result = parse!(combinator, f!(newlines));
-        // let combinator_result = parse!(combinator, f!(list_arguments));
         let combinator_result = parse!(combinator, f!(list_literal));
 
         println!("===== cache ===== \n{}", combinator.get_cache_string());
@@ -555,7 +548,7 @@ impl Parser {
             // Get the third element.
             let value = parser_result_values.remove(2);
 
-            let mut list_expr = match value {
+            let list_expr = match value {
                 // Create an empty list if there is nothing in the third element.
                 Output::Empty => Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![]))),
                 // Otherwise pull out an array from Output::Values and get first element.
@@ -575,12 +568,14 @@ impl Parser {
     }
 }
 
+// TODO: Add failing cases.
 #[cfg(test)]
 mod tests {
     use super::{macros, Combinator, CombinatorArg, Output, Parser, SimpleExpr, TokenKind, AST};
     use astro_lexer::Lexer;
 
     // Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![])))
+    // println!("parser = {:?}", combinator_result_2);
 
     fn get_combinator_for_code(code: String) -> Combinator<AST> {
         let tokens = Lexer::new(code).lex().unwrap();
@@ -589,24 +584,168 @@ mod tests {
 
     #[test]
     fn newlines() {
+        // Sinle newline.
         let combinator = &mut get_combinator_for_code("\r\n".into());
-        let combinator_result = parse!(combinator, f!(newlines));
-        println!("parser = {:?}", combinator_result);
-        assert_eq!(true, true);
+        let combinator_result_1 = parse!(combinator, f!(newlines));
+
+        // Multiple newlines.
+        let combinator = &mut get_combinator_for_code("\n \r\n".into());
+        let combinator_result_2 = parse!(combinator, f!(newlines));
+
+        assert_eq!(
+            combinator_result_1,
+            Ok(Output::Values(vec![Output::AST(AST::Empty)]))
+        );
+        assert_eq!(
+            combinator_result_2,
+            Ok(Output::Values(vec![Output::AST(AST::Empty)]))
+        );
     }
 
     #[test]
     fn comma() {
-        assert!(true);
+        // Just comma.
+        let combinator = &mut get_combinator_for_code(",".into());
+        let combinator_result_1 = parse!(combinator, f!(comma));
+
+        // Comma with newlines.
+        let combinator = &mut get_combinator_for_code(",  \r\n\n".into());
+        let combinator_result_2 = parse!(combinator, f!(comma));
+
+        assert_eq!(
+            combinator_result_1,
+            Ok(Output::Values(vec![Output::AST(AST::Empty)]))
+        );
+        assert_eq!(
+            combinator_result_2,
+            Ok(Output::Values(vec![Output::AST(AST::Empty)]))
+        );
     }
 
     #[test]
     fn list_arguments() {
-        assert!(true);
+        // One argument.
+        let combinator = &mut get_combinator_for_code("5".into());
+        let combinator_result_1 = parse!(combinator, f!(list_arguments));
+
+        // Multiple arguments.
+        let combinator = &mut get_combinator_for_code("5, 0x7f.45".into());
+        let combinator_result_2 = parse!(combinator, f!(list_arguments));
+
+        // Multiple arguments with trailing comma.
+        let combinator = &mut get_combinator_for_code(".1, 2.3, 5_00,".into());
+        let combinator_result_3 = parse!(combinator, f!(list_arguments));
+
+        assert_eq!(
+            combinator_result_1,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::List(vec![SimpleExpr::Terminal {
+                    kind: TokenKind::IntegerDecimalLiteral,
+                    value: "5".into()
+                }])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_2,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::List(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "5".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatHexadecimalLiteral,
+                        value: "7f.45".into()
+                    }
+                ])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_3,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::List(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "0.1".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "2.3".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "500".into()
+                    }
+                ])
+            ))]))
+        );
     }
 
     #[test]
     fn list_literal() {
+        // One argument.
+        let combinator = &mut get_combinator_for_code("[5,]".into());
+        let combinator_result_1 = parse!(combinator, f!(list_literal));
+
+        // Multiple arguments.
+        let combinator = &mut get_combinator_for_code("[\n5,\r\n 0x7f.45,]".into());
+        let combinator_result_2 = parse!(combinator, f!(list_literal));
+
+        // Multiple arguments with trailing comma.
+        let combinator = &mut get_combinator_for_code("[.1, 2.3, 5_00,]".into());
+        let combinator_result_3 = parse!(combinator, f!(list_literal));
+
+        // No argument.
+        let combinator = &mut get_combinator_for_code("[]".into());
+        let combinator_result_4 = parse!(combinator, f!(list_literal));
+
+        assert_eq!(
+            combinator_result_1,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::List(vec![SimpleExpr::Terminal {
+                    kind: TokenKind::IntegerDecimalLiteral,
+                    value: "5".into()
+                }])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_2,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::List(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "5".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatHexadecimalLiteral,
+                        value: "7f.45".into()
+                    }
+                ])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_3,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::List(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "0.1".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "2.3".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "500".into()
+                    }
+                ])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_4,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![])))]))
+        );
         assert!(true);
     }
 }
