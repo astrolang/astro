@@ -140,6 +140,15 @@ listliteral =
   | '[' newlines? listarguments? newlines? ']'
   { AST::SimpleExpr(SimpleExpr::List) }
 
+tuplearguments =
+  | simpleexpression (comma simpleexpression)+ comma?
+  | simpleexpression comma
+  { AST::SimpleExpr(SimpleExpr::Tuple) }
+
+tupleliteral =
+  | '(' newlines? tuplearguments? newlines? ')'
+  { AST::SimpleExpr(SimpleExpr::Tuple) }
+
 /*************** FUTURE ***************/
 
 floatwithoutmantissa = // LEXER PHASE

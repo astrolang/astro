@@ -38,8 +38,13 @@ pub enum CombinatorArg<'a, T> {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Output<T> {
     Values(Vec<Output<T>>), // A list of outputs returned by combinator function.
-    Str(String),            // A token returned by combinator function.
-    AST(T),                 // Outputs returned by a custom parser function
+    Alt {
+        // A list of outputs returned by alt combinator function.
+        value: Box<Output<T>>,
+        index: u8,
+    },
+    Str(String), // A token returned by combinator function.
+    AST(T),      // Outputs returned by a custom parser function
     Empty,
 }
 
@@ -299,9 +304,10 @@ where
         let column = combinator.get_column();
         let mut asts: Vec<Output<T>> = Vec::new();
         let mut parsed_successfully = false;
+        let mut alternative_index: u8 = 0;
 
         // Loop through arguments.
-        for arg in args {
+        for (index, arg) in args.iter().enumerate() {
             // Check type of argument.
             match arg {
                 CombinatorArg::Func((func, arguments)) => {
@@ -322,6 +328,9 @@ where
                             // Parsing successful.
                             parsed_successfully = true;
 
+                            // Set alternative index.
+                            alternative_index = index as _;
+
                             // Add data to list.
                             asts.push(data.unwrap());
 
@@ -341,6 +350,9 @@ where
                             // Parsing successful.
                             parsed_successfully = true;
 
+                            // Set alternative index.
+                            alternative_index = index as _;
+
                             // Add data to list.
                             asts.push(ast.unwrap());
 
@@ -359,6 +371,9 @@ where
                         // Parsing successful.
                         parsed_successfully = true;
 
+                        // Set alternative index.
+                        alternative_index = index as _;
+
                         // Add data to list.
                         asts.push(Output::Str(token.to_string()));
 
@@ -376,7 +391,10 @@ where
             return Err(ParserError::new(ErrorKind::AlternativesDontMatch, column));
         }
 
-        Ok(Output::Values(asts))
+        Ok(Output::Alt {
+            value: Box::new(Output::Values(asts)),
+            index: alternative_index,
+        })
     }
 
     /// Parses its arguments at least once.

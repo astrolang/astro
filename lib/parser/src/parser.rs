@@ -30,7 +30,10 @@ impl Parser {
 
         println!("===== parser starts =====");
 
-        let combinator_result = parse!(combinator, f!(list_literal));
+        // let combinator_result = parse!(combinator, more!(s!("Hello"), s!("Hi")));
+        // let combinator_result = parse!(combinator, alt!(parse!(s!("Hello")), parse!(s!("Hi"), s!("Hello"))));
+        // let combinator_result = parse!(combinator, f!(tuple_arguments));
+        let combinator_result = parse!(combinator, f!(numeric_literal));
 
         println!("===== cache ===== \n{}", combinator.get_cache_string());
 
@@ -278,11 +281,17 @@ impl Parser {
             f!(integer_decimal_literal)
         );
 
+        println!(">>> = {:#?}", parser_result);
+
         // Check if parser result is OK.
         if parser_result.is_ok() {
-            // Pull out array from `Output::Values`.
-            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
-            result = Ok(parser_result_values.remove(0));
+            // Pull value field out of Output::Alt.
+            let (value, _) = variant_fields!(parser_result.unwrap(), Output::Alt, { value, index });
+
+            // Pull array out of Output::Values.
+            let mut array = variant_value!(*value, Output::Values);
+
+            result = Ok(array.remove(0));
         }
 
         // Cache parser result if not already cached.
@@ -291,6 +300,7 @@ impl Parser {
             get_func_addr(&(Parser::integer_literal as _)),
             result.clone(),
         );
+        println!(">>> = {:#?}", result);
 
         result
     }
@@ -319,9 +329,13 @@ impl Parser {
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
-            // Pull out array from `Output::Values`.
-            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
-            result = Ok(parser_result_values.remove(0));
+            // Pull value field out of Output::Alt.
+            let (value, _) = variant_fields!(parser_result.unwrap(), Output::Alt, { value, index });
+
+            // Pull array out of Output::Values.
+            let mut array = variant_value!(*value, Output::Values);
+
+            result = Ok(array.remove(0));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
@@ -355,9 +369,13 @@ impl Parser {
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
-            // Pull out array from `Output::Values`.
-            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
-            result = Ok(parser_result_values.remove(0));
+            // Pull value field out of Output::Alt.
+            let (value, _) = variant_fields!(parser_result.unwrap(), Output::Alt, { value, index });
+
+            // Pull array out of Output::Values.
+            let mut array = variant_value!(*value, Output::Values);
+
+            result = Ok(array.remove(0));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
@@ -464,7 +482,7 @@ impl Parser {
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
-            // Pull out array from `Output::Values`.
+            // Pull array out of Output::Values.
             let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
             let parser_result_values_length = parser_result_values.len();
 
@@ -542,7 +560,7 @@ impl Parser {
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
-            // Pull out array from `Output::Values`.
+            // Pull array out of Output::Values.
             let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
 
             // Get the third element.
@@ -551,7 +569,147 @@ impl Parser {
             let list_expr = match value {
                 // Create an empty list if there is nothing in the third element.
                 Output::Empty => Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![]))),
-                // Otherwise pull out an array from Output::Values and get first element.
+                // Otherwise Pull an array out of Output::Values and get first element.
+                _ => variant_value!(value, Output::Values).remove(0),
+            };
+
+            result = Ok(list_expr);
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(cursor, get_func_addr(&(Parser::comma as _)), result.clone());
+
+        result
+    }
+
+    /// TODO: Change numericliteral to simpleexpression.
+    /// Parses tuplearguments =
+    ///     | simpleexpression (comma simpleexpression)+ comma?
+    ///     | simpleexpression comma
+    ///     { expressions }
+    pub fn tuple_arguments<'a>(
+        _args: &Vec<CombinatorArg<'a, AST>>,
+        combinator: &mut Combinator<AST>,
+    ) -> Result<Output<AST>, ParserError> {
+        // Get the cursor and column.
+        let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedTupleArguments, column));
+
+        // Get parser result.
+        let parser_result = parse!(
+            combinator,
+            alt!(
+                parse!(
+                    f!(numeric_literal),
+                    more!(f!(comma), f!(numeric_literal)),
+                    opt!(f!(comma))
+                ),
+                parse!(f!(numeric_literal), f!(comma))
+            )
+        );
+
+        println!(">>> {:#?}", parser_result);
+
+        // // Holds expressions.
+        // let mut expressions = vec![];
+
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            // // Pull array out of Output::Values.
+            // let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
+            // let parser_result_values_length = parser_result_values.len();
+
+            // // Get the expression first if it exists.
+            // if parser_result_values_length > 0 {
+            //     let output = parser_result_values.remove(0);
+            //     if output != Output::Empty {
+            //         // Pull AST::SimpleExpr from Output::AST.
+            //         let ast_expr = variant_value!(output, Output::AST);
+
+            //         // Pull SimpleExpr::_ from AST::SimpleExpr.
+            //         let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
+
+            //         expressions.push(simple_expr);
+            //     }
+            // }
+
+            // // Get subsequent expressions.
+            // if parser_result_values_length > 1 {
+            //     // Get the next item.
+            //     let output = parser_result_values.remove(0);
+            //     if output != Output::Empty {
+            //         // Pull array from Output::Values.
+            //         let values = variant_value!(output, Output::Values);
+
+            //         for values_enum in values {
+            //             // Pull array from Output::Values.
+            //             let mut values = variant_value!(values_enum, Output::Values);
+
+            //             // Pull AST::SimpleExpr from the second Output::AST.
+            //             let ast_expr = variant_value!(values.remove(1), Output::AST);
+
+            //             // Pull SimpleExpr::_ from AST::SimpleExpr.
+            //             let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
+
+            //             expressions.push(simple_expr);
+            //         }
+            //     }
+            // }
+            // result = Ok(Output::AST(AST::SimpleExpr(SimpleExpr::List(expressions))));
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(cursor, get_func_addr(&(Parser::comma as _)), result.clone());
+
+        result
+    }
+
+    /// Parses tupleliteral =
+    ///     | '(' newlines? listarguments? newlines? ')'
+    pub fn tuple_literal<'a>(
+        _args: &Vec<CombinatorArg<'a, AST>>,
+        combinator: &mut Combinator<AST>,
+    ) -> Result<Output<AST>, ParserError> {
+        // Get the cursor and column.
+        let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedTupleLiteral, column));
+
+        // Get parser result.
+        let parser_result = parse!(
+            combinator,
+            s!("("),
+            opt!(f!(newlines)),
+            opt!(f!(tuple_arguments)),
+            opt!(f!(newlines)),
+            s!(")")
+        );
+
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            // Pull array out of Output::Values.
+            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
+
+            // Get the third element.
+            let value = parser_result_values.remove(2);
+
+            let list_expr = match value {
+                // Create an empty list if there is nothing in the third element.
+                Output::Empty => Output::AST(AST::SimpleExpr(SimpleExpr::Tuple(vec![]))),
+                // Otherwise Pull an array out of Output::Values and get first element.
                 _ => variant_value!(value, Output::Values).remove(0),
             };
 
@@ -567,6 +725,8 @@ impl Parser {
         result
     }
 }
+
+/************************* TESTS *************************/
 
 // TODO: Add failing cases.
 #[cfg(test)]
@@ -744,7 +904,9 @@ mod tests {
         );
         assert_eq!(
             combinator_result_4,
-            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![])))]))
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::List(vec![])
+            ))]))
         );
         assert!(true);
     }

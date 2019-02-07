@@ -14,4 +14,6 @@ pub enum ErrorKind {
     ExpectedNewlines,
     ExpectedListArguments,
     ExpectedListLiteral,
+    ExpectedTupleArguments,
+    ExpectedTupleLiteral,
 }

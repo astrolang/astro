@@ -15,5 +15,6 @@ pub enum SimpleExpr {
         value: String,
     },
     List(Vec<SimpleExpr>),
+    Tuple(Vec<SimpleExpr>),
     Empty,
 }
