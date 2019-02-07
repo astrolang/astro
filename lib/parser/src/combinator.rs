@@ -405,7 +405,7 @@ where
                 break;
             } else {
                 // Pull out the value in parser result.
-                asts.push(variant_value!(result.unwrap(), Output::Values).remove(0));
+                asts.push(result.unwrap());
             }
         }
 

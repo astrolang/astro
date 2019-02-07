@@ -1,10 +1,6 @@
 use astro_lexer::{Lexer, LexerError};
 use astro_parser::Parser;
 
-// enum, match, not_func {, $not_valid_interp, $not_symbol, (<:, ::, >: as operators),
-// # and #--# not comment, priv, : block indentation,
-// // and /**/ as comment, func :symbol,
-// [correct snippets], no_mutative_call!(), ident(. ident?)?: type
 fn main() {
     println!("Welcome to Astro!");
 
@@ -18,7 +14,8 @@ fn main() {
 
     // let valid_parser_code = String::from("0x5");
     // let valid_parser_code = String::from("0x5.5");
-    let valid_parser_code = String::from(", \n \n");
+    // let valid_parser_code = String::from(", \n \n");
+    let valid_parser_code = String::from("5, 0x5.0, 0b1.10, ");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,

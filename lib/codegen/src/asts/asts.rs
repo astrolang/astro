@@ -10,7 +10,6 @@ pub enum AST {
 
 #[derive(Debug, Clone)]
 pub enum SimpleExpr {
-    // Identifier, Float, String
     Terminal {
         kind: TokenKind,
         value: String,
