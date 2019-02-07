@@ -104,10 +104,16 @@ where
         if self.is_inbounds() {
             self.tokens[self.cursor].cursor
         } else {
-            // Get the ending column of the last token.
-            let token = &self.tokens[self.tokens.len() - 1];
-            let token_length = token.token.clone().unwrap_or(String::new()).len();
-            token.cursor + token_length + 1
+            let num_of_tokens = self.tokens.len();
+            match num_of_tokens {
+                0 => 0, // Check if there is a token at all.
+                _ => {
+                    // Get the ending column of the last token.
+                    let token = &self.tokens[num_of_tokens - 1];
+                    let token_length = token.token.clone().unwrap_or(String::new()).len();
+                    token.cursor + token_length + 1
+                }
+            }
         }
     }
 

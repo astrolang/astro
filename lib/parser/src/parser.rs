@@ -12,6 +12,7 @@ use astro_codegen::asts::{
 use astro_lexer::{Token, TokenKind};
 
 /************************* PARSER *************************/
+
 /// Astro parser.
 pub struct Parser {
     combinator: Combinator<AST>,
@@ -504,7 +505,6 @@ impl Parser {
             ),
             opt!(f!(comma))
         );
-        println!("parser = {:#?}", parser_result);
 
         // Holds expressions.
         let mut expressions = vec![];
@@ -598,10 +598,17 @@ impl Parser {
             // Pull out array from `Output::Values`.
             let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
 
-            // Pull another array from the third element, an Output::Values.
-            let mut values = variant_value!(parser_result_values.remove(2), Output::Values);
+            // Get the third element.
+            let value = parser_result_values.remove(2);
 
-            result = Ok(values.remove(0));
+            let mut list_expr = match value {
+                // Create an empty list if there is nothing in the third element.
+                Output::Empty => Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![]))),
+                // Otherwise pull out an array from Output::Values and get first element.
+                _ => variant_value!(value, Output::Values).remove(0),
+            };
+
+            result = Ok(list_expr);
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
@@ -647,17 +654,17 @@ mod tests {
 
     #[test]
     fn comma() {
-        assert_eq!(true, true);
+        assert!(true);
     }
 
     #[test]
     fn list_arguments() {
-        assert_eq!(true, true);
+        assert!(true);
     }
 
     #[test]
     fn list_literal() {
-        assert_eq!(true, true);
+        assert!(true);
     }
 }
 
