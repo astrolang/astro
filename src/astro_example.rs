@@ -14,8 +14,14 @@ fn main() {
 
     // let valid_parser_code = String::from("0x5");
     // let valid_parser_code = String::from("0x5.5");
+    // let valid_parser_code = String::from("\r\n \n");
     // let valid_parser_code = String::from(", \n \n");
-    let valid_parser_code = String::from("5, 0x5.0, 0b1.10, ");
+    // let valid_parser_code = String::from("5, 0x5.0, \n 0b1.10,");
+    // let valid_parser_code = String::from("5");
+    // let valid_parser_code = String::from("");
+    // let valid_parser_code = String::from("[ 5, 0x5.0, \n 0b1.10, \n ]");
+    let valid_parser_code = String::from("[\r\n 5 ]");
+    // let valid_parser_code = String::from("[]");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,

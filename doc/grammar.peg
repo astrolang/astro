@@ -126,16 +126,19 @@ numericliteral =
   | floatliteral
   | integerliteral  // Can eat others cake
 
+newlines =
+  | newline+
+
 comma =
-  | ',' newline*
+  | ',' newlines?
 
 listarguments =
   | simpleexpression (comma simpleexpression)* comma?
-  { expressions }
+  { AST::SimpleExpr(SimpleExpr::List) }
 
 listliteral =
-  | '[' listarguments ']'
-  { kind, expressions }
+  | '[' newlines? listarguments? newlines? ']'
+  { AST::SimpleExpr(SimpleExpr::List) }
 
 /*************** FUTURE ***************/
 

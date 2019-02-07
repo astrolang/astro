@@ -11,4 +11,7 @@ pub enum ErrorKind {
     ExpectedIntegerLiteral,
     ExpectedFloatLiteral,
     ExpectedComma,
+    ExpectedNewlines,
+    ExpectedListArguments,
+    ExpectedListLiteral,
 }

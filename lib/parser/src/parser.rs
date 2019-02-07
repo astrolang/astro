@@ -11,12 +11,8 @@ use astro_codegen::asts::{
 };
 use astro_lexer::{Token, TokenKind};
 
-// println!("===== cache ===== \n{}", combinator.get_cache_string());
-// println!("===== result ===== \n{:#?}", parse_result);
-// println!("===== float_binary_literal ===== \n{:#?}", get_func_addr(&(Parser::float_binary_literal as _)));
-
 /************************* PARSER *************************/
-
+/// Astro parser.
 pub struct Parser {
     combinator: Combinator<AST>,
 }
@@ -41,7 +37,9 @@ impl Parser {
         // let combinator_result = parse!(combinator, f!(float_literal));
         // let combinator_result = parse!(combinator, f!(numeric_literal));
         // let combinator_result = parse!(combinator, f!(comma));
-        let combinator_result = parse!(combinator, f!(list_arguments));
+        // let combinator_result = parse!(combinator, f!(newlines));
+        // let combinator_result = parse!(combinator, f!(list_arguments));
+        let combinator_result = parse!(combinator, f!(list_literal));
 
         println!("===== cache ===== \n{}", combinator.get_cache_string());
 
@@ -62,7 +60,6 @@ impl Parser {
         // Get the cursor and columns.
         let cursor = combinator.get_cursor();
         let column = combinator.get_column();
-        // println!("===== parse_terminal ===== \n{:#?}", kind.clone()); // RM
 
         // Holds the returning result.
         let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
@@ -88,7 +85,6 @@ impl Parser {
 
         // Cache parser result if not already cached.
         combinator.memoize(cursor, get_func_addr(&func), result.clone());
-        // println!("===== parse_terminal ===== \n{:#?}", get_func_addr(&func)); // RM
 
         result
     }
@@ -400,8 +396,48 @@ impl Parser {
         result
     }
 
+    /// Parses newlines =
+    ///     | newline*.
+    pub fn newlines<'a>(
+        _args: &Vec<CombinatorArg<'a, AST>>,
+        combinator: &mut Combinator<AST>,
+    ) -> Result<Output<AST>, ParserError> {
+        // Get the cursor and column.
+        let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
+            ErrorKind::ExpectedNewlines,
+            column,
+        ));
+
+        // Get parser result.
+        let parser_result = parse!(
+            combinator,
+            more!(f!(newline))
+        );
+
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            result = Ok(Output::AST(AST::Empty));
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(
+            cursor,
+            get_func_addr(&(Parser::comma as _)),
+            result.clone(),
+        );
+
+        result
+    }
+
     /// Parses comma =
-    ///     | ',' newline*.
+    ///     | ',' newlines?.
     pub fn comma<'a>(
         _args: &Vec<CombinatorArg<'a, AST>>,
         combinator: &mut Combinator<AST>,
@@ -420,7 +456,7 @@ impl Parser {
         let parser_result = parse!(
             combinator,
             s!(","),
-            optmore!(f!(newline))
+            opt!(f!(newlines))
         );
 
         // Check if parser result is OK.
@@ -455,7 +491,7 @@ impl Parser {
 
         // Holds the returning result.
         let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedComma,
+            ErrorKind::ExpectedListArguments,
             column,
         ));
 
@@ -466,8 +502,9 @@ impl Parser {
             optmore!(
                 f!(comma), f!(numeric_literal)
             ),
-            f!(comma)
+            opt!(f!(comma))
         );
+        println!("parser = {:#?}", parser_result);
 
         // Holds expressions.
         let mut expressions = vec![];
@@ -480,29 +517,10 @@ impl Parser {
 
             // Get the expression first if it exists.
             if parser_result_values_length > 0 {
-                // Pull AST::SimpleExpr from Output::AST.
-                let ast_expr = variant_value!(parser_result_values.remove(0), Output::AST);
-
-                // Pull SimpleExpr::_ from AST::SimpleExpr.
-                let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
-
-                expressions.push(simple_expr);
-            }
-
-            // Get subsequent expressions.
-            if parser_result_values_length > 1 {
-                // Get the next item.
-                let values_enum = parser_result_values.remove(0);
-
-                // Pull array from Output::Values.
-                let values = variant_value!(values_enum, Output::Values);
-
-                for values_enum in values {
-                    // Pull array from Output::Values.
-                    let mut values = variant_value!(values_enum, Output::Values);
-
-                    // Pull AST::SimpleExpr from the second Output::AST.
-                    let ast_expr = variant_value!(values.remove(1), Output::AST);
+                let output = parser_result_values.remove(0);
+                if output != Output::Empty {
+                    // Pull AST::SimpleExpr from Output::AST.
+                    let ast_expr = variant_value!(output, Output::AST);
 
                     // Pull SimpleExpr::_ from AST::SimpleExpr.
                     let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
@@ -510,7 +528,80 @@ impl Parser {
                     expressions.push(simple_expr);
                 }
             }
+
+            // Get subsequent expressions.
+            if parser_result_values_length > 1 {
+                // Get the next item.
+                let output = parser_result_values.remove(0);
+                if output != Output::Empty {
+                    // Pull array from Output::Values.
+                    let values = variant_value!(output, Output::Values);
+
+                    for values_enum in values {
+                        // Pull array from Output::Values.
+                        let mut values = variant_value!(values_enum, Output::Values);
+
+                        // Pull AST::SimpleExpr from the second Output::AST.
+                        let ast_expr = variant_value!(values.remove(1), Output::AST);
+
+                        // Pull SimpleExpr::_ from AST::SimpleExpr.
+                        let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
+
+                        expressions.push(simple_expr);
+                    }
+                }
+            }
             result = Ok(Output::AST(AST::SimpleExpr(SimpleExpr::List(expressions))));
+        } else {
+            // Revert advancement.
+            combinator.set_cursor(cursor);
+        }
+
+        // Cache parser result if not already cached.
+        combinator.memoize(
+            cursor,
+            get_func_addr(&(Parser::comma as _)),
+            result.clone(),
+        );
+
+        result
+    }
+
+    /// Parses listliteral =
+    ///     | '[' newlines? listarguments? newlines? ']'
+    pub fn list_literal<'a>(
+        _args: &Vec<CombinatorArg<'a, AST>>,
+        combinator: &mut Combinator<AST>,
+    ) -> Result<Output<AST>, ParserError> {
+        // Get the cursor and column.
+        let cursor = combinator.get_cursor();
+        let column = combinator.get_column();
+
+        // Holds the returning result.
+        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
+            ErrorKind::ExpectedListLiteral,
+            column,
+        ));
+
+        // Get parser result.
+        let parser_result = parse!(
+            combinator,
+            s!("["),
+            opt!(f!(newlines)),
+            opt!(f!(list_arguments)),
+            opt!(f!(newlines)),
+            s!("]")
+        );
+
+        // Check if parser result is OK.
+        if parser_result.is_ok() {
+            // Pull out array from `Output::Values`.
+            let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
+
+            // Pull another array from the third element, an Output::Values.
+            let mut values = variant_value!(parser_result_values.remove(2), Output::Values);
+
+            result = Ok(values.remove(0));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
