@@ -618,5 +618,46 @@ impl Parser {
     }
 }
 
-/// TODO
-mod tests {}
+#[cfg(test)]
+mod tests {
+    use super::{
+        macros,
+        Parser,
+        Combinator,
+        CombinatorArg,
+        AST,
+        TokenKind,
+        SimpleExpr,
+        Output,
+    };
+    use astro_lexer::{Lexer};
+
+    fn get_combinator_for_code(code: String) -> Combinator<AST> {
+        let tokens = Lexer::new(code).lex().unwrap();
+        Combinator::new(tokens)
+    }
+
+    #[test]
+    fn newlines() {
+        let combinator = &mut get_combinator_for_code("\r\n".into());
+        let combinator_result = parse!(combinator, f!(newlines));
+        println!("parser = {:?}", combinator_result);
+        assert_eq!(true, true);
+    }
+
+    #[test]
+    fn comma() {
+        assert_eq!(true, true);
+    }
+
+    #[test]
+    fn list_arguments() {
+        assert_eq!(true, true);
+    }
+
+    #[test]
+    fn list_literal() {
+        assert_eq!(true, true);
+    }
+}
+
