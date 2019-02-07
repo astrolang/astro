@@ -250,9 +250,6 @@
     let arguments = (5, 6)
     add(...arguments)
 
-    // Empty tuple.
-    let map = (,)
-
     // One-element tuple. Note the trailing comma.
     let map = (london,)
 
@@ -261,6 +258,13 @@
     let title = book.1 // Harry Potter
     let author = book.2 // J.K. Rowling
     let year = book.3 // 1995
+
+    // Empty tuple is a subtype of Tuple and just like non-constructor
+    // enum variants, an empty tuple type is a singleton of itself.
+    let empty_tuple = ()
+
+    // Functions without explicit return types implicitly returns empty tuple.
+    fun get_tuple() { () }
 
 - LISTS
     var unordered_list = [7, 3, 8, 5, 4, 0, 9, 1, 2, 6]
@@ -338,10 +342,6 @@
     // You can also add more fields to a dictionary using the dot operator or the index operator.
     parents.mum.nationality = 'Nigerian'
     siblings.sister['nationality'] = 'Nigerian'
-
-    // If the compiler is unsure if a field exists in a dictionary. You have to handle the possibility of nil.
-    let name = parent.mum.age // Invalid!
-    let name = parent.mum.age?
 
     // To use variable names from the outer scope as a dictionary key, the name needs to be enclosed in a bracket.
     var professor = {
@@ -493,12 +493,12 @@
         cry('we are broke')
     }
 
-    // Checking for nil.
-    if phone_number { // The block executes if `phone_number` is not nil.
+    // Checking for Noneness.
+    if phone_number { // The block executes if `phone_number` is not None.
         call(phone_number)
     }
 
-    // Checking for nil and binding value to a subject.
+    // Checking for Noneness and binding value to a subject.
     if let stock_code = get_stock_code('APPLE') {
         print('APPLE: $stock_code')
     }
@@ -881,7 +881,7 @@
     get_name(perhaps_person as Person) // (p: Person) -> String // (p: Person | Error) -> String
 
     type ErrablePerson = Person!
-    type NillablePerson = Person?
+    type MaybePerson = Person?
 
 - GENERICS
     // Uppercase single letter identifiers in type annotation are taken as type variable declaration.
@@ -915,8 +915,8 @@
 
     let buf = Buffer[Int](50)
 
-    // Nillable type annotation.
-    let language: String | Nil
+    // Maybe type annotation.
+    let language: String | None
     let language: String?
 
     // List type annotation.
@@ -965,6 +965,23 @@
             Card(card_type, card_no) => print "Paid with card: ${card_type} ${card_no}",
         }
     }
+
+    // Singleton Variants
+    enum Fruits {
+        Orange,
+        Apple,
+    }
+
+    // A non-constructor variant is a singleton of itself.
+    let orange = Fruit.Orange;
+
+    // It is both an object and a type.
+    orange.is_type() and orange.is_object()
+
+    fun get_apple() -> Fruits.Apple {
+        Fruits.Apple
+    }
+
 
 - TYPES AS FIRST-CLASS CITIZENS
     // Types can be passed around and specialized on like regular objects in Astro.
@@ -1289,6 +1306,7 @@
     Type
     Any
         Function
+            Closure
         Scalar
             Real
                 Integer
@@ -1298,21 +1316,8 @@
                         UInt, UInt8, UInt16, UInt32, UInt64
                 Float
                     Float32, Float64
-            Complex
-                Complex64, Complex128
             Bool
             Char
-        Seq
-            List
-            Array
-            Set
-            Range
-            String
-            Indexer
-            Tuple
-            NamedTuple
-            Dict
-            Coroutine
 
 
 - REMOVED
