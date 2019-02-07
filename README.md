@@ -6,7 +6,8 @@
 </a>
 </div>
 
-# The Astro Programming Language
+<h1 align="center">The Astro Programming Language</h1>
+
 #### Work in Progress :construction:
 Current Version: 0.1.15
 
