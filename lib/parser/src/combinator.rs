@@ -38,7 +38,7 @@ pub enum CombinatorArg<'a, T> {
 /************************* OUTPUT *************************/
 
 /// TODO: Think abt this impl thoroughly
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Output<T> {
     Values(Vec<Output<T>>), // A list of outputs returned by combinator function.
     Str(String),            // A token returned by combinator function.
@@ -431,12 +431,17 @@ where
     where
         T: Debug + Clone,
     {
+        // Get cursor.
+        let cursor = combinator.cursor;
         let mut asts: Output<T> = Output::Empty;
 
         let result = Combinator::more(args, combinator);
 
         if result.is_ok() {
             asts = result.unwrap();
+        } else {
+            // Revert advancement.
+            combinator.cursor = cursor;
         }
 
         Ok(asts)
@@ -451,12 +456,17 @@ where
     where
         T: Debug + Clone,
     {
+        // Get cursor.
+        let cursor = combinator.cursor;
         let mut asts: Output<T> = Output::Empty;
 
         let result = Combinator::parse(args, combinator);
 
         if result.is_ok() {
             asts = result.unwrap();
+        } else {
+            // Revert advancement.
+            combinator.cursor = cursor;
         }
 
         Ok(asts)
