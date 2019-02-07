@@ -1,10 +1,7 @@
 use astro_lexer::Token;
 use std::{collections::HashMap, fmt::Debug};
 
-use crate::{
-    macros,
-    errors::ParserError, kinds::ErrorKind, utils::get_func_addr
-};
+use crate::{errors::ParserError, kinds::ErrorKind, macros, utils::get_func_addr};
 
 /************************* CACHE DATA *************************/
 
@@ -376,10 +373,7 @@ where
         if !parsed_successfully {
             // Revert state.
             combinator.set_cursor(cursor);
-            return Err(ParserError::new(
-                ErrorKind::AlternativesDontMatch,
-                column,
-            ));
+            return Err(ParserError::new(ErrorKind::AlternativesDontMatch, column));
         }
 
         Ok(Output::Values(asts))
@@ -419,10 +413,7 @@ where
         if !parsed_successfully {
             // Revert state.
             combinator.set_cursor(cursor);
-            return Err(ParserError::new(
-                ErrorKind::CantMatchAtLeastARule,
-                column,
-            ));
+            return Err(ParserError::new(ErrorKind::CantMatchAtLeastARule, column));
         }
 
         Ok(Output::Values(asts))
@@ -513,10 +504,7 @@ where
         let column = combinator.get_column();
 
         let result = match Combinator::parse(args, combinator) {
-            Ok(_) => Err(ParserError::new(
-                ErrorKind::ExpectedRuleToFail,
-                column,
-            )),
+            Ok(_) => Err(ParserError::new(ErrorKind::ExpectedRuleToFail, column)),
             Err(_) => Ok(Output::Empty),
         };
 

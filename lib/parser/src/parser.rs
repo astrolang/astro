@@ -5,10 +5,7 @@ use crate::{
     macros,
     utils::get_func_addr,
 };
-use astro_codegen::asts::{
-    AST,
-    SimpleExpr,
-};
+use astro_codegen::asts::{SimpleExpr, AST};
 use astro_lexer::{Token, TokenKind};
 
 /************************* PARSER *************************/
@@ -63,22 +60,18 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::UnexpectedToken,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::UnexpectedToken, column));
 
         // Get the next token.
         let token = combinator.eat_token()?;
 
         // Check if the token kind is the same as the one provided.
         if token.kind == kind {
-            result = Ok(Output::AST(AST::SimpleExpr(
-                SimpleExpr::Terminal {
-                    kind,
-                    value: token.token.unwrap_or(String::new()),
-                }
-            )));
+            result = Ok(Output::AST(AST::SimpleExpr(SimpleExpr::Terminal {
+                kind,
+                value: token.token.unwrap_or(String::new()),
+            })));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
@@ -280,10 +273,8 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedIntegerLiteral,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedIntegerLiteral, column));
 
         // Get parser result.
         let parser_result = alt!(
@@ -321,10 +312,8 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedFloatLiteral,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedFloatLiteral, column));
 
         // Get parser result.
         let parser_result = alt!(
@@ -365,17 +354,11 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedFloatLiteral,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedFloatLiteral, column));
 
         // Get parser result.
-        let parser_result = alt!(
-            combinator,
-            f!(float_literal),
-            f!(integer_literal)
-        );
+        let parser_result = alt!(combinator, f!(float_literal), f!(integer_literal));
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
@@ -408,16 +391,11 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedNewlines,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedNewlines, column));
 
         // Get parser result.
-        let parser_result = parse!(
-            combinator,
-            more!(f!(newline))
-        );
+        let parser_result = parse!(combinator, more!(f!(newline)));
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
@@ -428,11 +406,7 @@ impl Parser {
         }
 
         // Cache parser result if not already cached.
-        combinator.memoize(
-            cursor,
-            get_func_addr(&(Parser::comma as _)),
-            result.clone(),
-        );
+        combinator.memoize(cursor, get_func_addr(&(Parser::comma as _)), result.clone());
 
         result
     }
@@ -448,17 +422,11 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedComma,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedComma, column));
 
         // Get parser result.
-        let parser_result = parse!(
-            combinator,
-            s!(","),
-            opt!(f!(newlines))
-        );
+        let parser_result = parse!(combinator, s!(","), opt!(f!(newlines)));
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
@@ -469,11 +437,7 @@ impl Parser {
         }
 
         // Cache parser result if not already cached.
-        combinator.memoize(
-            cursor,
-            get_func_addr(&(Parser::comma as _)),
-            result.clone(),
-        );
+        combinator.memoize(cursor, get_func_addr(&(Parser::comma as _)), result.clone());
 
         result
     }
@@ -491,18 +455,14 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedListArguments,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedListArguments, column));
 
         // Get parser result.
         let parser_result = parse!(
             combinator,
             f!(numeric_literal),
-            optmore!(
-                f!(comma), f!(numeric_literal)
-            ),
+            optmore!(f!(comma), f!(numeric_literal)),
             opt!(f!(comma))
         );
 
@@ -558,11 +518,7 @@ impl Parser {
         }
 
         // Cache parser result if not already cached.
-        combinator.memoize(
-            cursor,
-            get_func_addr(&(Parser::comma as _)),
-            result.clone(),
-        );
+        combinator.memoize(cursor, get_func_addr(&(Parser::comma as _)), result.clone());
 
         result
     }
@@ -578,10 +534,8 @@ impl Parser {
         let column = combinator.get_column();
 
         // Holds the returning result.
-        let mut result: Result<Output<AST>, ParserError> = Err(ParserError::new(
-            ErrorKind::ExpectedListLiteral,
-            column,
-        ));
+        let mut result: Result<Output<AST>, ParserError> =
+            Err(ParserError::new(ErrorKind::ExpectedListLiteral, column));
 
         // Get parser result.
         let parser_result = parse!(
@@ -615,11 +569,7 @@ impl Parser {
         }
 
         // Cache parser result if not already cached.
-        combinator.memoize(
-            cursor,
-            get_func_addr(&(Parser::comma as _)),
-            result.clone(),
-        );
+        combinator.memoize(cursor, get_func_addr(&(Parser::comma as _)), result.clone());
 
         result
     }
@@ -627,17 +577,10 @@ impl Parser {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        macros,
-        Parser,
-        Combinator,
-        CombinatorArg,
-        AST,
-        TokenKind,
-        SimpleExpr,
-        Output,
-    };
-    use astro_lexer::{Lexer};
+    use super::{macros, Combinator, CombinatorArg, Output, Parser, SimpleExpr, TokenKind, AST};
+    use astro_lexer::Lexer;
+
+    // Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![])))
 
     fn get_combinator_for_code(code: String) -> Combinator<AST> {
         let tokens = Lexer::new(code).lex().unwrap();
@@ -667,4 +610,3 @@ mod tests {
         assert!(true);
     }
 }
-
