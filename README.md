@@ -45,7 +45,7 @@ Finally, seeing as CPU manufacturers are favoring multi-core design over transis
 ### How close is Astro to being ready for use?
 Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
 
-For now, Astro can compile its source code to ast format. It is not ready for even the simplest application. It is also currently implemented in Javascript and C++, however, the plan is to bootstrap the compiler (implement it in Astro) once it is sufficiently well-featured.
+For now, Astro can compile its source code to ast format. It is not ready for even the simplest application. It is also currently implemented Rust (it was being implemented in Javascript and C++), however, the plan is to bootstrap the compiler (implement it in Astro) once it is sufficiently well-featured.
 
 ### Where can I read about the language?
 There is no throrough documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](docs/summary.ast).
