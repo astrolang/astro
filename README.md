@@ -1,5 +1,12 @@
 
-# Astro Programming Language
+<a name="logo"/>
+<div align="center">
+<a href="https://astrolang.org" target="_blank">
+<img src="https://github.com/astrolang/astro/blob/develop/media/logo.png" alt="Julia Logo" width="140" height="140"></img>
+</a>
+</div>
+
+# The Astro Programming Language
 #### Work in Progress :construction:
 Current Version: 0.1.15
 
