@@ -379,14 +379,10 @@ impl Lexer {
         let mut token = String::from("");
         let cursor = self.cursor;
 
-        // Check if next character is an punctuator character.
-        loop {
-            let character = self.peek_char(None);
-            if character.is_some() && self.punctuator_char.find(character.unwrap()).is_some() {
-                token.push(self.eat_char());
-            } else {
-                break
-            }
+        // Check if next character is a punctuator character.
+        let character = self.peek_char(None);
+        if character.is_some() && self.punctuator_char.find(character.unwrap()).is_some() {
+            token.push(self.eat_char());
         }
 
         // Revert cursor value if no character consumed.
