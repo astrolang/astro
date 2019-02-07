@@ -789,7 +789,7 @@ impl Lexer {
         let mut token = String::from("");
         let cursor = self.cursor;
 
-        // Consume integerpart: digitdecimal ('_'? digitdecimal)*..
+        // Consume integerpart: digitdecimal ('_'? digitdecimal)*.
         let integer_part = self.integer_decimal_literal();
         if integer_part.is_ok() {
             token.push_str(integer_part.clone().unwrap().token.unwrap().as_str());
@@ -808,7 +808,7 @@ impl Lexer {
             // A preceding '.' means that this is not a float literal but an integer in a range literal.
             // Ex. a..120.
             let mut followingDot = false;
-            if self.cursor > 0 && self.code[self.cursor - 2] == '.' {
+            if self.cursor > 1 && self.code[self.cursor - 2] == '.' {
                 followingDot = true;
             }
 
@@ -1099,7 +1099,7 @@ impl Lexer {
         let token = self.no_name();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume identifier.
+        // Consume identifier. // Greedy (no_name)
         let token = self.identifier();
         return_on_ok_or_terminable_error!(token);
 
@@ -1127,10 +1127,6 @@ impl Lexer {
         let token = self.operator();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume punctuator.
-        let token = self.punctuator();
-        return_on_ok_or_terminable_error!(token);
-
         // Consume float_binary_literal.
         let token = self.float_binary_literal();
         return_on_ok_or_terminable_error!(token);
@@ -1143,8 +1139,12 @@ impl Lexer {
         let token = self.float_hexadecimal_literal();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume float_decimal_literal.
+        // Consume float_decimal_literal. // Greedy (float literals that start with `0`)
         let token = self.float_decimal_literal();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume punctuator. // Greedy (float literals that start with `.`)
+        let token = self.punctuator();
         return_on_ok_or_terminable_error!(token);
 
         // Consume integer_binary_literal.
@@ -1159,7 +1159,7 @@ impl Lexer {
         let token = self.integer_hexadecimal_literal();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume integer_decimal_literal.
+        // Consume integer_decimal_literal. // Greedy (integer literals that start with `0`)
         let token = self.integer_decimal_literal();
         return_on_ok_or_terminable_error!(token);
 
