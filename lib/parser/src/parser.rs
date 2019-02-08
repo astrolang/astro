@@ -30,10 +30,10 @@ impl Parser {
 
         println!("===== parser starts =====");
 
-        // let combinator_result = parse!(combinator, more!(s!("Hello"), s!("Hi")));
-        // let combinator_result = parse!(combinator, alt!(parse!(s!("Hello")), parse!(s!("Hi"), s!("Hello"))));
+        // let combinator_result = alt!(combinator, parse!(f!(integer_literal)));
+        // let combinator_result = parse!(combinator, f!(list_arguments));
         // let combinator_result = parse!(combinator, f!(tuple_arguments));
-        let combinator_result = parse!(combinator, f!(numeric_literal));
+        let combinator_result = parse!(combinator, f!(tuple_literal));
 
         println!("===== cache ===== \n{}", combinator.get_cache_string());
 
@@ -281,8 +281,6 @@ impl Parser {
             f!(integer_decimal_literal)
         );
 
-        println!(">>> = {:#?}", parser_result);
-
         // Check if parser result is OK.
         if parser_result.is_ok() {
             // Pull value field out of Output::Alt.
@@ -300,7 +298,6 @@ impl Parser {
             get_func_addr(&(Parser::integer_literal as _)),
             result.clone(),
         );
-        println!(">>> = {:#?}", result);
 
         result
     }
@@ -490,10 +487,10 @@ impl Parser {
             if parser_result_values_length > 0 {
                 let output = parser_result_values.remove(0);
                 if output != Output::Empty {
-                    // Pull AST::SimpleExpr from Output::AST.
+                    // Pull AST::SimpleExpr out of Output::AST.
                     let ast_expr = variant_value!(output, Output::AST);
 
-                    // Pull SimpleExpr::_ from AST::SimpleExpr.
+                    // Pull SimpleExpr::* out of AST::SimpleExpr.
                     let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
 
                     expressions.push(simple_expr);
@@ -505,17 +502,17 @@ impl Parser {
                 // Get the next item.
                 let output = parser_result_values.remove(0);
                 if output != Output::Empty {
-                    // Pull array from Output::Values.
+                    // Pull array out of Output::Values.
                     let values = variant_value!(output, Output::Values);
 
                     for values_enum in values {
-                        // Pull array from Output::Values.
+                        // Pull array out of Output::Values.
                         let mut values = variant_value!(values_enum, Output::Values);
 
-                        // Pull AST::SimpleExpr from the second Output::AST.
+                        // Pull AST::SimpleExpr out of the second Output::AST.
                         let ast_expr = variant_value!(values.remove(1), Output::AST);
 
-                        // Pull SimpleExpr::_ from AST::SimpleExpr.
+                        // Pull SimpleExpr::* out of AST::SimpleExpr.
                         let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
 
                         expressions.push(simple_expr);
@@ -603,66 +600,79 @@ impl Parser {
             Err(ParserError::new(ErrorKind::ExpectedTupleArguments, column));
 
         // Get parser result.
-        let parser_result = parse!(
+        let parser_result = alt!(
             combinator,
-            alt!(
-                parse!(
-                    f!(numeric_literal),
-                    more!(f!(comma), f!(numeric_literal)),
-                    opt!(f!(comma))
-                ),
-                parse!(f!(numeric_literal), f!(comma))
-            )
+            parse!(
+                f!(numeric_literal),
+                more!(f!(comma), f!(numeric_literal)),
+                opt!(f!(comma))
+            ),
+            parse!(f!(numeric_literal), f!(comma))
         );
 
-        println!(">>> {:#?}", parser_result);
-
-        // // Holds expressions.
-        // let mut expressions = vec![];
+        // Holds expressions.
+        let mut expressions = vec![];
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
-            // // Pull array out of Output::Values.
-            // let mut parser_result_values = variant_value!(parser_result.unwrap(), Output::Values);
-            // let parser_result_values_length = parser_result_values.len();
+            // Pull fields out of Output::Alt.
+            let (mut value, index) = variant_fields!(parser_result.unwrap(), Output::Alt, { value, index });
 
-            // // Get the expression first if it exists.
-            // if parser_result_values_length > 0 {
-            //     let output = parser_result_values.remove(0);
-            //     if output != Output::Empty {
-            //         // Pull AST::SimpleExpr from Output::AST.
-            //         let ast_expr = variant_value!(output, Output::AST);
+            // Pull array out of Output::Values.
+            let mut values = variant_value!(*value, Output::Values);
+            let values = values.remove(0);
 
-            //         // Pull SimpleExpr::_ from AST::SimpleExpr.
-            //         let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
+            match index {
+                0 => {
+                    // Pull array out of Output::Values.
+                    let mut values = variant_value!(values, Output::Values);
+                    let output = values.remove(0);
 
-            //         expressions.push(simple_expr);
-            //     }
-            // }
+                    if output != Output::Empty {
+                        // Pull AST::SimpleExpr out of Output::AST.
+                        let ast_expr = variant_value!(output, Output::AST);
 
-            // // Get subsequent expressions.
-            // if parser_result_values_length > 1 {
-            //     // Get the next item.
-            //     let output = parser_result_values.remove(0);
-            //     if output != Output::Empty {
-            //         // Pull array from Output::Values.
-            //         let values = variant_value!(output, Output::Values);
+                        // Pull SimpleExpr::* out of AST::SimpleExpr.
+                        let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
 
-            //         for values_enum in values {
-            //             // Pull array from Output::Values.
-            //             let mut values = variant_value!(values_enum, Output::Values);
+                        expressions.push(simple_expr);
+                    }
 
-            //             // Pull AST::SimpleExpr from the second Output::AST.
-            //             let ast_expr = variant_value!(values.remove(1), Output::AST);
+                    // Get the next item.
+                    let output = values.remove(0);
+                    if output != Output::Empty {
+                        // Pull array out of Output::Values.
+                        let values = variant_value!(output, Output::Values);
 
-            //             // Pull SimpleExpr::_ from AST::SimpleExpr.
-            //             let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
+                        for values_enum in values {
+                            // Pull array out of Output::Values.
+                            let mut values = variant_value!(values_enum, Output::Values);
 
-            //             expressions.push(simple_expr);
-            //         }
-            //     }
-            // }
-            // result = Ok(Output::AST(AST::SimpleExpr(SimpleExpr::List(expressions))));
+                            // Pull AST::SimpleExpr out of the second Output::AST.
+                            let ast_expr = variant_value!(values.remove(1), Output::AST);
+
+                            // Pull SimpleExpr::* out of AST::SimpleExpr.
+                            let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
+
+                            expressions.push(simple_expr);
+                        }
+                    }
+                },
+                _ => {
+                    // Pull array out of Output::Values.
+                    let mut values = variant_value!(values, Output::Values);
+
+                    // Pull AST::SimpleExpr out of the second Output::AST.
+                    let ast_expr = variant_value!(values.remove(0), Output::AST);
+
+                    // Pull SimpleExpr::* out of AST::SimpleExpr.
+                    let simple_expr = variant_value!(ast_expr, AST::SimpleExpr);
+
+                    expressions.push(simple_expr);
+                }
+            }
+
+            result = Ok(Output::AST(AST::SimpleExpr(SimpleExpr::Tuple(expressions))));
         } else {
             // Revert advancement.
             combinator.set_cursor(cursor);
@@ -731,7 +741,7 @@ impl Parser {
 // TODO: Add failing cases.
 #[cfg(test)]
 mod tests {
-    use super::{macros, Combinator, CombinatorArg, Output, Parser, SimpleExpr, TokenKind, AST};
+    use super::{macros, Combinator, CombinatorArg, Output, Parser, SimpleExpr, TokenKind, AST, ErrorKind, ParserError};
     use astro_lexer::Lexer;
 
     // Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![])))
@@ -908,6 +918,141 @@ mod tests {
                 SimpleExpr::List(vec![])
             ))]))
         );
-        assert!(true);
+    }
+
+    #[test]
+    fn tuple_arguments() {
+        // One argument.
+        let combinator = &mut get_combinator_for_code("5,".into());
+        let combinator_result_1 = parse!(combinator, f!(tuple_arguments));
+
+        // Multiple arguments.
+        let combinator = &mut get_combinator_for_code("5, 0x7f.45".into());
+        let combinator_result_2 = parse!(combinator, f!(tuple_arguments));
+
+        // Multiple arguments with trailing comma.
+        let combinator = &mut get_combinator_for_code(".1, 2.3, 5_00,".into());
+        let combinator_result_3 = parse!(combinator, f!(tuple_arguments));
+
+        // One argument without comma.
+        let combinator = &mut get_combinator_for_code("5".into());
+        let combinator_result_4 = parse!(combinator, f!(tuple_arguments));
+
+        assert_eq!(
+            combinator_result_1,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::Tuple(vec![SimpleExpr::Terminal {
+                    kind: TokenKind::IntegerDecimalLiteral,
+                    value: "5".into()
+                }])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_2,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::Tuple(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "5".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatHexadecimalLiteral,
+                        value: "7f.45".into()
+                    }
+                ])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_3,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::Tuple(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "0.1".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "2.3".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "500".into()
+                    }
+                ])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_4,
+            Err(ParserError { error: ErrorKind::ExpectedTupleArguments, column: 0 })
+        );
+    }
+
+    #[test]
+    fn tuple_literal() {
+        // One argument.
+        let combinator = &mut get_combinator_for_code("(5,)".into());
+        let combinator_result_1 = parse!(combinator, f!(tuple_literal));
+
+        // Multiple arguments.
+        let combinator = &mut get_combinator_for_code("(\n5,\r\n 0x7f.45,)".into());
+        let combinator_result_2 = parse!(combinator, f!(tuple_literal));
+
+        // Multiple arguments with trailing comma.
+        let combinator = &mut get_combinator_for_code("(.1, 2.3, 5_00,)".into());
+        let combinator_result_3 = parse!(combinator, f!(tuple_literal));
+
+        // No argument.
+        let combinator = &mut get_combinator_for_code("()".into());
+        let combinator_result_4 = parse!(combinator, f!(tuple_literal));
+
+        assert_eq!(
+            combinator_result_1,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::Tuple(vec![SimpleExpr::Terminal {
+                    kind: TokenKind::IntegerDecimalLiteral,
+                    value: "5".into()
+                }])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_2,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::Tuple(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "5".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatHexadecimalLiteral,
+                        value: "7f.45".into()
+                    }
+                ])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_3,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::Tuple(vec![
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "0.1".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::FloatDecimalLiteral,
+                        value: "2.3".into()
+                    },
+                    SimpleExpr::Terminal {
+                        kind: TokenKind::IntegerDecimalLiteral,
+                        value: "500".into()
+                    }
+                ])
+            ))]))
+        );
+        assert_eq!(
+            combinator_result_4,
+            Ok(Output::Values(vec![Output::AST(AST::SimpleExpr(
+                SimpleExpr::Tuple(vec![])
+            ))]))
+        );
     }
 }

@@ -6,8 +6,10 @@ fn main() {
 
     // let valid_parser_code = String::from("Hello Hi");
     // let valid_parser_code = String::from("Hi Hello");
-    let valid_parser_code = String::from("5,6");
+    // let valid_parser_code = String::from("5,");
     // let valid_parser_code = String::from("5,6");
+    // let valid_parser_code = String::from("(5,)");
+    // let valid_parser_code = String::from("(5,6)");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,
