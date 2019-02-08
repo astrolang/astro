@@ -733,6 +733,17 @@
 
     print_person("John", 25) // (name: "John", age: 25)
 
+    // Optional argument
+    fun print_name(first_name: String, last_name?) {
+        if last_name {
+            print("${first_name} ${last_name}")
+        }
+        print("${first_name}")
+    }
+
+    print_name("Jake")
+    print_name("Jake","Badino")
+
     // Astro supports Unified Function Call Syntax (UFCS), so a function can be called with using the dot notation.
     print(500)
     500.print()
@@ -1285,9 +1296,12 @@
         }
     }
 
-    @func("hello")
-    @func(name, 1, 2, 3)
-    @func(name) fun add(a, b) { a + b }
+    func!("hello")
+    func!(name, 1, 2, 3)
+    func!(name)
+    fun add(a, b) {
+        a + b
+    }
 
 /// PREDEFINED TYPE HIERARCHY
     Type
