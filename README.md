@@ -48,8 +48,6 @@ fun times(a, b) {
 
 Astro is supposed to be high-level enough to write python-like scripts but also low-level enough to write an operating system kernel. Therefore, it doesn't have a traditional [garbage collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) instead it relies on lifetime analysis at compile-time that free memory once they are no longer referenced.
 
-Finally, seeing as CPU manufacturers are favoring multi-core design over transistor shrinkage, we believe making concurrency (and parallelism) a major aspect of the language development is beneficial to the type of applications that the language targets. Astro has built-in facilities for writing concurrent programs. A [CSP](https://en.m.wikipedia.org/wiki/Communicating_sequential_processes)-based lightweight threading model, with the guarantee that the programs you write won't have data races.
-
 ### How close is Astro to being ready for use?
 Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
 
