@@ -279,17 +279,17 @@
     stuffs[1] // 500
 
     // Slicing a list.
-    contestants[2:7] // 2nd to the 6th index.
-    contestants[2:] // 2nd to the last index.
-    contestants[:7] // first to the 6th index.
-    contestants[:] // first to the last index.
+    contestants[2..7] // 2nd to the 6th index.
+    contestants[2..] // 2nd to the last index.
+    contestants[..7] // first to the 6th index.
+    contestants[..] // first to the last index.
 
     // A slice can have a step value.
-    let odds = numbers[1:2:30] // The step value is the `2` in the middle.
+    let odds = numbers[1..2..30] // The step value is the `2` in the middle.
 
     // Reversing a list.
-    var reversed = contestants[end:-1:]
-    var reversed = contestants[end:]
+    var reversed = contestants[end..-1..]
+    var reversed = contestants[end..]
 
     // Using a constructor to create a List.
     let number = List[String]("")
@@ -1288,7 +1288,7 @@
                 desc: GlobalDesc { $(params ,)* }
             }
         },
-        ($param:ident) $fn:func => {
+        () $fn:func => {
             $(fn.proto) {
                 print $param;
                 $(fn.body)
@@ -1298,10 +1298,17 @@
 
     func!("hello")
     func!(name, 1, 2, 3)
-    func!(name)
+    func!()
     fun add(a, b) {
         a + b
     }
+
+/// COMBINE MACRO : TODO
+// Combining multiple object.
+let foo = Foo { x, y, a }
+let bar = Bar { x, y, z }
+let mix = combine!(foo { x }, bar { y })
+mix :: Foo & Bar
 
 /// PREDEFINED TYPE HIERARCHY
     Type
