@@ -58,7 +58,8 @@ pub struct Lexer {
 /// TODO:
 /// - symbols => `:identifier` and `:(`
 /// - multiple `_` in numeric literals => `0x1___2345f`
-/// - linecontinuation => `...` \s* (\r?\n)*
+/// - linecontinuation => `...` (\s | newline)*
+/// - string interpolation handling
 impl Lexer {
     /// Creates a new lexer object from the code passed in.
     pub fn new(code: String) -> Self {
@@ -286,26 +287,6 @@ impl Lexer {
         Ok(Token::new(kind, token, cursor))
     }
 
-    /// Consumes '_' in code if it comes next.
-    fn no_name(&mut self) -> Result<Token, LexerError> {
-        let kind = TokenKind::NoName;
-        let mut token: Option<String> = None;
-        let cursor = self.cursor;
-
-        // Get next character without consuming it.
-        let character = self.peek_char(None);
-
-        // Check if the character is a space character.
-        if character.is_some() && character.unwrap() == '_' {
-            // Save character.
-            token = Some(self.eat_char().to_string());
-        } else {
-            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
-        }
-
-        Ok(Token::new(kind, token, cursor))
-    }
-
     /// Consumes identifier in code if it comes next.
     fn identifier(&mut self) -> Result<Token, LexerError> {
         let kind = TokenKind::Identifier;
@@ -337,7 +318,9 @@ impl Lexer {
         }
 
         // Check if identifier is a boolean literal
-        if token == "true" || token == "false" {
+        if token == "_" {
+            Ok(Token::new(TokenKind::NoName, Some(token), cursor))
+        } else if token == "true" || token == "false" {
             Ok(Token::new(TokenKind::BooleanLiteral, Some(token), cursor))
         } else if self.keywords.contains(&token) {
             // Or if it is a keyword.
@@ -1095,10 +1078,6 @@ impl Lexer {
         let token = self.newline();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume no_name.
-        let token = self.no_name();
-        return_on_ok_or_terminable_error!(token);
-
         // Consume identifier. // Greedy (no_name)
         let token = self.identifier();
         return_on_ok_or_terminable_error!(token);
@@ -1185,6 +1164,8 @@ impl Lexer {
             if token.is_err() {
                 return Err(token.unwrap_err());
             }
+
+            // TODO: support multiple token returns.
 
             // If there isno error, get the token value.
             let token = token.unwrap();
