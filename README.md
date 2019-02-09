@@ -1,9 +1,7 @@
 
-<a name="logo"/>
 <div align="center">
 <a href="https://astrolang.org" target="_blank">
 <img src="https://github.com/astrolang/astro/blob/develop/media/logo.png" alt="Julia Logo" width="140" height="140"></img>
-</a>
 </div>
 
 <h1 align="center">The Astro Programming Language</h1>
