@@ -79,3 +79,6 @@ Please [open an issue](https://github.com/appcypher/astro/issues/new) and ask qu
 
 ### Attributions
 Astro logo made by [Freepik](https://www.freepik.com/)
+
+### License
+[Apache 2.0](LICENSE)
