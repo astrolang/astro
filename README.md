@@ -1,13 +1,14 @@
 
 <div align="center">
-<a href="https://astrolang.org" target="_blank">
-<img src="https://github.com/astrolang/astro/blob/develop/media/logo.png" alt="Julia Logo" width="140" height="140"></img>
+    <a href="https://astrolang.org" target="_blank">
+        <img src="https://github.com/astrolang/astro/blob/develop/media/logo.png" alt="Astro Logo" width="140" height="140"></img>
+    </a>
 </div>
 
 <h1 align="center">The Astro Programming Language</h1>
 
 #### Work in Progress :construction:
-Current Version: 0.1.15
+Current Version: 0.1.15a
 
 ![astro screenshot](https://github.com/astrolang/astro/blob/develop/media/syntax_screenshot.png)
 
@@ -19,7 +20,7 @@ Astro is a fun programming language designed for safe _high-performance applicat
 - supports data-race-free concurrency.
 
 ### Why create yet another programming language?
-The language creator had a set of requirements (listed above) not met by any language ([Rust](https://en.wikipedia.org/wiki/Rust_(programming_language)) comes close). Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
+The language creator had a set of requirements (listed above) not met by any language ([Rust](https://en.wikipedia.org/wiki/Rust_programming_language)) comes close. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and other proposals for GPU Compute will make the web a desirable HPC target in the near future. Astro is, for this reason, designed for high-performance apps that are expected to run on the server or in the browser.
 
