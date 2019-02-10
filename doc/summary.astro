@@ -17,7 +17,7 @@
     let hello
     hello = "こんにちは"
 
-    // A subject cannot be used without binding it to a value first.
+    // A subject cannot be used without assigning it a value first.
     let str
     print(str) // Invalid!
 
@@ -41,16 +41,18 @@
 /// IDENTIFIERS
     // Name of subjects must start with a character and can be followed by characters, digits or underscore.
     var my_name
-    fun do_nothing(): pass
+    fun foo() {
+        return "foo"
+    }
 
     // Astro supports wide range of unicode characters for identifiers.
-    var φ = arctan(y/x)
+    var φ = arc_tan(y/x)
 
-    // Naming convention.
+    // Naming conventions.
     // Snake case for variables, constants and function names.
     let book_title = "Ender\"s Game"
     fun add_numbers(a, b) {
-        a + b
+        return a + b
     }
 
     // Pascal case for type and import names.
@@ -68,7 +70,7 @@
     }
 
     // if a name remains readable and unambiguous without underscores, then the underscores can be ommitted.
-    iseven 45
+    is_even(45)
 
 /// VARIABLE/CONSTANT OBJECTS
     // Objects are variable by default but can be made immutable with the const keyword.
@@ -100,8 +102,9 @@
     }
 
 /// COMMAND NOTATION
-    // If a function call takes just one argument, the parens can be ommitted given the argument is not a list, dict, set or regex literal or preceded by a prefix operator.
-    // This is necessary due to ambiguities that may otherwise be caused when parsing or reading the code.
+    // If a function call takes just one argument, the call parens can be ommitted given the argument is
+    // not a list, tuple or a dictionary literal.
+    // This restriction is in place to improve code legibility.
     print (x | x in z) // Comprehensions
     print { x: y | x in z } // Comprehensions
     print [x | y in z] // Comprehensions
@@ -115,13 +118,14 @@
     print 56 // Numbers
     print ||regex||
 
-    print [9, 5] // Invalid!
-    print { name: "John" } // Invalid!
-    print (2, 3, 5) // Invalid!
-    print +5 // Invalid!
+    // There are some gotchas one need to take note of.
+    get [5] // Not: `get([5])` But: `get[5]`
+    Person { name: "John" } // Not: `Person({ name: "John" })` But: `Person { name: "John" }`
+    send (2, 3, 5) // Not: `send((2, 3, 5))` But: `send(2, 3, 5)`
+    index +5 // Not: `index(+5)` But: `index + 5`
 
 /// TYPE DEFINITION (1)
-    // A type is synonymous with `struct` in C. It holds the blueprint of what an object can contain.
+    // A type is synonymous with `struct` in C. It represents a blueprint of what an object can contain.
     type Person {
         name,
         age,
@@ -133,7 +137,7 @@
         age: 30
     }
 
-/// EXPRESSION-ORIENTED
+/// EXPRESSION-BASED
     // Everything (except the import and export statements) is an expression in Astro!
     var is_nypro_crazy = (fave_hobby == "CountingBirds")
 
@@ -150,7 +154,7 @@
 
     hieght = add(2, 3)
 
-    // A semi-colon at the end of a block, stops it from returning its last value
+    // A semi-colon at the end of a block, prevents the block from returning its last value
     fun set_name(p: Person, name: String) {
         p.name = name;
     }
@@ -161,16 +165,8 @@
     // Types can be automatically inferred in Astro.
     var todo = "Create a new programming language :)"
 
-    // However you can still specify types explicitly using "::" type comment.
-    var number: Int
-
-    // Union types.
-    var identification: String | Int = 60
-
-    // Intersection types.
-    var pegasus: Horse & Wing
-
-    // If any parameter type is not specified, return type may be omitted.
+    // If a parameter type is not specified, return type may also be omitted.
+    // Astro infers the function signature.
     fun add(a, b) {
         a + b
     }
@@ -181,23 +177,21 @@
         a + b
     }
 
-/// SOME BUILT-IN TYPES
-    var index = UInt(2_000) // Unsigned integer type.
+    // But you can still specify types explicitly using ":".
+    var number: Int
 
-    let e = 2.718281828459045 // 64-bit floating-point type.
+    // Astro supports union types.
+    var identification: String | Int = 60
 
-    let dog_breed = String("German Shepherd") // Immutable UTF-8 string type.
-
-    var list_of_groceries = ["Oranges", "Cabbages", "Tomatos", "Bananas"] // List type.
-
-    var game = "BioShock Infinite", 2014 // Tuple type.
+    // Astro also supports intersection types.
+    var pegasus: Horse & Wing
 
 /// VALUES & REFERENCES
-    // By default primitive objects (UInt, Int, Float32, Bool) are passed around by value.
-    // and by default complex objects (String, user-defined types) are passed around by reference.
-    // however, you can change this behavior with "ref" and "val".
-    let str = "Gift"
-    let number = 1000
+    // By default primitive objects (UInt, Int, Float32, Bool) are passed around by value
+    // and by default complex objects (String, user-defined types) are passed around by reference
+    // but you can change this behavior with "ref" keyword and "copy" function.
+    let str = "Gift" // Referenceable but not copyable by default.
+    let number = 1000 // Copyable but not referenceable by default.
 
     // Passing a primitive object by reference.
     var new_number = ref number
@@ -205,21 +199,20 @@
     // Passing a complex object by value.
     var new_str = copy(str)
 
-    // Astro manages memory automatically using a non-lexical lifetime analysis, it handles reference cycles as well.
-    my_company.affiliate = ref your_company
-    your_company.affiliate = ref my_company
+    // Astro manages memory and reference cycles automatically.
+    my_company.affiliate = ref your_company // my_company refers to your_company.
+    your_company.affiliate = ref my_company // your_company refers to my_company.
 
     // `iso` is used to hold an exclusive reference to an object.
     let developer = iso "AppCypher"
     let another_developer = developer // Ownership passed!
     let yet_another_developer = developer // Invalid!
 
-    // `copy` is a shallow copy operation, while `deepcopy` is a deep copy operation.
+    // `copy` is a shallow copy operation, while `deep_copy` is a deep copy operation.
     let rent = copy(house)
     let buyer = deep_copy(game)
 
-    let player = team.player
-
+    // TODO
     // An immutable reference to an object can be returned from a function using the `const` keyword.
     fun get_amount(account) {
         return const account.amount
@@ -235,14 +228,15 @@
     var interest = 0o566768 // Octal literal.
 
 /// TUPLES
-    // Tuple is an immutable datatype whose element types and length are determined statically.
+    // Tuple is datatype with statically-known length.
     // Tuples cannot be appended to or removed from.
-    var (game, year) = ("Uncharted 4", 2016) // Closed tuple.
+    var fave_game = ("Uncharted 4", 2016)
 
     // Tuple destructuring.
     let person = ("Sam", 50)
     let (name, age) = person // name = "Sam", age = 50
 
+    // TODO
     // Tuple unpacking.
     let arguments = (5, 6)
     add(...arguments)
@@ -275,8 +269,8 @@
     // Heterogenous list.
     var stuffs = [500, "Steve", 1.0]
 
-    // Astro uses 1-based indexing. Every list indices start at index 1.
-    stuffs[1] // 500
+    // Astro uses 0-based indexing. Every list indices start at index 0.
+    stuffs[0] // 500
 
     // Slicing a list.
     contestants[2..7] // 2nd to the 6th index.
@@ -364,7 +358,7 @@
     // Set is an unordered collection of items with no duplicate elements.
     let fruits = Set("orange", "mango", "guava", "apple", "orange", "guava", "pineapple")
     let citrus = Set("lime", "lemon", "orange")
-    fruits.length // 4
+    fruits.length() // 4
 
     // Set operations.
     let union = citrus | fruits // Set("lime", "lemon", "orange", "mango", "guava", "apple", "pineapple")
@@ -373,7 +367,7 @@
 
 /// RANGE
     // Range is an iterable that allows iterating through a range of values.
-    let days = 1..30 // 1 to 30
+    let days = 1..31 // 1 to 31
 
     // A range can have a step value.
     let evens = 2..2..20 // The step value is the `2` in the middle.
@@ -382,7 +376,7 @@
     var reversed = 20..-1..1
 
     // Using a range in a for loop.
-    for i in 1..10 {
+    for i in 1..11 {
         print(i)
     }
 
@@ -409,10 +403,10 @@
     var story = "${language} was started in the ${year}"
 
     // Both single and double quotes can be used to represent a string literal.
-    let director = 'James Cameron'
+    let string = 'Valid string as well'
 
-    // Multiline strings are enclosed in triple `"` or `"` quotes and they ignore all escapes and interpolation
-    // The first and last newlines are always ignored in multiline strings.
+    // TODO
+    // Strings can span multiple lines.
     var verbatim_str = "
     Hello, World!
     "
@@ -465,16 +459,6 @@
         .trim()
         .lower()
 
-/// INDENTATION
-    // Astro recognizes 4-space indentations only. No tabs.
-    fun removespaces(str) {
-        return str.split(||\s||).join()
-    }
-
-    fun removespaces(str) {
-        return str.split(||\s||).join() // Invalid!
-    }
-
 /// IF EXPRESSION
     // Conditional branches using `if`, `elif` and `else`.
     if is_adrian_rich {
@@ -490,7 +474,7 @@
         call(phone_number)
     }
 
-    // Checking for Noneness and binding value to a subject.
+    // Checking for Noneness and binding value to a name.
     if let stock_code = get_stock_code("APPLE") {
         print("APPLE: $stock_code")
     }
@@ -514,8 +498,9 @@
 
 /// FOR LOOP
     // A `for` loop iterates through an iterable and binds the value to a subject.
-    for i in 1..11:
+    for i in 1..11 {
         print i
+    }
 
     // Destructuring in loop.
     for (kind, number) in interesting_numbers {
@@ -533,7 +518,7 @@
         return i
     }
 
-    // The `else` block executes when a loop completes without interruption from `break`, `return` or `throw`.
+    // The `else` block executes when a loop completes without interruption from `break` or `return`.
     for line in file where ||lagbaja|| in line {
         print "name found!"
         break
@@ -545,7 +530,7 @@
     // Comprehensions are syntactic sugar for iterator generators.
     let gen = (i | i in random(0, 200))
 
-    // Extending a comprehension with `where`.
+    // A comprehension with `where` clause.
     let list = list((x | x in 1..21 where x mod 2 != 0))
 
     // List comprehension
@@ -561,7 +546,7 @@
     let dict = { x: y | x in 1..30 and y in 31..60 where even(y) }
 
 /// BREAK WITH
-    // Break-with breaks a loop and returns a value.
+    // Break-with breaks a loop with a value.
     let name =
         for name in register where ||tony|| in name {
             break name
@@ -570,13 +555,13 @@
         }
 
 /// IN
-    // `in` is a special keyword-based infix operator that checks for the existence of an object in a collection type.
-    if student.name in defaulterlist {
+    // `in` is a special infix keyword operator that checks for the existence of an object in a collection type.
+    if student.name in defaulter_list {
         print "${student.name} hasn\"t paid yet. Contact parents"
     }
 
     // Negation.
-    if "ps4" not in birthday_presents {
+    if "fave_gift" not in birthday_presents {
         print "Aaargh! Everyone hates me"
     }
 
@@ -586,8 +571,10 @@
     }
 
 /// MOD
-    // `mod` is a keyword-based infix operator alias of `%` operator.
-    fun iseven(n) { n mod 2 == 0 }
+    // `mod` is a also infix keyword operator as an alias of `%` operator.
+    fun is_even(n) {
+        n mod 2 == 0
+    }
 
 
 /// WHILE LOOP & LOOP
@@ -596,9 +583,9 @@
         print file.next()
     }
 
-    // Unconditional loop. Synonymous to `while true`.
+    // Unconditional loop. Synonymous to `while true { ... }`.
     loop {
-        let input = scan ">>> "
+        let input = scan "print 'Hello world!'"
         let tokens = lex input
         let ast = parse tokens
         let bytecodes = compile ast
@@ -606,7 +593,7 @@
         print result
     }
 
-    // Unwrappable assignment in while loop.
+    // Loop variable assignment.
     while let details = books[title] {
         print details
         if details.author != "J.K. Rowlings" {
@@ -615,12 +602,13 @@
         title = choose_title_randomly()
     }
 
-    // Like `for` loops, `while` and `loop` can have a closing `else` block.
-    while file.has_next() where ||\t+|| in file.next() {
-        break "File contains tabs!"
-    } else {
-        "File is clean!"
-    }
+    // Like `for` loops, `while` and `loop` can have closing `else` block.
+    let message =
+        while file.has_next() where ||\t+|| in file.next() {
+            break "File contains tabs!"
+        } else {
+            "File is clean!"
+        }
 
 /// MATCH EXPRESSION
     // Match expression is like a chain of if-elif-else expressions.
@@ -629,26 +617,26 @@
         Some(x, y) => 0, // Matches if object is of `Some` type.
         x :: Some => 0, // Matches if object is of `Some` type.
         Some { x: 2, y: 3 } => 0, // Matches if object is of `Some` type.
-        [1, 2, ...s] => 0, // Matches if object is a list or an array that has values `1`, and `2` at beginning.
+        [1, 2, ...s] => 0, // Matches if object is a list that has values `1`, and `2` at beginning.
         (x, y) => x, // Matches if object is a tuple of two elements.
-        75 | 90 => 3, // Matches if object has a value `75` or `67`
+        75 | 90 => 3, // Matches if object has a value of `75` or `67`
         75..90 => 3, // Matches if object has a value between `75` and value `67`
         75 => {
             print("Hello")
             fallthrough // `fallthrough` keyword means the control flow should unconditionaly move to the next match condition.
         },
         n => 6, // Matches. Binds `n` to the object.
-        _ => 7, // Matches.
+        _ => 7, // Matches if no other pattern matches.
     }
 
 /// ASSIGNMENT DESTRUCTURING
     // Instead of separately binding subjects to objects fields, it can be done in a single expression with destructuring.
     let { name, age } = person
-    let Person { name, age } = person
 
     // Destructuring patterns for other data structures
     let [name, age, _, ...rest] = [1, 2, 3, 4, 5]
     let (a, b, _, ...c) = (1, 2, 3, 4, 5)
+    let Person { name, age } = jane
 
 /// MAIN FUNCTION
     // If a module contains a main function, it will be the module"s entry point.
@@ -657,29 +645,29 @@
     }
 
 /// FUNCTION DEFINITION (2)
-    // If a function returns nothing, it can either be annotated with None or return type can be left empty.
-    fun show(point: Point) {
+    // If a function returns nothing, it can either be annotated with `()` or return type can be left empty.
+    fun show(point: Point) -> () {
         print(point.a, point.b)
     }
 
-    // The normal order of arguments in a function call can be changed if the parameter name is specified.
-    fun say(msg: String, name: String) {
-        print "${msg} ${name}!"
+    // The normal order of arguments in a function call can be changed if the parameter names are specified.
+    fun say(name: String, age: Int) {
+        print "${name} is ${age} years old"
     }
 
-    say(name: "Steve", "Hello") // Hello Steve!
+    say(age: 10, msg: "Steve") // => `Steve is 10 years old`
 
     // Varargs takes variable number of arguments.
-    fun arith_mean(...numbers) {
-        var total = 0
+    fun arith_mean(initial, ...numbers) {
+        var total = initial
         for number in numbers {
             total += number
         }
-        total / numbers.length
+        total / numbers.length()
     }
 
-    arith_mean(1, 2, 3, 4) // It can take multiple arguments.
-    arith_mean(...tuple) // Or a spread tuple.
+    arith_mean(0, 1, 2, 3, 4) // It can take multiple arguments.
+    arith_mean(0, ...(1, 2, 3, 4)) // Or a spread tuple.
 
     // Anonymous functions are functions without names.
     fun (a, b) {
@@ -692,31 +680,6 @@
     }
 
     login() // Using default values.
-
-    // Compulsory named parameters are marked with `.`.
-    fun signup(username., password.) {
-        access Account(username, password)
-    }
-
-    // The parameter names must be specified in the function calls.
-    signup(username: "appcypher", password: "bazinga!")
-    signup("appcypher", "bazinga!") // Invalid!
-
-    // Compulsory named parameters can have a different name that can be used within the function block.
-    fun send(message, to.recipient) {
-        print((message + recipient).upper())
-    }
-
-    send("Hello", to = "Cantell")
-
-    // Compulsory named parameters can also be apllied on varargs, which would then be a named tuple.
-    fun total(start, ...rest.) {
-        let result = start
-        for i in rest { result += i }
-        result
-    }
-
-    total(0, watch: 500, shoes: 6700, laptop: 1200)
 
     // Destructuring parameters.
     fun show({ name, age }) {
@@ -742,11 +705,11 @@
     }
 
     print_name("Jake")
-    print_name("Jake","Badino")
+    print_name("Jake", "Badino")
 
-    // Astro supports Unified Function Call Syntax (UFCS), so a function can be called with using the dot notation.
+    // Astro supports Unified Function Call Syntax (UFCS), so a function can be called with the dot notation.
     print(500)
-    500.print()
+    500.print() // Same as above.
 
 /// LAMBDAS
     // Functions are first-class objects and can be passed around just like regular objects.
@@ -794,7 +757,7 @@
     // A coroutine is a type of function that can pause and resume its execution.
     // `yield` marks an execution pause and resumption point.
     fun count(num) {
-        for x in 1..num {
+        for x in 0..num {
             yield x
         }
     }
@@ -818,7 +781,8 @@
     }
 
     // Types need constructors for object creation.
-    // init is a special constructor.
+    // init is a special function and it is the only function that
+    // dispatches based on return type.
     fun init(make, year) -> Car {
         Car { make, year }
     }
@@ -908,6 +872,7 @@
         false
     }
 
+    // A more complicated type relation.
     fun startequal(c: C, d: D) -> Bool where |C, D| <: Collection, C.Element :: D.Element, C.Element <: Equatable {
         c.first == d.first
     }
@@ -925,11 +890,6 @@
     // List type annotation.
     let languages: List[String] = []
     let languages: [String] = []
-
-    // Varargs type annotation.
-    fun total(first: Int, ...rem: Int) -> Int {
-        return first + sum rem
-    }
 
     // Value generics
     let arr = Array[Int, 3]()
@@ -1017,8 +977,8 @@
 /// TRAITS
     // Types can inherit from one or more parent types in Astro.
     type Person
-    type Parent1: Person // Parent1 type inherits fields from Person.
-    type Parent2: Person  // Parent2 type inherits fields from Person.
+    type Parent1: Person
+    type Parent2: Person
 
     // Multiple inheritance is allowed as well.
     type Child: Parent1, Parent2  // inherits Parent1, Parent2.
@@ -1101,7 +1061,7 @@
 /// ERROR HANDLING
     let data = get_data()
 
-    if data and data.length == 25 {
+    if data and data.length() == 25 {
         print data
     }
 
@@ -1180,7 +1140,7 @@
     }
 
     // Special operators like [] and {} can be overloaded using their alternative identifier names.
-    fun getindex(sequence: Sequence, index: Signed) -> T {
+    fun get_index(sequence: Sequence, index: Signed) -> T {
         sequence.items[index]
     }
 
@@ -1190,7 +1150,7 @@
     number_pattern in "π = 3.14159265" // true
 
     // Regex operations.
-    var = `\d` + `[a-z]` + `\d` // Concatenation
+    var = ||\d|| + ||[a-z]|| + ||\d|| // Concatenation
 
 /// COEFFICIENT EXPRESSION
     // Coefficient expression as the name implies allows coefficients to be taken as multiplication.
@@ -1257,7 +1217,8 @@
     // Extending and coercing a primitive type to another can be done with `as`
     let int_number = 45
     let uint_number = int_number as UInt
-    // Coercing a unsigneg integer into a pointer.
+
+    // Coercing a unsigned integer into a pointer.
     let pointer = unsafe { int_number as *Int }
 
 /// RESERVED KEYWORDS
@@ -1269,14 +1230,14 @@
     where,
     is, not, in, as, mod, typeof,
 
-/// SYMBOL : TODO
+/// SYMBOL // TODO
     // Symbols are static data types that hold their content as-is.
     let symbol = :name
 
     // A symbol can be interpolated in another symbol.
     let addition = :(let five = :symbol)
 
-/// MACROS : TODO
+/// MACROS // TODO
     // Rust macros vs Julia macros
     macro func {
         ($param:str) => {
@@ -1303,7 +1264,7 @@
         a + b
     }
 
-/// COMBINE MACRO : TODO
+/// COMBINE MACRO // TODO
 // Combining multiple object.
 let foo = Foo { x, y, a }
 let bar = Bar { x, y, z }
@@ -1332,7 +1293,7 @@ mix :: Foo & Bar
 // Non-standard numeric literals
 // Special dictionary syntax
 // Arrays
-// Only significant whitespace is indentation
+// Indentation
 // Custom operator overloading
 // Symbol eval
 // Block end punctuator
@@ -1344,3 +1305,6 @@ mix :: Foo & Bar
 // Primitive types
 // For/end, while/end
 // Aggregate module
+// Varargs type parameter
+// Compulsory named parameters
+// ...
