@@ -13,7 +13,7 @@ mod tests {
     };
     use astro_codegen::asts::{SimpleExpr, AST};
     use astro_lexer::{Lexer, Token, TokenKind};
-    
+
     // Output::AST(AST::SimpleExpr(SimpleExpr::List(vec![])))
     // println!("parser = {:?}", combinator_result_2);
 
@@ -52,12 +52,20 @@ mod tests {
         let combinator = &mut get_combinator_for_code(",  \r\n\n".into());
         let combinator_result_2 = parse!(combinator, f!(comma));
 
+        // Comma with newlines on either end.
+        let combinator = &mut get_combinator_for_code("\r\n,  \r\n\n".into());
+        let combinator_result_3 = parse!(combinator, f!(comma));
+
         assert_eq!(
             combinator_result_1,
             Ok(Output::Values(vec![Output::AST(AST::Empty)]))
         );
         assert_eq!(
             combinator_result_2,
+            Ok(Output::Values(vec![Output::AST(AST::Empty)]))
+        );
+        assert_eq!(
+            combinator_result_3,
             Ok(Output::Values(vec![Output::AST(AST::Empty)]))
         );
     }

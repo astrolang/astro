@@ -10,5 +10,8 @@ astro-lexer = { path = "lib/lexer", version = "0.1.0" }
 astro-parser = { path = "lib/parser", version = "0.1.0" }
 
 [[bin]]
-name = "astro-example"
-path = "src/astro_example.rs"
+name = "example"
+path = "src/example.rs"
+
+[features]
+debug = []

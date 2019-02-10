@@ -8,3 +8,6 @@ edition = "2018"
 [dependencies]
 astro-lexer = { path = "../../lib/lexer", version = "0.1.0" }
 astro-codegen = { path = "../../lib/codegen", version = "0.1.0" }
+
+[features]
+debug = []

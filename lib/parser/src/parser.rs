@@ -92,7 +92,7 @@ impl Parser {
         _args: &Vec<CombinatorArg<'a, AST>>,
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
-        Parser::parse_terminal(TokenKind::NoName, combinator, Parser::no_name)
+        Parser::parse_terminal(TokenKind::Placeholder, combinator, Parser::no_name)
     }
 
     /// Parses identifier.
@@ -420,7 +420,7 @@ impl Parser {
     }
 
     /// Parses comma =
-    ///     | ',' newlines?.
+    ///     | newlines? ',' newlines?.
     pub fn comma<'a>(
         _args: &Vec<CombinatorArg<'a, AST>>,
         combinator: &mut Combinator<AST>,
@@ -434,7 +434,7 @@ impl Parser {
             Err(ParserError::new(ErrorKind::ExpectedComma, column));
 
         // Get parser result.
-        let parser_result = parse!(combinator, s!(","), opt!(f!(newlines)));
+        let parser_result = parse!(combinator, opt!(f!(newlines)), s!(","), opt!(f!(newlines)));
 
         // Check if parser result is OK.
         if parser_result.is_ok() {
@@ -453,7 +453,6 @@ impl Parser {
     /// TODO: Change numericliteral to simpleexpression.
     /// Parses listarguments =
     ///     | simpleexpression (comma simpleexpression)* comma?
-    ///     { expressions }
     pub fn list_arguments<'a>(
         _args: &Vec<CombinatorArg<'a, AST>>,
         combinator: &mut Combinator<AST>,
@@ -586,7 +585,6 @@ impl Parser {
     /// Parses tuplearguments =
     ///     | simpleexpression (comma simpleexpression)+ comma?
     ///     | simpleexpression comma
-    ///     { expressions }
     pub fn tuple_arguments<'a>(
         _args: &Vec<CombinatorArg<'a, AST>>,
         combinator: &mut Combinator<AST>,

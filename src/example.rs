@@ -9,12 +9,14 @@ fn main() {
     // let valid_parser_code = String::from("5,");
     // let valid_parser_code = String::from("5,6");
     // let valid_parser_code = String::from("(5,)");
-    // let valid_parser_code = String::from("(5,6)");
+    let valid_parser_code = String::from("(5,6), _ ..");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,
         Err(error) => panic!("Lexer Error = {:?}", error),
     };
+
+    println!("==== tokens ==== \n{:#?}", tokens);
 
     let ast = Parser::new(tokens).parse();
 }
