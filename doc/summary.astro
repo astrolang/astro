@@ -713,7 +713,7 @@
 
 /// LAMBDAS
     // Functions are first-class objects and can be passed around just like regular objects.
-    let scores_extra_marks = scores.map(fun (score) { score + 5 })
+    let scores_extra_marks = scores.map(fun add_five(score) { score + 5 })
     scores.each(print)
 
     // Assigning a function to a subject.
@@ -721,7 +721,7 @@
     add(4, 5) // 9
 
     // Lambdas are syntactic sugar for anonymous functions.
-    fixture_list.filter(fun (game) { not game.iscancelled }) // Anonymous function.
+    fixture_list.filter(fun check(game) { not game.iscancelled }) // Anonymous function.
     fixture_list.filter((game) => not game.iscancelled) // Lambda.
 
     // When a function call takes a single function argument, the lambda can be written after the call parens.
