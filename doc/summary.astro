@@ -1096,30 +1096,30 @@
     // Importing multiple modules
     import csv, dataframes
 
-    // Module path can be specified following a style similar to Unix.
-    import ../my_cool_project
-
     // Renaming can help disambiguate imports.
-    import fastmath: nypro/fast_math { cosine: cos, sine: sin, π: pi }
+    import fastmath: nypro.fast_math { cosine: cos, sine: sin, π: pi }
     let b = fastmath.tan(45)
     let d = cosine(30)
 
-/// EXPORT
-    // Subjects, functions and types declared within the current module can be exported using the "export" keyword.
-    export { cos, sin, tan }
+/// PUBLIC MEMBERS
+    // Subjects, functions and types declared within the current module can be exposed to external modules
+    // with `pub` keyword.
 
-    // There can only be one export statement in a module.
-    import random { randoms }
+    // Public subject.
+    pub let name = "Hello"
 
-    fun random_string() {
+    // Public function.
+    pub fun random_string() {
         randoms(36).map string
     }
 
-    export random_string
+    // Public type.
+    pub type Entity {
+        position,
+        health,
+    }
 
-/// PUBLIC ACCESS MODIFIER FOR FIELDS
-    // Types fields are private by default.
-    // To make a field visible to external modules, it must be marked with `pub`.
+    // Type fields are private by default, but can bwe made public with `pub`.
     type Student {
         var name
         pub var scores // field is now public
