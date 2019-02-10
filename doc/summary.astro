@@ -1093,13 +1093,16 @@
     // Importing all exported members of a module.
     import math {...}
 
-    // Importing multiple modules
-    import csv, dataframes
-
     // Renaming can help disambiguate imports.
     import fastmath: nypro.fast_math { cosine: cos, sine: sin, π: pi }
     let b = fastmath.tan(45)
     let d = cosine(30)
+
+    // Relative imports.
+    import module // `module` from root folder
+    import .module // `module` from curent folder
+    import ..module // `module` from parent folder
+    import .. ..module // `module` from grandparent folder
 
 /// PUBLIC MEMBERS
     // Subjects, functions and types declared within the current module can be exposed to external modules
