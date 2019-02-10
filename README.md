@@ -48,7 +48,7 @@ fun times(a, b) {
 Astro is supposed to be high-level enough to write python-like scripts but also low-level enough to write an operating system kernel. Therefore, it doesn't have a traditional [garbage collector](https://en.m.wikipedia.org/wiki/Garbage_collection_(computer_science)) instead it relies on lifetime analysis at compile-time that free memory once they are no longer referenced.
 
 ### How close is Astro to being ready for use?
-Not close. Astro is at its infancy, there are several tasks —which you can find [below](#tasks)— to complete before it becomes usable.
+Not close. Astro is at its infancy, there are several tasks to complete before it becomes usable.
 
 For now, Astro can compile its source code to ast format. It is not ready for even the simplest application. It is also currently implemented Rust (it was being implemented in Javascript and C++), however, the plan is to bootstrap the compiler (implement it in Astro) once it is sufficiently well-featured.
 
@@ -57,20 +57,6 @@ There is no throrough documentation for the language yet since the main implemen
 
 ### How do I install it?
 N/A
-
-### <a name="tasks"></a> What are the important tasks to complete?
-- [x] ~Improve project structure~
-- [x] ~Add automated unit testing and coverage reports~
-- [x] ~Redesign and remove certain inconsistencies in language syntax~
-- [x] ~Complete lexer implementation~
-- [ ] Complete parser implementation
-- [ ] Implement semantic analysis phase
-- [ ] Create ambiguity finders for inheritance, multiple dispatch, etc.
-- [ ] Implement type inference and garbage collection using program flow analysis
-- [ ] Add wasm code generation
-- [ ] Incorporate incremental compilation
-- [ ] Build REPL
-- [ ] Create specialized error handler
 
 ### Want to contribute to the project?
 Please read the [code of conduct](CODE_OF_CONDUCT.md) and contribution [guidelines](CONTRIBUTING.md). We welcome your ideas and contributions.
