@@ -9,7 +9,7 @@ spaces =
 newline =
   | '\r'? '\n'
 
-noname =
+placeholder =
   | '_'
 
 identifierbeginchar =
@@ -107,8 +107,10 @@ multilinecommentchars =
 multilinecomment =
   | "/*" multilinecommentchars? multilinecomment* multilinecommentchars? '*/'
 
-
 /*************** PARSER ***************/
+
+// Newlines can exist near or around punctuators or keywords that are not operators.
+// Try various placement of newlines for each rule in tests.
 
 integerliteral =
   | integerbinaryliteral
@@ -130,38 +132,563 @@ newlines =
   | newline+
 
 comma =
-  | ',' newlines?
+  | newlines? ',' newlines?
+
+// CONTAINERS
 
 listarguments =
   | simpleexpression (comma simpleexpression)* comma?
-  { AST::SimpleExpr(SimpleExpr::List) }
+  { AST::SimpleExpr(SimpleExpr::List(Vec<SimpleExpr>)) }
 
 listliteral =
   | '[' newlines? listarguments? newlines? ']'
-  { AST::SimpleExpr(SimpleExpr::List) }
+  { AST::SimpleExpr(SimpleExpr::List(Vec<SimpleExpr>)) }
 
 tuplearguments =
   | simpleexpression (comma simpleexpression)+ comma?
   | simpleexpression comma
-  { AST::SimpleExpr(SimpleExpr::Tuple) }
+  { AST::SimpleExpr(SimpleExpr::Tuple(Vec<SimpleExpr>)) }
 
 tupleliteral =
   | '(' newlines? tuplearguments? newlines? ')'
-  { AST::SimpleExpr(SimpleExpr::Tuple) }
+  { AST::SimpleExpr(SimpleExpr::Tuple(Vec<SimpleExpr>)) }
 
-/*************** FUTURE ***************/
+dictargument =
+  | simpleexpression newlines? ':' newlines? simpleexpression comma?
+  | simpleexpression
+  { AST::Entry((SimpleExpr, SimpleExpr)) }
 
-floatwithoutmantissa = // LEXER PHASE
-  | integerliteral '.' '.' !(operator | identifier | '.')
+dictarguments =
+  | dictargument (comma dictargument)* comma?
+  { AST::SimpleExpr(SimpleExpr::Dict(Vec<(SimpleExpr, SimpleExpr)>)) }
 
-symbolidentifier = // LEXER PHASE
-  | ':' identifier
+dictliteral =
+  | '{' newlines? dictarguments? newlines? '}'
+  { AST::SimpleExpr(SimpleExpr::Dict(Vec<(SimpleExpr, SimpleExpr)>)) }
+
+objectargument =
+  | identifier newlines? ':' newlines? simpleexpression comma?
+  | identifier
+  { AST::Entry((SimpleExpr, SimpleExpr)) }
+
+objectarguments =
+  | objectargument (comma objectargument)* comma?
+  { AST::SimpleExpr(SimpleExpr::Object(Vec<(SimpleExpr, SimpleExpr)>)) }
+
+objectliteral =
+  | identifier '[' newlines? typefunctionarguments newlines? ']' '{' newlines? objectarguments? newlines? '}'
+  { AST::SimpleExpr(SimpleExpr::Object(Vec<(SimpleExpr, SimpleExpr)>)) }
+
+containers =
+  | listliteral
+  | tupleliteral
+  | dictliteral
+  | objectliteral
+
+literal =
+  | numericliteral
+  | booleanliteral
+  | charliteral
+  | stringliteral
+  | regexliteral
+  | containers
+
+// COMPREHENSION
+
+generatorcomprehension =
+  | '(' newlines? simpleexpression newlines? '|' newlines? iter newlines? ')'
+  { AST::SimpleExpr(Simple::Compr(ComprKind, SimpleExpr, Option<SimpleExpr>, Iter)) }
+
+listcomprehension =
+  | '[' newlines? simpleexpression newlines? '|' newlines? iter newlines? ']'
+  { AST::SimpleExpr(Simple::Compr(ComprKind, SimpleExpr, Option<SimpleExpr>, Iter)) }
+
+dictcomprehension =
+  | '{' newlines? simpleexpression newlines? ':' newlines?  simpleexpression '|' iter newlines? '}'
+  { AST::SimpleExpr(Simple::Compr(ComprKind, SimpleExpr, Option<SimpleExpr>, Iter)) }
+
+comprehension =
+  | generatorcomprehension
+  | listcomprehension
+  | dictcomprehension
+
+// POSTFIXES // TODO
+
+callargument =
+  | identifier newlines? ':' newlines? simpleexpression
+  | simpleexpression
+  { AST::CallArg((Option<String>, SimpleExpr)) }
+
+callarguments =
+  | callargument (comma callargument)* comma?
+  { AST::Call(bool, Vec<(Option<String>, SimpleExpr)>) }
+
+callpostfix = // TODO: Type arguments
+  | '.'? '[' newlines? typefunctionarguments newlines? ']' '(' newlines? callarguments newlines? ')'
+  { AST::Call(bool, Vec<(Option<String>, SimpleExpr)>) }
+
+dot =
+  | newlines? '.'
+
+dotnotationpostfix =
+  | dot identifier
+  { AST::Dot(String) }
+
+indexargument =
+  | simpleexpression? '..' (simpleexpression? '..')? simpleexpression?
+  { AST::IndexArg((Option<SimpleExpr>, Option<SimpleExpr>, Option<SimpleExpr>)) }
+
+indexarguments =
+  | indexargument (comma indexargument)* comma?
+  { AST::Index(Vec<(Option<SimpleExpr>, Option<SimpleExpr>, Option<SimpleExpr>)>) }
+
+indexpostfix =
+  | '[' newlines? indexarguments newlines? ']'
+  { AST::Index(Vec<(Option<SimpleExpr>, Option<SimpleExpr>, Option<SimpleExpr>)>) }
+
+tupleindexpostfix =
+  | dot integerdecimalliteral
+  { AST::TupleIndex(String) }
+
+postfix =
+  | callpostfix
+  | dotnotationpostfix
+  | indexpostfix
+  | tupleindexpostfix
+
+emptytuple =
+  | '(' newlines? ')'
+  { AST::SimpleExpr(SimplExpr::EmptyTuple) }
+
+// ATOMS
+
+subatom =
+  | literal
+  | id
+  | comprehension
+  | emptytuple
+  | operator
+  | '(' newlines? simpleexpression newlines? ')'
+
+atom =
+  | subatom '!'? (postfix '!')*
+
+// OPERATORS
+keywordoperator =
+  | 'is' 'not'
+  | 'not' 'in'
+  | 'in'
+  | 'mod'
+  | 'is'
+  | 'not'
+  | 'and'
+  | 'or'
+
+ternaryoperator =
+  | '(' newlines? simpleexpression newlines? ')' newlines? '?' newlines? simpleexpression ':' newlines? simpleexpression
+  { AST::SimpleExpr(SimpleExpr::TernaryOp(Box<SimpleExpr>, Box<SimpleExpr>, Box<SimpleExpr>)) }
+
+spread =
+  | '...' newlines?
+  { ... } // TODO
+
+range =
+  | fixexpression? '..' (fixexpression? '..')? fixexpression?
+  { AST::IndexArg((Option<SimpleExpr>, Option<SimpleExpr>, Option<SimpleExpr>)) }
 
 commadnotation =
   | identifier HASSPACE (comprehension | lambda | identifier | symbolliteral | stringliteral | charliteral | regexliteral | range | numericliteral)
 
+
 coefficientexpression =
-  | numericliteral NOSPACE identifier
+  | floatbinaryliteral NOSPACE identifier
+  | floatoctalliteral NOSPACE identifier
+  | floatdecimalliteral NOSPACE identifier
+  | integerbinaryliteral NOSPACE identifier
+  | integeroctalliteral NOSPACE identifier
+  | integerdecimalliteral NOSPACE identifier
+  | '(' newlines? numericliteral newlines? ')' NOSPACE identifier
+  { AST::SimpleExpr(SimplExpr::Coeff(Box<SimpleExpr>, Box<SimpleExpr>)) }
+
+prepostfixatom =
+  | coefficientexpression
+  | atom operator
+  | operator atom
+  | atom
+
+infixexpression = // Unfurls coefficientexpression atoms as well.
+  | prepostfixatom (operator prepostfixatom)*
+
+// PATTERN IDENTIFIER
+
+id =
+  | indentifier
+  | placeholder
+
+patternid =
+  | '...'? id
+  | '...'
+  { AST::Rest((bool, Option<SimpleExpr>)) }
+
+// ITER
+
+iterargument =
+  | 'var'? newlines? lhspattern newlines? 'in' newlines? simpleexpression
+  { AST::IterArg((bool, Pat, SimpleExpr)) }
+
+iterarguments =
+  | iterargument (newlines? 'and' newlines? iterargument) newlines? 'where' newlines? simpleexpression
+  { AST::Iter(Iter(Vec<(bool, Pat, SimpleExpr)>, Option<SimpleExpr>)) }
+
+// TYPES // TODO
+typesubatom =
+  | identifier '`'?
+  { AST::TypeAtom(TypeAtom(SimpleExpr)) }
+
+typepostfix =
+  | '.' typesubatom
+  | '[' newlines? typeexpression newlines? ']'
+  { AST::TypePostfix(TypeAtom(AccessKind, SimpleExpr)) }
+
+typetuple =
+  | '(' typebinop (comma typebinop)* comma? ')'
+
+typeatom =
+  | typesubatom typepostfix* ('!' | '?')?
+  | typetuple ('!' | '?')?
+  { AST::TypeAtom(TypeAtom(...)) }
+
+typebinop =
+  | typeatom '|' typebinop
+  | typeatom '&' typebinop
+  | typeatom
+
+typerelationoperator =
+  | '::'
+  | '>:'
+  | '<:'
+
+typerelationargument =
+  | '|' newlines? typeatom (comma typeatom)* comma? newlines? '|' newlines? typerelationoperator typeatom
+  | typeatom typerelationoperator typeatom
+
+typerelationarguments =
+  | typerelationargument (comma typerelationargument)* comma?
+
+typefunctionarguments =
+  | typebinop (comma typebinop)* comma?
+
+typeexpression =
+  | '(' newlines? typefunctionarguments newlines? ')' newlines? '->' newlines? (typebinop | emptytuple) (newlines? 'where' newlines? typerelationarguments)?
+  | typebinop
+  { AST::SimpleExpr(SimpleExpr::FuncType()) }
+  { AST::SimpleExpr(SimpleExpr::Type()) }
+
+// LHS PATTERN
+
+lhsrefpostfix =
+  | dotnotationpostfix
+  | indexpostfix
+  | tupleindexpostfix
+
+lhsref = // *x.y. b[x] *(name.age)[name]
+  | '*'? (identifier | '(' newlines? lhsref newlines? ')') lhsrefpostfix*
+  { AST::Ref(Ref(bool, Box<SimpleExpr>, Postfix, Option<Ref>)) } // TODO
+
+lhspatternargument =
+  | ('var' newlines?)? id newlines? ':' newlines? lhspattern
+  | ('var' newlines?)? patternid
+  { AST::PatArg((bool, (bool, SimpleExpr), Pat)) }
+
+lhspatternarguments =
+  | lhspatternargument (comma lhspatternargument)* comma?
+  { AST::PatArgs(Vec<(bool, (bool, SimpleExpr), Pat)>) }
+
+lhstuplepattern =
+  | '(' newlines? lhspatternarguments newlines? ')'
+  { AST::ContainerPat(ContainerPat(PatKind, Vec<(bool, (bool, SimpleExpr), Pat)>)) }
+
+lhsdictpattern =
+  | '{' newlines? lhspatternarguments newlines? '}'
+  { AST::ContainerPat(ContainerPat(PatKind, Vec<(bool, (bool, SimpleExpr), Pat)>)) }
+
+lhslistpattern =
+  | '[' newlines? lhspatternarguments newlines? ']'
+  { AST::ContainerPat(ContainerPat(PatKind, Vec<(bool, (bool, SimpleExpr), Pat)>)) }
+
+lhsobjectpattern =
+  | typeatom (lhstuplepattern | lhsdictpattern)
+  { AST::Pat(Pat::Type(TypeAtom, ContainerPat)) }
+
+lhscontainerpattern =
+  | lhstuplepattern
+  | lhsdictpattern
+  | lhslistpattern
+  | lhsobjectpattern
+
+lhspattern =
+  | lhscontainerpattern
+  | lhsref
+  { AST::Pat(Pat::Type(TypeAtom, ContainerPat)) }
+  { AST::Pat(Pat::Container(ContainerPat)) }
+  { AST::Pat(Pat::Ref(Ref)) }
+
+// MATCH PATTERN
+
+matchpatternargument =
+  | ('var' newlines?)? id newlines? ':' newlines? matchpattern
+  | ('var' newlines?)? patternid
+  { AST::MatchPatArg((bool, (bool, SimpleExpr), MatchPat)) }
+
+matchpatternarguments =
+  | matchpatternargument (comma matchpatternargument)* comma?
+  { AST::MatchPatArgs(Vec<(bool, (bool, SimpleExpr), MatchPat)>) }
+
+matchtuplepattern =
+  | '(' newlines? matchpatternarguments newlines? ')'
+  { AST::MatchContainerPat(MatchContainerPat(MatchPatKind, Vec<(bool, (bool, SimpleExpr), MatchPat)>)) }
+
+matchdictpattern =
+  | '{' newlines? matchpatternarguments newlines? '}'
+  { AST::MatchContainerPat(MatchContainerPat(MatchPatKind, Vec<(bool, (bool, SimpleExpr), MatchPat)>)) }
+
+matchlistpattern =
+  | '[' newlines? matchpatternarguments newlines? ']'
+  { AST::MatchContainerPat(MatchContainerPat(MatchPatKind, Vec<(bool, (bool, SimpleExpr), MatchPat)>)) }
+
+matchcontainerpattern =
+  | matchtuplepattern
+  | matchdictpattern
+  | matchlistpattern
+
+matchpattern =
+  | typeatom (matchtuplepattern | matchdictpattern)
+  | matchcontainerpattern
+  | id (typerelationoperator typeatom)?
+  | simpleexpression '|' simpleexpression
+  | simpleexpression '..' simpleexpression
+  { AST::MatchPat(MatchPat::Type(TypeAtom, MatchContainerPat))) }
+  { AST::MatchPat(MatchPat::Container(MatchContainerPat))) }
+  { AST::MatchPat(MatchPat::Id(Option<SimpleExpr>, SimpleExpr, Option<TypeAtom>))) }
+  { AST::MatchPat(MatchPat::BinOp(Option<SimpleExpr>, SimpleExpr, SimpleExpr))) }
+
+// CONDITIONAL STRUCTURES
+
+elifexpression =
+  | 'elif' newlines? simpleexpression newlines? '{' newlines? expressions newlines? '}'
+
+elseexpression =
+  | 'else' newlines? simpleexpression newlines? '{' newlines? expressions newlines? '}'
+
+condition =
+  | simpleexpression
+  | ('let' | 'var') lhspattern newlines? '=' newlines? simpleexpression
+
+ifexpression =
+  | 'if' newlines? condition newlines? '{' newlines? expressions newlines? '}' (newlines? elifexpression)* (newlines? elseexpression)?
+
+matchargument =
+  | matchpattern newlines? '=>' newlines? expression
+  | matchpattern newlines? '=>' newlines? '{' newlines? expressions newlines? '}'
+
+matcharguments =
+  | matchargument (comma matchargument)* comma?
+
+matchexpression =
+  | 'match' newlines? simpleexpression newlines? '{' newlines? matcharguments newlines? '}'
+
+loopexpresssion =
+  | 'loop' newlines? '{' newlines? expressions newlines? '}'
+
+forexpresssion =
+  | 'for' newlines? iter newlines? '{' newlines? expressions newlines? '}'
+
+whileexpression =
+  | 'while' newlines? condition newlines? '{' newlines? expressions newlines? '}'
+
+conditionalexpression =
+  | ifexpression
+  | matchexpression
+  | loopexpresssion
+  | forexpresssion
+  | whileexpression
+
+// MEMBERS
+
+typegenericargument =
+  | identifier (newlines? ':' newlines? typebinop)?
+
+typegenericarguments =
+  | '[' newlines? typegenericargument (comma typegenericargument)* comma? newlines? ']'
+
+typeparentarguments =
+  | '(' newlines? identifier (comma identifier)* comma? newlines? ')'
+
+typecompletearguments =
+  | typegenericarguments? (newlines? ':' newlines? typeparentarguments)?
+
+field =
+  | identifier ((newlines? ':' newlines? typeexpression)? newlines? '=' newlines? blockexpression)?
+
+typefield =
+  | 'pub'? newlines?
+
+typefields =
+  | typefield (comma typefield)* commma?
+
+type =
+  | 'pub' newlines? 'type' newlines? identifier typecompletearguments '{' newlines? typefields newlines? '}'
+
+enumvariantfield =
+  | identifier (newlines? ':' newlines? typeexpression)?
+
+enumvariantfields =
+  | enumvariantfield (comma? enumvariantfield)* comma?
+
+enumvarianttupleargument =
+  | typeexpression
+  | noname
+
+enumvarianttuplearguments =
+  | enumvarianttupleargument (comma enumvarianttupleargument)* comma?
+
+enumvariant =
+  | identifier '{' newlines? enumvariantfields newlines? '}'
+  | identifier '(' newlines? enumvarianttuplearguments newlines? ')'
+
+enumvariants =
+  | enumvariant (comma, enumvariant)* comma?
+
+enum =
+  | 'pub' newlines? 'enum' newlines? '{' newlines? enumvariants newlines? '}'
+
+functionargument =
+  | lhscontainerpattern
+  | identifier ((newlines? ':' newlines? typeexpression)? newlines? '=' newlines? blockexpression)?
+  | identifier newlines?  '?'?
+
+functionarguments =
+  | functionargument (comma functionargument)* comma?
+
+function =
+  | 'pub' newlines? 'fun' newlines? typegenericarguments newlines? '(' newlines? functionarguments newlines? ')' newlines? '{' newlines? expressions newlines? '}'
+
+closure =
+  | '(' newlines? functionarguments newlines? ')' newlines? '=>' newlines? (simpleexpression | '{' newlines? expressions newlines? '}')
+
+subject =
+  | 'pub' newlines? ('let' | 'var') lhscontainerpattern ((newlines? ':' newlines? typeexpression)? '=' newlines? blockexpression)?
+
+assignmentoperator =
+  | '='
+  | '.='
+  | '+='
+  | '-='
+  | '/='
+  | '÷='
+  | '*='
+  | '×='
+  | '^='
+  | '~='
+  | '|='
+  | '&='
+
+assignment =
+  | lhspattern ((newlines? ':' newlines? typeexpression)? assignmentoperator newlines? blockexpression)?
+
+// EXPRESSION
+
+returnexpression =
+  | 'return' newlines? simpleexpression
+  { AST::Expr(Expr::Return(Option<SimplExpr>)) }
+
+yieldexpression =
+  | 'yield' 'from'? newlines? simpleexpression?
+  { AST::Expr(Expr::Yield(bool, Option<SimplExpr>)) }
+
+continueexpression =
+  | 'continue'
+  { AST::Expr(Expr::Continue) }
+
+breakexpression =
+  | 'break' newlines? simpleexpression?
+  { AST::Expr(Expr::Break(Option<SimplExpr>)) }
+
+fallthroughexpression =
+  | 'fallthrough'
+  { AST::Expr(Expr::Fallthrough) }
+
+controlflowexpression =
+  | returnexpression
+  | yieldexpression
+  | continueexpression
+  | breakexpression
+  | fallthroughexpression
+
+block =
+  | '{' newlines? expressions newlines?  '}'
+
+fixexpression =
+  | function
+  | closure
+  | ternaryoperator
+  | commadnotation
+  | infixexpression
+  | prepostfixatom
+
+simpleexpression =
+  | spread
+  | range
+  | fixexpression
+
+expression =
+  | assignment
+  | controlflowexpression
+  | simpleexpression
+
+blockexpression =
+  | expression
+  | subject
+  | type
+  | enum
+  | block
+  | importstatement
+
+expressions =
+  | blockexpression ((';'? newlines | ';') blockexpression) ';'?
+  | blockexpression ';'?
+
+importargument =
+  | (identifier (newlines? ':' newlines?)? identifier
+
+importarguments =
+  | importargument (comma importargument)* comma?
+  | '...'
+
+importpathprefix =
+  | '..'
+  | '.'
+
+importpathpostfix =
+  | dot identifier
+
+importpath =
+  | importpathprefix? identifier importpathpostfix*
+
+importstatement =
+  | 'import' newlines? (identifier ':' newlines?)? importpath (newlines? '{' newlines? importarguments newlines? '}')
+
+program =
+  | expressions
+  | ε
+
+/*************** FUTURE ***************/
+
+floatwithoutmantissa = // LEXER PHASE
+  | integerliteral '.' !(operator | identifier | '.')
+
+symbolidentifier = // LEXER PHASE
+  | ':' identifier
 
 symbol =
   | symbolidentifier
