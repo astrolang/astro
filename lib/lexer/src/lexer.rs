@@ -83,7 +83,7 @@ impl Lexer {
             ),
             // TODO: Support certain Unicode characters.
             operator_char: String::from(":+'-*/\\^%&|!><=÷×≠≈¹²³√?~"),
-            punctuator_char: String::from("(){}[],.;@$"),
+            punctuator_char: String::from("(){}[],;@$"),
             // Valid Astro keywords
             keywords: vec![
                 String::from("import"),
@@ -319,7 +319,7 @@ impl Lexer {
 
         // Check if identifier is a boolean literal
         if token == "_" {
-            Ok(Token::new(TokenKind::NoName, Some(token), cursor))
+            Ok(Token::new(TokenKind::Placeholder, Some(token), cursor))
         } else if token == "true" || token == "false" {
             Ok(Token::new(TokenKind::BooleanLiteral, Some(token), cursor))
         } else if self.keywords.contains(&token) {
@@ -341,6 +341,31 @@ impl Lexer {
         loop {
             let character = self.peek_char(None);
             if character.is_some() && self.operator_char.find(character.unwrap()).is_some() {
+                token.push(self.eat_char());
+            } else {
+                break
+            }
+        }
+
+        // Revert cursor value if no character consumed.
+        if token.is_empty() {
+            self.cursor = cursor;
+            return Err(LexerError::new(ErrorKind::CantConsume, kind, cursor));
+        }
+
+        Ok(Token::new(kind, Some(token), cursor))
+    }
+
+    /// Consumes a sequence of dots in code if they come next.
+    fn dots(&mut self) -> Result<Token, LexerError> {
+        let kind = TokenKind::Dots;
+        let mut token = String::from("");
+        let cursor = self.cursor;
+
+        // Check if next character is an operator character.
+        loop {
+            let character = self.peek_char(None);
+            if character.is_some() && character.unwrap() == '.' {
                 token.push(self.eat_char());
             } else {
                 break
@@ -1078,7 +1103,7 @@ impl Lexer {
         let token = self.newline();
         return_on_ok_or_terminable_error!(token);
 
-        // Consume identifier. // Greedy (no_name)
+        // Consume identifier.
         let token = self.identifier();
         return_on_ok_or_terminable_error!(token);
 
@@ -1104,6 +1129,10 @@ impl Lexer {
 
         // Consume operator.
         let token = self.operator();
+        return_on_ok_or_terminable_error!(token);
+
+        // Consume dots.
+        let token = self.dots();
         return_on_ok_or_terminable_error!(token);
 
         // Consume float_binary_literal.
