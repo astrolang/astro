@@ -709,6 +709,8 @@ impl Parser {
             s!(")")
         );
 
+        println!("parser_result = {:#?}", parser_result);
+
         // Check if parser result is OK.
         if parser_result.is_ok() {
             // Pull array out of Output::Values.

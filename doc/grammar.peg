@@ -694,3 +694,9 @@ symbolidentifier = // LEXER PHASE
 symbol =
   | symbolidentifier
   | ':(' expr ')'
+
+vectorizationpostfix =
+  | '.' callpostfix
+
+vectorizedoperator =
+  | operator '.'

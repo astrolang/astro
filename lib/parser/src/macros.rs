@@ -170,3 +170,17 @@ macro_rules! variant_fields {
         }
     };
 }
+
+#[macro_export]
+macro_rules! pull {
+    ($value:expr, { $field:path $(> $fields:path)* }) => {
+        // TODO
+    };
+}
+
+#[macro_export]
+macro_rules! val {
+    ($lhs:path > $rhs:path) => {
+        // TODO
+    };
+}
