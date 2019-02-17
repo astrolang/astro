@@ -1,4 +1,3 @@
-
 /************************* TESTS *************************/
 
 // TODO: Add failing cases.
@@ -7,9 +6,9 @@ mod tests {
     use crate::{
         combinator::{Combinator, CombinatorArg, Output},
         errors::ParserError,
-        parser::Parser,
         kinds::ErrorKind,
         macros,
+        parser::Parser,
     };
     use astro_codegen::asts::{SimpleExpr, AST};
     use astro_lexer::{Lexer, Token, TokenKind};
@@ -261,7 +260,10 @@ mod tests {
         );
         assert_eq!(
             combinator_result_4,
-            Err(ParserError { error: ErrorKind::ExpectedTupleArguments, column: 0 })
+            Err(ParserError {
+                error: ErrorKind::ExpectedTupleArguments,
+                column: 0
+            })
         );
     }
 

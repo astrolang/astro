@@ -25,8 +25,8 @@ impl<T> CacheData<T> {
 pub enum CombinatorArg<'a, T> {
     Func(
         (
-            fn(&Vec<CombinatorArg<'a, T>>, &mut Combinator<T>) -> Result<Output<T>, ParserError>,
-            &'a Vec<CombinatorArg<'a, T>>,
+            fn(&[CombinatorArg<'a, T>], &mut Combinator<T>) -> Result<Output<T>, ParserError>,
+            &'a [CombinatorArg<'a, T>],
         ),
     ),
     Str(&'a str),
@@ -200,7 +200,7 @@ where
 
     /// Parses its arguments.
     pub fn parse<'a>(
-        args: &Vec<CombinatorArg<'a, T>>,
+        args: &[CombinatorArg<'a, T>],
         combinator: &mut Combinator<T>,
     ) -> Result<Output<T>, ParserError>
     where
@@ -293,7 +293,7 @@ where
 
     /// Parses a set of alternatives.
     pub fn alt<'a>(
-        args: &Vec<CombinatorArg<'a, T>>,
+        args: &[CombinatorArg<'a, T>],
         combinator: &mut Combinator<T>,
     ) -> Result<Output<T>, ParserError>
     where
@@ -399,7 +399,7 @@ where
 
     /// Parses its arguments at least once.
     pub fn more<'a>(
-        args: &Vec<CombinatorArg<'a, T>>,
+        args: &[CombinatorArg<'a, T>],
         combinator: &mut Combinator<T>,
     ) -> Result<Output<T>, ParserError>
     where
@@ -440,7 +440,7 @@ where
     /// Parses its arguments at least once.
     /// Returns success if unable to parse.
     pub fn opt_more<'a>(
-        args: &Vec<CombinatorArg<'a, T>>,
+        args: &[CombinatorArg<'a, T>],
         combinator: &mut Combinator<T>,
     ) -> Result<Output<T>, ParserError>
     where
@@ -465,7 +465,7 @@ where
     /// Parses its arguments once.
     /// Returns success if unable to parse.
     pub fn opt<'a>(
-        args: &Vec<CombinatorArg<'a, T>>,
+        args: &[CombinatorArg<'a, T>],
         combinator: &mut Combinator<T>,
     ) -> Result<Output<T>, ParserError>
     where
@@ -490,7 +490,7 @@ where
     /// Tries to parse its arguments once.
     /// Does not advance the combinator.
     pub fn and<'a>(
-        args: &Vec<CombinatorArg<'a, T>>,
+        args: &[CombinatorArg<'a, T>],
         combinator: &mut Combinator<T>,
     ) -> Result<Output<T>, ParserError>
     where
@@ -511,7 +511,7 @@ where
     /// Expects parsing to fail.
     /// Does not advance the combinator.
     pub fn not<'a>(
-        args: &Vec<CombinatorArg<'a, T>>,
+        args: &[CombinatorArg<'a, T>],
         combinator: &mut Combinator<T>,
     ) -> Result<Output<T>, ParserError>
     where

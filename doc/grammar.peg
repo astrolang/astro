@@ -274,6 +274,7 @@ atom =
   | subatom '!'? (postfix '!')*
 
 // OPERATORS
+
 keywordoperator =
   | 'is' 'not'
   | 'not' 'in'

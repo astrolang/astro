@@ -15,6 +15,11 @@ pub struct Parser {
     combinator: Combinator<AST>,
 }
 
+type ParserFn<'a> = fn(
+    args: &[CombinatorArg<'a, AST>],
+    combinator: &mut Combinator<AST>,
+) -> Result<Output<AST>, ParserError>;
+
 impl Parser {
     /// Creates a new parser object from the tokens passed in.
     pub fn new(tokens: Vec<Token>) -> Self {
@@ -46,10 +51,7 @@ impl Parser {
     pub fn parse_terminal<'a>(
         kind: TokenKind,
         combinator: &mut Combinator<AST>,
-        func: fn(
-            args: &Vec<CombinatorArg<'a, AST>>,
-            combinator: &mut Combinator<AST>,
-        ) -> Result<Output<AST>, ParserError>,
+        func: ParserFn<'a>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and columns.
         let cursor = combinator.get_cursor();
@@ -81,7 +83,7 @@ impl Parser {
 
     /// Parses newline.
     pub fn newline<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::Newline, combinator, Parser::newline as _)
@@ -89,7 +91,7 @@ impl Parser {
 
     /// Parses no_name.
     pub fn no_name<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::Placeholder, combinator, Parser::no_name)
@@ -97,7 +99,7 @@ impl Parser {
 
     /// Parses identifier.
     pub fn identifier<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::Identifier, combinator, Parser::identifier)
@@ -105,7 +107,7 @@ impl Parser {
 
     /// Parses boolean literal.
     pub fn boolean_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -117,7 +119,7 @@ impl Parser {
 
     /// Parses keyword.
     pub fn keyword<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::Keyword, combinator, Parser::keyword)
@@ -125,7 +127,7 @@ impl Parser {
 
     /// Parses operator.
     pub fn operator<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::Operator, combinator, Parser::operator)
@@ -133,7 +135,7 @@ impl Parser {
 
     /// Parses punctuator.
     pub fn punctuator<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::Punctuator, combinator, Parser::punctuator)
@@ -141,7 +143,7 @@ impl Parser {
 
     /// Parses integer binary literal.
     pub fn integer_binary_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -153,7 +155,7 @@ impl Parser {
 
     /// Parses integer octal literal.
     pub fn integer_octal_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -165,7 +167,7 @@ impl Parser {
 
     /// Parses integer hexadecimal literal.
     pub fn integer_hexadecimal_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -177,7 +179,7 @@ impl Parser {
 
     /// Parses integer decimal literal.
     pub fn integer_decimal_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -189,7 +191,7 @@ impl Parser {
 
     /// Parses float binary literal.
     pub fn float_binary_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -201,7 +203,7 @@ impl Parser {
 
     /// Parses float octal literal.
     pub fn float_octal_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -213,7 +215,7 @@ impl Parser {
 
     /// Parses float hexadecimal literal.
     pub fn float_hexadecimal_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -225,7 +227,7 @@ impl Parser {
 
     /// Parses float decimal literal.
     pub fn float_decimal_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(
@@ -237,7 +239,7 @@ impl Parser {
 
     /// Parses char literal.
     pub fn char_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::CharLiteral, combinator, Parser::char_literal)
@@ -245,7 +247,7 @@ impl Parser {
 
     /// Parses regex literal.
     pub fn regex_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::RegexLiteral, combinator, Parser::regex_literal)
@@ -253,7 +255,7 @@ impl Parser {
 
     /// Parses string literal.
     pub fn string_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         Parser::parse_terminal(TokenKind::StringLiteral, combinator, Parser::string_literal)
@@ -261,7 +263,7 @@ impl Parser {
 
     /// Parses integer literal.
     pub fn integer_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -304,7 +306,7 @@ impl Parser {
 
     /// Parses float literal.
     pub fn float_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -350,7 +352,7 @@ impl Parser {
 
     /// Parses numeric literal.
     pub fn numeric_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -391,7 +393,7 @@ impl Parser {
     /// Parses newlines =
     ///     | newline*.
     pub fn newlines<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -422,7 +424,7 @@ impl Parser {
     /// Parses comma =
     ///     | newlines? ',' newlines?.
     pub fn comma<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -454,7 +456,7 @@ impl Parser {
     /// Parses listarguments =
     ///     | simpleexpression (comma simpleexpression)* comma?
     pub fn list_arguments<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -533,7 +535,7 @@ impl Parser {
     /// Parses listliteral =
     ///     | '[' newlines? listarguments? newlines? ']'
     pub fn list_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -586,7 +588,7 @@ impl Parser {
     ///     | simpleexpression (comma simpleexpression)+ comma?
     ///     | simpleexpression comma
     pub fn tuple_arguments<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.
@@ -686,7 +688,7 @@ impl Parser {
     /// Parses tupleliteral =
     ///     | '(' newlines? listarguments? newlines? ')'
     pub fn tuple_literal<'a>(
-        _args: &Vec<CombinatorArg<'a, AST>>,
+        _args: &[CombinatorArg<'a, AST>],
         combinator: &mut Combinator<AST>,
     ) -> Result<Output<AST>, ParserError> {
         // Get the cursor and column.

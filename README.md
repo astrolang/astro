@@ -53,7 +53,7 @@ Not close. Astro is at its infancy, there are several tasks to complete before i
 For now, Astro can compile its source code to ast format. It is not ready for even the simplest application. It is also currently implemented Rust (it was being implemented in Javascript and C++), however, the plan is to bootstrap the compiler (implement it in Astro) once it is sufficiently well-featured.
 
 ### Where can I read about the language?
-There is no throrough documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](docs/summary.ast).
+There is no thorough documentation for the language yet since the main implementation is still in active development, however, you can find an up-to-date summary of language features [here](doc/summary.astro).
 
 ### How do I install it?
 N/A
