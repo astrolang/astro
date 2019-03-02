@@ -73,7 +73,7 @@
     is_even(45)
 
 /// VARIABLE/CONSTANT OBJECTS
-    // Objects are variable by default but can be made immutable with the const keyword.
+    // REVIEW: This semantics is no longer supported
     var name = const Name("Steve")
     let list = const [1, 2, 3, 4]
 
@@ -94,11 +94,6 @@
     // You can annotate the argument and return types of a function.
     fun modulo(a: Int, b: Int) -> Int {
         return a % b
-    }
-
-    // Astro is indentation-based, but for legibility reason blocks can optionally be delimited with `..`.
-    fun sub(a, b) {
-        a - b
     }
 
 /// COMMAND NOTATION
@@ -159,7 +154,7 @@
         p.name = name;
     }
 
-    let name = set_name("John Smith") // Invalid! setname returns no result.
+    let name = set_name("John Smith") // Invalid! set_name returns no result.
 
 /// SPECIFYING TYPES
     // Types can be automatically inferred in Astro.
@@ -211,12 +206,6 @@
     // `copy` is a shallow copy operation, while `deep_copy` is a deep copy operation.
     let rent = copy(house)
     let buyer = deep_copy(game)
-
-    // TODO
-    // An immutable reference to an object can be returned from a function using the `const` keyword.
-    fun get_amount(account) {
-        return const account.amount
-    }
 
 /// NUMBER LITERALS
     // Number literals in Astro
@@ -318,14 +307,6 @@
         }
     }
 
-    // Nested dictionaries can be simplified with indentation.
-    let siblings = {
-        sister: {
-            name: "Shade Williams",
-            age: 15
-        }
-    }
-
     // Dictionary fields can be accessed using the dot operator or the index operator.
     let mum_name = parents.mum.name
     let sister_name = siblings["sister", "name"]
@@ -367,7 +348,7 @@
 
 /// RANGE
     // Range is an iterable that allows iterating through a range of values.
-    let days = 1..31 // 1 to 31
+    let days = 1..31 // 1 to 30
 
     // A range can have a step value.
     let evens = 2..2..20 // The step value is the `2` in the middle.
@@ -386,7 +367,7 @@
     print(a) // 1
     print(b) // (2, 3, 4)
 
-    // It is also used for varargs.
+    // It can also be used to specify varargs.
     fun rest(a, ...b) {
         print(b)
     }
@@ -454,7 +435,7 @@
     let brothers = ("James",
     "Jackson")
 
-    // Chained dot notation can be written on subsequent lines but with an indentation.
+    // Chained dot notation expression can be spread accross multiple lines
     sentence
         .trim()
         .lower()
@@ -462,9 +443,9 @@
 /// IF EXPRESSION
     // Conditional branches using `if`, `elif` and `else`.
     if is_adrian_rich {
-        spendall("on parties")
+        spend_all("on parties")
     } elif is_orobo_rich {
-        spendall("on legos")
+        spend_all("on legos")
     } else {
         cry("we are broke")
     }
@@ -476,7 +457,7 @@
 
     // Checking for Noneness and binding value to a name.
     if let stock_code = get_stock_code("APPLE") {
-        print("APPLE: $stock_code")
+        print("APPLE: ${stock_code}")
     }
 
 /// TERNARY OPERATOR
@@ -557,7 +538,7 @@
 /// IN
     // `in` is a special infix keyword operator that checks for the existence of an object in a collection type.
     if student.name in defaulter_list {
-        print "${student.name} hasn\"t paid yet. Contact parents"
+        print "${student.name} hasn't paid yet. Contact parents"
     }
 
     // Negation.
