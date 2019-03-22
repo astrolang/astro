@@ -57,7 +57,6 @@ pub struct Lexer {
 
 /// TODO:
 /// - symbols => `:identifier` and `:(`
-/// - multiple `_` in numeric literals => `0x1___2345f`
 /// - linecontinuation => `...` (\s | newline)*
 /// - string interpolation handling
 impl Lexer {
@@ -402,28 +401,29 @@ impl Lexer {
         Ok(Token::new(kind, Some(token), cursor))
     }
 
-    // Consume ('_'? digit)*.
+    // Consume ('-'* digit)*.
     fn consume_digits(&mut self, digit_characters: String, token: &mut String) {
         loop {
             // Try consume '_' digit.
-            let character = self.peek_char(None);
-            if character.is_some() && character.unwrap() == '_' {
+            let mut character = self.peek_char(None);
+            let mut underscore_count = 0;
+            while character.is_some() && character.unwrap() == '_' {
                 // Consume '_'.
                 self.eat_char();
+                character = self.peek_char(None);
+                underscore_count += 1;
 
-                // If '_' is consumed, a digit must follow.
-                let character = self.peek_char(None);
-                if character.is_some() && digit_characters.find(character.unwrap()).is_some() {
-                    token.push(self.eat_char());
-                } else { // Otherwise spit out '_' and break.
-                    self.cursor -= 1;
-                    break;
-                }
-            } else if character.is_some() && digit_characters.find(character.unwrap()).is_some() {
+            }
+
+            // If '_' is consumed, a digit must follow.
+            let character = self.peek_char(None);
+            if character.is_some() && digit_characters.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
-            } else {
+            } else { // Otherwise spit out '_' and break.
+                self.cursor -= underscore_count;
                 break;
             }
+    
         }
     }
 
@@ -436,10 +436,11 @@ impl Lexer {
         // Consume '0b'.
         let string = self.eat_token(String::from("0b"));
         if string.is_some() && string.unwrap() == "0b" {
-            // Consume '_'?.
-            let character = self.peek_char(None);
-            if character.is_some() && character.unwrap() == '_' {
+            // Consume '-'*.
+            let mut character = self.peek_char(None);
+            while character.is_some() && character.unwrap() == '_' {
                 self.eat_char();
+                character = self.peek_char(None);
             }
 
             // Consume digitbinary.
@@ -447,7 +448,7 @@ impl Lexer {
             if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
 
-                // Consume ('_'? digitbinary)*.
+                // Consume ('-'* digitbinary)*.
                 self.consume_digits(self.digit_binary.clone(), &mut token);
             }
         }
@@ -470,17 +471,18 @@ impl Lexer {
         // Consume '0o'.
         let string = self.eat_token(String::from("0o"));
         if string.is_some() && string.unwrap() == "0o" {
-            // Consume '_'?.
-            let character = self.peek_char(None);
-            if character.is_some() && character.unwrap() == '_' {
+            // Consume '-'*.
+            let mut character = self.peek_char(None);
+            while character.is_some() && character.unwrap() == '_' {
                 self.eat_char();
+                character = self.peek_char(None);
             }
             // Consume digitoctal.
             let character = self.peek_char(None);
             if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
 
-                // Consume ('_'? digitoctal)*.
+                // Consume ('-'* digitoctal)*.
                 self.consume_digits(self.digit_octal.clone(), &mut token);
             }
         }
@@ -503,17 +505,18 @@ impl Lexer {
         // Consume '0x'.
         let string = self.eat_token(String::from("0x"));
         if string.is_some() && string.unwrap() == "0x" {
-            // Consume '_'?.
-            let character = self.peek_char(None);
-            if character.is_some() && character.unwrap() == '_' {
+            // Consume '-'*.
+            let mut character = self.peek_char(None);
+            while character.is_some() && character.unwrap() == '_' {
                 self.eat_char();
+                character = self.peek_char(None);
             }
             // Consume digithexadecimal.
             let character = self.peek_char(None);
             if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
 
-                // Consume ('_'? digithexadecimal)*.
+                // Consume ('-'* digithexadecimal)*.
                 self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
             }
         }
@@ -533,12 +536,20 @@ impl Lexer {
         let mut token = String::from("");
         let cursor = self.cursor;
 
+        // Consume '_'
+        let mut character = self.peek_char(None);
+        while character.is_some() && character.unwrap() == '_' {
+            self.eat_char();
+            character = self.peek_char(None);
+
+        }
+
         // Consume digitdecimal.
         let character = self.peek_char(None);
         if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
             token.push(self.eat_char());
 
-            // Consume ('_'? digitdecimal)*.
+            // Consume ('-'* digitdecimal)*.
             self.consume_digits(self.digit_decimal.clone(), &mut token);
         }
 
@@ -557,7 +568,7 @@ impl Lexer {
         let mut token = String::from("");
         let cursor = self.cursor;
 
-        // Consume integerpart: ('0b' '_'? digitbinary) ('_'? digitbinary)*.
+        // Consume integerpart: ('0b' '-'* digitbinary) ('-'* digitbinary)*.
         let integer_part = self.integer_binary_literal();
         if integer_part.is_ok() {
             token.push_str(integer_part.unwrap().token.unwrap().as_str());
@@ -571,10 +582,10 @@ impl Lexer {
                 if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
                     token.push(self.eat_char());
 
-                    // Consume ('_'? digitbinary)*.
+                    // Consume ('-'* digitbinary)*.
                     self.consume_digits(self.digit_binary.clone(), &mut token);
 
-                    // Consume ('e' [-+]? digitbinary ('_'? digitbinary)*)?
+                    // Consume ('e' [-+]? digitbinary ('-'* digitbinary)*)?
                     let character = self.peek_char(None);
                     if character.is_some() && character.unwrap() == 'e' {
                         token.push(self.eat_char());
@@ -590,7 +601,7 @@ impl Lexer {
                         if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
                             token.push(self.eat_char());
 
-                            // Consume ('_'? digitbinary)*.
+                            // Consume ('-'* digitbinary)*.
                             self.consume_digits(self.digit_binary.clone(), &mut token);
                         } else { // Failed if can't consume digitbinary.
                             token = String::new();
@@ -612,7 +623,7 @@ impl Lexer {
                 if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
                     token.push(self.eat_char());
 
-                    // Consume ('_'? digitbinary)*.
+                    // Consume ('-'* digitbinary)*.
                     self.consume_digits(self.digit_binary.clone(), &mut token);
                 } else { // Failed if can't consume digitbinary.
                     token = String::new();
@@ -637,7 +648,7 @@ impl Lexer {
         let mut token = String::from("");
         let cursor = self.cursor;
 
-        // Consume integerpart: ('0o' '_'? digitoctal) ('_'? digitoctal)*.
+        // Consume integerpart: ('0o' '-'* digitoctal) ('-'* digitoctal)*.
         let integer_part = self.integer_octal_literal();
         if integer_part.is_ok() {
             token.push_str(integer_part.unwrap().token.unwrap().as_str());
@@ -651,10 +662,10 @@ impl Lexer {
                 if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
                     token.push(self.eat_char());
 
-                    // Consume ('_'? digitoctal)*.
+                    // Consume ('-'* digitoctal)*.
                     self.consume_digits(self.digit_octal.clone(), &mut token);
 
-                    // Consume ('e' [-+]? digitoctal ('_'? digitoctal)*)?
+                    // Consume ('e' [-+]? digitoctal ('-'* digitoctal)*)?
                     let character = self.peek_char(None);
                     if character.is_some() && character.unwrap() == 'e' {
                         token.push(self.eat_char());
@@ -670,7 +681,7 @@ impl Lexer {
                         if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
                             token.push(self.eat_char());
 
-                            // Consume ('_'? digitoctal)*.
+                            // Consume ('-'* digitoctal)*.
                             self.consume_digits(self.digit_octal.clone(), &mut token);
                         } else { // Failed if can't consume digitoctal.
                             token = String::new();
@@ -692,7 +703,7 @@ impl Lexer {
                 if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
                     token.push(self.eat_char());
 
-                    // Consume ('_'? digitoctal)*.
+                    // Consume ('-'* digitoctal)*.
                     self.consume_digits(self.digit_octal.clone(), &mut token);
                 } else { // Failed if can't consume digitoctal.
                     token = String::new();
@@ -717,7 +728,7 @@ impl Lexer {
         let mut token = String::from("");
         let cursor = self.cursor;
 
-        // Consume integerpart: ('0o' '_'? digithexadecimal) ('_'? digithexadecimal)*.
+        // Consume integerpart: ('0o' '-'* digithexadecimal) ('-'* digithexadecimal)*.
         let integer_part = self.integer_hexadecimal_literal();
         if integer_part.is_ok() {
             token.push_str(integer_part.unwrap().token.unwrap().as_str());
@@ -731,10 +742,10 @@ impl Lexer {
                 if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
                     token.push(self.eat_char());
 
-                    // Consume ('_'? digithexadecimal)*.
+                    // Consume ('-'* digithexadecimal)*.
                     self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
 
-                    // Consume ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
+                    // Consume ('p' [-+]? digithexadecimal ('-'* digithexadecimal)*)?
                     let character = self.peek_char(None);
                     if character.is_some() && character.unwrap() == 'p' {
                         token.push(self.eat_char());
@@ -750,7 +761,7 @@ impl Lexer {
                         if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
                             token.push(self.eat_char());
 
-                            // Consume ('_'? digithexadecimal)*.
+                            // Consume ('-'* digithexadecimal)*.
                             self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
                         } else { // Failed if can't consume digithexadecimal.
                             token = String::new();
@@ -772,7 +783,7 @@ impl Lexer {
                 if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
                     token.push(self.eat_char());
 
-                    // Consume ('_'? digithexadecimal)*.
+                    // Consume ('-'* digithexadecimal)*.
                     self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
                 } else { // Failed if can't consume digithexadecimal.
                     token = String::new();
@@ -797,7 +808,7 @@ impl Lexer {
         let mut token = String::from("");
         let cursor = self.cursor;
 
-        // Consume integerpart: digitdecimal ('_'? digitdecimal)*.
+        // Consume integerpart: digitdecimal ('-'* digitdecimal)*.
         let integer_part = self.integer_decimal_literal();
         if integer_part.is_ok() {
             token.push_str(integer_part.clone().unwrap().token.unwrap().as_str());
@@ -825,10 +836,10 @@ impl Lexer {
             if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() && !followingDot {
                 token.push(self.eat_char());
 
-                // Consume ('_'? digitdecimal)*.
+                // Consume ('-'* digitdecimal)*.
                 self.consume_digits(self.digit_decimal.clone(), &mut token);
 
-                // Consume ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
+                // Consume ('e' [-+]? digitdecimal ('-'* digitdecimal)*)?
                 let character = self.peek_char(None);
                 if character.is_some() && character.unwrap() == 'e' {
                     token.push(self.eat_char());
@@ -844,7 +855,7 @@ impl Lexer {
                     if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
                         token.push(self.eat_char());
 
-                        // Consume ('_'? digitdecimal)*.
+                        // Consume ('-'* digitdecimal)*.
                         self.consume_digits(self.digit_decimal.clone(), &mut token);
                     } else { // Failed if can't consume digitdecimal.
                         token = String::new();
@@ -866,7 +877,7 @@ impl Lexer {
             if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
 
-                // Consume ('_'? digitdecimal)*.
+                // Consume ('-'* digitdecimal)*.
                 self.consume_digits(self.digit_decimal.clone(), &mut token);
             } else { // Failed if can't consume digitdecimal.
                 token = String::new();
