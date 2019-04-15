@@ -20,7 +20,7 @@ Astro is a fun programming language designed for safe _high-performance applicat
 - supports data-race-free concurrency.
 
 ### Why create yet another programming language?
-The language creator had a set of requirements (listed above) not met by any language ([Rust](https://en.wikipedia.org/wiki/Rust_programming_language)) comes close. Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
+The language creator had a set of requirements (listed above) not met by any language ([Rust](https://en.wikipedia.org/wiki/Rust_programming_language) comes close). Although, the project started as an educational effort, it later shaped into a language designed to meet those requirements.
 
 SIMD, threads and direct access to Web APIs are planned for WebAssembly. These and other proposals for GPU Compute will make the web a desirable HPC target in the near future. Astro is, for this reason, designed for high-performance apps that are expected to run on the server or in the browser.
 
