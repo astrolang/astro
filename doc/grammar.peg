@@ -45,32 +45,32 @@ digithexadecimal =
   | [0-9a-fA-F]
 
 integerbinaryliteral =
-  | '0b' '_'? digitbinary ('_'? digitbinary)*
+  | '0b' '_'* digitbinary ('_'* digitbinary)*
 
 integeroctalliteral =
-  | '0o' '_'? digitoctal ('_'? digitoctal)*
+  | '0o' '_'* digitoctal ('_'* digitoctal)*
 
 integerhexadecimalliteral =
-  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)*
+  | '0x' '_'* digithexadecimal ('_'* digithexadecimal)*
 
 integerdecimalliteral =
-  | digitdecimal ('_'? digitdecimal)*
+  | digitdecimal ('_'* digitdecimal)*
 
 floatbinaryliteral =
-  | '0b' '_'? digitbinary ('_'? digitbinary)* '.' digitbinary ('_'? digitbinary)* ('e' [-+]? digitbinary ('_'? digitbinary)*)?
-  | '0b' '_'? digitbinary ('_'? digitbinary)* 'e' [-+]? digitbinary ('_'? digitbinary)*
+  | '0b' '_'* digitbinary ('_'* digitbinary)* '.' digitbinary ('_'* digitbinary)* ('e' [-+]? digitbinary ('_'* digitbinary)*)?
+  | '0b' '_'* digitbinary ('_'* digitbinary)* 'e' [-+]? digitbinary ('_'* digitbinary)*
 
 floatoctalliteral =
-  | '0o' '_'? digitoctal ('_'? digitoctal)* '.' digitoctal ('_'? digitoctal)* ('e' [-+]? digitoctal ('_'? digitoctal)*)?
-  | '0o' '_'? digitoctal ('_'? digitoctal)* 'e' [-+]? digitoctal ('_'? digitoctal)*
+  | '0o' '_'* digitoctal ('_'* digitoctal)* '.' digitoctal ('_'* digitoctal)* ('e' [-+]? digitoctal ('_'* digitoctal)*)?
+  | '0o' '_'* digitoctal ('_'* digitoctal)* 'e' [-+]? digitoctal ('_'* digitoctal)*
 
 floathexadecimalliteral =
-  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* '.' digithexadecimal ('_'? digithexadecimal)* ('p' [-+]? digithexadecimal ('_'? digithexadecimal)*)?
-  | '0x' '_'? digithexadecimal ('_'? digithexadecimal)* 'p' [-+]? digithexadecimal ('_'? digithexadecimal)*
+  | '0x' '_'* digithexadecimal ('_'* digithexadecimal)* '.' digithexadecimal ('_'* digithexadecimal)* ('p' [-+]? digithexadecimal ('_'* digithexadecimal)*)?
+  | '0x' '_'* digithexadecimal ('_'* digithexadecimal)* 'p' [-+]? digithexadecimal ('_'* digithexadecimal)*
 
 floatdecimalliteral =
-  | (digitdecimal ('_'? digitdecimal)*)? !('.' nospace '.') '.' digitdecimal ('_'? digitdecimal)* ('e' [-+]? digitdecimal ('_'? digitdecimal)*)?
-  | digitdecimal ('_'? digitdecimal)* 'e' [-+]? digitdecimal ('_'? digitdecimal)*
+  | (digitdecimal ('_'* digitdecimal)*)? !('.' nospace '.') '.' digitdecimal ('_'* digitdecimal)* ('e' [-+]? digitdecimal ('_'* digitdecimal)*)?
+  | digitdecimal ('_'* digitdecimal)* 'e' [-+]? digitdecimal ('_'* digitdecimal)*
 
 chars =
   | (!(newline | '`') .) // TODO

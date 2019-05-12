@@ -29,10 +29,6 @@
     var mutable = 10
     mutable = 50 // Subject value changed to 50.
 
-    // Multiple subjects can be assigned the same value in a single expression.
-    let |name, id, title| = "Janitor"
-    cost = price = total = 45
-
 /// SHADOWING
     // Astro allows subjects to be rebound to a different type in the same scope
     let phone = "08074789222"
@@ -46,11 +42,11 @@
     }
 
     // Astro supports wide range of unicode characters for identifiers.
-    var φ = arc_tan(y/x)
+    var φ = arc_tan(y / x)
 
     // Naming conventions.
     // Snake case for variables, constants and function names.
-    let book_title = "Ender\"s Game"
+    let book_title = "Ender's Game"
     fun add_numbers(a, b) {
         return a + b
     }
@@ -702,8 +698,8 @@
     add(4, 5) // 9
 
     // Lambdas are syntactic sugar for anonymous functions.
-    fixture_list.filter(fun check(game) { not game.iscancelled }) // Anonymous function.
-    fixture_list.filter((game) => not game.iscancelled) // Lambda.
+    fixture_list.filter(fun check(game) { not game.is_canceled }) // Anonymous function.
+    fixture_list.filter((game) => not game.is_canceled) // Lambda.
 
     // When a function call takes a single function argument, the lambda can be written after the call parens.
     list.foldl(0, (x, y) => x + y)

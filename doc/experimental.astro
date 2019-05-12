@@ -1,0 +1,83 @@
+/// IMPORTS
+import ./module {
+    first::Type,
+    Fruit::*,
+    sub::{
+        module
+    }
+}
+
+import ./module // ./module.astro or ./module/index.astro
+import ./module::function // ./module.astro::function or  ./module/index.astro::function
+import module // package
+import ../function // ../index.astro::function
+
+/// IMPLEMENTATIONS VS MULTIPLE DISPATCH
+type Person { name, age }
+
+impl Person {
+    // Single dispatch
+    fun new(name, age) -> Self {
+        Self { name, age }
+    }
+
+    // Single dispatch. Specific
+    fun print(self) -> String {
+        print(self.name, self.age)
+    }
+}
+
+// Multiple dispatch
+fun print(person: Person) { print(self.name, self.age) }
+
+person.print() // Calls specific
+print person
+
+
+// GENERICS
+type Array[T] {
+    length: UInt,
+    capacity: UInt,
+    buffer: *T,
+}
+
+impl Array[T] {
+    fun length(self) -> UInt {
+        self.length
+    }
+}
+
+/// TRAITS
+type Pegasus {}
+
+impl Pegasus <: Bird, Horse {
+    // A Bird implementation
+    fun fly() { print 'fly' }
+
+    // A Horse implementation
+    fun gallop() { print 'gallop' }
+}
+
+
+/// TYPE STABILITY
+type Person { name, age }
+
+let john = Person { 'John', 23) // Person[{String, Int}]
+let pete = Person { 'Peter', '23') // Person[{String, String}]
+let arr = [john, pete] // List[Person[{String, Int}] | Person[{String, String}]]
+
+compute(arr) // compute =: (List[Person[{String, Int}] | Person[{String, String}]]) -> ()
+
+//  PATTERN MATCHING
+match object {
+    Some { value } => 0,
+    [ 1, 2, ..s ] => 1,
+    (1, 2) => 1,
+    75 | 79 => 2,
+    75 .. 79 => 3,
+}
+
+/// TYPE RELATION
+person =: Person
+person <: Person
+person >: Person
