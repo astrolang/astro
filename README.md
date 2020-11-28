@@ -29,17 +29,17 @@ In order to match up with the expressiveness and productivity of dynamic program
 #### Python
 ```python
 def times(a, b):
-    sum = a
+    sum = 0
     for i in range(b):
-        sum += sum
+        sum += a
     return sum
 ```
 #### Astro
 ```kotlin
 fun times(a, b) {
-    var sum = a
+    var sum = 0
     for i in range(b) {
-        sum += sum
+        sum += a
     }
     return sum
 }
