@@ -8,9 +8,9 @@ fn main() {
     // let valid_parser_code = String::from("Hi Hello");
     // let valid_parser_code = String::from("5,");
     // let valid_parser_code = String::from("5,6");
-    // let valid_parser_code = String::from("(5,)");
-    //let valid_parser_code = String::from("(5,6), _ ..");
-    let valid_parser_code = String::from("0o____01010___111.01____name");
+    let valid_parser_code = String::from("(5,)");
+    // let valid_parser_code = String::from("(5,6), _ ..");
+    // let valid_parser_code = String::from("0o____01010___111.01____name");
 
     let tokens = match Lexer::new(valid_parser_code).lex() {
         Ok(tokens) => tokens,
@@ -19,5 +19,5 @@ fn main() {
 
     println!("==== tokens ==== \n{:#?}", tokens);
 
-    let ast = Parser::new(tokens).parse();
+    // let ast = Parser::new(tokens).parse();
 }
