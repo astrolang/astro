@@ -55,7 +55,7 @@ pub struct Lexer {
     keywords: Vec<String>,
 }
 
-/// TODO:
+///   TODO:
 /// - symbols => `:identifier` and `:(`
 /// - linecontinuation => `...` (\s | newline)*
 /// - string interpolation handling
@@ -296,16 +296,23 @@ impl Lexer {
         let character = self.peek_char(None);
 
         // Check if next character is an identifier character.
-        if character.is_some() && self.identifier_begin_char.find(character.unwrap()).is_some() {
+        if character.is_some()
+            && self
+                .identifier_begin_char
+                .find(character.unwrap())
+                .is_some()
+        {
             // Save first character.
             token = self.eat_char().to_string();
             loop {
                 let character = self.peek_char(None);
-                if character.is_some() && self.identifier_end_char.find(character.unwrap()).is_some() {
+                if character.is_some()
+                    && self.identifier_end_char.find(character.unwrap()).is_some()
+                {
                     // Append subsequent identifier character.
                     token.push(self.eat_char());
                 } else {
-                    break
+                    break;
                 }
             }
         }
@@ -342,7 +349,7 @@ impl Lexer {
             if character.is_some() && self.operator_char.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
             } else {
-                break
+                break;
             }
         }
 
@@ -367,7 +374,7 @@ impl Lexer {
             if character.is_some() && character.unwrap() == '.' {
                 token.push(self.eat_char());
             } else {
-                break
+                break;
             }
         }
 
@@ -412,18 +419,17 @@ impl Lexer {
                 self.eat_char();
                 character = self.peek_char(None);
                 underscore_count += 1;
-
             }
 
             // If '_' is consumed, a digit must follow.
             let character = self.peek_char(None);
             if character.is_some() && digit_characters.find(character.unwrap()).is_some() {
                 token.push(self.eat_char());
-            } else { // Otherwise spit out '_' and break.
+            } else {
+                // Otherwise spit out '_' and break.
                 self.cursor -= underscore_count;
                 break;
             }
-    
         }
     }
 
@@ -541,7 +547,6 @@ impl Lexer {
         while character.is_some() && character.unwrap() == '_' {
             self.eat_char();
             character = self.peek_char(None);
-
         }
 
         // Consume digitdecimal.
@@ -598,19 +603,22 @@ impl Lexer {
 
                         // Consume digitbinary.
                         let character = self.peek_char(None);
-                        if character.is_some() && self.digit_binary.find(character.unwrap()).is_some() {
+                        if character.is_some()
+                            && self.digit_binary.find(character.unwrap()).is_some()
+                        {
                             token.push(self.eat_char());
 
                             // Consume ('-'* digitbinary)*.
                             self.consume_digits(self.digit_binary.clone(), &mut token);
-                        } else { // Failed if can't consume digitbinary.
+                        } else {
+                            // Failed if can't consume digitbinary.
                             token = String::new();
                         }
                     }
-                } else { // Failed if can't consume digitbinary.
+                } else {
+                    // Failed if can't consume digitbinary.
                     token = String::new();
                 }
-
             } else if character.is_some() && character.unwrap() == 'e' {
                 // Consume [-+]?
                 let sign = self.peek_char(None);
@@ -625,10 +633,12 @@ impl Lexer {
 
                     // Consume ('-'* digitbinary)*.
                     self.consume_digits(self.digit_binary.clone(), &mut token);
-                } else { // Failed if can't consume digitbinary.
+                } else {
+                    // Failed if can't consume digitbinary.
                     token = String::new();
                 }
-            } else { // Failed if can't consume digitbinary.
+            } else {
+                // Failed if can't consume digitbinary.
                 token = String::new();
             }
         }
@@ -678,19 +688,22 @@ impl Lexer {
 
                         // Consume digitoctal.
                         let character = self.peek_char(None);
-                        if character.is_some() && self.digit_octal.find(character.unwrap()).is_some() {
+                        if character.is_some()
+                            && self.digit_octal.find(character.unwrap()).is_some()
+                        {
                             token.push(self.eat_char());
 
                             // Consume ('-'* digitoctal)*.
                             self.consume_digits(self.digit_octal.clone(), &mut token);
-                        } else { // Failed if can't consume digitoctal.
+                        } else {
+                            // Failed if can't consume digitoctal.
                             token = String::new();
                         }
                     }
-                } else { // Failed if can't consume digitoctal.
+                } else {
+                    // Failed if can't consume digitoctal.
                     token = String::new();
                 }
-
             } else if character.is_some() && character.unwrap() == 'e' {
                 // Consume [-+]?
                 let sign = self.peek_char(None);
@@ -705,10 +718,12 @@ impl Lexer {
 
                     // Consume ('-'* digitoctal)*.
                     self.consume_digits(self.digit_octal.clone(), &mut token);
-                } else { // Failed if can't consume digitoctal.
+                } else {
+                    // Failed if can't consume digitoctal.
                     token = String::new();
                 }
-            } else { // Failed if can't consume digitoctal.
+            } else {
+                // Failed if can't consume digitoctal.
                 token = String::new();
             }
         }
@@ -739,7 +754,8 @@ impl Lexer {
                 token.push(self.eat_char());
                 // Consume digithexadecimal.
                 let character = self.peek_char(None);
-                if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some()
+                {
                     token.push(self.eat_char());
 
                     // Consume ('-'* digithexadecimal)*.
@@ -758,19 +774,22 @@ impl Lexer {
 
                         // Consume digithexadecimal.
                         let character = self.peek_char(None);
-                        if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                        if character.is_some()
+                            && self.digit_hexadecimal.find(character.unwrap()).is_some()
+                        {
                             token.push(self.eat_char());
 
                             // Consume ('-'* digithexadecimal)*.
                             self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
-                        } else { // Failed if can't consume digithexadecimal.
+                        } else {
+                            // Failed if can't consume digithexadecimal.
                             token = String::new();
                         }
                     }
-                } else { // Failed if can't consume digithexadecimal.
+                } else {
+                    // Failed if can't consume digithexadecimal.
                     token = String::new();
                 }
-
             } else if character.is_some() && character.unwrap() == 'e' {
                 // Consume [-+]?
                 let sign = self.peek_char(None);
@@ -780,15 +799,18 @@ impl Lexer {
 
                 // Consume digithexadecimal.
                 let character = self.peek_char(None);
-                if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some() {
+                if character.is_some() && self.digit_hexadecimal.find(character.unwrap()).is_some()
+                {
                     token.push(self.eat_char());
 
                     // Consume ('-'* digithexadecimal)*.
                     self.consume_digits(self.digit_hexadecimal.clone(), &mut token);
-                } else { // Failed if can't consume digithexadecimal.
+                } else {
+                    // Failed if can't consume digithexadecimal.
                     token = String::new();
                 }
-            } else { // Failed if can't consume digithexadecimal.
+            } else {
+                // Failed if can't consume digithexadecimal.
                 token = String::new();
             }
         }
@@ -833,7 +855,10 @@ impl Lexer {
 
             // Consume digitdecimal.
             let character = self.peek_char(None);
-            if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() && !followingDot {
+            if character.is_some()
+                && self.digit_decimal.find(character.unwrap()).is_some()
+                && !followingDot
+            {
                 token.push(self.eat_char());
 
                 // Consume ('-'* digitdecimal)*.
@@ -852,19 +877,21 @@ impl Lexer {
 
                     // Consume digitdecimal.
                     let character = self.peek_char(None);
-                    if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some() {
+                    if character.is_some() && self.digit_decimal.find(character.unwrap()).is_some()
+                    {
                         token.push(self.eat_char());
 
                         // Consume ('-'* digitdecimal)*.
                         self.consume_digits(self.digit_decimal.clone(), &mut token);
-                    } else { // Failed if can't consume digitdecimal.
+                    } else {
+                        // Failed if can't consume digitdecimal.
                         token = String::new();
                     }
                 }
-            } else { // Failed if can't consume digitdecimal.
+            } else {
+                // Failed if can't consume digitdecimal.
                 token = String::new();
             }
-
         } else if character.is_some() && character.unwrap() == 'e' {
             // Consume [-+]?
             let sign = self.peek_char(None);
@@ -879,10 +906,12 @@ impl Lexer {
 
                 // Consume ('-'* digitdecimal)*.
                 self.consume_digits(self.digit_decimal.clone(), &mut token);
-            } else { // Failed if can't consume digitdecimal.
+            } else {
+                // Failed if can't consume digitdecimal.
                 token = String::new();
             }
-        } else { // Failed if can't consume digitdecimal.
+        } else {
+            // Failed if can't consume digitdecimal.
             token = String::new();
         }
 
@@ -908,7 +937,11 @@ impl Lexer {
 
             // Consume (singlequotestringchars: (!(newline | '`') .))?.
             let character = self.peek_char(None);
-            if character.is_some() && character.unwrap() != '\n' && character.unwrap() != '\r' && character.unwrap() != '`' {
+            if character.is_some()
+                && character.unwrap() != '\n'
+                && character.unwrap() != '\r'
+                && character.unwrap() != '`'
+            {
                 token.push(self.eat_char());
             }
 
@@ -939,12 +972,15 @@ impl Lexer {
         // Consume '||'.
         let word = self.eat_token("||".into());
         if word.is_some() {
-
             // Consume (singlequotestringchars: (!(newline | '||') .)+)?.
             loop {
                 let character = self.peek_char(None);
                 let word = self.peek_token("||".into());
-                if character.is_some() && character.unwrap() != '\n' && character.unwrap() != '\r' && !word {
+                if character.is_some()
+                    && character.unwrap() != '\n'
+                    && character.unwrap() != '\r'
+                    && !word
+                {
                     token.push(self.eat_char());
                 } else {
                     break;
@@ -1075,7 +1111,11 @@ impl Lexer {
             loop {
                 let character = self.peek_char(None);
                 let close_tag = self.peek_token("*/".into());
-                if character.is_some() && character.unwrap() != '\n' && character.unwrap() != '\r' && !close_tag {
+                if character.is_some()
+                    && character.unwrap() != '\n'
+                    && character.unwrap() != '\r'
+                    && !close_tag
+                {
                     // Check for nested multiline comment
                     let open_tag = self.peek_token("/*".into());
                     if open_tag {
@@ -1211,7 +1251,10 @@ impl Lexer {
             let token = token.unwrap();
 
             // Push tokens that are not spaces, ...
-            if token.kind != TokenKind::Spaces && token.kind != TokenKind::SingleLineComment && token.kind != TokenKind::MultiLineComment {
+            if token.kind != TokenKind::Spaces
+                && token.kind != TokenKind::SingleLineComment
+                && token.kind != TokenKind::MultiLineComment
+            {
                 tokens.push(token);
             }
         }

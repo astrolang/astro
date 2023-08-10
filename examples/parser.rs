@@ -8,7 +8,8 @@ fn main() {
     // let valid_parser_code = String::from("Hi Hello");
     // let valid_parser_code = String::from("5,");
     // let valid_parser_code = String::from("5,6");
-    let valid_parser_code = String::from("(5,)");
+    let valid_parser_code = String::from("print(\"Hello\")");
+    // let valid_parser_code = String::from("(5,)");
     // let valid_parser_code = String::from("(5,6), _ ..");
     // let valid_parser_code = String::from("0o____01010___111.01____name");
 

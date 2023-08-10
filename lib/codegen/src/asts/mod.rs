@@ -1,8 +1,3 @@
 pub mod asts;
 
-pub use self::{
-    asts::{
-        AST,
-        SimpleExpr,
-    }
-};
+pub use self::asts::{SimpleExpr, AST};

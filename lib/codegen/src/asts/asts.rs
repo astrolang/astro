@@ -10,10 +10,7 @@ pub enum AST {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SimpleExpr {
-    Terminal {
-        kind: TokenKind,
-        value: String,
-    },
+    Terminal { kind: TokenKind, value: String },
     List(Vec<SimpleExpr>),
     Tuple(Vec<SimpleExpr>),
     Empty,
